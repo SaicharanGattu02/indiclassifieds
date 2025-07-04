@@ -62,6 +62,7 @@ final ThemeData darkTheme = ThemeData(
     backgroundColor: Colors.black,
     shadowColor: Colors.black,
     foregroundColor: Colors.black,
+    actionsPadding: EdgeInsets.only(right: 16),
     elevation: 2,
   ),
   cardTheme: CardThemeData(

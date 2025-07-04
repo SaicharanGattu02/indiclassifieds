@@ -3,6 +3,7 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:indiclassifieds/presentation/PostAdds/LifeStyleAdScreen.dart';
 import 'package:indiclassifieds/presentation/PostAdds/PetAdScreen.dart';
 import 'package:indiclassifieds/presentation/PostAdds/PropertiesAdScreen.dart';
 
@@ -12,7 +13,7 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/',
       pageBuilder: (context, state) =>
-          buildSlideTransitionPage(PetAdScreen(), state),
+          buildSlideTransitionPage(Lifestyleadscreen(), state),
     ),
     GoRoute(
       path: '/property_ad',
@@ -23,6 +24,11 @@ final GoRouter appRouter = GoRouter(
       path: '/pet_ad',
       pageBuilder: (context, state) =>
           buildSlideTransitionPage(PetAdScreen(), state),
+    ),
+    GoRoute(
+      path: '/life_style_ad',
+      pageBuilder: (context, state) =>
+          buildSlideTransitionPage(Lifestyleadscreen(), state),
     ),
   ],
 );

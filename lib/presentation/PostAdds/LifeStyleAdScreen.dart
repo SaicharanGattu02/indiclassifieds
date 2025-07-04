@@ -5,21 +5,26 @@ import '../../theme/ThemeHelper.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/CommonTextField.dart';
 
-class PetAdScreen extends StatefulWidget {
-  const PetAdScreen({super.key});
+class Lifestyleadscreen extends StatefulWidget {
+  const Lifestyleadscreen({super.key});
 
   @override
-  State<PetAdScreen> createState() => _PetAdScreenState();
+  State<Lifestyleadscreen> createState() => _LifestyleadscreenState();
 }
 
-class _PetAdScreenState extends State<PetAdScreen> {
+class _LifestyleadscreenState extends State<Lifestyleadscreen> {
   @override
   Widget build(BuildContext context) {
+    final backgroundColor = ThemeHelper.backgroundColor(context);
     final textColor = ThemeHelper.textColor(context);
     final isDark = ThemeHelper.isDarkMode(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text('Pet Ad', style: AppTextStyles.titleLarge(textColor)),
+        title: Text(
+          'Life Style Ad',
+          style: AppTextStyles.titleLarge(textColor),
+        ),
+        backgroundColor: backgroundColor,
         elevation: 0,
         iconTheme: IconThemeData(color: textColor),
       ),
@@ -28,15 +33,6 @@ class _PetAdScreenState extends State<PetAdScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Select Pet Category',
-              style: AppTextStyles.titleMedium(textColor).copyWith(
-                color: textColor,
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 10),
             _buildCategoryGrid(textColor),
             const SizedBox(height: 20),
             Row(
@@ -90,12 +86,12 @@ class _PetAdScreenState extends State<PetAdScreen> {
             ),
             SizedBox(height: 4),
             _buildMultilineField(
-              'Include breed, behaviour, vaccination, food habits, etc.s',
+              'Mention size, color, condition, material, etc.',
               textColor,
             ),
             const SizedBox(height: 20),
             Text(
-              'Pet Type/Breed',
+              'Brand',
               style: AppTextStyles.titleMedium(textColor).copyWith(
                 color: textColor,
                 fontSize: 15,
@@ -103,13 +99,10 @@ class _PetAdScreenState extends State<PetAdScreen> {
               ),
             ),
             const SizedBox(height: 10),
-            CommonTextField(
-              hint: 'e.g., Labrador, Persian Cat, Parrot',
-              color: textColor,
-            ),
-            const SizedBox(height: 15),
+            CommonTextField(hint: 'e.g. Zara, Adidas, Puma', color: textColor),
+            const SizedBox(height: 20),
             Text(
-              'Age',
+              'Size',
               style: AppTextStyles.titleMedium(textColor).copyWith(
                 color: textColor,
                 fontSize: 15,
@@ -118,39 +111,10 @@ class _PetAdScreenState extends State<PetAdScreen> {
             ),
             const SizedBox(height: 10),
             _buildChips(
-              [
-                'Less than 1 Month',
-                '1-3 Months',
-                '3-6 Months',
-                '6 Months-1 Year',
-                "1+ Year",
-                "Custom",
-              ],
+              ['S', 'M', 'L', 'XL', 'XXL', 'XXXL'],
               textColor,
               isDark,
             ),
-            const SizedBox(height: 15),
-            Text(
-              'Gender',
-              style: AppTextStyles.titleMedium(textColor).copyWith(
-                color: textColor,
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 10),
-            _buildChips(['Male', 'Female'], textColor, isDark),
-            const SizedBox(height: 10),
-            Text(
-              'Vaccination',
-              style: AppTextStyles.titleMedium(textColor).copyWith(
-                color: textColor,
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 10),
-            _buildChips(['Yes', 'No'], textColor, isDark),
             const SizedBox(height: 20),
             Text(
               'Condition',
@@ -166,6 +130,7 @@ class _PetAdScreenState extends State<PetAdScreen> {
             Text('Price', style: AppTextStyles.titleMedium(textColor)),
             const SizedBox(height: 10),
             CommonTextField(hint: 'Selling Price (₹)', color: textColor),
+
             const SizedBox(height: 10),
             _buildSwitchRow('Is it negotiable?', textColor),
             const SizedBox(height: 20),
@@ -179,7 +144,6 @@ class _PetAdScreenState extends State<PetAdScreen> {
             ),
             const SizedBox(height: 10),
             _buildUploadImagesSection(textColor),
-
             const SizedBox(height: 20),
             Text(
               'Contact Information',
@@ -223,7 +187,7 @@ class _PetAdScreenState extends State<PetAdScreen> {
   }
 
   Widget _buildCategoryGrid(Color color) {
-    final categories = ['Dogs', 'Cats', 'Birds', 'Rabbits', 'Turtles', 'Fish'];
+    final categories = ['Mens', 'Womens', 'Kids', 'Footware', 'Wallets'];
     return GridView.count(
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
@@ -269,7 +233,7 @@ class _PetAdScreenState extends State<PetAdScreen> {
           .map(
             (e) => Chip(
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadiusGeometry.all(Radius.circular(7)),
+                borderRadius: BorderRadiusGeometry.all(Radius.circular(100)),
                 side: BorderSide(
                   color: isDark ? Color(0xff666666) : Color(0xffD9D9D9),
                 ),
