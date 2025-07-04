@@ -15,16 +15,29 @@ final ThemeData darkTheme = ThemeData(
   tabBarTheme: const TabBarThemeData(),
   inputDecorationTheme: InputDecorationTheme(
     filled: true,
+    fillColor: Colors.black,
+    labelStyle: AppTextStyles.titleMedium(Colors.black.withOpacity(0.25)),
+    hintStyle: AppTextStyles.titleMedium(Colors.black.withOpacity(0.25)),
     contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
-      borderSide: BorderSide.none,
+      borderRadius: BorderRadius.circular(7),
+      borderSide: BorderSide(color: AppColors.darkBorder),
     ),
-    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-    errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(7),
+      borderSide: BorderSide(color: AppColors.darkBorder),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(7),
+      borderSide: BorderSide(color: AppColors.darkBorder),
+    ),
+    errorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(7),
+      borderSide: BorderSide(color: AppColors.darkBorder),
+    ),
     focusedErrorBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(7),
+      borderSide: BorderSide(color: AppColors.darkBorder),
     ),
     errorStyle: TextStyle(
       fontWeight: FontWeight.w400,

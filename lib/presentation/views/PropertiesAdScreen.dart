@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-
 import '../../theme/AppTextStyles.dart';
+import '../../theme/ThemeHelper.dart';
 import '../../theme/app_colors.dart';
 
 class PropertiesAdScreen extends StatefulWidget {
@@ -9,16 +9,13 @@ class PropertiesAdScreen extends StatefulWidget {
   @override
   State<PropertiesAdScreen> createState() => _PropertiesAdScreenState();
 }
+
 class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
-  final bool isDarkMode = true;
   @override
   Widget build(BuildContext context) {
-    final backgroundColor = isDarkMode
-        ? AppColors.darkBackground
-        : AppColors.lightBackground;
-    final textColor = isDarkMode ? AppColors.lightText : AppColors.darkText;
+    final backgroundColor = ThemeHelper.backgroundColor(context);
+    final textColor = ThemeHelper.textColor(context);
     return Scaffold(
-      backgroundColor: backgroundColor,
       appBar: AppBar(
         title: Text(
           'Properties Ad',
@@ -296,7 +293,10 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
       children: items
           .map(
             (e) => Chip(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.all(Radius.circular(100)),side: BorderSide(color: Colors.white)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadiusGeometry.all(Radius.circular(100)),
+                side: BorderSide(color: Colors.white),
+              ),
               label: Text(e, style: AppTextStyles.bodySmall(color)),
               backgroundColor: Colors.grey.shade200,
             ),

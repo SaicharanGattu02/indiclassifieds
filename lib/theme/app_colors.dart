@@ -8,5 +8,5 @@ class AppColors {
   static const lightText =Color(0xFFFFFFFF);
   static const darkText = Color(0xFF000000);
   static const lightBorder = Color(0xFFD1D5DB);
-  static const darkBorder = Color(0xFFD1D5DB);
+  static const darkBorder = Color(0xFF666666);
 }
