@@ -3,9 +3,8 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:indiclassifieds/presentation/views/PropertiesAdScreen.dart';
-
-import '../presentation/views/SplashScreen.dart';
+import 'package:indiclassifieds/presentation/PostAdds/PetAdScreen.dart';
+import 'package:indiclassifieds/presentation/PostAdds/PropertiesAdScreen.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
@@ -13,12 +12,17 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/',
       pageBuilder: (context, state) =>
+          buildSlideTransitionPage(PetAdScreen(), state),
+    ),
+    GoRoute(
+      path: '/property_ad',
+      pageBuilder: (context, state) =>
           buildSlideTransitionPage(PropertiesAdScreen(), state),
     ),
     GoRoute(
-      path: '/',
+      path: '/pet_ad',
       pageBuilder: (context, state) =>
-          buildSlideTransitionPage(PropertiesAdScreen(), state),
+          buildSlideTransitionPage(PetAdScreen(), state),
     ),
   ],
 );

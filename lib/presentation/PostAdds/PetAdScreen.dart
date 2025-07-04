@@ -1,27 +1,26 @@
 import 'package:flutter/material.dart';
+
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/CommonTextField.dart';
 
-class PropertiesAdScreen extends StatefulWidget {
-  const PropertiesAdScreen({super.key});
+class PetAdScreen extends StatefulWidget {
+  const PetAdScreen({super.key});
 
   @override
-  State<PropertiesAdScreen> createState() => _PropertiesAdScreenState();
+  State<PetAdScreen> createState() => _PetAdScreenState();
 }
 
-class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
+class _PetAdScreenState extends State<PetAdScreen> {
   @override
   Widget build(BuildContext context) {
     final backgroundColor = ThemeHelper.backgroundColor(context);
     final textColor = ThemeHelper.textColor(context);
+    final isDark = ThemeHelper.isDarkMode(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Properties Ad',
-          style: AppTextStyles.titleLarge(textColor),
-        ),
+        title: Text('Pet Ad', style: AppTextStyles.titleLarge(textColor)),
         backgroundColor: backgroundColor,
         elevation: 0,
         iconTheme: IconThemeData(color: textColor),
@@ -32,14 +31,13 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Select Furniture Category',
+              'Select Pet Category',
               style: AppTextStyles.titleMedium(textColor).copyWith(
                 color: textColor,
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
               ),
             ),
-
             const SizedBox(height: 10),
             _buildCategoryGrid(textColor),
             const SizedBox(height: 20),
@@ -94,10 +92,9 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
             ),
             SizedBox(height: 4),
             _buildMultilineField(
-              'Mention color, material, usage, delivery options, etc.',
+              'Include breed, behaviour, vaccination, food habits, etc.s',
               textColor,
             ),
-
             const SizedBox(height: 20),
             Text(
               'Furniture Type',
@@ -108,13 +105,11 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
               ),
             ),
             const SizedBox(height: 10),
-            _buildChips([
-              'Wooden',
-              'Metal',
-              'Plastic',
-              'Leather',
-              'Fabric',
-            ], textColor),
+            _buildChips(
+              ['Wooden', 'Metal', 'Plastic', 'Leather', 'Fabric'],
+              textColor,
+              isDark,
+            ),
 
             const SizedBox(height: 15),
             Text(
@@ -126,12 +121,11 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
               ),
             ),
             const SizedBox(height: 10),
-            _buildChips([
-              'Modern',
-              'Traditional',
-              'Minimal',
-              'Rustic',
-            ], textColor),
+            _buildChips(
+              ['Modern', 'Traditional', 'Minimal', 'Rustic'],
+              textColor,
+              isDark,
+            ),
 
             const SizedBox(height: 20),
             Text(
@@ -211,7 +205,6 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
             Text("Email", style: AppTextStyles.labelLarge(textColor)),
             SizedBox(height: 4),
             CommonTextField(hint: 'Email (Optional)', color: textColor),
-
             const SizedBox(height: 30),
             SizedBox(
               width: double.infinity,
@@ -235,15 +228,12 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
 
   Widget _buildCategoryGrid(Color color) {
     final categories = [
-      'Sofa Sets',
-      'Chairs',
-      'Beds',
-      'Wardrobes',
-      'Tables',
-      'TV Units',
-      'Kids Furniture',
-      'Mattress',
-      'Others',
+      'Dogs',
+      'Cats',
+      'Birds',
+      'Rabbits',
+      'Turtles',
+      'Fish',
     ];
     return GridView.count(
       physics: const NeverScrollableScrollPhysics(),
@@ -283,7 +273,7 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
     );
   }
 
-  Widget _buildChips(List<String> items, Color color) {
+  Widget _buildChips(List<String> items, Color color, bool isDark) {
     return Wrap(
       spacing: 8,
       children: items
@@ -291,10 +281,12 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
             (e) => Chip(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadiusGeometry.all(Radius.circular(100)),
-                side: BorderSide(color: Colors.white),
+                side: BorderSide(
+                  color: isDark ? Color(0xff666666) : Color(0xffD9D9D9),
+                ),
               ),
               label: Text(e, style: AppTextStyles.bodySmall(color)),
-              backgroundColor: Colors.grey.shade200,
+              backgroundColor: isDark ? Colors.black : Colors.grey.shade200,
             ),
           )
           .toList(),
