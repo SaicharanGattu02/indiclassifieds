@@ -14,7 +14,7 @@ class AppTextStyles {
   static TextStyle headlineSmall(Color color) =>
       TextStyle(fontSize: 24, fontFamily: 'Roboto', color: color);
   static TextStyle titleLarge(Color color) =>
-      TextStyle(fontSize: 22, fontFamily: 'Roboto', color: color);
+      TextStyle(fontSize: 18, fontFamily: 'Roboto', color: color);
   static TextStyle titleMedium(Color color) =>
       TextStyle(fontSize: 16, fontFamily: 'Roboto', color: color);
   static TextStyle titleSmall(Color color) =>
@@ -30,5 +30,6 @@ class AppTextStyles {
   static TextStyle labelMedium(Color color) =>
       TextStyle(fontSize: 12, fontFamily: 'Roboto', color: color);
   static TextStyle labelSmall(Color color) =>
-      TextStyle(fontSize: 11, fontFamily: 'Roboto', color: color);
+      TextStyle(fontSize: 10, fontFamily: 'Roboto', color: color);
+
 }

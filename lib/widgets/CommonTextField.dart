@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../theme/AppTextStyles.dart';
 
 class CommonTextField extends StatelessWidget {
@@ -10,6 +9,8 @@ class CommonTextField extends StatelessWidget {
   final TextInputType? keyboardType;
   final bool obscureText;
   final void Function(String)? onChanged;
+  final Widget? prefixIcon;
+  final Widget? suffixIcon;
 
   const CommonTextField({
     super.key,
@@ -20,6 +21,8 @@ class CommonTextField extends StatelessWidget {
     this.keyboardType,
     this.obscureText = false,
     this.onChanged,
+    this.prefixIcon,
+    this.suffixIcon,
   });
 
   @override
@@ -32,11 +35,14 @@ class CommonTextField extends StatelessWidget {
       maxLines: maxLines,
       onChanged: onChanged,
       decoration: InputDecoration(
+        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 15),
         hintText: hint,
         hintStyle: AppTextStyles.bodyMedium(color.withOpacity(0.6)),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
         ),
+        prefixIcon: prefixIcon,
+        suffixIcon: suffixIcon,
       ),
     );
   }
