@@ -42,7 +42,6 @@ class _MyAppState extends State<MyApp> {
           default:
             themeMode = ThemeMode.system;
         }
-
         return MaterialApp.router(
           title: 'Flutter Theme Example',
           theme: AppTheme.getLightTheme(),
@@ -55,4 +54,3 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
-

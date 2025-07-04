@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../theme/app_colors.dart';
+import '../../widgets/CommonTextField.dart';
 
 class PropertiesAdScreen extends StatefulWidget {
   const PropertiesAdScreen({super.key});
@@ -41,7 +42,6 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
 
             const SizedBox(height: 10),
             _buildCategoryGrid(textColor),
-
             const SizedBox(height: 20),
             Row(
               children: [
@@ -71,9 +71,16 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
             SizedBox(height: 4),
             Row(
               children: [
-                Expanded(child: _buildTextField('Add Title', textColor)),
+                Expanded(
+                  child: CommonTextField(hint: 'Add Title', color: textColor),
+                ),
                 const SizedBox(width: 10),
-                Expanded(child: _buildTextField('Enter Location', textColor)),
+                Expanded(
+                  child: CommonTextField(
+                    hint: 'Enter Location',
+                    color: textColor,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 20),
@@ -152,7 +159,7 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
             const SizedBox(height: 20),
             Text('Price', style: AppTextStyles.titleMedium(textColor)),
             const SizedBox(height: 10),
-            _buildTextField('Selling Price (₹)', textColor),
+            CommonTextField(hint: 'Selling Price (₹)', color: textColor),
 
             const SizedBox(height: 10),
             _buildSwitchRow('Is it negotiable?', textColor),
@@ -195,15 +202,15 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
             const SizedBox(height: 10),
             Text('Name', style: AppTextStyles.labelLarge(textColor)),
             SizedBox(height: 4),
-            _buildTextField('Name', textColor),
+            CommonTextField(hint: 'Name', color: textColor),
             SizedBox(height: 4),
             Text('Phone Number', style: AppTextStyles.labelLarge(textColor)),
             SizedBox(height: 4),
-            _buildTextField('Phone Number', textColor),
+            CommonTextField(hint: 'Phone Number', color: textColor),
             SizedBox(height: 4),
             Text("Email", style: AppTextStyles.labelLarge(textColor)),
             SizedBox(height: 4),
-            _buildTextField('Email (Optional)', textColor),
+            CommonTextField(hint: 'Email (Optional)', color: textColor),
 
             const SizedBox(height: 30),
             SizedBox(
@@ -264,17 +271,6 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
     );
   }
 
-  Widget _buildTextField(String hint, Color color) {
-    return TextField(
-      style: AppTextStyles.bodyMedium(color),
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: AppTextStyles.bodyMedium(color.withOpacity(0.6)),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-      ),
-    );
-  }
-
   Widget _buildMultilineField(String hint, Color color) {
     return TextField(
       style: AppTextStyles.bodyMedium(color),
@@ -323,11 +319,17 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
   Widget _buildDimensionFields(Color color) {
     return Row(
       children: [
-        Expanded(child: _buildTextField('Length', color)),
+        Expanded(
+          child: CommonTextField(hint: 'Length', color: color),
+        ),
         const SizedBox(width: 8),
-        Expanded(child: _buildTextField('Width', color)),
+        Expanded(
+          child: CommonTextField(hint: 'Width', color: color),
+        ),
         const SizedBox(width: 8),
-        Expanded(child: _buildTextField('Height', color)),
+        Expanded(
+          child: CommonTextField(hint: 'Height', color: color),
+        ),
       ],
     );
   }
