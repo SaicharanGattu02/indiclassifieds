@@ -9,7 +9,7 @@ final ThemeData darkTheme = ThemeData(
   highlightColor: Colors.transparent,
   hoverColor: Colors.transparent,
   scaffoldBackgroundColor: Colors.black,
-  dialogBackgroundColor: Colors.white,
+  dialogBackgroundColor: Colors.black.withOpacity(0.3),
   cardColor: Colors.white,
   searchBarTheme: const SearchBarThemeData(),
   tabBarTheme: const TabBarThemeData(),
@@ -20,15 +20,9 @@ final ThemeData darkTheme = ThemeData(
       borderRadius: BorderRadius.circular(8),
       borderSide: BorderSide.none,
     ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
-    ),
-    errorBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
-    ),
+    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+    errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
     focusedErrorBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(8),
     ),
@@ -46,16 +40,16 @@ final ThemeData darkTheme = ThemeData(
       borderRadius: BorderRadius.all(Radius.circular(5.0)),
     ),
   ),
-  buttonTheme: const ButtonThemeData(),
   popupMenuTheme: const PopupMenuThemeData(
     color: Colors.white,
     shadowColor: Colors.white,
   ),
   appBarTheme: AppBarTheme(
-    surfaceTintColor: Colors.white,
-    backgroundColor: Colors.white,
-    shadowColor: Colors.white,
-    foregroundColor: Colors.white,
+    surfaceTintColor: Colors.black,
+    backgroundColor: Colors.black,
+    shadowColor: Colors.black,
+    foregroundColor: Colors.black,
+    elevation: 2,
   ),
   cardTheme: CardThemeData(
     shadowColor: Colors.white,

@@ -3,6 +3,7 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:indiclassifieds/presentation/views/PropertiesAdScreen.dart';
 
 import '../presentation/views/SplashScreen.dart';
 
@@ -12,7 +13,12 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/',
       pageBuilder: (context, state) =>
-          buildSlideTransitionPage(Splashscreen(), state),
+          buildSlideTransitionPage(PropertiesAdScreen(), state),
+    ),
+    GoRoute(
+      path: '/',
+      pageBuilder: (context, state) =>
+          buildSlideTransitionPage(PropertiesAdScreen(), state),
     ),
   ],
 );
