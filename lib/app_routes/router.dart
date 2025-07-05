@@ -3,6 +3,8 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:indiclassifieds/presentation/PostAdds/LifeStyleAdScreen.dart';
+import '../presentation/views/SubCategoriesScreen.dart';
 import '../presentation/views/dashboard.dart';
 
 final GoRouter appRouter = GoRouter(
@@ -11,7 +13,7 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/',
       pageBuilder: (context, state) =>
-          buildSlideTransitionPage(Dashboard(), state),
+          buildSlideTransitionPage(SubCategoriesScreen(), state),
     ),
   ],
 );
