@@ -23,6 +23,7 @@ class _AdElectronicsState extends State<AdElectronics> {
   final nameController = TextEditingController();
   final phoneController = TextEditingController();
   final emailController = TextEditingController();
+  List<String> selectedConditions = [];
 
   @override
   Widget build(BuildContext context) {
@@ -42,15 +43,17 @@ class _AdElectronicsState extends State<AdElectronics> {
               _buildCategoryGrid(textColor),
               CommonTextField1(
                 lable: 'Description',
-                hint: 'Include brand, condition, features, etc.',
+                hint: 'Include details',
                 controller: descriptionController,
                 color: textColor,
                 maxLines: 5,
-                validator: (v) => (v == null || v.trim().isEmpty)
-                    ? 'Description is required'
-                    : null,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Description required';
+                  }
+                  return null;
+                },
               ),
-
               Row(
                 children: [
                   Expanded(
@@ -59,8 +62,9 @@ class _AdElectronicsState extends State<AdElectronics> {
                       hint: 'e.g. Apple, Samsung',
                       controller: brandController,
                       color: textColor,
-                      validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Required brand' : null,
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? 'Required brand'
+                          : null,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -70,8 +74,9 @@ class _AdElectronicsState extends State<AdElectronics> {
                       hint: 'Hyderabad',
                       controller: locationController,
                       color: textColor,
-                      validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Required location' : null,
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? 'Required location'
+                          : null,
                     ),
                   ),
                 ],
@@ -90,13 +95,16 @@ class _AdElectronicsState extends State<AdElectronics> {
                 controller: priceController,
                 color: textColor,
                 keyboardType: TextInputType.number,
-                prefixIcon:
-                Icon(Icons.currency_rupee, color: textColor, size: 16),
+                prefixIcon: Icon(
+                  Icons.currency_rupee,
+                  color: textColor,
+                  size: 16,
+                ),
                 validator: (v) =>
-                (v == null || v.trim().isEmpty) ? 'Price required' : null,
+                    (v == null || v.trim().isEmpty) ? 'Price required' : null,
               ),
-
-              _buildSwitchRow('Is it negotiable?', textColor),
+              SizedBox(height: 8),
+              _buildSwitchRow('Is it negotiable?', Color(0xff00000040)),
 
               _sectionTitle('Upload Product Images', textColor),
               _buildUploadImagesSection(textColor),
@@ -109,7 +117,7 @@ class _AdElectronicsState extends State<AdElectronics> {
                 color: textColor,
                 prefixIcon: Icon(Icons.person, color: textColor, size: 16),
                 validator: (v) =>
-                (v == null || v.trim().isEmpty) ? 'Name required' : null,
+                    (v == null || v.trim().isEmpty) ? 'Name required' : null,
               ),
               CommonTextField1(
                 lable: 'Phone Number',
@@ -119,7 +127,7 @@ class _AdElectronicsState extends State<AdElectronics> {
                 keyboardType: TextInputType.phone,
                 prefixIcon: Icon(Icons.call, color: textColor, size: 16),
                 validator: (v) =>
-                (v == null || v.trim().isEmpty) ? 'Phone required' : null,
+                    (v == null || v.trim().isEmpty) ? 'Phone required' : null,
               ),
               CommonTextField1(
                 lable: 'Email (Optional)',
@@ -138,11 +146,7 @@ class _AdElectronicsState extends State<AdElectronics> {
           child: CustomAppButton1(
             text: 'Submit Ad',
             onPlusTap: () {
-              if (_formKey.currentState?.validate() ?? false) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Ad submitted successfully')),
-                );
-              }
+              if (_formKey.currentState?.validate() ?? false) {}
             },
           ),
         ),
@@ -155,16 +159,22 @@ class _AdElectronicsState extends State<AdElectronics> {
       padding: const EdgeInsets.only(top: 20, bottom: 10),
       child: Text(
         title,
-        style: AppTextStyles.titleMedium(color).copyWith(
-          fontSize: 15,
-          fontWeight: FontWeight.w600,
-        ),
+        style: AppTextStyles.titleMedium(
+          color,
+        ).copyWith(fontSize: 15, fontWeight: FontWeight.w600),
       ),
     );
   }
 
   Widget _buildCategoryGrid(Color color) {
-    final categories = ['Mobiles', 'Laptops', 'TVs', 'Cameras', 'Headphones', 'Watches'];
+    final categories = [
+      'Mobiles',
+      'Laptops',
+      'TVs',
+      'Cameras',
+      'Headphones',
+      'Watches',
+    ];
     return GridView.count(
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
@@ -175,26 +185,26 @@ class _AdElectronicsState extends State<AdElectronics> {
       children: categories
           .map(
             (c) => Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x0D000000),
-                offset: Offset(0, 1),
-                blurRadius: 2,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x0D000000),
+                    offset: Offset(0, 1),
+                    blurRadius: 2,
+                  ),
+                ],
               ),
-            ],
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            c,
-            textAlign: TextAlign.center,
-            style: AppTextStyles.bodyMedium(color),
-          ),
-        ),
-      )
+              alignment: Alignment.center,
+              child: Text(
+                c,
+                textAlign: TextAlign.center,
+                style: AppTextStyles.bodyMedium(color),
+              ),
+            ),
+          )
           .toList(),
     );
   }
@@ -204,17 +214,32 @@ class _AdElectronicsState extends State<AdElectronics> {
       spacing: 8,
       children: items
           .map(
-            (e) => Chip(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(7),
-            side: BorderSide(
-              color: isDark ? const Color(0xff666666) : const Color(0xffD9D9D9),
+            (e) => FilterChip(
+              selected: selectedConditions.contains(e),
+              label: Text(e, style: AppTextStyles.bodySmall(color)),
+              selectedColor: Colors.blue.withOpacity(0.2),
+              backgroundColor: isDark ? Colors.black : Colors.grey.shade200,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(7),
+                side: BorderSide(
+                  color: selectedConditions.contains(e)
+                      ? Colors.blue
+                      : (isDark
+                            ? const Color(0xff666666)
+                            : const Color(0xffD9D9D9)),
+                ),
+              ),
+              onSelected: (bool selected) {
+                setState(() {
+                  if (selected) {
+                    selectedConditions.add(e);
+                  } else {
+                    selectedConditions.remove(e);
+                  }
+                });
+              },
             ),
-          ),
-          label: Text(e, style: AppTextStyles.bodySmall(color)),
-          backgroundColor: isDark ? Colors.black : Colors.grey.shade200,
-        ),
-      )
+          )
           .toList(),
     );
   }
@@ -223,7 +248,7 @@ class _AdElectronicsState extends State<AdElectronics> {
     return Row(
       children: [
         Transform.scale(
-          scale: 0.7,
+          scale: 0.8,
           child: Switch(
             inactiveTrackColor: color.withOpacity(0.2),
             value: negotiable,
@@ -238,7 +263,7 @@ class _AdElectronicsState extends State<AdElectronics> {
 
   Widget _buildUploadImagesSection(Color color) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border.all(color: const Color(0xFFE5E7EB), width: 1),

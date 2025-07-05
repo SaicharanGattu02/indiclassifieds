@@ -79,8 +79,7 @@ class CommonTextField extends StatelessWidget {
   }
 }
 
-
-class CommonTextField1 extends StatelessWidget {
+class CommonTextField1 extends StatefulWidget {
   final String hint;
   final String lable;
   final Color color;
@@ -92,9 +91,6 @@ class CommonTextField1 extends StatelessWidget {
   final Widget? prefixIcon;
   final Widget? suffixIcon;
   final String? Function(String?)? validator;
-  final bool showError;
-  final String errorKey;
-  final String errorMsg;
 
   const CommonTextField1({
     super.key,
@@ -109,10 +105,16 @@ class CommonTextField1 extends StatelessWidget {
     this.prefixIcon,
     this.suffixIcon,
     this.validator,
-    this.showError = false,
-    this.errorKey = '',
-    this.errorMsg = '',
   });
+
+  @override
+  State<CommonTextField1> createState() => _CommonTextField1State();
+}
+
+class _CommonTextField1State extends State<CommonTextField1> {
+  bool showError = false;
+  String errorKey = '';
+  String errorMsg = '';
 
   @override
   Widget build(BuildContext context) {
@@ -123,47 +125,48 @@ class CommonTextField1 extends StatelessWidget {
       children: [
         const SizedBox(height: 20),
         Text(
-          lable,
-          style: AppTextStyles.bodyLarge(textColor).copyWith(
-            color: textColor,
-            fontWeight: FontWeight.w600,
-          ),
+          widget.lable,
+          style: AppTextStyles.bodyLarge(
+            textColor,
+          ).copyWith(color: textColor, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 10),
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(
-              color: showError ? Colors.red : const Color(0xFFE5E7EB),
-              width: 1,
-            ),
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x0D000000),
-                offset: Offset(0, 1),
-                blurRadius: 2,
-              ),
-            ],
-          ),
-          child: TextFormField(
-            style: AppTextStyles.bodyMedium(color),
-            controller: controller,
-            keyboardType: keyboardType,
-            obscureText: obscureText,
-            maxLines: maxLines,
-            onChanged: onChanged,
-            validator: validator,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            decoration: InputDecoration(
-              isDense: true,
-              border: InputBorder.none,
-              hintText: hint,
-              hintStyle: AppTextStyles.bodyMedium(color.withOpacity(0.6)),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
-              prefixIcon: prefixIcon,
-              suffixIcon: suffixIcon,
-            ),
+        TextFormField(
+          style: AppTextStyles.bodyMedium(widget.color),
+          controller: widget.controller,
+          keyboardType: widget.keyboardType,
+          obscureText: widget.obscureText,
+          maxLines: widget.maxLines,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          onChanged: (val) {
+            if (widget.onChanged != null) widget.onChanged!(val);
+          },
+          validator: (value) {
+            final validationMsg = widget.validator?.call(value);
+            if (validationMsg != null) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                setState(() {
+                  showError = true;
+                  errorKey = DateTime.now().millisecondsSinceEpoch.toString();
+                  errorMsg = validationMsg;
+                });
+              });
+            } else {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                setState(() {
+                  showError = false;
+                  errorMsg = '';
+                });
+              });
+            }
+            return null; // 👈 prevent Flutter default error
+          },
+          decoration: InputDecoration(
+            hintText: widget.hint,
+            hintStyle: TextStyle(color: textColor),
+            prefixIcon: widget.prefixIcon,
+            suffixIcon: widget.suffixIcon,
+            // no errorText here
           ),
         ),
         if (showError)
@@ -187,4 +190,3 @@ class CommonTextField1 extends StatelessWidget {
     );
   }
 }
-
