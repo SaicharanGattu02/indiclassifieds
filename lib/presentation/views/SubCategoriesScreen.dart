@@ -17,6 +17,14 @@ class SubCategoriesScreen extends StatelessWidget {
       {'title': 'Sports & Fitness', 'image': 'assets/images/subcat2.png'},
       {'title': 'Fashion', 'image': 'assets/images/subcat3.png'},
       {'title': 'Watches', 'image': 'assets/images/subcat4.png'},
+      {'title': 'Wellness spa', 'image': 'assets/images/subcat1.png'},
+      {'title': 'Sports & Fitness', 'image': 'assets/images/subcat2.png'},
+      {'title': 'Fashion', 'image': 'assets/images/subcat3.png'},
+      {'title': 'Watches', 'image': 'assets/images/subcat4.png'},
+      {'title': 'Wellness spa', 'image': 'assets/images/subcat1.png'},
+      {'title': 'Sports & Fitness', 'image': 'assets/images/subcat2.png'},
+      {'title': 'Fashion', 'image': 'assets/images/subcat3.png'},
+      {'title': 'Watches', 'image': 'assets/images/subcat4.png'},
     ];
 
     return Scaffold(
@@ -37,7 +45,7 @@ class SubCategoriesScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(8),
                 child: Image.asset(
                   'assets/images/banner1.png',
                   fit: BoxFit.cover,
@@ -69,7 +77,7 @@ class SubCategoriesScreen extends StatelessWidget {
                     child: Container(
                       decoration: BoxDecoration(
                         color: isDark ? Colors.grey[900] : Colors.grey[100],
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(8),
                       ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -77,8 +85,8 @@ class SubCategoriesScreen extends StatelessWidget {
                           Expanded(
                             child: ClipRRect(
                               borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(16),
-                                topRight: Radius.circular(16),
+                                topLeft: Radius.circular(8),
+                                topRight: Radius.circular(8),
                               ),
                               child: Image.asset(
                                 item['image']!,

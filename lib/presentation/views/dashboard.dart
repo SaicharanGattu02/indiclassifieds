@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:indiclassifieds/presentation/views/Home.dart';
+import 'package:indiclassifieds/presentation/views/ProfileScreen.dart';
 import 'package:indiclassifieds/theme/app_colors.dart';
 
 import '../../theme/ThemeHelper.dart';
@@ -50,7 +52,7 @@ class _DashboardState extends State<Dashboard> {
             });
           },
           physics: const NeverScrollableScrollPhysics(),
-          children: [HomeScreen()],
+          children: [HomeScreen(),ProfileScreen(),],
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         floatingActionButton: Container(
@@ -69,7 +71,7 @@ class _DashboardState extends State<Dashboard> {
           child: FloatingActionButton(
             backgroundColor: Colors.blue,
             onPressed: () {
-              onItemTapped(2);
+              context.push("/post_category");
             },
             child: Icon(Icons.add, size: 32, color: Colors.white),
           ),
@@ -79,7 +81,7 @@ class _DashboardState extends State<Dashboard> {
           child: Container(
             height: 65,
             decoration: BoxDecoration(
-              color: Color(isDarkMode?0xff0D0D0D:0xffffffff),
+              color: Color(isDarkMode ? 0xff0D0D0D : 0xffffffff),
               boxShadow: [
                 BoxShadow(
                   offset: Offset(0, -1),
