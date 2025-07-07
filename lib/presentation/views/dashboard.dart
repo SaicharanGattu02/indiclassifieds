@@ -52,7 +52,7 @@ class _DashboardState extends State<Dashboard> {
             });
           },
           physics: const NeverScrollableScrollPhysics(),
-          children: [HomeScreen(),ProfileScreen(),],
+          children: [HomeScreen(), ProfileScreen()],
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         floatingActionButton: Container(
