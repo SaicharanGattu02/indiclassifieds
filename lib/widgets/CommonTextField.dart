@@ -83,6 +83,8 @@ class CommonTextField1 extends StatefulWidget {
   final String hint;
   final String lable;
   final Color color;
+  final double? lableFontSize;
+  final FontWeight? lableFontWeight;
   final int maxLines;
   final TextEditingController? controller;
   final TextInputType? keyboardType;
@@ -99,6 +101,8 @@ class CommonTextField1 extends StatefulWidget {
     required this.lable,
     this.maxLines = 1,
     this.controller,
+    this.lableFontSize,
+    this.lableFontWeight,
     this.keyboardType,
     this.obscureText = false,
     this.onChanged,
@@ -126,9 +130,11 @@ class _CommonTextField1State extends State<CommonTextField1> {
         const SizedBox(height: 20),
         Text(
           widget.lable,
-          style: AppTextStyles.bodyLarge(
-            textColor,
-          ).copyWith(color: textColor, fontWeight: FontWeight.w600),
+          style: AppTextStyles.bodyLarge(textColor).copyWith(
+            color: textColor,
+            fontWeight: widget.lableFontWeight ?? FontWeight.w600,
+            fontSize: widget.lableFontSize,
+          ),
         ),
         const SizedBox(height: 10),
         TextFormField(
@@ -159,14 +165,13 @@ class _CommonTextField1State extends State<CommonTextField1> {
                 });
               });
             }
-            return null; // 👈 prevent Flutter default error
+            return null;
           },
           decoration: InputDecoration(
             hintText: widget.hint,
-            hintStyle: TextStyle(color: textColor),
+            hintStyle: TextStyle(color: textColor.withOpacity(0.6)),
             prefixIcon: widget.prefixIcon,
             suffixIcon: widget.suffixIcon,
-            // no errorText here
           ),
         ),
         if (showError)
@@ -190,3 +195,4 @@ class _CommonTextField1State extends State<CommonTextField1> {
     );
   }
 }
+

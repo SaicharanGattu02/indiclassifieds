@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:go_router/go_router.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 
@@ -45,9 +45,15 @@ class PostCategoryScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('What are you posting?', style: AppTextStyles.headlineMedium(textColor)),
+            Text(
+              'What are you posting?',
+              style: AppTextStyles.headlineMedium(textColor),
+            ),
             const SizedBox(height: 4),
-            Text('Select a category to continue', style: AppTextStyles.bodyMedium(Colors.grey)),
+            Text(
+              'Select a category to continue',
+              style: AppTextStyles.bodyMedium(Colors.grey),
+            ),
             const SizedBox(height: 20),
             Expanded(
               child: GridView.builder(
@@ -63,16 +69,29 @@ class PostCategoryScreen extends StatelessWidget {
                   return OutlinedButton(
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: Colors.blue),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 12,
+                      ),
                     ),
-                    onPressed: () {},
+                    onPressed: () {
+                      final label = item['label'] as String;
+                      _handleCategoryTap(context, label);
+                    },
+
                     child: Row(
                       children: [
                         CircleAvatar(
                           radius: 18,
                           backgroundColor: Colors.blue.withOpacity(0.1),
-                          child: Icon(item['icon'] as IconData, color: Colors.blue, size: 18),
+                          child: Icon(
+                            item['icon'] as IconData,
+                            color: Colors.blue,
+                            size: 18,
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -80,7 +99,7 @@ class PostCategoryScreen extends StatelessWidget {
                             item['label'].toString(),
                             style: AppTextStyles.bodyMedium(Colors.blue),
                           ),
-                        )
+                        ),
                       ],
                     ),
                   );
@@ -91,5 +110,60 @@ class PostCategoryScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _handleCategoryTap(BuildContext context, String label) {
+    switch (label) {
+      case 'Books':
+        context.push('/'); // You can assign actual routes
+        break;
+      case 'Pets':
+        context.push('/');
+        break;
+      case 'Life Style':
+        context.push('/life_style_ad');
+        break;
+      case 'Real Estate':
+      case 'Properties':
+        context.push('/real_estate');
+        break;
+      case 'Vehicles':
+        context.push('/vechile_ad');
+        break;
+      case 'Electronics':
+        context.push('/ad_electronics');
+        break;
+      case 'Jobs':
+        context.push('/job_ad');
+        break;
+      case 'Education':
+        context.push('/educational_ad');
+        break;
+      case 'Transport':
+      case 'City Rentals':
+        context.push('/mobile_ad');
+        break;
+      case 'Find Inventor':
+        context.push('/');
+        break;
+      case 'Astrology':
+        context.push('/astrology_ad');
+        break;
+      case 'Community':
+        context.push('/');
+        break;
+      case 'Films':
+      case 'Events':
+        context.push('/');
+        break;
+      case 'Coworking':
+        context.push('/co_work_space_ad');
+        break;
+      case 'Services':
+        context.push('/service_ad');
+        break;
+      default:
+        context.push('/');
+    }
   }
 }
