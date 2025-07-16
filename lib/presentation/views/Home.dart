@@ -1,5 +1,6 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:indiclassifieds/theme/app_colors.dart';
 import 'package:indiclassifieds/widgets/CommonTextField.dart';
 
@@ -221,45 +222,50 @@ class _HomeScreenState extends State<HomeScreen> {
                       childAspectRatio: 0.65,
                     ),
                     delegate: SliverChildBuilderDelegate((context, index) {
-                      return Container(
-                        padding: EdgeInsets.fromLTRB(2, 12, 2, 2),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Column(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(4),
-                              child: Image.asset(
-                                'assets/images/findInvestor.png',
-                                fit: BoxFit.cover,
+                      return InkResponse(
+                        onTap:(){
+                          context.push("/subcategories");
+                        },
+                        child: Container(
+                          padding: EdgeInsets.fromLTRB(2, 12, 2, 2),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Column(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(4),
+                                child: Image.asset(
+                                  'assets/images/findInvestor.png',
+                                  fit: BoxFit.cover,
+                                ),
                               ),
-                            ),
-                            SizedBox(height: 6),
-                            Text(
-                              "Find Investor",
-                              textAlign: TextAlign.center,
-                              style: AppTextStyles.titleSmall(textColor)
-                                  .copyWith(
-                                    fontWeight: FontWeight.w500,
-                                    color: Color(
-                                      isDarkMode ? 0xffD7E4FF : 0xff374151,
+                              SizedBox(height: 6),
+                              Text(
+                                "Find Investor",
+                                textAlign: TextAlign.center,
+                                style: AppTextStyles.titleSmall(textColor)
+                                    .copyWith(
+                                      fontWeight: FontWeight.w500,
+                                      color: Color(
+                                        isDarkMode ? 0xffD7E4FF : 0xff374151,
+                                      ),
                                     ),
-                                  ),
-                            ),
-                            SizedBox(height: 2),
-                            Text(
-                              "144",
-                              textAlign: TextAlign.center,
-                              style: AppTextStyles.labelSmall(textColor)
-                                  .copyWith(
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(
-                                      isDarkMode ? 0xffB5B5B5 : 0xff6B7280,
+                              ),
+                              SizedBox(height: 2),
+                              Text(
+                                "144",
+                                textAlign: TextAlign.center,
+                                style: AppTextStyles.labelSmall(textColor)
+                                    .copyWith(
+                                      fontWeight: FontWeight.w400,
+                                      color: Color(
+                                        isDarkMode ? 0xffB5B5B5 : 0xff6B7280,
+                                      ),
                                     ),
-                                  ),
-                            ),
-                          ],
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     }, childCount: 4),

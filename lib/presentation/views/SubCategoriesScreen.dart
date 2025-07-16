@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
@@ -71,7 +72,7 @@ class SubCategoriesScreen extends StatelessWidget {
                   final item = categories[index];
                   return InkWell(
                     onTap: () {
-                      // Navigate to category detail
+                      context.push("/products_list");
                     },
                     borderRadius: BorderRadius.circular(12),
                     child: Container(

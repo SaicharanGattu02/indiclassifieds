@@ -3,18 +3,25 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:indiclassifieds/presentation/PostAdds/CommunityAdScreen.dart';
 import 'package:indiclassifieds/presentation/PostAdds/EducationalAd.dart';
+import 'package:indiclassifieds/presentation/PostAdds/EventsAdScreen.dart';
+import 'package:indiclassifieds/presentation/PostAdds/FindInventoryAdScreen.dart';
 import 'package:indiclassifieds/presentation/PostAdds/VechileAd.dart';
 import 'package:indiclassifieds/presentation/views/SplashScreen.dart';
+import 'package:indiclassifieds/presentation/views/SubCategoriesScreen.dart';
 import '../presentation/PostAdds/AdElectronics.dart';
 import '../presentation/PostAdds/AstrologyAd.dart';
 import '../presentation/PostAdds/BikeAd.dart';
 import '../presentation/PostAdds/CoWorkSpaceAd.dart';
+import '../presentation/PostAdds/FilmsAd.dart';
 import '../presentation/PostAdds/JobAd.dart';
 import '../presentation/PostAdds/LifeStyleAd.dart';
 import '../presentation/PostAdds/MobileAd.dart';
 import '../presentation/PostAdds/RealEstateAd.dart';
 import '../presentation/PostAdds/ServiceAd.dart';
+import 'package:indiclassifieds/presentation/views/ProductsListScreen.dart';
+import '../presentation/PostAdds/AdElectronics.dart';
 import '../presentation/views/DetailsScreen.dart';
 import '../presentation/views/NotificationScreen.dart';
 import '../presentation/views/PostCategoryScreen.dart';
@@ -33,6 +40,16 @@ final GoRouter appRouter = GoRouter(
       path: '/notifications',
       pageBuilder: (context, state) =>
           buildSlideTransitionPage(NotificationScreen(), state),
+    ),
+    GoRoute(
+      path: '/subcategories',
+      pageBuilder: (context, state) =>
+          buildSlideTransitionPage(SubCategoriesScreen(), state),
+    ),
+    GoRoute(
+      path: '/products_list',
+      pageBuilder: (context, state) =>
+          buildSlideTransitionPage(ProductsListScreen(), state),
     ),
     GoRoute(
       path: '/dashboard',
@@ -117,6 +134,26 @@ final GoRouter appRouter = GoRouter(
       path: '/co_work_space_ad',
       pageBuilder: (context, state) =>
           buildSlideFromBottomPage(CoWorkingSpaceAd(), state),
+    ),
+    GoRoute(
+      path: '/film_ad',
+      pageBuilder: (context, state) =>
+          buildSlideFromBottomPage(FilmsAdScreen(), state),
+    ),
+    GoRoute(
+      path: '/events_ad',
+      pageBuilder: (context, state) =>
+          buildSlideFromBottomPage(EventsAdScreen(), state),
+    ),
+    GoRoute(
+      path: '/community_ad',
+      pageBuilder: (context, state) =>
+          buildSlideFromBottomPage(CommunityAdScreen(), state),
+    ),
+    GoRoute(
+      path: '/find_inventory_ad',
+      pageBuilder: (context, state) =>
+          buildSlideFromBottomPage(FindInventoryAdScreen(), state),
     ),
   ],
 );

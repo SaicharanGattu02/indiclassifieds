@@ -33,9 +33,10 @@ class _DashboardState extends State<Dashboard> {
     });
   }
 
+
+
   @override
   Widget build(BuildContext context) {
-    final textColor = ThemeHelper.textColor(context);
     final isDarkMode = ThemeHelper.isDarkMode(context);
     return WillPopScope(
       onWillPop: () async {

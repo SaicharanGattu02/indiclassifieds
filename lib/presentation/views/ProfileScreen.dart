@@ -100,6 +100,7 @@ class ProfileScreen extends StatelessWidget {
               Icons.unsubscribe_outlined,
               Colors.blue.shade100,
               'Subscription',
+              isDark,
               textColor,
               trailing: Icons.arrow_forward_ios,
             ),
@@ -107,6 +108,7 @@ class ProfileScreen extends StatelessWidget {
               Icons.language,
               Colors.green.shade100,
               'Language',
+              isDark,
               textColor,
               trailingText: 'English',
             ),
@@ -114,6 +116,7 @@ class ProfileScreen extends StatelessWidget {
               Icons.nightlight_round,
               Colors.purple.shade100,
               'Dark Theme',
+              isDark,
               textColor,
               isSwitch: true,
             ),
@@ -121,6 +124,7 @@ class ProfileScreen extends StatelessWidget {
               Icons.share,
               Colors.orange.shade100,
               'Share this App',
+              isDark,
               textColor,
               trailing: Icons.arrow_forward_ios,
             ),
@@ -128,6 +132,7 @@ class ProfileScreen extends StatelessWidget {
               Icons.star_rate,
               Colors.yellow.shade100,
               'Rate us',
+              isDark,
               textColor,
               trailing: Icons.arrow_forward_ios,
             ),
@@ -135,6 +140,7 @@ class ProfileScreen extends StatelessWidget {
               Icons.headset_mic,
               Colors.lightBlue.shade100,
               'Contact us',
+              isDark,
               textColor,
               trailing: Icons.arrow_forward_ios,
             ),
@@ -142,6 +148,7 @@ class ProfileScreen extends StatelessWidget {
               Icons.favorite,
               Colors.red.shade100,
               'Wishlist',
+              isDark,
               textColor,
               trailing: Icons.arrow_forward_ios,
             ),
@@ -149,6 +156,7 @@ class ProfileScreen extends StatelessWidget {
               Icons.info,
               Colors.purple.shade100,
               'About us',
+              isDark,
               textColor,
               trailing: Icons.arrow_forward_ios,
             ),
@@ -158,13 +166,13 @@ class ProfileScreen extends StatelessWidget {
             // Logout
             SizedBox(
               width: double.infinity,
+              height: 48,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
                 onPressed: () {},
                 child: const Text('Log Out'),
@@ -209,6 +217,7 @@ class ProfileScreen extends StatelessWidget {
     IconData icon,
     Color iconBg,
     String label,
+    bool isDark,
     Color textcolor, {
     IconData? trailing,
     String? trailingText,
@@ -217,7 +226,19 @@ class ProfileScreen extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.all(Radius.circular(10)),
-        gradient: LinearGradient(colors: [Colors.black.withOpacity(0.2), Colors.black.withOpacity(0.8)])
+        gradient: isDark
+            ? LinearGradient(
+                colors: [
+                  Colors.black.withOpacity(0.2),
+                  Colors.black.withOpacity(0.8),
+                ],
+              )
+            : LinearGradient(
+                colors: [
+                  Color(0xffF9FAFB).withOpacity(0.8),
+                  Color(0xffFFFFFF).withOpacity(0.8),
+                ],
+              ),
       ),
       padding: const EdgeInsets.all(16),
       margin: EdgeInsets.only(bottom: 6),

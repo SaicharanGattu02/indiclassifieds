@@ -13,6 +13,10 @@ class PostCategoryScreen extends StatelessWidget {
     final textColor = ThemeHelper.textColor(context);
 
     final categories = [
+      {'icon': Icons.visibility, 'label': 'Find Inventor'},
+      {'icon': Icons.movie, 'label': 'Films'},
+      {'icon': Icons.directions_run, 'label': 'Events'},
+      {'icon': Icons.people, 'label': 'Community'},
       {'icon': Icons.card_giftcard, 'label': 'Books'},
       {'icon': Icons.pets, 'label': 'Pets'},
       {'icon': Icons.style, 'label': 'Life Style'},
@@ -26,8 +30,6 @@ class PostCategoryScreen extends StatelessWidget {
       {'icon': Icons.visibility, 'label': 'Find Inventor'},
       {'icon': Icons.auto_fix_high, 'label': 'Astrology'},
       {'icon': Icons.people, 'label': 'Community'},
-      {'icon': Icons.movie, 'label': 'Films'},
-      {'icon': Icons.directions_run, 'label': 'Events'},
       {'icon': Icons.meeting_room, 'label': 'Coworking'},
       {'icon': Icons.directions_car_filled, 'label': 'City Rentals'},
       {'icon': Icons.build, 'label': 'Services'},
@@ -144,17 +146,19 @@ class PostCategoryScreen extends StatelessWidget {
         context.push('/mobile_ad');
         break;
       case 'Find Inventor':
-        context.push('/');
+        context.push('/find_inventory_ad');
         break;
       case 'Astrology':
         context.push('/astrology_ad');
         break;
       case 'Community':
-        context.push('/');
+        context.push('/community_ad');
         break;
       case 'Films':
+        context.push('/film_ad');
+        break;
       case 'Events':
-        context.push('/');
+        context.push('/events_ad');
         break;
       case 'Coworking':
         context.push('/co_work_space_ad');
@@ -163,7 +167,6 @@ class PostCategoryScreen extends StatelessWidget {
         context.push('/service_ad');
         break;
       default:
-        context.push('/');
     }
   }
 }
