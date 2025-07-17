@@ -6,6 +6,8 @@ import 'package:indiclassifieds/presentation/views/ProfileScreen.dart';
 import 'package:indiclassifieds/theme/app_colors.dart';
 
 import '../../theme/ThemeHelper.dart';
+import 'AddsScreen.dart';
+import 'FavouritesScreen.dart';
 
 class Dashboard extends StatefulWidget {
   final int initialTab;
@@ -33,8 +35,6 @@ class _DashboardState extends State<Dashboard> {
     });
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     final isDarkMode = ThemeHelper.isDarkMode(context);
@@ -53,7 +53,12 @@ class _DashboardState extends State<Dashboard> {
             });
           },
           physics: const NeverScrollableScrollPhysics(),
-          children: [HomeScreen(), ProfileScreen()],
+          children: [
+            HomeScreen(),
+            AdsScreen(),
+            FavouritesScreen(),
+            ProfileScreen(),
+          ],
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         floatingActionButton: Container(

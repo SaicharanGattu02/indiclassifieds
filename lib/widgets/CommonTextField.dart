@@ -195,4 +195,3 @@ class _CommonTextField1State extends State<CommonTextField1> {
     );
   }
 }
-

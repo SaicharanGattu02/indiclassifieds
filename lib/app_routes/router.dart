@@ -22,6 +22,7 @@ import '../presentation/PostAdds/RealEstateAd.dart';
 import '../presentation/PostAdds/ServiceAd.dart';
 import 'package:indiclassifieds/presentation/views/ProductsListScreen.dart';
 import '../presentation/PostAdds/AdElectronics.dart';
+import '../presentation/authentication/LoginScreen.dart';
 import '../presentation/views/DetailsScreen.dart';
 import '../presentation/views/NotificationScreen.dart';
 import '../presentation/views/PostCategoryScreen.dart';
@@ -34,7 +35,7 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/',
       pageBuilder: (context, state) =>
-          buildSlideTransitionPage(Splashscreen(), state),
+          buildSlideTransitionPage(Loginscreen(), state),
     ),
     GoRoute(
       path: '/notifications',

@@ -1,6 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../../theme/AppTextStyles.dart';
+import '../../theme/ThemeHelper.dart';
+
 class FavouriteItem {
   final String name;
   final String date;
@@ -21,65 +24,68 @@ class FavouritesScreen extends StatelessWidget {
       name: 'Apple AirPods Pro',
       date: '21 Jan 2025',
       price: '₹ 8,999',
-      imageUrl: 'assets/appleipod.png',
+      imageUrl: 'assets/images/carimg.png',
     ),
     FavouriteItem(
       name: 'JBL Charge 2 Speaker',
       date: '20 Dec 2025',
       price: '₹ 6,499',
-      imageUrl: 'assets/soundspeaker.png',
+      imageUrl: 'assets/images/carimg.png',
     ),
     FavouriteItem(
       name: 'PlayStation Controller',
       date: '14 Nov 2024',
       price: '₹ 1,299',
-      imageUrl: 'assets/gamepad.png',
+      imageUrl: 'assets/images/carimg.png',
     ),
     FavouriteItem(
       name: 'Nexus Mountain Bike',
       date: '05 Oct 2023',
       price: '₹ 9,100',
-      imageUrl: 'assets/cycleride.png',
+      imageUrl: 'assets/images/carimg.png',
     ),
     FavouriteItem(
       name: 'Wildcraft Ranger Tent',
       date: '30 Sep 2022',
       price: '₹ 999',
-      imageUrl: 'assets/cycleride.png',
+      imageUrl: 'assets/images/carimg.png',
     ),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final isDark = ThemeHelper.isDarkMode(context);
+    final backgroundColor = ThemeHelper.backgroundColor(context);
+    final textColor = ThemeHelper.textColor(context);
+
     return Scaffold(
-      backgroundColor: Color(0xFFF5F5F5),
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? Colors.grey[900] : Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: textColor),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
           'Favourites',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
+          style: AppTextStyles.titleLarge(textColor).copyWith(fontWeight: FontWeight.bold),
         ),
       ),
       body: ListView.builder(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         itemCount: items.length,
         itemBuilder: (context, index) {
           final item = items[index];
           return Container(
-            margin: EdgeInsets.only(bottom: 16),
-            padding: EdgeInsets.all(12),
+            margin: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: isDark ? Colors.grey[850] : Colors.white,
               borderRadius: BorderRadius.circular(16),
+              boxShadow: isDark
+                  ? []
+                  : [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))],
             ),
             child: Row(
               children: [
@@ -92,43 +98,30 @@ class FavouritesScreen extends StatelessWidget {
                     fit: BoxFit.cover,
                   ),
                 ),
-                SizedBox(width: 12),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         item.name,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xff616161)
-                        ),
+                        style: AppTextStyles.bodySmall(textColor).copyWith(fontWeight: FontWeight.w600),
                       ),
-                      SizedBox(height: 4),
+                      const SizedBox(height: 4),
                       Text(
                         item.date,
-                        style: TextStyle(
-                          fontSize: 12,
-
-                          color: Color(0xff898989),
-                        ),
+                        style: AppTextStyles.labelMedium(isDark ? Colors.grey[400]! : Colors.grey[700]!),
                       ),
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
                       Text(
                         item.price,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-
-                            color: Color(0xff616161),
-                        ),
+                        style: AppTextStyles.titleLarge(textColor).copyWith(fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
                 ),
                 Container(
-                  padding: EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: Colors.blue.withOpacity(0.1),
                     shape: BoxShape.circle,
