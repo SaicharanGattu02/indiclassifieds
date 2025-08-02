@@ -1,15 +1,160 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../../Components/CustomAppButton.dart';
+import '../../services/AuthService.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
+import '../../utils/color_constants.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = ThemeHelper.isDarkMode(context);
     final bgColor = ThemeHelper.backgroundColor(context);
     final textColor = ThemeHelper.textColor(context);
+    void showLogoutDialog(BuildContext context) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return Dialog(
+            elevation: 4.0,
+            insetPadding: const EdgeInsets.symmetric(horizontal: 14.0),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16.0),
+            ),
+            child: SizedBox(
+              width: 300.0,
+              height: 230.0,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  // Power Icon Positioned Above Dialog
+                  Positioned(
+                    top: -35.0,
+                    left: 0.0,
+                    right: 0.0,
+                    child: Container(
+                      width: 70.0,
+                      height: 70.0,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        border: Border.all(width: 6.0, color: Colors.white),
+                        shape: BoxShape.circle,
+                        color: Colors.red.shade100, // Light red background
+                      ),
+                      child: const Icon(
+                        Icons.power_settings_new,
+                        size: 40.0,
+                        color: Colors.red, // Power icon color
+                      ),
+                    ),
+                  ),
+
+                  // Dialog Content
+                  Positioned.fill(
+                    top: 30.0, // Moves content down
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 14.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const SizedBox(height: 15.0),
+                          Text(
+                            "Logout",
+                            style: TextStyle(
+                              fontSize: 24.0,
+                              fontWeight: FontWeight.w700,
+                              color: primarycolor,
+                              fontFamily: "roboto_serif",
+                            ),
+                          ),
+                          const SizedBox(height: 10.0),
+                          const Text(
+                            "Are you sure you want to logout?",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 16.0,
+                              color: Colors.black54,
+                              fontFamily: "roboto_serif",
+                            ),
+                          ),
+                          const SizedBox(height: 20.0),
+
+                          // Buttons Row
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              // No Button (Filled)
+                              SizedBox(
+                                width: 100,
+                                child: ElevatedButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor:
+                                        primarycolor, // Filled button color
+                                    foregroundColor: Colors.white, // Text color
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                      vertical: 10,
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    "No",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: "roboto_serif",
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              // Yes Button (Outlined)
+                              SizedBox(
+                                width: 100,
+                                child: OutlinedButton(
+                                  onPressed: () async {
+                                    await AuthService.logout();
+                                    context.go("/login");
+                                  },
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: primarycolor, // Text color
+                                    side: BorderSide(
+                                      color: primarycolor,
+                                    ), // Border color
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                      vertical: 10,
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    "Yes",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: "roboto_serif",
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    }
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -163,20 +308,11 @@ class ProfileScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            // Logout
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                onPressed: () {},
-                child: const Text('Log Out'),
-              ),
+            CustomAppButton1(
+              text: "Log Out",
+              onPlusTap: () {
+                showLogoutDialog(context);
+              },
             ),
             const SizedBox(height: 20),
           ],

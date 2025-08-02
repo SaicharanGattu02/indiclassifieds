@@ -31,11 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
         elevation: 0,
         title: Row(
           children: [
-            Image.asset(
-              'assets/images/applogo.png',
-              scale: 5,
-              fit: BoxFit.contain,
-            ),
+            Image.asset('assets/images/logo.png', scale: 4, fit: BoxFit.cover),
           ],
         ),
         actions: [
@@ -223,7 +219,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     delegate: SliverChildBuilderDelegate((context, index) {
                       return InkResponse(
-                        onTap:(){
+                        onTap: () {
                           context.push("/subcategories");
                         },
                         child: Container(
@@ -391,13 +387,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ],
                             ),
-
-
                           ),
-                          Positioned(right: -2,top: 14,
+                          Positioned(
+                            right: -2,
+                            top: 14,
                             child: OutlinedButton(
                               style: OutlinedButton.styleFrom(
-                                backgroundColor: AppColors.primary.withOpacity(0.5),
+                                backgroundColor: AppColors.primary.withOpacity(
+                                  0.5,
+                                ),
                                 shape: CircleBorder(),
                                 padding: EdgeInsets.all(12), // adjust as needed
                               ),

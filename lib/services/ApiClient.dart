@@ -12,10 +12,16 @@ class ApiClient {
       connectTimeout: const Duration(seconds: 60),
       receiveTimeout: const Duration(seconds: 60),
       headers: {"Content-Type": "application/json"},
+      validateStatus: (status) {
+        return true;
+      },
     ),
   );
 
-  static const List<String> _unauthenticatedEndpoints = [];
+  static const List<String> _unauthenticatedEndpoints = [
+    '/api/app/send-otp',
+    '/api/app/verify-otp',
+  ];
 
   static void setupInterceptors() {
     try {

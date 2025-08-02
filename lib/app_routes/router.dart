@@ -21,8 +21,8 @@ import '../presentation/PostAdds/MobileAd.dart';
 import '../presentation/PostAdds/RealEstateAd.dart';
 import '../presentation/PostAdds/ServiceAd.dart';
 import 'package:indiclassifieds/presentation/views/ProductsListScreen.dart';
-import '../presentation/PostAdds/AdElectronics.dart';
 import '../presentation/authentication/LoginScreen.dart';
+import '../presentation/authentication/OTPScreen.dart';
 import '../presentation/views/DetailsScreen.dart';
 import '../presentation/views/NotificationScreen.dart';
 import '../presentation/views/PostCategoryScreen.dart';
@@ -35,12 +35,26 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/',
       pageBuilder: (context, state) =>
-          buildSlideTransitionPage(Loginscreen(), state),
+          buildSlideTransitionPage(Splashscreen(), state),
     ),
     GoRoute(
       path: '/notifications',
       pageBuilder: (context, state) =>
           buildSlideTransitionPage(NotificationScreen(), state),
+    ),
+    GoRoute(
+      path: '/login',
+      pageBuilder: (context, state) =>
+          buildSlideTransitionPage(Loginscreen(), state),
+    ),
+    GoRoute(
+      path: '/otp',
+      pageBuilder: (context, state) {
+        final mobile=state.uri.queryParameters['mobile']??"";
+        return  buildSlideTransitionPage(Otpscreen(mobile:mobile ,), state);
+
+}
+
     ),
     GoRoute(
       path: '/subcategories',

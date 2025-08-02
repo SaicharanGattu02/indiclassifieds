@@ -1,39 +1,35 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:indiclassifieds/data/cubit/category/category_cubit.dart';
+import 'package:indiclassifieds/data/cubit/category/category_state.dart';
+import 'package:indiclassifieds/utils/color_constants.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
+import '../../utils/spinkittsLoader.dart';
 
-class PostCategoryScreen extends StatelessWidget {
+class PostCategoryScreen extends StatefulWidget {
   const PostCategoryScreen({super.key});
+
+  @override
+  State<PostCategoryScreen> createState() => _PostCategoryScreenState();
+}
+
+class _PostCategoryScreenState extends State<PostCategoryScreen> {
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CategoryCubit>().getCategory();
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     final isDark = ThemeHelper.isDarkMode(context);
     final bgColor = ThemeHelper.backgroundColor(context);
     final textColor = ThemeHelper.textColor(context);
-
-    final categories = [
-      {'icon': Icons.visibility, 'label': 'Find Inventor'},
-      {'icon': Icons.movie, 'label': 'Films'},
-      {'icon': Icons.directions_run, 'label': 'Events'},
-      {'icon': Icons.people, 'label': 'Community'},
-      {'icon': Icons.card_giftcard, 'label': 'Books'},
-      {'icon': Icons.pets, 'label': 'Pets'},
-      {'icon': Icons.style, 'label': 'Life Style'},
-      {'icon': Icons.home, 'label': 'Real Estate'},
-      {'icon': Icons.home_work, 'label': 'Properties'},
-      {'icon': Icons.directions_car, 'label': 'Vehicles'},
-      {'icon': Icons.battery_charging_full, 'label': 'Electronics'},
-      {'icon': Icons.menu_book, 'label': 'Jobs'},
-      {'icon': Icons.school, 'label': 'Education'},
-      {'icon': Icons.emoji_transportation, 'label': 'Transport'},
-      {'icon': Icons.visibility, 'label': 'Find Inventor'},
-      {'icon': Icons.auto_fix_high, 'label': 'Astrology'},
-      {'icon': Icons.people, 'label': 'Community'},
-      {'icon': Icons.meeting_room, 'label': 'Coworking'},
-      {'icon': Icons.directions_car_filled, 'label': 'City Rentals'},
-      {'icon': Icons.build, 'label': 'Services'},
-    ];
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -57,56 +53,88 @@ class PostCategoryScreen extends StatelessWidget {
               style: AppTextStyles.bodyMedium(Colors.grey),
             ),
             const SizedBox(height: 20),
-            Expanded(
-              child: GridView.builder(
-                itemCount: categories.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 12,
-                  crossAxisSpacing: 12,
-                  childAspectRatio: 2.8,
-                ),
-                itemBuilder: (context, index) {
-                  final item = categories[index];
-                  return OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Colors.blue),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 8,
-                        horizontal: 12,
-                      ),
-                    ),
-                    onPressed: () {
-                      final label = item['label'] as String;
-                      _handleCategoryTap(context, label);
-                    },
+            BlocBuilder<CategoryCubit, CategoryStates>(
+              builder: (context, state) {
+                if (state is CategoryLoading) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (state is CategoryLoaded) {
+                  final categories = state.categoryModel.data;
+                  return Expanded(
+                    child: GridView.builder(
+                      itemCount: categories?.length ?? 0,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            mainAxisSpacing: 12,
+                            crossAxisSpacing: 12,
+                            childAspectRatio: 2.8,
+                          ),
+                      itemBuilder: (context, index) {
+                        final categoryItem = categories![index];
+                        return OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Colors.blue),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 8,
+                              horizontal: 12,
+                            ),
+                          ),
+                          onPressed: () {
+                            // final label = item['label'] as String;
+                            // _handleCategoryTap(context, label);
+                          },
 
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 18,
-                          backgroundColor: Colors.blue.withOpacity(0.1),
-                          child: Icon(
-                            item['icon'] as IconData,
-                            color: Colors.blue,
-                            size: 18,
+                          child: Row(
+                            children: [
+                              CircleAvatar(
+                                radius: 24,
+                                backgroundColor: Colors.blue.withOpacity(0.1),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(100),
+                                  child: CachedNetworkImage(
+                                    imageUrl: categoryItem.image ?? "",
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                    placeholder: (context, url) => Center(
+                                      child: spinkits.getSpinningLinespinkit(),
+                                    ),
+                                    errorWidget: (context, url, error) =>
+                                        Container(
+                                          color: Colors.grey.shade100,
+                                          child: const Icon(
+                                            Icons.broken_image,
+                                            size: 40,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  categoryItem.name ?? "Un Known",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: primarycolor,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            item['label'].toString(),
-                            style: AppTextStyles.bodyMedium(Colors.blue),
-                          ),
-                        ),
-                      ],
+                        );
+                      },
                     ),
                   );
-                },
-              ),
+                } else if (state is CategoryFailure) {
+                  return Center(child: Text(state.error ?? ""));
+                }
+                return Center(child: Text("No Data"));
+              },
             ),
           ],
         ),

@@ -69,7 +69,8 @@ class CustomAppButton1 extends StatelessWidget implements PreferredSizeWidget {
   final Color? textcolor;
   final VoidCallback? onPlusTap;
   final bool isLoading;
-  CustomAppButton1({
+
+  const CustomAppButton1({
     Key? key,
     required this.text,
     required this.onPlusTap,
@@ -83,43 +84,44 @@ class CustomAppButton1 extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     var w = MediaQuery.of(context).size.width;
-    var h = MediaQuery.of(context).size.height;
     return SizedBox(
       width: width ?? w,
       height: height ?? 48,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
           backgroundColor: color ?? AppColors.primary,
-          foregroundColor: color ?? Colors.white,
-          disabledBackgroundColor: color ?? Colors.white,
-          disabledForegroundColor: color ?? Colors.white,
+          foregroundColor: textcolor ?? Colors.white,
           shadowColor: Colors.transparent,
           overlayColor: Colors.transparent,
         ),
-        onPressed: isLoading ? null : onPlusTap,
+        // keep button active but ignore taps when loading
+        onPressed: isLoading ? () {} : onPlusTap,
         child: isLoading
             ? const SizedBox(
-                height: 24,
-                width: 24,
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-                  strokeWidth: 2,
-                ),
-              )
+          height: 24,
+          width: 24,
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.white), // 👈 loader white
+            strokeWidth: 2,
+          ),
+        )
             : Text(
-                text,
-                style: TextStyle(
-                  color: textcolor ?? Colors.white,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: "Poppins",
-                  fontSize: 16,
-                ),
-              ),
+          text,
+          style: TextStyle(
+            color: textcolor ?? Colors.white,
+            fontWeight: FontWeight.w600,
+            fontFamily: "Poppins",
+            fontSize: 16,
+          ),
+        ),
       ),
     );
   }
 
   @override
-  Size get preferredSize => throw UnimplementedError();
+  Size get preferredSize => Size.fromHeight(height ?? 48);
 }
+

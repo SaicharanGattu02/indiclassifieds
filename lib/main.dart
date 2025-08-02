@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:indiclassifieds/services/ApiClient.dart';
 import 'package:indiclassifieds/state_injector.dart';
 import 'package:indiclassifieds/theme/AppTheme.dart';
 
@@ -7,6 +8,8 @@ import 'app_routes/router.dart';
 import 'data/cubit/theme_cubit.dart';
 
 void main() {
+  ApiClient.setupInterceptors();
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(
     MultiRepositoryProvider(
       providers: StateInjector.repositoryProviders,

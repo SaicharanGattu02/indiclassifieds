@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../theme/AppTextStyles.dart';
 import '../Components/ShakeWidget.dart';
 import '../theme/ThemeHelper.dart';
@@ -16,6 +17,7 @@ class CommonTextField extends StatelessWidget {
   final bool showError;
   final String errorKey;
   final String errorMsg;
+  final List<TextInputFormatter>? inputFormatters;
 
   const CommonTextField({
     super.key,
@@ -31,6 +33,7 @@ class CommonTextField extends StatelessWidget {
     this.showError = false,
     this.errorKey = '',
     this.errorMsg = '',
+    this.inputFormatters,
   });
 
   @override
@@ -45,6 +48,7 @@ class CommonTextField extends StatelessWidget {
           obscureText: obscureText,
           maxLines: maxLines,
           onChanged: onChanged,
+          inputFormatters: inputFormatters,
           decoration: InputDecoration(
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,

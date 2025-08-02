@@ -6,7 +6,7 @@ import 'app_colors.dart';
 
 class ThemeHelper {
   static bool isDarkMode(BuildContext context) {
-    final themeMode = context.watch<ThemeCubit>().state;
+    final themeMode = context.read<ThemeCubit>().state;
     final platformBrightness = MediaQuery.of(context).platformBrightness;
 
     return switch (themeMode) {
