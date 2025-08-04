@@ -12,7 +12,7 @@ class AppTextStyles {
   static TextStyle headlineMedium(Color color) =>
       TextStyle(fontSize: 28, fontFamily: 'Roboto', color: color);
   static TextStyle headlineSmall(Color color) =>
-      TextStyle(fontSize: 24, fontFamily: 'Roboto', color: color);
+      TextStyle(fontSize: 20, fontFamily: 'Roboto', color: color);
   static TextStyle titleLarge(Color color) =>
       TextStyle(fontSize: 18, fontFamily: 'Roboto', color: color);
   static TextStyle titleMedium(Color color) =>

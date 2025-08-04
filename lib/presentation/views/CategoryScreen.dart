@@ -9,14 +9,14 @@ import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../utils/spinkittsLoader.dart';
 
-class PostCategoryScreen extends StatefulWidget {
-  const PostCategoryScreen({super.key});
+class CategoryScreen extends StatefulWidget {
+  const CategoryScreen({super.key});
 
   @override
-  State<PostCategoryScreen> createState() => _PostCategoryScreenState();
+  State<CategoryScreen> createState() => _CategoryScreenState();
 }
 
-class _PostCategoryScreenState extends State<PostCategoryScreen> {
+class _CategoryScreenState extends State<CategoryScreen> {
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -83,8 +83,9 @@ class _PostCategoryScreenState extends State<PostCategoryScreen> {
                             ),
                           ),
                           onPressed: () {
-                            // final label = item['label'] as String;
-                            // _handleCategoryTap(context, label);
+                            context.push(
+                              '/select_sub_categories?categoryId=${categoryItem.categoryId ?? ""}&categoryName=${categoryItem.name ?? ""}',
+                            );
                           },
 
                           child: Row(

@@ -35,3 +35,36 @@ class Background extends StatelessWidget {
     );
   }
 }
+
+class Background1 extends StatelessWidget {
+  final Widget child;
+  final String? bgImagePath;
+
+  const Background1({super.key, required this.child, this.bgImagePath});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Center(
+          child: Opacity(
+            opacity: 0.05,
+            child: Transform.rotate(
+              angle: -45 * 3.1415926535 / 180, // -45° diagonal
+              child: Image.asset(
+                bgImagePath ?? "assets/images/logo.png",
+                width: 382.8654593415135,
+                height: 202.9186919251232,
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
+        ),
+
+        // Foreground child UI
+        child,
+      ],
+    );
+  }
+}

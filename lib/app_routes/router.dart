@@ -14,6 +14,7 @@ import '../presentation/PostAdds/AdElectronics.dart';
 import '../presentation/PostAdds/AstrologyAd.dart';
 import '../presentation/PostAdds/BikeAd.dart';
 import '../presentation/PostAdds/CoWorkSpaceAd.dart';
+import '../presentation/PostAdds/CommonAd.dart';
 import '../presentation/PostAdds/FilmsAd.dart';
 import '../presentation/PostAdds/JobAd.dart';
 import '../presentation/PostAdds/LifeStyleAd.dart';
@@ -25,8 +26,9 @@ import '../presentation/authentication/LoginScreen.dart';
 import '../presentation/authentication/OTPScreen.dart';
 import '../presentation/views/DetailsScreen.dart';
 import '../presentation/views/NotificationScreen.dart';
-import '../presentation/views/PostCategoryScreen.dart';
+import '../presentation/views/CategoryScreen.dart';
 import '../presentation/views/ProfileScreen.dart';
+import '../presentation/views/SelectSubCategory.dart';
 import '../presentation/views/dashboard.dart';
 
 final GoRouter appRouter = GoRouter(
@@ -50,16 +52,30 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/otp',
       pageBuilder: (context, state) {
-        final mobile=state.uri.queryParameters['mobile']??"";
-        return  buildSlideTransitionPage(Otpscreen(mobile:mobile ,), state);
-
-}
-
+        final mobile = state.uri.queryParameters['mobile'] ?? "";
+        return buildSlideTransitionPage(Otpscreen(mobile: mobile), state);
+      },
     ),
     GoRoute(
-      path: '/subcategories',
-      pageBuilder: (context, state) =>
-          buildSlideTransitionPage(SubCategoriesScreen(), state),
+      path: '/sub_categories',
+      pageBuilder: (context, state) {
+        final categoryId = state.uri.queryParameters['categoryId'] ?? "";
+        return buildSlideTransitionPage(
+          SubCategoriesScreen(categoryId: categoryId),
+          state,
+        );
+      },
+    ),
+    GoRoute(
+      path: '/select_sub_categories',
+      pageBuilder: (context, state) {
+        final categoryId = state.uri.queryParameters['categoryId'] ?? "";
+        final categoryName = state.uri.queryParameters['categoryName'] ?? "";
+        return buildSlideTransitionPage(
+          SelectSubCategory(categoryId: categoryId, categoryName: categoryName),
+          state,
+        );
+      },
     ),
     GoRoute(
       path: '/products_list',
@@ -71,11 +87,11 @@ final GoRouter appRouter = GoRouter(
       pageBuilder: (context, state) =>
           buildSlideTransitionPage(Dashboard(), state),
     ),
-    GoRoute(
-      path: '/sub_categories',
-      pageBuilder: (context, state) =>
-          buildSlideTransitionPage(AdElectronics(), state),
-    ),
+    // GoRoute(
+    //   path: '/sub_categories',
+    //   pageBuilder: (context, state) =>
+    //       buildSlideTransitionPage(AdElectronics(), state),
+    // ),
     GoRoute(
       path: '/dashboard',
       pageBuilder: (context, state) =>
@@ -83,8 +99,38 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: '/ad_electronics',
-      pageBuilder: (context, state) =>
-          buildSlideTransitionPage(AdElectronics(), state),
+      pageBuilder: (context, state) {
+        final categoryId = state.uri.queryParameters['catId'] ?? "";
+        final categoryName = state.uri.queryParameters['CatName'] ?? "";
+        final subCatId = state.uri.queryParameters['subCatId'] ?? "";
+
+        return buildSlideTransitionPage(
+          AdElectronics(
+            catId: categoryId,
+            CatName: categoryName,
+            subCatId: subCatId,
+          ),
+          state,
+        );
+      },
+    ),
+    GoRoute(
+      path: '/common_ad',
+      pageBuilder: (context, state) {
+        final categoryId = state.uri.queryParameters['catId'] ?? "";
+        final categoryName = state.uri.queryParameters['CatName'] ?? "";
+        final SubCategoryName = state.uri.queryParameters['SubCatName'] ?? "";
+        final subCatId = state.uri.queryParameters['subCatId'] ?? "";
+
+        return buildSlideTransitionPage(
+          CommonAd(
+            catId: categoryId,
+            CatName: categoryName,
+            subCatId: subCatId,SubCatName: SubCategoryName,
+          ),
+          state,
+        );
+      },
     ),
     GoRoute(
       path: '/real_estate',
@@ -102,9 +148,9 @@ final GoRouter appRouter = GoRouter(
           buildSlideTransitionPage(ProfileScreen(), state),
     ),
     GoRoute(
-      path: '/post_category',
+      path: '/category',
       pageBuilder: (context, state) =>
-          buildSlideFromBottomPage(PostCategoryScreen(), state),
+          buildSlideFromBottomPage(CategoryScreen(), state),
     ),
     GoRoute(
       path: '/vechile_ad',

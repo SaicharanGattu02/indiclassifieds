@@ -77,7 +77,7 @@ class _DashboardState extends State<Dashboard> {
           child: FloatingActionButton(
             backgroundColor: Colors.blue,
             onPressed: () {
-              context.push("/post_category");
+              context.push("/category");
             },
             child: Icon(Icons.add, size: 32, color: Colors.white),
           ),

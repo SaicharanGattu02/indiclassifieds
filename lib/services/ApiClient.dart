@@ -47,17 +47,17 @@ class ApiClient {
               return handler.next(options);
             }
             // Check token expiration
-            final isExpired = await AuthService.isTokenExpired();
-            if (isExpired) {
-              await AuthService.logout();
-              return handler.reject(
-                DioException(
-                  requestOptions: options,
-                  error: 'Token expired, please log in again',
-                  type: DioExceptionType.cancel,
-                ),
-              );
-            }
+            // final isExpired = await AuthService.isTokenExpired();
+            // if (isExpired) {
+            //   await AuthService.logout();
+            //   return handler.reject(
+            //     DioException(
+            //       requestOptions: options,
+            //       error: 'Token expired, please log in again',
+            //       type: DioExceptionType.cancel,
+            //     ),
+            //   );
+            // }
             // Get access token from storage
             final accessToken = await AuthService.getAccessToken();
             if (accessToken == null || accessToken.isEmpty) {

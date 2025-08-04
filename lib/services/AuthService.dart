@@ -7,8 +7,8 @@ import '../utils/constants.dart';
 
 class AuthService {
   static const String _accessTokenKey = "access_token";
-  static const String _refreshTokenKey = "refresh_token";
-  static const String _tokenExpiryKey = "token_expiry";
+  // static const String _refreshTokenKey = "refresh_token";
+  // static const String _tokenExpiryKey = "token_expiry";
 
   static final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
@@ -24,35 +24,35 @@ class AuthService {
   }
 
   /// Get stored refresh token
-  static Future<String?> getRefreshToken() async {
-    return await _storage.read(key: _refreshTokenKey);
-  }
+  // static Future<String?> getRefreshToken() async {
+  //   return await _storage.read(key: _refreshTokenKey);
+  // }
 
   /// Check if token is expired
-  static Future<bool> isTokenExpired() async {
-    final expiryTimestampStr = await _storage.read(key: _tokenExpiryKey);
-    if (expiryTimestampStr == null) {
-      debugPrint('No expiry timestamp found, considering token expired');
-      return true;
-    }
-
-    final expiryTimestamp = int.tryParse(expiryTimestampStr);
-    if (expiryTimestamp == null) {
-      debugPrint('Invalid expiry timestamp format, considering token expired');
-      return true;
-    }
-
-    final now =
-        DateTime.now().millisecondsSinceEpoch ~/
-        1000; // current time in seconds
-
-    final isExpired = now >= expiryTimestamp;
-
-    debugPrint(
-      'Token expiry check: now=$now, expiry=$expiryTimestamp, isExpired=$isExpired',
-    );
-    return isExpired;
-  }
+  // static Future<bool> isTokenExpired() async {
+  //   final expiryTimestampStr = await _storage.read(key: _tokenExpiryKey);
+  //   if (expiryTimestampStr == null) {
+  //     debugPrint('No expiry timestamp found, considering token expired');
+  //     return true;
+  //   }
+  //
+  //   final expiryTimestamp = int.tryParse(expiryTimestampStr);
+  //   if (expiryTimestamp == null) {
+  //     debugPrint('Invalid expiry timestamp format, considering token expired');
+  //     return true;
+  //   }
+  //
+  //   final now =
+  //       DateTime.now().millisecondsSinceEpoch ~/
+  //       1000; // current time in seconds
+  //
+  //   final isExpired = now >= expiryTimestamp;
+  //
+  //   debugPrint(
+  //     'Token expiry check: now=$now, expiry=$expiryTimestamp, isExpired=$isExpired',
+  //   );
+  //   return isExpired;
+  // }
 
   // static Future<bool> isTokenExpired() async {
   //   final expiryTimestamp = await _storage.read(key: _tokenExpiryKey);
@@ -71,13 +71,15 @@ class AuthService {
   /// Save tokens and expiry time
   static Future<void> saveTokens(
     String accessToken,
-    String? refreshToken,
-    int expiresIn,
+    // String? refreshToken,
+    // int expiresIn,
   ) async {
     await _storage.write(key: _accessTokenKey, value: accessToken);
-    await _storage.write(key: _refreshTokenKey, value: refreshToken ?? "");
-    await _storage.write(key: _tokenExpiryKey, value: expiresIn.toString());
-    debugPrint('Tokens saved: accessToken=$accessToken, expiryTime=$expiresIn');
+    // await _storage.write(key: _refreshTokenKey, value: refreshToken ?? "");
+    // await _storage.write(key: _tokenExpiryKey, value: expiresIn.toString());
+    debugPrint('Tokens saved: accessToken=$accessToken, '
+        // 'expiryTime=$expiresIn'
+    );
   }
 
   /// Refresh token

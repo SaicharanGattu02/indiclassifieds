@@ -93,10 +93,12 @@ class CommonTextField1 extends StatefulWidget {
   final TextEditingController? controller;
   final TextInputType? keyboardType;
   final bool obscureText;
+  final bool? isRead;
   final void Function(String)? onChanged;
   final Widget? prefixIcon;
   final Widget? suffixIcon;
   final String? Function(String?)? validator;
+  final List<TextInputFormatter>? inputFormatters;
 
   const CommonTextField1({
     super.key,
@@ -112,7 +114,9 @@ class CommonTextField1 extends StatefulWidget {
     this.onChanged,
     this.prefixIcon,
     this.suffixIcon,
+    this.inputFormatters,
     this.validator,
+    this.isRead,
   });
 
   @override
@@ -140,8 +144,10 @@ class _CommonTextField1State extends State<CommonTextField1> {
             fontSize: widget.lableFontSize,
           ),
         ),
-        const SizedBox(height: 10),
-        TextFormField(
+        SizedBox(height: 10),
+        TextFormField(readOnly:  widget.isRead ?? false,
+          inputFormatters: widget.inputFormatters ?? const [],
+
           style: AppTextStyles.bodyMedium(widget.color),
           controller: widget.controller,
           keyboardType: widget.keyboardType,

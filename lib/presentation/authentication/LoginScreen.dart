@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:indiclassifieds/Components/CustomSnackBar.dart';
-import 'package:indiclassifieds/data/cubit/LogInWithMobileCubit/login_with_mobile.dart';
-import 'package:indiclassifieds/data/cubit/LogInWithMobileCubit/login_with_mobile_state.dart';
+import 'package:indiclassifieds/data/cubit/LogInWithMobile/login_with_mobile.dart';
+import 'package:indiclassifieds/data/cubit/LogInWithMobile/login_with_mobile_state.dart';
 import 'package:indiclassifieds/widgets/CommonTextField.dart';
 import '../../Components/CustomAppButton.dart';
 import '../../theme/ThemeHelper.dart';
@@ -24,6 +24,7 @@ class _LoginscreenState extends State<Loginscreen> {
   @override
   Widget build(BuildContext context) {
     final textColor = ThemeHelper.textColor(context);
+    final isDarkMode = ThemeHelper.isDarkMode(context);
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -63,11 +64,10 @@ class _LoginscreenState extends State<Loginscreen> {
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 40),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 60, vertical: 30),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color:  isDarkMode ? Colors.black : Colors.grey.shade200,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
@@ -80,23 +80,26 @@ class _LoginscreenState extends State<Loginscreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      "Mobile Number",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontFamily: 'Roboto',
-                        fontWeight: FontWeight.w600,
-                        color: textTittleColor,
-                      ),
-                    ),
                     const SizedBox(height: 12),
-                    CommonTextField(
+                    // CommonTextField1(
+                    //   lable: 'Phone Number',
+                    //   hint: 'Enter phone number',
+                    //   controller: _phoneController,
+                    //   color: textColor,
+                    //   keyboardType: TextInputType.phone,
+                    //   prefixIcon: Icon(Icons.call, color: textColor, size: 16),
+                    //   validator: (v) =>
+                    //   (v == null || v.trim().isEmpty) ? 'Phone required' : null,
+                    // ),
+                    CommonTextField1( validator: (v) =>
+                      (v == null || v.trim().isEmpty) ?
+                      'Phone required' : null,
                       hint: "Enter Number",
                       inputFormatters: [
                         FilteringTextInputFormatter.digitsOnly,
                         LengthLimitingTextInputFormatter(10),
                       ],
-                      color: Colors.black,
+                      color: textColor,
                       keyboardType: TextInputType.phone,
                       controller: _phoneController,
                       prefixIcon: Padding(
@@ -114,7 +117,7 @@ class _LoginscreenState extends State<Loginscreen> {
                             ),
                           ],
                         ),
-                      ),
+                      ), lable:"Mobile Number",
                     ),
                     const SizedBox(height: 20),
 

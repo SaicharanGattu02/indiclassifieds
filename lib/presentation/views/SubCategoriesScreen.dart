@@ -1,11 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../data/cubit/subCategory/sub_category_cubit.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 
-class SubCategoriesScreen extends StatelessWidget {
-  const SubCategoriesScreen({super.key});
+class SubCategoriesScreen extends StatefulWidget {
+  final String categoryId;
+  const SubCategoriesScreen({super.key, required this.categoryId});
+
+  @override
+  State<SubCategoriesScreen> createState() => _SubCategoriesScreenState();
+}
+
+class _SubCategoriesScreenState extends State<SubCategoriesScreen> {
+
 
   @override
   Widget build(BuildContext context) {

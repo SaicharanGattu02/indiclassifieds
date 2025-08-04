@@ -6,7 +6,10 @@ import '../../theme/ThemeHelper.dart';
 import '../../widgets/CommonTextField.dart';
 
 class AdElectronics extends StatefulWidget {
-  const AdElectronics({super.key});
+  final String catId;
+  final String CatName;
+  final String subCatId;
+  const AdElectronics({super.key,required this.catId,required this.CatName,required this.subCatId});
 
   @override
   State<AdElectronics> createState() => _AdElectronicsState();
@@ -40,7 +43,6 @@ class _AdElectronicsState extends State<AdElectronics> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _sectionTitle('Select Category', textColor),
-              _buildCategoryGrid(textColor),
               CommonTextField1(
                 lable: 'Description',
                 hint: 'Include details',
@@ -166,48 +168,7 @@ class _AdElectronicsState extends State<AdElectronics> {
     );
   }
 
-  Widget _buildCategoryGrid(Color color) {
-    final categories = [
-      'Mobiles',
-      'Laptops',
-      'TVs',
-      'Cameras',
-      'Headphones',
-      'Watches',
-    ];
-    return GridView.count(
-      physics: const NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
-      crossAxisCount: 3,
-      crossAxisSpacing: 8,
-      mainAxisSpacing: 8,
-      childAspectRatio: 1,
-      children: categories
-          .map(
-            (c) => Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x0D000000),
-                    offset: Offset(0, 1),
-                    blurRadius: 2,
-                  ),
-                ],
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                c,
-                textAlign: TextAlign.center,
-                style: AppTextStyles.bodyMedium(color),
-              ),
-            ),
-          )
-          .toList(),
-    );
-  }
+
 
   Widget _buildChips(List<String> items, Color color, bool isDark) {
     return Wrap(
