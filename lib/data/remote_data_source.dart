@@ -16,7 +16,7 @@ abstract class RemoteDataSource {
   Future<CategoryModel?> getCategory();
   Future<SubCategoryModel?> getSubCategory(String categoryId);
   Future<SelectStatesModel?> getStates(String search);
-  Future<SelectCityModel?> getCity(int state_id, String search);
+  Future<SelectCityModel?> getCity(int state_id, String search, int page);
   Future<AdSuccessModel?> postCommonAd(Map<String, dynamic> data);
   Future<AdSuccessModel?> postCoWorkingAd(Map<String, dynamic> data);
   Future<AdSuccessModel?> postCityRentalsAd(Map<String, dynamic> data);
@@ -146,10 +146,10 @@ class RemoteDataSourceImpl implements RemoteDataSource {
   }
 
   @override
-  Future<SelectCityModel?> getCity(int state_id, String search) async {
+  Future<SelectCityModel?> getCity(int state_id, String search, int page) async {
     try {
       Response response = await ApiClient.get(
-        "${APIEndpointUrls.get_states}?state_id=${state_id}&search=${search}",
+        "${APIEndpointUrls.get_city}?state_id=${state_id}&search=${search}&page=${page}",
       );
       AppLogger.log('get City :${response.data}');
       return SelectCityModel.fromJson(response.data);

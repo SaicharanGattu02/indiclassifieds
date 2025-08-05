@@ -12,12 +12,16 @@ import '../../Components/ShakeWidget.dart';
 import '../../data/cubit/Ad/commomAd/common_ad_cubit.dart';
 import '../../data/cubit/Ad/commomAd/common_ad_states.dart';
 
-
+import '../../data/cubit/States/states_cubit.dart';
+import '../../data/cubit/States/states_repository.dart';
+import '../../data/remote_data_source.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../utils/ImageUtils.dart';
 import '../../utils/color_constants.dart';
 import '../../widgets/CommonTextField.dart';
+import '../../widgets/SelectCityBottomSheet.dart';
+import '../../widgets/SelectStateBottomSheet.dart';
 
 class CommonAd extends StatefulWidget {
   final String catId;
@@ -53,12 +57,12 @@ class _CommonAdState extends State<CommonAd> {
   final nameController = TextEditingController();
   final phoneController = TextEditingController();
   final emailController = TextEditingController();
+  final stateController = TextEditingController();
+  final cityController = TextEditingController();
   List<String> selectedConditions = [];
+
   @override
   void initState() {
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   context.read<SelectStatesCubit>().getSelectStates("");
-    // });
     super.initState();
   }
 
@@ -246,291 +250,126 @@ class _CommonAdState extends State<CommonAd> {
                     (v == null || v.trim().isEmpty) ? 'Price required' : null,
               ),
 
-              // SizedBox(height: 12),
-              // BlocBuilder<SelectStatesCubit, SelectStates>(
-              //   builder: (context, state) {
-              //     final List<DropdownMenuItem<int>> items = [];
-              //
-              //     if (state is SelectStatesLoading) {
-              //       items.add(
-              //         const DropdownMenuItem<int>(
-              //           enabled: false,
-              //           child: Row(
-              //             children: [
-              //               SizedBox(
-              //                 width: 18,
-              //                 height: 18,
-              //                 child: CircularProgressIndicator(strokeWidth: 2),
-              //               ),
-              //               SizedBox(width: 8),
-              //               Text("Loading..."),
-              //             ],
-              //           ),
-              //         ),
-              //       );
-              //     } else if (state is SelectStatesLoaded) {
-              //       final states = state.selectStatesModel.data ?? [];
-              //
-              //       // ✅ Ensure selectedStateId is valid in new list
-              //       if (selectedStateId != null &&
-              //           !states.any((e) => e.id == selectedStateId)) {
-              //         selectedStateId = null;
-              //         // Reset city ID when state ID becomes invalid
-              //         selectedCityId = null;
-              //       }
-              //
-              //       items.addAll(states.map<DropdownMenuItem<int>>(
-              //             (e) => DropdownMenuItem<int>(
-              //           value: e.id,
-              //           child: Text(
-              //             e.name ?? "",
-              //             style: AppTextStyles.titleLarge(textColor),
-              //           ),
-              //         ),
-              //       ));
-              //     }
-              //
-              //     return DropdownButtonHideUnderline(
-              //       child: DropdownButton2<int>(
-              //         isExpanded: true,
-              //         hint: Text(
-              //           'Select State',
-              //           style: AppTextStyles.titleLarge(textColor),
-              //         ),
-              //         items: items,
-              //         value: selectedStateId,
-              //         onChanged: (value) {
-              //           if (value == null) return;
-              //           context.read<SelectCityCubit>().getSelectCity(value, "");
-              //           setState(() {
-              //             selectedStateId = value;
-              //             selectedCityId = null; // Reset city when state changes
-              //             _showStateError = false;
-              //             _showCityError = false; // Reset city error as well
-              //           });
-              //         },
-              //         buttonStyleData: ButtonStyleData(
-              //           padding: const EdgeInsets.only(right: 8),
-              //           decoration: BoxDecoration(
-              //             borderRadius: BorderRadius.circular(8),
-              //             border: Border.all(
-              //               color: isDarkMode ? Colors.white54 : Colors.black54,
-              //               width: 0.5,
-              //             ),
-              //             color: isDarkMode ? Colors.black : Colors.white,
-              //           ),
-              //         ),
-              //         iconStyleData: IconStyleData(
-              //           icon: const Icon(Icons.keyboard_arrow_down_sharp),
-              //           iconSize: 24,
-              //           iconEnabledColor: textColor,
-              //         ),
-              //         dropdownStyleData: DropdownStyleData(
-              //           maxHeight: 250,
-              //           decoration: BoxDecoration(
-              //             borderRadius: BorderRadius.circular(8),
-              //             color: isDarkMode ? Colors.grey[850] : Colors.white,
-              //           ),
-              //         ),
-              //         dropdownSearchData: DropdownSearchData(
-              //           searchController: TextEditingController(),
-              //           searchInnerWidgetHeight: 50,
-              //           searchInnerWidget: Container(
-              //             height: 50,
-              //             padding: const EdgeInsets.all(8),
-              //             child: TextField(
-              //               expands: true,
-              //               maxLines: null,
-              //               onChanged: (value) {
-              //
-              //                 context.read<SelectStatesCubit>().getSelectStates(value);
-              //               },
-              //               decoration: InputDecoration(
-              //                 hintText: 'Search State...',
-              //                 hintStyle: TextStyle(fontSize: 14, color: Colors.grey),
-              //                 border: OutlineInputBorder(
-              //                   borderRadius: BorderRadius.circular(8),
-              //                 ),
-              //               ),
-              //             ),
-              //           ),
-              //           searchMatchFn: (item, searchValue) {
-              //             // Only local match if not fetching from API
-              //             return (item.child as Text?)
-              //                 ?.data
-              //                 ?.toLowerCase()
-              //                 .contains(searchValue.toLowerCase()) ??
-              //                 false;
-              //           },
-              //         ),
-              //       ),
-              //     );
-              //   },
-              // ),
-              //
-              // if (_showStateError) ...[
-              //   Padding(
-              //     padding: const EdgeInsets.only(top: 5),
-              //     child: ShakeWidget(
-              //       key: Key(
-              //         "dropdown_state_error_${DateTime.now().millisecondsSinceEpoch}",
-              //       ),
-              //       duration: const Duration(milliseconds: 700),
-              //       child: const Text(
-              //         'Please Select State',
-              //         style: TextStyle(
-              //           fontFamily: 'roboto_serif',
-              //           fontSize: 12,
-              //           color: Colors.red,
-              //           fontWeight: FontWeight.w500,
-              //         ),
-              //       ),
-              //     ),
-              //   ),
-              // ],
-              // SizedBox(height: 12),
-              // if (selectedStateId != null) ...[
-              //   BlocBuilder<SelectCityCubit, SelectCity>(
-              //     builder: (context, cityState) {
-              //       final List<DropdownMenuItem<int>> cityItems = [];
-              //
-              //       if (cityState is SelectCityLoading) {
-              //         cityItems.add(
-              //           const DropdownMenuItem<int>(
-              //             enabled: false,
-              //             child: Row(
-              //               children: [
-              //                 SizedBox(
-              //                   width: 18,
-              //                   height: 18,
-              //                   child: CircularProgressIndicator(strokeWidth: 2),
-              //                 ),
-              //                 SizedBox(width: 8),
-              //                 Text("Loading..."),
-              //               ],
-              //             ),
-              //           ),
-              //         );
-              //       } else if (cityState is SelectCityLoaded) {
-              //         final cities = cityState.selectCityModel.data ?? [];
-              //
-              //         // ✅ Ensure selectedCityId is valid in new list
-              //         if (selectedCityId != null &&
-              //             !cities.any((e) => e.cityId == selectedCityId)) {
-              //           selectedCityId = null;
-              //         }
-              //
-              //         cityItems.addAll(cities.map<DropdownMenuItem<int>>(
-              //               (e) => DropdownMenuItem<int>(
-              //             value: e.cityId,
-              //             child: Text(
-              //               e.name ?? "",
-              //               style: AppTextStyles.titleLarge(textColor),
-              //             ),
-              //           ),
-              //         ));
-              //       }
-              //
-              //       return DropdownButtonHideUnderline(
-              //         child: DropdownButton2<int>(
-              //           isExpanded: true,
-              //           hint: Text(
-              //             'Select City',
-              //             style: AppTextStyles.titleLarge(textColor),
-              //           ),
-              //           items: cityItems,
-              //           value: selectedCityId,
-              //           onChanged: (value) {
-              //             if (value == null) return;
-              //             setState(() {
-              //               selectedCityId = value;
-              //               _showCityError = false;
-              //             });
-              //           },
-              //           buttonStyleData: ButtonStyleData(
-              //             padding: const EdgeInsets.only(right: 8),
-              //             decoration: BoxDecoration(
-              //               borderRadius: BorderRadius.circular(8),
-              //               border: Border.all(
-              //                 color: isDarkMode ? Colors.white54 : Colors.black54,
-              //                 width: 0.5,
-              //               ),
-              //               color: isDarkMode ? Colors.black : Colors.white,
-              //             ),
-              //           ),
-              //           iconStyleData: IconStyleData(
-              //             icon: const Icon(Icons.keyboard_arrow_down_sharp),
-              //             iconSize: 24,
-              //             iconEnabledColor: textColor,
-              //           ),
-              //           dropdownStyleData: DropdownStyleData(
-              //             maxHeight: 250,
-              //             decoration: BoxDecoration(
-              //               borderRadius: BorderRadius.circular(8),
-              //               color: isDarkMode ? Colors.grey[850] : Colors.white,
-              //             ),
-              //           ),
-              //           dropdownSearchData: DropdownSearchData(
-              //             searchController: TextEditingController(),
-              //             searchInnerWidgetHeight: 50,
-              //             searchInnerWidget: Container(
-              //               height: 50,
-              //               padding: const EdgeInsets.all(8),
-              //               child: TextField(
-              //                 expands: true,
-              //                 maxLines: null,
-              //                 onChanged: (value) {
-              //                   // 🔹 Trigger search API for cities
-              //                   if (selectedStateId != null) {
-              //                     context.read<SelectCityCubit>().getSelectCity(selectedStateId!, value);
-              //                   }
-              //                 },
-              //                 decoration: InputDecoration(
-              //                   hintText: 'Search City...',
-              //                   hintStyle: TextStyle(
-              //                     fontSize: 14,
-              //                     color: textColor,
-              //                   ),
-              //                   border: OutlineInputBorder(
-              //                     borderRadius: BorderRadius.circular(8),
-              //                   ),
-              //                 ),
-              //               ),
-              //             ),
-              //             searchMatchFn: (item, searchValue) {
-              //               return (item.child as Text?)
-              //                   ?.data
-              //                   ?.toLowerCase()
-              //                   .contains(searchValue.toLowerCase()) ??
-              //                   false;
-              //             },
-              //           ),
-              //         ),
-              //       );
-              //     },
-              //   ),
-              // ],
-              //
-              // if (_showCityError) ...[
-              //   Padding(
-              //     padding: const EdgeInsets.only(top: 5),
-              //     child: ShakeWidget(
-              //       key: Key(
-              //         "dropdown_city_error_${DateTime.now().millisecondsSinceEpoch}",
-              //       ),
-              //       duration: const Duration(milliseconds: 700),
-              //       child: const Text(
-              //         'Please Select City',
-              //         style: TextStyle(
-              //           fontFamily: 'roboto_serif',
-              //           fontSize: 12,
-              //           color: Colors.red,
-              //           fontWeight: FontWeight.w500,
-              //         ),
-              //       ),
-              //     ),
-              //   ),
-              // ],
+              GestureDetector(
+                onTap: () async {
+                  final selectedState = await showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) {
+                      return BlocProvider(
+                        create: (_) => SelectStatesCubit(
+                          SelectStatesImpl(
+                            remoteDataSource: RemoteDataSourceImpl(),
+                          ),
+                        ),
+                        child: const SelectStateBottomSheet(),
+                      );
+                    },
+                  );
+
+                  if (selectedState != null) {
+                    stateController.text = selectedState.name ?? "";
+                    selectedStateId = selectedState.id ?? "";
+                    setState(() {});
+                  }
+                },
+                child: AbsorbPointer(
+                  // 👈 stops inner TextField from eating taps
+                  child: CommonTextField1(
+                    lable: 'State',
+                    hint: 'Select State',
+                    controller: stateController,
+                    color: textColor,
+                    keyboardType: TextInputType.text,
+                    isRead: true,
+                    prefixIcon: Icon(
+                      Icons.location_city_outlined,
+                      color: textColor,
+                      size: 16,
+                    ),
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? 'State required'
+                        : null,
+                  ),
+                ),
+              ),
+              if (_showStateError) ...[
+                Padding(
+                  padding: const EdgeInsets.only(top: 5),
+                  child: ShakeWidget(
+                    key: Key("state"),
+                    duration: const Duration(milliseconds: 700),
+                    child: const Text(
+                      'Please Select State',
+                      style: TextStyle(
+                        fontFamily: 'roboto_serif',
+                        fontSize: 12,
+                        color: Colors.red,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+              GestureDetector(
+                onTap: () async {
+                  final selectedCity = await showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) {
+                      return SelectCityBottomSheet(
+                        stateId: selectedStateId ?? 0,
+                      );
+                    },
+                  );
+
+                  if (selectedCity != null) {
+                    cityController.text = selectedCity.name ?? "";
+                    selectedCityId = selectedCity.id ?? "";
+                    setState(() {});
+                  }
+                },
+                child: AbsorbPointer(
+                  child: CommonTextField1(
+                    lable: 'City',
+                    hint: 'Select City',
+                    controller: cityController,
+                    color: textColor,
+                    keyboardType: TextInputType.text,
+                    isRead: true,
+                    prefixIcon: Icon(
+                      Icons.location_city_outlined,
+                      color: textColor,
+                      size: 16,
+                    ),
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? 'City required'
+                        : null,
+                  ),
+                ),
+              ),
+              if (_showCityError) ...[
+                Padding(
+                  padding: const EdgeInsets.only(top: 5),
+                  child: ShakeWidget(
+                    key: Key(
+                      "dropdown_city_error_${DateTime.now().millisecondsSinceEpoch}",
+                    ),
+                    duration: const Duration(milliseconds: 700),
+                    child: const Text(
+                      'Please Select City',
+                      style: TextStyle(
+                        fontFamily: 'roboto_serif',
+                        fontSize: 12,
+                        color: Colors.red,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
               _sectionTitle('Upload Product Images', textColor),
               Container(
                 padding: const EdgeInsets.symmetric(
@@ -749,31 +588,34 @@ class _CommonAdState extends State<CommonAd> {
             listener: (context, state) {
               if (state is CommonAdSuccess) {
                 context.pushReplacement("/successfully");
-              }else if(state is CommonAdFailure){
+              } else if (state is CommonAdFailure) {
                 CustomSnackBar1.show(context, state.error);
               }
             },
             builder: (context, state) {
-              return CustomAppButton1(isLoading: state is CommonAdLoading,
+              return CustomAppButton1(
+                isLoading: state is CommonAdLoading,
                 text: 'Submit Ad',
                 onPlusTap: () {
                   if (_formKey.currentState?.validate() ?? false) {
-                    final Map<String,dynamic> data={
-                      "title":titleController.text,
-                      "description":descriptionController.text,
-                      "sub_category_id":widget.subCatId,
-                      "category_id":widget.catId,
-                      "location":locationController.text,
-                      "mobile_number":phoneController.text,
-                      "plan_id":"1",
-                      "package_id":"3",
-                      "price":priceController.text,
-                      "full_name":nameController.text,
-                      "state_id":"4012",
-                      "city_id":"132132",
+                    final Map<String, dynamic> data = {
+                      "title": titleController.text,
+                      "description": descriptionController.text,
+                      "sub_category_id": widget.subCatId,
+                      "category_id": widget.catId,
+                      "location": locationController.text,
+                      "mobile_number": phoneController.text,
+                      "plan_id": "1",
+                      "package_id": "3",
+                      "price": priceController.text,
+                      "full_name": nameController.text,
+                      "state_id": selectedStateId,
+                      "city_id": selectedCityId,
                     };
                     if (_images.isNotEmpty) {
-                      data["images"] = _images.map((file) => file.path).toList();
+                      data["images"] = _images
+                          .map((file) => file.path)
+                          .toList();
                     }
                     context.read<CommonAdCubit>().postCommonAd(data);
                   }

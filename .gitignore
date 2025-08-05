@@ -3,6 +3,7 @@
 # -------------------------
 .DS_Store
 *.swp
+Thumbs.db
 
 # -------------------------
 # Compiled source & logs
@@ -20,8 +21,13 @@
 .packages
 .pub-cache/
 .pub/
-/build/
-/ios/Flutter/.last_build_id
+build/
+pubspec.lock        # <-- ignore lock file if you don't want it versioned
+
+# Generated plugin registrants (cross-platform)
+**/generated_plugin_registrant.*
+**/GeneratedPluginRegistrant.*
+**/generated_plugins.cmake
 
 # Symbol maps & obfuscation
 app.*.symbols
