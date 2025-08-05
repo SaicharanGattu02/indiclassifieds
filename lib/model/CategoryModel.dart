@@ -31,13 +31,15 @@ class Data {
   int? categoryId;
   String? name;
   String? image;
+  String? noOfCounts;
 
-  Data({this.categoryId, this.name, this.image});
+  Data({this.categoryId, this.name, this.image, this.noOfCounts});
 
   Data.fromJson(Map<String, dynamic> json) {
     categoryId = json['category_id'];
     name = json['name'];
     image = json['image'];
+    noOfCounts = json['no_of_counts'];
   }
 
   Map<String, dynamic> toJson() {
@@ -45,6 +47,7 @@ class Data {
     data['category_id'] = this.categoryId;
     data['name'] = this.name;
     data['image'] = this.image;
+    data['no_of_counts'] = this.noOfCounts;
     return data;
   }
 }

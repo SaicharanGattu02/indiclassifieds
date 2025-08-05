@@ -4,8 +4,32 @@ import 'package:indiclassifieds/data/cubit/subCategory/sub_category_cubit.dart';
 import 'package:indiclassifieds/data/cubit/subCategory/sub_category_repository.dart';
 import 'package:indiclassifieds/data/cubit/theme_cubit.dart';
 import 'data/bloc/internet_status/internet_status_bloc.dart';
-import 'data/cubit/Ad/commomAd/common_ad_cubit.dart';
-import 'data/cubit/Ad/commomAd/common_ad_repo.dart';
+import 'data/cubit/Ad/AstrologyAd/astrology_ad_cubit.dart';
+import 'data/cubit/Ad/AstrologyAd/astrology_ad_repo.dart';
+import 'data/cubit/Ad/BikesAd/bikes_ad_cubit.dart';
+import 'data/cubit/Ad/BikesAd/bikes_ad_repo.dart';
+import 'data/cubit/Ad/CarsAd/cars_ad_cubit.dart';
+import 'data/cubit/Ad/CarsAd/cars_ad_repo.dart';
+import 'data/cubit/Ad/CityRentalsAd/city_rentals_ad_cubit.dart';
+import 'data/cubit/Ad/CityRentalsAd/city_rentals_ad_repo.dart';
+import 'data/cubit/Ad/CoWorkingAd/co_working_ad_cubit.dart';
+import 'data/cubit/Ad/CoWorkingAd/co_working_ad_repo.dart';
+import 'data/cubit/Ad/CommercialvehicleAd/commercial_vehicle_ad_cubit.dart';
+import 'data/cubit/Ad/CommercialvehicleAd/commercial_vehicle_ad_repo.dart';
+import 'data/cubit/Ad/CommonAd/common_ad_cubit.dart';
+import 'data/cubit/Ad/CommonAd/common_ad_repo.dart';
+import 'data/cubit/Ad/CommunityAd/community_ad_cubit.dart';
+import 'data/cubit/Ad/CommunityAd/community_ad_repo.dart';
+import 'data/cubit/Ad/EducationAd/education_ad_cubit.dart';
+import 'data/cubit/Ad/EducationAd/education_ad_repo.dart';
+import 'data/cubit/Ad/JobsAd/jobs_ad_cubit.dart';
+import 'data/cubit/Ad/JobsAd/jobs_ad_repo.dart';
+import 'data/cubit/Ad/MobileAd/mobile_ad_cubit.dart';
+import 'data/cubit/Ad/MobileAd/mobile_ad_repo.dart';
+import 'data/cubit/Ad/PetsAd/pets_ad_cubit.dart';
+import 'data/cubit/Ad/PetsAd/pets_ad_repo.dart';
+import 'data/cubit/Ad/PropertyAd/popperty_ad_cubit.dart';
+import 'data/cubit/Ad/PropertyAd/property_ad_repo.dart';
 import 'data/cubit/City/city_repository.dart';
 import 'data/cubit/LogInWithMobile/login_with_mobile.dart';
 import 'data/cubit/LogInWithMobile/login_with_mobile_repository.dart';
@@ -48,6 +72,55 @@ class StateInjector {
       create: (context) =>
           CommonAdImpl(remoteDataSource: context.read<RemoteDataSource>()),
     ),
+    RepositoryProvider<MobileAdRepository>(
+      create: (context) =>
+          MobileAdImpl(remoteDataSource: context.read<RemoteDataSource>()),
+    ),
+    RepositoryProvider<PropertyAdRepository>(
+      create: (context) =>
+          PropertyAdImpl(remoteDataSource: context.read<RemoteDataSource>()),
+    ),
+    RepositoryProvider<CarsAdRepository>(
+      create: (context) =>
+          CarsAdImpl(remoteDataSource: context.read<RemoteDataSource>()),
+    ),
+    RepositoryProvider<BikeAdRepository>(
+      create: (context) =>
+          BikeAdImpl(remoteDataSource: context.read<RemoteDataSource>()),
+    ),
+    RepositoryProvider<CommercialVehileAdRepository>(
+      create: (context) => CommercialVehileAdImpl(
+        remoteDataSource: context.read<RemoteDataSource>(),
+      ),
+    ),
+    RepositoryProvider<PetsAdRepository>(
+      create: (context) =>
+          PetsAdImpl(remoteDataSource: context.read<RemoteDataSource>()),
+    ),
+    RepositoryProvider<JobsAdRepository>(
+      create: (context) =>
+          JobsAdImpl(remoteDataSource: context.read<RemoteDataSource>()),
+    ),
+    RepositoryProvider<EducationAdRepository>(
+      create: (context) =>
+          EducationAdImpl(remoteDataSource: context.read<RemoteDataSource>()),
+    ),
+    RepositoryProvider<AstrologyAdRepository>(
+      create: (context) =>
+          AstrologyAdImpl(remoteDataSource: context.read<RemoteDataSource>()),
+    ),
+    RepositoryProvider<CommunityAdRepository>(
+      create: (context) =>
+          CommunityAdImpl(remoteDataSource: context.read<RemoteDataSource>()),
+    ),
+    RepositoryProvider<CityRentalsAdRepository>(
+      create: (context) =>
+          CityRentalsAdImpl(remoteDataSource: context.read<RemoteDataSource>()),
+    ),
+    RepositoryProvider<CoWorkingAdRepository>(
+      create: (context) =>
+          CoWorkingAdImpl(remoteDataSource: context.read<RemoteDataSource>()),
+    ),
   ];
 
   static final blocProviders = <BlocProvider>[
@@ -74,6 +147,46 @@ class StateInjector {
     ),
     BlocProvider<CommonAdCubit>(
       create: (context) => CommonAdCubit(context.read<CommonAdRepository>()),
+    ),
+    BlocProvider<PropertyAdCubit>(
+      create: (context) =>
+          PropertyAdCubit(context.read<PropertyAdRepository>()),
+    ),
+    BlocProvider<CarsAdCubit>(
+      create: (context) => CarsAdCubit(context.read<CarsAdRepository>()),
+    ),
+    BlocProvider<BikesAdCubit>(
+      create: (context) => BikesAdCubit(context.read<BikeAdRepository>()),
+    ),
+    BlocProvider<CommercialVehileAdCubit>(
+      create: (context) =>
+          CommercialVehileAdCubit(context.read<CommercialVehileAdRepository>()),
+    ),
+    BlocProvider<PetsAdCubit>(
+      create: (context) => PetsAdCubit(context.read<PetsAdRepository>()),
+    ),
+    BlocProvider<JobsAdCubit>(
+      create: (context) => JobsAdCubit(context.read<JobsAdRepository>()),
+    ),
+    BlocProvider<EducationAdCubit>(
+      create: (context) =>
+          EducationAdCubit(context.read<EducationAdRepository>()),
+    ),
+    BlocProvider<AstrologyAdCubit>(
+      create: (context) =>
+          AstrologyAdCubit(context.read<AstrologyAdRepository>()),
+    ),
+    BlocProvider<CommunityAdCubit>(
+      create: (context) =>
+          CommunityAdCubit(context.read<CommunityAdRepository>()),
+    ),
+    BlocProvider<CityRentalsAdCubit>(
+      create: (context) =>
+          CityRentalsAdCubit(context.read<CityRentalsAdRepository>()),
+    ),
+    BlocProvider<CoWorkingAdCubit>(
+      create: (context) =>
+          CoWorkingAdCubit(context.read<CoWorkingAdRepository>()),
     ),
   ];
 }

@@ -1,12 +1,17 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:indiclassifieds/theme/app_colors.dart';
 import 'package:indiclassifieds/widgets/CommonTextField.dart';
 
+import '../../data/cubit/category/category_cubit.dart';
+import '../../data/cubit/category/category_state.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../utils/media_query_helper.dart';
+import '../../utils/spinkittsLoader.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,8 +24,16 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Map<String, String>> topBanners = [
     {'image': 'assets/images/banner.png', 'url': 'assets/images/banner.png'},
   ];
-
   int currentIndex = 0;
+
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CategoryCubit>().getCategory();
+    });
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     final textColor = ThemeHelper.textColor(context);
@@ -31,7 +44,11 @@ class _HomeScreenState extends State<HomeScreen> {
         elevation: 0,
         title: Row(
           children: [
-            Image.asset('assets/images/logo.png', scale: 4, fit: BoxFit.cover),
+            Image.asset(
+              'assets/images/logo.png',
+              width: SizeConfig.screenWidth * 0.16,
+              fit: BoxFit.cover,
+            ),
           ],
         ),
         actions: [
@@ -148,7 +165,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       crossAxisCount: 4,
                       mainAxisSpacing: 12,
                       crossAxisSpacing: 12,
-                      childAspectRatio: 0.65,
+                      childAspectRatio: 1,
                     ),
                     delegate: SliverChildBuilderDelegate((context, index) {
                       return Container(
@@ -206,68 +223,128 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               SizedBox(height: 8),
-              CustomScrollView(
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                slivers: [
-                  SliverGrid(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 4,
-                      mainAxisSpacing: 12,
-                      crossAxisSpacing: 12,
-                      childAspectRatio: 0.65,
-                    ),
-                    delegate: SliverChildBuilderDelegate((context, index) {
-                      return InkResponse(
-                        onTap: () {
-                          context.push("/subcategories");
-                        },
-                        child: Container(
-                          padding: EdgeInsets.fromLTRB(2, 12, 2, 2),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Column(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(4),
-                                child: Image.asset(
-                                  'assets/images/findInvestor.png',
-                                  fit: BoxFit.cover,
+              BlocBuilder<CategoryCubit, CategoryStates>(
+                builder: (context, state) {
+                  if (state is CategoryLoading) {
+                    return Center(child: CircularProgressIndicator());
+                  } else if (state is CategoryLoaded) {
+                    final categories = state.categoryModel.data;
+                    return CustomScrollView(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      slivers: [
+                        SliverGrid(
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 4,
+                                mainAxisSpacing: 12,
+                                crossAxisSpacing: 12,
+                                childAspectRatio: 1.45,
+                              ),
+                          delegate: SliverChildBuilderDelegate((
+                            context,
+                            index,
+                          ) {
+                            final categoryItem = categories![index];
+                            return InkResponse(
+                              onTap: () {
+                                context.push("/sub_categories?");
+                              },
+                              child: Container(
+                                padding: EdgeInsets.fromLTRB(2, 12, 2, 2),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(8),
+                                        color: Color(0xffF8FAFE),
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(4),
+                                        child: CachedNetworkImage(
+                                          imageUrl: categoryItem.image ?? "",
+                                          fit: BoxFit.cover,
+                                          width: SizeConfig.screenWidth * 0.2,
+                                          height:
+                                              SizeConfig.screenHeight * 0.06,
+                                          placeholder: (context, url) => Center(
+                                            child: spinkits
+                                                .getSpinningLinespinkit(),
+                                          ),
+                                          errorWidget: (context, url, error) =>
+                                              Container(
+                                                decoration: BoxDecoration(
+                                                  borderRadius: BorderRadius.circular(8),
+                                                  color: Color(0xffF8FAFE),
+                                                ),
+                                                child:  Icon(
+                                                  Icons.broken_image,
+                                                  size: 40,
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                        ),
+                                      ),
+                                    ),
+
+                                    SizedBox(height: 6),
+                                    Text(
+                                      categoryItem.name ?? "Un Known",
+                                      textAlign: TextAlign.center,
+                                      style: AppTextStyles.titleSmall(textColor)
+                                          .copyWith(
+                                            fontWeight: FontWeight.w500,
+                                            color: Color(
+                                              isDarkMode
+                                                  ? 0xffD7E4FF
+                                                  : 0xff374151,
+                                            ),
+                                          ),
+                                    ),
+                                    SizedBox(height: 2),
+                                    Text(
+                                      categoryItem.noOfCounts??"",
+                                      textAlign: TextAlign.center,
+                                      style: AppTextStyles.labelSmall(textColor)
+                                          .copyWith(
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(
+                                          isDarkMode ? 0xffB5B5B5 : 0xff6B7280,
+                                        ),
+                                      ),
+                                    ),
+                                    // SizedBox(height: 2),
+                                    // Text(
+                                    //   categoryItem.name??"Un Known",
+                                    //   textAlign: TextAlign.center,
+                                    //   style: AppTextStyles.labelSmall(textColor)
+                                    //       .copyWith(
+                                    //         fontWeight: FontWeight.w400,
+                                    //         color: Color(
+                                    //           isDarkMode
+                                    //               ? 0xffB5B5B5
+                                    //               : 0xff6B7280,
+                                    //         ),
+                                    //       ),
+                                    // ),
+                                  ],
                                 ),
                               ),
-                              SizedBox(height: 6),
-                              Text(
-                                "Find Investor",
-                                textAlign: TextAlign.center,
-                                style: AppTextStyles.titleSmall(textColor)
-                                    .copyWith(
-                                      fontWeight: FontWeight.w500,
-                                      color: Color(
-                                        isDarkMode ? 0xffD7E4FF : 0xff374151,
-                                      ),
-                                    ),
-                              ),
-                              SizedBox(height: 2),
-                              Text(
-                                "144",
-                                textAlign: TextAlign.center,
-                                style: AppTextStyles.labelSmall(textColor)
-                                    .copyWith(
-                                      fontWeight: FontWeight.w400,
-                                      color: Color(
-                                        isDarkMode ? 0xffB5B5B5 : 0xff6B7280,
-                                      ),
-                                    ),
-                              ),
-                            ],
-                          ),
+                            );
+                          }, childCount: categories?.length ?? 0),
                         ),
-                      );
-                    }, childCount: 4),
-                  ),
-                ],
+                      ],
+                    );
+                  } else if (state is CategoryFailure) {
+                    return Center(child: Text(state.error ?? ""));
+                  }
+                  return Center(child: Text("No Data"));
+                },
               ),
+
               SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

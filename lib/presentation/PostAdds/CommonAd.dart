@@ -9,9 +9,8 @@ import 'package:indiclassifieds/Components/CustomSnackBar.dart';
 import 'package:indiclassifieds/Components/CutomAppBar.dart';
 
 import '../../Components/ShakeWidget.dart';
-import '../../data/cubit/Ad/commomAd/common_ad_cubit.dart';
-import '../../data/cubit/Ad/commomAd/common_ad_states.dart';
-
+import '../../data/cubit/Ad/CommonAd/common_ad_cubit.dart';
+import '../../data/cubit/Ad/CommonAd/common_ad_states.dart';
 import '../../data/cubit/States/states_cubit.dart';
 import '../../data/cubit/States/states_repository.dart';
 import '../../data/remote_data_source.dart';

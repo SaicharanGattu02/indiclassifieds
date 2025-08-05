@@ -2,11 +2,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'mobile_ad_repo.dart';
 import 'mobile_ad_states.dart';
 
-class CommonAdCubit extends Cubit<MobileAdStates> {
+class MobileAdCubit extends Cubit<MobileAdStates> {
   MobileAdRepository mobileAdRepository;
-  CommonAdCubit(this.mobileAdRepository) : super(MobileAdInitially());
+  MobileAdCubit(this.mobileAdRepository) : super(MobileAdInitially());
 
-  Future<void> postCommonAd(Map<String, dynamic> data) async {
+  Future<void> postMobileAd(Map<String, dynamic> data) async {
     emit(MobileAdLoading());
     try {
       final response = await mobileAdRepository.postMobileAd(data);

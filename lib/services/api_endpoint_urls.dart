@@ -13,11 +13,15 @@ class APIEndpointUrls {
 
   /// User Urls
 
+
+
   /// get Apis
   static const String get_category = '${apiUrl}get-all-categories';
   static const String get_sub_category = '${apiUrl}get-all-sub-categories';
   static const String get_states = '${apiUrl}get-all-states';
   static const String get_city = '${apiUrl}get-all-cities';
+
+
 
   /// post apis
   static const String post_common_ad = '${apiUrl}add-common-list-to-listings';
