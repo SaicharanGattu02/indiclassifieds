@@ -228,7 +228,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   if (state is CategoryLoading) {
                     return Center(child: CircularProgressIndicator());
                   } else if (state is CategoryLoaded) {
-                    final categories = state.categoryModel.data;
+                    final categories = state.categoryModel.categoriesList;
                     return CustomScrollView(
                       shrinkWrap: true,
                       physics: NeverScrollableScrollPhysics(),
@@ -239,7 +239,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 crossAxisCount: 4,
                                 mainAxisSpacing: 12,
                                 crossAxisSpacing: 12,
-                                childAspectRatio: 1.3,
+                                childAspectRatio: 0.85,
                               ),
                           delegate: SliverChildBuilderDelegate((
                             context,
@@ -248,7 +248,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             final categoryItem = categories![index];
                             return InkResponse(
                               onTap: () {
-                                context.push("/sub_categories?");
+                                context.push(
+                                  '/sub_categories',
+                                  extra: categoryItem, // pass the full object
+                                );
                               },
                               child: Container(
                                 padding: EdgeInsets.fromLTRB(2, 12, 2, 2),
@@ -269,7 +272,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           fit: BoxFit.cover,
                                           width: SizeConfig.screenWidth * 0.2,
                                           height:
-                                              SizeConfig.screenHeight * 0.06,
+                                              SizeConfig.screenHeight * 0.04,
                                           placeholder: (context, url) => Center(
                                             child: spinkits
                                                 .getSpinningLinespinkit(),
@@ -277,10 +280,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                           errorWidget: (context, url, error) =>
                                               Container(
                                                 decoration: BoxDecoration(
-                                                  borderRadius: BorderRadius.circular(8),
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
                                                   color: Color(0xffF8FAFE),
                                                 ),
-                                                child:  Icon(
+                                                child: Icon(
                                                   Icons.broken_image,
                                                   size: 40,
                                                   color: Colors.grey,
@@ -304,18 +308,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                             ),
                                           ),
                                     ),
-                                    SizedBox(height: 2),
-                                    Text(
-                                      categoryItem.noOfCounts.toString()??"0",
-                                      textAlign: TextAlign.center,
-                                      style: AppTextStyles.labelSmall(textColor)
-                                          .copyWith(
-                                        fontWeight: FontWeight.w400,
-                                        color: Color(
-                                          isDarkMode ? 0xffB5B5B5 : 0xff6B7280,
-                                        ),
-                                      ),
-                                    ),
+                                    // SizedBox(height: 2),
+                                    // Text(
+                                    //   categoryItem.noOfCounts.toString()??"0",
+                                    //   textAlign: TextAlign.center,
+                                    //   style: AppTextStyles.labelSmall(textColor)
+                                    //       .copyWith(
+                                    //     fontWeight: FontWeight.w400,
+                                    //     color: Color(
+                                    //       isDarkMode ? 0xffB5B5B5 : 0xff6B7280,
+                                    //     ),
+                                    //   ),
+                                    // ),
                                     // SizedBox(height: 2),
                                     // Text(
                                     //   categoryItem.name??"Un Known",

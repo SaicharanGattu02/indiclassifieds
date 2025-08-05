@@ -18,7 +18,7 @@ import 'package:flutter/material.dart';
     static TextStyle titleMedium(Color color) =>
         TextStyle(fontSize: 16, fontFamily: 'Roboto', color: color);
     static TextStyle titleSmall(Color color) =>
-        TextStyle(fontSize: 14, fontFamily: 'Roboto', color: color);
+        TextStyle(fontSize: 13, fontFamily: 'Roboto', color: color);
     static TextStyle bodyLarge(Color color) =>
         TextStyle(fontSize: 16, fontFamily: 'Roboto', color: color);
     static TextStyle bodyMedium(Color color) =>

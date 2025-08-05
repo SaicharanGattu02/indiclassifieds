@@ -18,6 +18,8 @@ class APIEndpointUrls {
   /// get Apis
   static const String get_category = '${apiUrl}get-all-categories';
   static const String get_sub_category = '${apiUrl}get-all-sub-categories';
+  static const String get_listings_by_sub_category = '${apiUrl}get-listings-by-sub-category';
+  static const String get_all_listings_with_pagination = '${apiUrl}get-all-listings-with-pagination';
   static const String get_states = '${apiUrl}get-all-states';
   static const String get_city = '${apiUrl}get-all-cities';
 

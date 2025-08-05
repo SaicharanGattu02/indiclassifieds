@@ -6,6 +6,7 @@ import '../model/SelectCityModel.dart';
 import '../model/SelectStatesModel.dart';
 import '../model/SendOtpModel.dart';
 import '../model/SubCategoryModel.dart';
+import '../model/SubcategoryProductsModel.dart';
 import '../model/VerifyOtpModel.dart';
 import '../services/ApiClient.dart';
 import '../services/api_endpoint_urls.dart';
@@ -15,6 +16,10 @@ abstract class RemoteDataSource {
   Future<VerifyOtpModel?> verifyMobileOTP(Map<String, dynamic> data);
   Future<CategoryModel?> getCategory();
   Future<SubCategoryModel?> getSubCategory(String categoryId);
+  Future<SubcategoryProductsModel?> getProducts(
+    String sub_category_id,
+    int page,
+  );
   Future<SelectStatesModel?> getStates(String search);
   Future<SelectCityModel?> getCity(int state_id, String search, int page);
   Future<AdSuccessModel?> postCommonAd(Map<String, dynamic> data);
@@ -69,8 +74,24 @@ class RemoteDataSourceImpl implements RemoteDataSource {
         formMap[key] = value;
       }
     }
-
     return FormData.fromMap(formMap);
+  }
+
+  @override
+  Future<SubcategoryProductsModel?> getProducts(
+    String sub_category_id,
+    int page,
+  ) async {
+    try {
+      Response response = await ApiClient.get(
+        "${APIEndpointUrls.get_all_listings_with_pagination}?page=${page}",
+      );
+      AppLogger.log('getProducts:${response.data}');
+      return SubcategoryProductsModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('getProducts:: $e');
+      return null;
+    }
   }
 
   @override
@@ -146,7 +167,11 @@ class RemoteDataSourceImpl implements RemoteDataSource {
   }
 
   @override
-  Future<SelectCityModel?> getCity(int state_id, String search, int page) async {
+  Future<SelectCityModel?> getCity(
+    int state_id,
+    String search,
+    int page,
+  ) async {
     try {
       Response response = await ApiClient.get(
         "${APIEndpointUrls.get_city}?state_id=${state_id}&search=${search}&page=${page}",

@@ -1,16 +1,16 @@
 class SubCategoryModel {
   bool? success;
-  List<Data>? data;
+  List<SubCategories>? subcategories;
   String? message;
 
-  SubCategoryModel({this.success, this.data, this.message});
+  SubCategoryModel({this.success, this.subcategories, this.message});
 
   SubCategoryModel.fromJson(Map<String, dynamic> json) {
     success = json['success'];
     if (json['data'] != null) {
-      data = <Data>[];
+      subcategories = <SubCategories>[];
       json['data'].forEach((v) {
-        data!.add(new Data.fromJson(v));
+        subcategories!.add(new SubCategories.fromJson(v));
       });
     }
     message = json['message'];
@@ -19,23 +19,23 @@ class SubCategoryModel {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['success'] = this.success;
-    if (this.data != null) {
-      data['data'] = this.data!.map((v) => v.toJson()).toList();
+    if (this.subcategories != null) {
+      data['data'] = this.subcategories!.map((v) => v.toJson()).toList();
     }
     data['message'] = this.message;
     return data;
   }
 }
 
-class Data {
+class SubCategories {
   int? subCategoryId;
   String? name;
   String? image;
   int? noOfCounts;
 
-  Data({this.subCategoryId, this.name, this.image, this.noOfCounts});
+  SubCategories({this.subCategoryId, this.name, this.image, this.noOfCounts});
 
-  Data.fromJson(Map<String, dynamic> json) {
+  SubCategories.fromJson(Map<String, dynamic> json) {
     subCategoryId = json['sub_category_id'];
     name = json['name'];
     image = json['image'];

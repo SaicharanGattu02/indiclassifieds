@@ -10,6 +10,7 @@ import 'package:indiclassifieds/presentation/PostAdds/FindInventoryAdScreen.dart
 import 'package:indiclassifieds/presentation/PostAdds/VechileAd.dart';
 import 'package:indiclassifieds/presentation/views/SplashScreen.dart';
 import 'package:indiclassifieds/presentation/views/SubCategoriesScreen.dart';
+import '../model/CategoryModel.dart';
 import '../presentation/PostAdds/AdElectronics.dart';
 import '../presentation/PostAdds/AstrologyAd.dart';
 import '../presentation/PostAdds/BikeAd.dart';
@@ -60,13 +61,20 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/sub_categories',
       pageBuilder: (context, state) {
-        final categoryId = state.uri.queryParameters['categoryId'] ?? "";
+        // Try to get CategoriesList from extra
+        final categoriesList = state.extra is CategoriesList
+            ? state.extra as CategoriesList
+            : null;
+
         return buildSlideTransitionPage(
-          SubCategoriesScreen(categoryId: categoryId),
+          SubCategoriesScreen(
+            categoriesList: categoriesList,
+          ),
           state,
         );
       },
     ),
+
     GoRoute(
       path: '/select_sub_categories',
       pageBuilder: (context, state) {

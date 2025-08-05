@@ -58,7 +58,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                 if (state is CategoryLoading) {
                   return Center(child: CircularProgressIndicator());
                 } else if (state is CategoryLoaded) {
-                  final categories = state.categoryModel.data;
+                  final categories = state.categoryModel.categoriesList;
                   return Expanded(
                     child: GridView.builder(
                       itemCount: categories?.length ?? 0,

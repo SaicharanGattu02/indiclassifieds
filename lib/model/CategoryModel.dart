@@ -1,16 +1,16 @@
 class CategoryModel {
   bool? success;
-  List<Data>? data;
+  List<CategoriesList>? categoriesList;
   String? message;
 
-  CategoryModel({this.success, this.data, this.message});
+  CategoryModel({this.success, this.categoriesList, this.message});
 
   CategoryModel.fromJson(Map<String, dynamic> json) {
     success = json['success'];
     if (json['data'] != null) {
-      data = <Data>[];
+      categoriesList = <CategoriesList>[];
       json['data'].forEach((v) {
-        data!.add(new Data.fromJson(v));
+        categoriesList!.add(new CategoriesList.fromJson(v));
       });
     }
     message = json['message'];
@@ -19,23 +19,23 @@ class CategoryModel {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['success'] = this.success;
-    if (this.data != null) {
-      data['data'] = this.data!.map((v) => v.toJson()).toList();
+    if (this.categoriesList != null) {
+      data['data'] = this.categoriesList!.map((v) => v.toJson()).toList();
     }
     data['message'] = this.message;
     return data;
   }
 }
 
-class Data {
+class CategoriesList {
   int? categoryId;
   String? name;
   String? image;
   int? noOfCounts;
 
-  Data({this.categoryId, this.name, this.image, this.noOfCounts});
+  CategoriesList({this.categoryId, this.name, this.image, this.noOfCounts});
 
-  Data.fromJson(Map<String, dynamic> json) {
+  CategoriesList.fromJson(Map<String, dynamic> json) {
     categoryId = json['category_id'];
     name = json['name'];
     image = json['image'];

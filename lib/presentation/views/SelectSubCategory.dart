@@ -46,7 +46,8 @@ class _SelectSubCategoryState extends State<SelectSubCategory> {
               if (state is SubCategoryLoading) {
                 return const Center(child: CircularProgressIndicator());
               } else if (state is SubCategoryLoaded) {
-                final subcategories = state.subCategoryModel.data ?? [];
+                final subcategories =
+                    state.subCategoryModel.subcategories ?? [];
 
                 return CustomScrollView(
                   slivers: [

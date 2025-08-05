@@ -1,8 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:indiclassifieds/data/cubit/Products/products_cubit.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 
-class ProductsListScreen extends StatelessWidget {
+class ProductsListScreen extends StatefulWidget {
+  @override
+  State<ProductsListScreen> createState() => _ProductsListScreenState();
+}
+
+class _ProductsListScreenState extends State<ProductsListScreen> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<ProductsCubit>().getProducts("");
+  }
+
   @override
   Widget build(BuildContext context) {
     final textColor = ThemeHelper.textColor(context);
@@ -106,15 +119,11 @@ class ProductCard extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.horizontal(left: Radius.circular(12)),
-            child: Image.asset(
-              imagePath,
-              width: 120,
-              fit: BoxFit.cover,
-            ),
+            child: Image.asset(imagePath, width: 120, fit: BoxFit.cover),
           ),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.only(left: 12,right: 12,top: 12),
+              padding: const EdgeInsets.only(left: 12, right: 12, top: 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

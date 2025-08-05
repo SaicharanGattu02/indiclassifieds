@@ -1,42 +1,36 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-
+import 'package:indiclassifieds/data/cubit/subCategory/sub_category_state.dart';
+import 'package:indiclassifieds/model/CategoryModel.dart';
 import '../../data/cubit/subCategory/sub_category_cubit.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
+import '../../utils/spinkittsLoader.dart';
 
 class SubCategoriesScreen extends StatefulWidget {
-  final String categoryId;
-  const SubCategoriesScreen({super.key, required this.categoryId});
+  final CategoriesList? categoriesList;
+  const SubCategoriesScreen({super.key, required this.categoriesList});
 
   @override
   State<SubCategoriesScreen> createState() => _SubCategoriesScreenState();
 }
 
 class _SubCategoriesScreenState extends State<SubCategoriesScreen> {
-
+  @override
+  void initState() {
+    super.initState();
+    context.read<SubCategoryCubit>().getSubCategory(
+      widget.categoriesList?.categoryId.toString() ?? "",
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final isDark = ThemeHelper.isDarkMode(context);
     final bgColor = ThemeHelper.backgroundColor(context);
     final textColor = ThemeHelper.textColor(context);
-
-    final categories = [
-      {'title': 'Wellness spa', 'image': 'assets/images/subcat1.png'},
-      {'title': 'Sports & Fitness', 'image': 'assets/images/subcat2.png'},
-      {'title': 'Fashion', 'image': 'assets/images/subcat3.png'},
-      {'title': 'Watches', 'image': 'assets/images/subcat4.png'},
-      {'title': 'Wellness spa', 'image': 'assets/images/subcat1.png'},
-      {'title': 'Sports & Fitness', 'image': 'assets/images/subcat2.png'},
-      {'title': 'Fashion', 'image': 'assets/images/subcat3.png'},
-      {'title': 'Watches', 'image': 'assets/images/subcat4.png'},
-      {'title': 'Wellness spa', 'image': 'assets/images/subcat1.png'},
-      {'title': 'Sports & Fitness', 'image': 'assets/images/subcat2.png'},
-      {'title': 'Fashion', 'image': 'assets/images/subcat3.png'},
-      {'title': 'Watches', 'image': 'assets/images/subcat4.png'},
-    ];
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -45,85 +39,122 @@ class _SubCategoriesScreenState extends State<SubCategoriesScreen> {
         elevation: 0,
         iconTheme: IconThemeData(color: textColor),
         title: Text(
-          'Life Style Categories',
+          widget.categoriesList?.name ?? "",
           style: AppTextStyles.headlineSmall(textColor),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.asset(
-                  'assets/images/banner1.png',
-                  fit: BoxFit.cover,
-                  height: 150,
-                  width: double.infinity,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: GridView.builder(
-                itemCount: categories.length,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 12,
-                  crossAxisSpacing: 12,
-                  childAspectRatio: 1,
-                ),
-                itemBuilder: (context, index) {
-                  final item = categories[index];
-                  return InkWell(
-                    onTap: () {
-                      context.push("/products_list");
-                    },
-                    borderRadius: BorderRadius.circular(12),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: isDark ? Colors.grey[900] : Colors.grey[100],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(8),
-                                topRight: Radius.circular(8),
-                              ),
-                              child: Image.asset(
-                                item['image']!,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              item['title']!,
-                              textAlign: TextAlign.center,
-                              style: AppTextStyles.bodyMedium(textColor),
-                            ),
-                          ),
-                        ],
+      body: BlocBuilder<SubCategoryCubit, SubCategoryStates>(
+        builder: (context, state) {
+          if (state is SubCategoryLoading) {
+            return Center(child: CircularProgressIndicator());
+          } else if (state is SubCategoryLoaded) {
+            final subcategories = state.subCategoryModel.subcategories;
+            return CustomScrollView(
+              slivers: [
+                // ----- Top Spacing -----
+                const SliverToBoxAdapter(child: SizedBox(height: 16)),
+
+                // ----- Banner -----
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.asset(
+                        'assets/images/banner1.png',
+                        fit: BoxFit.cover,
+                        height: 150,
+                        width: double.infinity,
                       ),
                     ),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 20),
-          ],
-        ),
+                  ),
+                ),
+
+                const SliverToBoxAdapter(child: SizedBox(height: 16)),
+
+                // ----- Categories Grid -----
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  sliver: SliverGrid(
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final item = subcategories?[index];
+                      return InkWell(
+                        onTap: () {
+                          context.push("/products_list");
+                        },
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: isDark ? Colors.grey[900] : Colors.grey[100],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                child: ClipRRect(
+                                  borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(8),
+                                    topRight: Radius.circular(8),
+                                  ),
+                                  child: CachedNetworkImage(
+                                    width: double.infinity,
+                                    imageUrl: item?.image ?? "",
+                                    fit: BoxFit.cover,
+                                    placeholder: (context, url) => Center(
+                                      child: spinkits.getSpinningLinespinkit(),
+                                    ),
+                                    errorWidget: (context, url, error) =>
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                const BorderRadius.only(
+                                                  topLeft: Radius.circular(8),
+                                                  topRight: Radius.circular(8),
+                                                ),
+                                            color: Color(0xffF8FAFE),
+                                          ),
+                                          child: Icon(
+                                            Icons.broken_image,
+                                            size: 40,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  item?.name ?? "",
+                                  textAlign: TextAlign.center,
+                                  style: AppTextStyles.bodyMedium(textColor),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }, childCount: subcategories?.length),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 12,
+                          crossAxisSpacing: 12,
+                          childAspectRatio: 1,
+                        ),
+                  ),
+                ),
+
+                // ----- Bottom Spacing -----
+                const SliverToBoxAdapter(child: SizedBox(height: 20)),
+              ],
+            );
+          } else {
+            return Center(child: Text("No data Found"));
+          }
+        },
       ),
     );
   }
