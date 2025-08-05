@@ -3,6 +3,7 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:indiclassifieds/presentation/BoostYourSalesScreen.dart';
 import 'package:indiclassifieds/presentation/PostAdds/CommunityAdScreen.dart';
 import 'package:indiclassifieds/presentation/PostAdds/EducationalAd.dart';
 import 'package:indiclassifieds/presentation/PostAdds/EventsAdScreen.dart';
@@ -40,7 +41,17 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/',
       pageBuilder: (context, state) =>
-          buildSlideTransitionPage(Splashscreen(), state),
+          buildSlideTransitionPage(BoostYourSalesScreen(), state),
+    ),
+    GoRoute(
+      path: '/dashboard',
+      pageBuilder: (context, state) =>
+          buildSlideTransitionPage(Dashboard(), state),
+    ),
+    GoRoute(
+      path: '/plans',
+      pageBuilder: (context, state) =>
+          buildSlideTransitionPage(BoostYourSalesScreen(), state),
     ),
     GoRoute(
       path: '/notifications',
@@ -68,9 +79,7 @@ final GoRouter appRouter = GoRouter(
             : null;
 
         return buildSlideTransitionPage(
-          SubCategoriesScreen(
-            categoriesList: categoriesList,
-          ),
+          SubCategoriesScreen(categoriesList: categoriesList),
           state,
         );
       },
@@ -89,23 +98,14 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: '/products_list',
-      pageBuilder: (context, state) =>
-          buildSlideTransitionPage(ProductsListScreen(), state),
-    ),
-    GoRoute(
-      path: '/dashboard',
-      pageBuilder: (context, state) =>
-          buildSlideTransitionPage(Dashboard(), state),
-    ),
-    // GoRoute(
-    //   path: '/sub_categories',
-    //   pageBuilder: (context, state) =>
-    //       buildSlideTransitionPage(AdElectronics(), state),
-    // ),
-    GoRoute(
-      path: '/dashboard',
-      pageBuilder: (context, state) =>
-          buildSlideTransitionPage(Dashboard(), state),
+      pageBuilder: (context, state) {
+        final sub_categoryId =
+            state.uri.queryParameters['sub_categoryId'] ?? "";
+        return buildSlideTransitionPage(
+          ProductsListScreen(subCategoryId: sub_categoryId),
+          state,
+        );
+      },
     ),
     GoRoute(
       path: '/ad_electronics',

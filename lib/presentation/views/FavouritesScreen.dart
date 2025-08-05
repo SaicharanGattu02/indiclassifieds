@@ -1,141 +1,144 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:indiclassifieds/data/cubit/Wishlist/wishlist_cubit.dart';
+import 'package:indiclassifieds/data/cubit/Wishlist/wishlist_states.dart';
 
+import '../../Components/CustomSnackBar.dart';
+import '../../data/cubit/AddToWishlist/addToWishlistCubit.dart';
+import '../../data/cubit/AddToWishlist/addToWishlistStates.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
+import '../../utils/AppLogger.dart';
+import '../../widgets/ProductCard.dart';
 
-class FavouriteItem {
-  final String name;
-  final String date;
-  final String price;
-  final String imageUrl;
+class WishlistListScreen extends StatefulWidget {
+  const WishlistListScreen({super.key});
 
-  FavouriteItem({
-    required this.name,
-    required this.date,
-    required this.price,
-    required this.imageUrl,
-  });
+  @override
+  State<WishlistListScreen> createState() => _WishlistListScreenState();
 }
 
-class FavouritesScreen extends StatelessWidget {
-  final List<FavouriteItem> items = [
-    FavouriteItem(
-      name: 'Apple AirPods Pro',
-      date: '21 Jan 2025',
-      price: '₹ 8,999',
-      imageUrl: 'assets/images/carimg.png',
-    ),
-    FavouriteItem(
-      name: 'JBL Charge 2 Speaker',
-      date: '20 Dec 2025',
-      price: '₹ 6,499',
-      imageUrl: 'assets/images/carimg.png',
-    ),
-    FavouriteItem(
-      name: 'PlayStation Controller',
-      date: '14 Nov 2024',
-      price: '₹ 1,299',
-      imageUrl: 'assets/images/carimg.png',
-    ),
-    FavouriteItem(
-      name: 'Nexus Mountain Bike',
-      date: '05 Oct 2023',
-      price: '₹ 9,100',
-      imageUrl: 'assets/images/carimg.png',
-    ),
-    FavouriteItem(
-      name: 'Wildcraft Ranger Tent',
-      date: '30 Sep 2022',
-      price: '₹ 999',
-      imageUrl: 'assets/images/carimg.png',
-    ),
-  ];
+class _WishlistListScreenState extends State<WishlistListScreen> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Initial load
+    context.read<WishlistCubit>().getWishlist();
+
+    // Pagination on scroll
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 200) {
+        context.read<WishlistCubit>().getMoreWishlist();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = ThemeHelper.isDarkMode(context);
-    final backgroundColor = ThemeHelper.backgroundColor(context);
     final textColor = ThemeHelper.textColor(context);
+    final bgColor = ThemeHelper.backgroundColor(context);
 
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: bgColor,
       appBar: AppBar(
-        backgroundColor: isDark ? Colors.grey[900] : Colors.white,
+        backgroundColor: bgColor,
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: textColor),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Favourites',
-          style: AppTextStyles.titleLarge(textColor).copyWith(fontWeight: FontWeight.bold),
+          'Favourites List',
+          style: AppTextStyles.headlineSmall(textColor),
         ),
+        actions: [
+          Icon(Icons.tune, color: textColor),
+          const SizedBox(width: 16),
+        ],
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        itemCount: items.length,
-        itemBuilder: (context, index) {
-          final item = items[index];
-          return Container(
-            margin: const EdgeInsets.only(bottom: 16),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: isDark ? Colors.grey[850] : Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: isDark
-                  ? []
-                  : [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))],
-            ),
-            child: Row(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.asset(
-                    item.imageUrl,
-                    width: 64,
-                    height: 64,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.name,
-                        style: AppTextStyles.bodySmall(textColor).copyWith(fontWeight: FontWeight.w600),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        item.date,
-                        style: AppTextStyles.labelMedium(isDark ? Colors.grey[400]! : Colors.grey[700]!),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        item.price,
-                        style: AppTextStyles.titleLarge(textColor).copyWith(fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.favorite,
-                    color: Colors.blue,
-                    size: 20,
-                  ),
-                ),
-              ],
-            ),
-          );
+
+      body:  BlocListener<AddToWishlistCubit, AddToWishlistStates>(
+        listener: (context, state) {
+          if (state is AddToWishlistLoaded) {
+            // API returned success → update ProductsCubit
+            context.read<WishlistCubit>().updateWishlistStatus(
+              state.product_id,
+              state.addToWishlistModel.liked ?? false,
+            );
+          } else if (state is AddToWishlistFailure) {
+            CustomSnackBar1.show(context, state.error);
+          }
         },
+        child: BlocBuilder<WishlistCubit, WishlistStates>(
+          builder: (context, state) {
+            if (state is WishlistLoading) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (state is WishlistFailure) {
+              return Center(child: Text(state.error));
+            } else if (state is WishlistLoaded || state is WishlistLoadingMore) {
+              final wishlistModel = (state as dynamic).wishlistModel;
+              final products = wishlistModel.productslist ?? [];
+              final hasNextPage = (state as dynamic).hasNextPage;
+
+              if (products.isEmpty) {
+                return Center(child: Text("No data"));
+              }
+
+              return CustomScrollView(
+                controller: _scrollController,
+                slivers: [
+                  SliverPadding(
+                    padding: const EdgeInsets.all(16),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        if (index == products.length) {
+                          // Loader at bottom for pagination
+                          return hasNextPage
+                              ? const Padding(
+                                  padding: EdgeInsets.all(16.0),
+                                  child: Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                )
+                              : const SizedBox.shrink();
+                        }
+
+                        final product = products[index];
+                        AppLogger.info("${product.location}");
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: ProductCard1(
+                            productsList: product,
+                            onWishlistToggle: () {
+                              if (product.id != null) {
+                                context.read<AddToWishlistCubit>().addToWishlist(
+                                  product.id!,
+                                );
+                              }
+                            },
+                          ),
+                        );
+                      }, childCount: products.length + 1),
+                    ),
+                  ),
+                ],
+              );
+            }
+
+            return const SizedBox();
+          },
+        ),
       ),
     );
   }

@@ -74,5 +74,18 @@ class ProductsCubit extends Cubit<ProductsStates> {
       _isLoadingMore = false;
     }
   }
+
+  void updateWishlistStatus(int productId, bool isLiked) {
+    final updatedProducts = productsModel.products?.map((p) {
+      if (p.id == productId) {
+        return p.copyWith(isFavorited: isLiked);
+      }
+      return p;
+    }).toList();
+
+    productsModel = productsModel.copyWith(products: updatedProducts);
+    emit(ProductsLoaded(productsModel, _hasNextPage));
+  }
+
 }
 

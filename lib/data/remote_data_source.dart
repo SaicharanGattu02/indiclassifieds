@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:indiclassifieds/model/AddToWishlistModel.dart';
 import 'package:indiclassifieds/model/CategoryModel.dart';
 import 'package:indiclassifieds/utils/AppLogger.dart';
 import '../model/AdSuccessModel.dart';
@@ -8,6 +9,7 @@ import '../model/SendOtpModel.dart';
 import '../model/SubCategoryModel.dart';
 import '../model/SubcategoryProductsModel.dart';
 import '../model/VerifyOtpModel.dart';
+import '../model/WishlistModel.dart';
 import '../services/ApiClient.dart';
 import '../services/api_endpoint_urls.dart';
 
@@ -20,6 +22,8 @@ abstract class RemoteDataSource {
     String sub_category_id,
     int page,
   );
+  Future<WishlistModel?> getWishlistProducts(int page);
+  Future<AddToWishlistModel?> addToWishlist(int product_id);
   Future<SelectStatesModel?> getStates(String search);
   Future<SelectCityModel?> getCity(int state_id, String search, int page);
   Future<AdSuccessModel?> postCommonAd(Map<String, dynamic> data);
@@ -75,6 +79,36 @@ class RemoteDataSourceImpl implements RemoteDataSource {
       }
     }
     return FormData.fromMap(formMap);
+  }
+
+  @override
+  Future<AddToWishlistModel?> addToWishlist(int product_id) async {
+    try {
+      Map<String, dynamic> data = {"listingId": product_id};
+      Response response = await ApiClient.post(
+        "${APIEndpointUrls.like_toggle_to_product}",
+        data: data,
+      );
+      AppLogger.log('addToWishlist:${response.data}');
+      return AddToWishlistModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('addToWishlist :: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<WishlistModel?> getWishlistProducts(int page) async {
+    try {
+      Response response = await ApiClient.get(
+        "${APIEndpointUrls.get_all_liked_listings}?page=${page}",
+      );
+      AppLogger.log('getWishlistProducts:${response.data}');
+      return WishlistModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('getWishlistProducts:: $e');
+      return null;
+    }
   }
 
   @override

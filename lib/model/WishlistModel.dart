@@ -1,37 +1,32 @@
-class SubcategoryProductsModel {
+class WishlistModel {
   bool? success;
   String? message;
-  List<Products>? products;
+  List<ProductsList>? productslist;
   Settings? settings;
 
-  SubcategoryProductsModel({
-    this.success,
-    this.message,
-    this.products,
-    this.settings,
-  });
+  WishlistModel({this.success, this.message, this.productslist, this.settings});
 
-  SubcategoryProductsModel copyWith({
+  WishlistModel copyWith({
     bool? success,
     String? message,
-    List<Products>? products,
+    List<ProductsList>? productslist,
     Settings? settings,
   }) {
-    return SubcategoryProductsModel(
+    return WishlistModel(
       success: success ?? this.success,
       message: message ?? this.message,
-      products: products ?? this.products,
+      productslist: productslist ?? this.productslist,
       settings: settings ?? this.settings,
     );
   }
 
-  SubcategoryProductsModel.fromJson(Map<String, dynamic> json) {
+  WishlistModel.fromJson(Map<String, dynamic> json) {
     success = json['success'];
     message = json['message'];
     if (json['data'] != null) {
-      products = <Products>[];
+      productslist = <ProductsList>[];
       json['data'].forEach((v) {
-        products!.add(Products.fromJson(v));
+        productslist!.add(ProductsList.fromJson(v));
       });
     }
     settings = json['settings'] != null
@@ -43,8 +38,8 @@ class SubcategoryProductsModel {
     final Map<String, dynamic> data = {};
     data['success'] = success;
     data['message'] = message;
-    if (products != null) {
-      data['data'] = products!.map((v) => v.toJson()).toList();
+    if (productslist != null) {
+      data['data'] = productslist!.map((v) => v.toJson()).toList();
     }
     if (settings != null) {
       data['settings'] = settings!.toJson();
@@ -53,127 +48,128 @@ class SubcategoryProductsModel {
   }
 }
 
-
-class Products {
+class ProductsList {
   int? id;
   int? userId;
+  int? planId;
+  int? packageId;
   String? title;
   String? description;
+  int? subCategoryId;
+  int? categoryId;
   String? price;
   String? location;
   String? fullName;
   String? image;
   String? mobileNumber;
+  int? featuredStatus;
   String? status;
-  bool? sold;
+  int? sold;
   int? stateId;
   int? cityId;
   String? createdAt;
+  String? updatedAt;
   Category? category;
-  SubCategory? subCategory;
-  SubCategory? user;
-  SubCategory? state;
-  SubCategory? city;
-  String? postedAt;
   bool? isFavorited;
 
-  Products({
+  ProductsList({
     this.id,
     this.userId,
+    this.planId,
+    this.packageId,
     this.title,
     this.description,
+    this.subCategoryId,
+    this.categoryId,
     this.price,
     this.location,
     this.fullName,
     this.image,
     this.mobileNumber,
+    this.featuredStatus,
     this.status,
     this.sold,
     this.stateId,
     this.cityId,
     this.createdAt,
+    this.updatedAt,
     this.category,
-    this.subCategory,
-    this.user,
-    this.state,
-    this.city,
-    this.postedAt,
     this.isFavorited,
   });
 
-  Products copyWith({
+  ProductsList copyWith({
     int? id,
     int? userId,
+    int? planId,
+    int? packageId,
     String? title,
     String? description,
+    int? subCategoryId,
+    int? categoryId,
     String? price,
     String? location,
     String? fullName,
     String? image,
     String? mobileNumber,
+    int? featuredStatus,
     String? status,
-    bool? sold,
+    int? sold,
     int? stateId,
     int? cityId,
     String? createdAt,
+    String? updatedAt,
     Category? category,
-    SubCategory? subCategory,
-    SubCategory? user,
-    SubCategory? state,
-    SubCategory? city,
-    String? postedAt,
     bool? isFavorited,
   }) {
-    return Products(
+    return ProductsList(
       id: id ?? this.id,
       userId: userId ?? this.userId,
+      planId: planId ?? this.planId,
+      packageId: packageId ?? this.packageId,
       title: title ?? this.title,
       description: description ?? this.description,
+      subCategoryId: subCategoryId ?? this.subCategoryId,
+      categoryId: categoryId ?? this.categoryId,
       price: price ?? this.price,
       location: location ?? this.location,
       fullName: fullName ?? this.fullName,
       image: image ?? this.image,
       mobileNumber: mobileNumber ?? this.mobileNumber,
+      featuredStatus: featuredStatus ?? this.featuredStatus,
       status: status ?? this.status,
       sold: sold ?? this.sold,
       stateId: stateId ?? this.stateId,
       cityId: cityId ?? this.cityId,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
       category: category ?? this.category,
-      subCategory: subCategory ?? this.subCategory,
-      user: user ?? this.user,
-      state: state ?? this.state,
-      city: city ?? this.city,
-      postedAt: postedAt ?? this.postedAt,
       isFavorited: isFavorited ?? this.isFavorited,
     );
   }
 
-  Products.fromJson(Map<String, dynamic> json) {
+  ProductsList.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     userId = json['user_id'];
+    planId = json['plan_id'];
+    packageId = json['package_id'];
     title = json['title'];
     description = json['description'];
+    subCategoryId = json['sub_category_id'];
+    categoryId = json['category_id'];
     price = json['price'];
     location = json['location'];
     fullName = json['full_name'];
     image = json['image'];
     mobileNumber = json['mobile_number'];
+    featuredStatus = json['featured_status'];
     status = json['status'];
     sold = json['sold'];
     stateId = json['state_id'];
     cityId = json['city_id'];
     createdAt = json['created_at'];
+    updatedAt = json['updated_at'];
     category =
     json['Category'] != null ? Category.fromJson(json['Category']) : null;
-    subCategory = json['SubCategory'] != null
-        ? SubCategory.fromJson(json['SubCategory'])
-        : null;
-    user = json['User'] != null ? SubCategory.fromJson(json['User']) : null;
-    state =
-    json['state'] != null ? SubCategory.fromJson(json['state']) : null;
-    city = json['city'] != null ? SubCategory.fromJson(json['city']) : null;
-    postedAt = json['posted_at'];
     isFavorited = json['is_favorited'];
   }
 
@@ -181,39 +177,45 @@ class Products {
     final Map<String, dynamic> data = {};
     data['id'] = id;
     data['user_id'] = userId;
+    data['plan_id'] = planId;
+    data['package_id'] = packageId;
     data['title'] = title;
     data['description'] = description;
+    data['sub_category_id'] = subCategoryId;
+    data['category_id'] = categoryId;
     data['price'] = price;
     data['location'] = location;
     data['full_name'] = fullName;
     data['image'] = image;
     data['mobile_number'] = mobileNumber;
+    data['featured_status'] = featuredStatus;
     data['status'] = status;
     data['sold'] = sold;
     data['state_id'] = stateId;
     data['city_id'] = cityId;
     data['created_at'] = createdAt;
-    if (category != null) data['Category'] = category!.toJson();
-    if (subCategory != null) data['SubCategory'] = subCategory!.toJson();
-    if (user != null) data['User'] = user!.toJson();
-    if (state != null) data['state'] = state!.toJson();
-    if (city != null) data['city'] = city!.toJson();
-    data['posted_at'] = postedAt;
+    data['updated_at'] = updatedAt;
+    if (category != null) {
+      data['Category'] = category!.toJson();
+    }
     data['is_favorited'] = isFavorited;
     return data;
   }
 }
 
+
 class Category {
   int? id;
   String? name;
+  String? image;
   String? path;
 
-  Category({this.id, this.name, this.path});
+  Category({this.id, this.name, this.image, this.path});
 
   Category.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     name = json['name'];
+    image = json['image'];
     path = json['path'];
   }
 
@@ -221,26 +223,8 @@ class Category {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
     data['name'] = this.name;
+    data['image'] = this.image;
     data['path'] = this.path;
-    return data;
-  }
-}
-
-class SubCategory {
-  int? id;
-  String? name;
-
-  SubCategory({this.id, this.name});
-
-  SubCategory.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    name = json['name'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['name'] = this.name;
     return data;
   }
 }
@@ -253,14 +237,13 @@ class Settings {
   bool? nextPage;
   bool? prevPage;
 
-  Settings({
-    this.status,
-    this.count,
-    this.page,
-    this.rowsPerPage,
-    this.nextPage,
-    this.prevPage,
-  });
+  Settings(
+      {this.status,
+        this.count,
+        this.page,
+        this.rowsPerPage,
+        this.nextPage,
+        this.prevPage});
 
   Settings.fromJson(Map<String, dynamic> json) {
     status = json['status'];

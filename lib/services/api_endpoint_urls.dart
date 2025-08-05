@@ -20,6 +20,8 @@ class APIEndpointUrls {
   static const String get_sub_category = '${apiUrl}get-all-sub-categories';
   static const String get_listings_by_sub_category = '${apiUrl}get-listings-by-sub-category';
   static const String get_all_listings_with_pagination = '${apiUrl}get-all-listings-with-pagination';
+  static const String get_all_liked_listings = '${apiUrl}get-all-liked-listings';
+  static const String like_toggle_to_product = '${apiUrl}like-toggle-to-product';
   static const String get_states = '${apiUrl}get-all-states';
   static const String get_city = '${apiUrl}get-all-cities';
 

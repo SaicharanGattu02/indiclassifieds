@@ -56,7 +56,7 @@ class _DashboardState extends State<Dashboard> {
           children: [
             HomeScreen(),
             AdsScreen(),
-            FavouritesScreen(),
+            WishlistListScreen(),
             ProfileScreen(),
           ],
         ),
@@ -100,10 +100,10 @@ class _DashboardState extends State<Dashboard> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildNavItem(Icons.home, "Home", 0),
-                _buildNavItem(Icons.chat, "Chat", 1),
+                _buildNavItem(Icons.archive, "My Ads", 1),
                 SizedBox(width: 40), // space for Sell FAB
-                _buildNavItem(Icons.archive, "My Ads", 3),
-                _buildNavItem(Icons.person, "Profile", 4),
+                _buildNavItem(Icons.chat, "Chat", 2),
+                _buildNavItem(Icons.person, "Profile", 3),
               ],
             ),
           ),

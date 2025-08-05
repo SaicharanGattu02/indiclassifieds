@@ -1,5 +1,11 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:indiclassifieds/data/cubit/AddToWishlist/addToWishlistCubit.dart';
+import 'package:indiclassifieds/data/cubit/AddToWishlist/addToWishlistStates.dart';
 import 'package:indiclassifieds/data/cubit/City/city_cubit.dart';
+import 'package:indiclassifieds/data/cubit/Products/products_cubit.dart';
+import 'package:indiclassifieds/data/cubit/Products/products_repository.dart';
+import 'package:indiclassifieds/data/cubit/Wishlist/wishlist_cubit.dart';
+import 'package:indiclassifieds/data/cubit/Wishlist/wishlist_repository.dart';
 import 'package:indiclassifieds/data/cubit/subCategory/sub_category_cubit.dart';
 import 'package:indiclassifieds/data/cubit/subCategory/sub_category_repository.dart';
 import 'package:indiclassifieds/data/cubit/theme_cubit.dart';
@@ -121,6 +127,15 @@ class StateInjector {
       create: (context) =>
           CoWorkingAdImpl(remoteDataSource: context.read<RemoteDataSource>()),
     ),
+    RepositoryProvider<ProductsRepo>(
+      create: (context) =>
+          ProductsRepoImpl(remoteDataSource: context.read<RemoteDataSource>()),
+    ),
+    RepositoryProvider<WishlistRepository>(
+      create: (context) => WishlistRepositoryImpl(
+        remoteDataSource: context.read<RemoteDataSource>(),
+      ),
+    ),
   ];
 
   static final blocProviders = <BlocProvider>[
@@ -190,6 +205,16 @@ class StateInjector {
     ),
     BlocProvider<MobileAdCubit>(
       create: (context) => MobileAdCubit(context.read<MobileAdRepository>()),
+    ),
+    BlocProvider<ProductsCubit>(
+      create: (context) => ProductsCubit(context.read<ProductsRepo>()),
+    ),
+    BlocProvider<WishlistCubit>(
+      create: (context) => WishlistCubit(context.read<WishlistRepository>()),
+    ),
+    BlocProvider<AddToWishlistCubit>(
+      create: (context) =>
+          AddToWishlistCubit(context.read<WishlistRepository>()),
     ),
   ];
 }

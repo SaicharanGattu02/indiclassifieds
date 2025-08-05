@@ -23,4 +23,11 @@ class ThemeHelper {
   static Color textColor(BuildContext context) {
     return isDarkMode(context) ? AppColors.lightText : AppColors.darkText;
   }
+
+  static Color cardColor(BuildContext context) {
+    return isDarkMode(context)
+        ? const Color(0xFF1E1E1E) // dark card
+        : Colors.white;           // light card
+  }
+
 }
