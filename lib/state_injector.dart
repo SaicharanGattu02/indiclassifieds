@@ -4,6 +4,8 @@ import 'package:indiclassifieds/data/cubit/subCategory/sub_category_cubit.dart';
 import 'package:indiclassifieds/data/cubit/subCategory/sub_category_repository.dart';
 import 'package:indiclassifieds/data/cubit/theme_cubit.dart';
 import 'data/bloc/internet_status/internet_status_bloc.dart';
+import 'data/cubit/Ad/commomAd/common_ad_cubit.dart';
+import 'data/cubit/Ad/commomAd/common_ad_repo.dart';
 import 'data/cubit/City/city_repository.dart';
 import 'data/cubit/LogInWithMobile/login_with_mobile.dart';
 import 'data/cubit/LogInWithMobile/login_with_mobile_repository.dart';
@@ -11,8 +13,7 @@ import 'data/cubit/States/states_cubit.dart';
 import 'data/cubit/States/states_repository.dart';
 import 'data/cubit/category/category_cubit.dart';
 import 'data/cubit/category/category_repository.dart';
-import 'data/cubit/commomAd/common_ad_cubit.dart';
-import 'data/cubit/commomAd/common_ad_repo.dart';
+
 import 'data/remote_data_source.dart';
 
 class StateInjector {

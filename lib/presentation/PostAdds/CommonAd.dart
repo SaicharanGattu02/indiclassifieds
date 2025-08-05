@@ -1,20 +1,18 @@
 import 'dart:io';
-
-import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:indiclassifieds/Components/CustomAppButton.dart';
+import 'package:indiclassifieds/Components/CustomSnackBar.dart';
 import 'package:indiclassifieds/Components/CutomAppBar.dart';
-import 'package:indiclassifieds/data/cubit/City/city_cubit.dart';
-import 'package:indiclassifieds/data/cubit/States/states_cubit.dart';
-import 'package:indiclassifieds/data/cubit/States/states_state.dart';
-import 'package:indiclassifieds/data/cubit/commomAd/common_ad_states.dart';
+
 import '../../Components/ShakeWidget.dart';
-import '../../data/cubit/City/city_state.dart';
-import '../../data/cubit/commomAd/common_ad_cubit.dart';
+import '../../data/cubit/Ad/commomAd/common_ad_cubit.dart';
+import '../../data/cubit/Ad/commomAd/common_ad_states.dart';
+
+
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../utils/ImageUtils.dart';
@@ -185,7 +183,6 @@ class _CommonAdState extends State<CommonAd> {
       }
     }
   }
-
 
   void _removeImage(int index) {
     setState(() {
@@ -661,7 +658,9 @@ class _CommonAdState extends State<CommonAd> {
                 Padding(
                   padding: const EdgeInsets.only(top: 5),
                   child: ShakeWidget(
-                    key: Key("images_error_${DateTime.now().millisecondsSinceEpoch}"),
+                    key: Key(
+                      "images_error_${DateTime.now().millisecondsSinceEpoch}",
+                    ),
                     duration: const Duration(milliseconds: 700),
                     child: const Text(
                       'Please upload at least one image',
@@ -746,20 +745,41 @@ class _CommonAdState extends State<CommonAd> {
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-          child: BlocConsumer<CommonAdCubit,CommonAdStates>(listener: (context, state) {
-            if(state is CommonAdSuccess){
-              context.pop();
-            }
-
-          },builder: (context, state) {
-            return  CustomAppButton1(
-              text: 'Submit Ad',
-              onPlusTap: () {
-                if (_formKey.currentState?.validate() ?? false) {}
-              },
-            );
-          },
-
+          child: BlocConsumer<CommonAdCubit, CommonAdStates>(
+            listener: (context, state) {
+              if (state is CommonAdSuccess) {
+                context.pushReplacement("/successfully");
+              }else if(state is CommonAdFailure){
+                CustomSnackBar1.show(context, state.error);
+              }
+            },
+            builder: (context, state) {
+              return CustomAppButton1(isLoading: state is CommonAdLoading,
+                text: 'Submit Ad',
+                onPlusTap: () {
+                  if (_formKey.currentState?.validate() ?? false) {
+                    final Map<String,dynamic> data={
+                      "title":titleController.text,
+                      "description":descriptionController.text,
+                      "sub_category_id":widget.subCatId,
+                      "category_id":widget.catId,
+                      "location":locationController.text,
+                      "mobile_number":phoneController.text,
+                      "plan_id":"1",
+                      "package_id":"3",
+                      "price":priceController.text,
+                      "full_name":nameController.text,
+                      "state_id":"4012",
+                      "city_id":"132132",
+                    };
+                    if (_images.isNotEmpty) {
+                      data["images"] = _images.map((file) => file.path).toList();
+                    }
+                    context.read<CommonAdCubit>().postCommonAd(data);
+                  }
+                },
+              );
+            },
           ),
         ),
       ),

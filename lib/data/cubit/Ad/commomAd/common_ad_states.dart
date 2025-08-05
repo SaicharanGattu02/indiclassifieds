@@ -1,4 +1,5 @@
-import '../../../model/AdSuccessModel.dart';
+import '../../../../model/AdSuccessModel.dart';
+
 
 abstract class CommonAdStates {}
 

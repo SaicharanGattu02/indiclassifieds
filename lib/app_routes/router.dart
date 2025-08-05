@@ -29,6 +29,7 @@ import '../presentation/views/NotificationScreen.dart';
 import '../presentation/views/CategoryScreen.dart';
 import '../presentation/views/ProfileScreen.dart';
 import '../presentation/views/SelectSubCategory.dart';
+import '../presentation/views/SuccessScreen.dart';
 import '../presentation/views/dashboard.dart';
 
 final GoRouter appRouter = GoRouter(
@@ -115,6 +116,19 @@ final GoRouter appRouter = GoRouter(
       },
     ),
     GoRoute(
+      path: '/successfully',
+      pageBuilder: (context, state) {
+        final title = state.uri.queryParameters['title'] ?? "";
+        final subTitle = state.uri.queryParameters['subTitle'] ?? "";
+        final nextRoute = state.uri.queryParameters['next'] ?? "";
+
+        return buildSlideTransitionPage(
+          SuccessScreen(title: title, subTitle: subTitle, nextRoute: nextRoute),
+          state,
+        );
+      },
+    ),
+    GoRoute(
       path: '/common_ad',
       pageBuilder: (context, state) {
         final categoryId = state.uri.queryParameters['catId'] ?? "";
@@ -126,7 +140,8 @@ final GoRouter appRouter = GoRouter(
           CommonAd(
             catId: categoryId,
             CatName: categoryName,
-            subCatId: subCatId,SubCatName: SubCategoryName,
+            subCatId: subCatId,
+            SubCatName: SubCategoryName,
           ),
           state,
         );

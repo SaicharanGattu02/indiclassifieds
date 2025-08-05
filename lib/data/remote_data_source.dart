@@ -18,33 +18,54 @@ abstract class RemoteDataSource {
   Future<SelectStatesModel?> getStates(String search);
   Future<SelectCityModel?> getCity(int state_id, String search);
   Future<AdSuccessModel?> postCommonAd(Map<String, dynamic> data);
+  Future<AdSuccessModel?> postCoWorkingAd(Map<String, dynamic> data);
+  Future<AdSuccessModel?> postCityRentalsAd(Map<String, dynamic> data);
+  Future<AdSuccessModel?> postCommunityAd(Map<String, dynamic> data);
+  Future<AdSuccessModel?> postAstrologyAd(Map<String, dynamic> data);
+  Future<AdSuccessModel?> postEducationAd(Map<String, dynamic> data);
+  Future<AdSuccessModel?> postJobsAd(Map<String, dynamic> data);
+  Future<AdSuccessModel?> postPetsAd(Map<String, dynamic> data);
+  Future<AdSuccessModel?> postCommercialVehicleAd(Map<String, dynamic> data);
+  Future<AdSuccessModel?> postBikeAd(Map<String, dynamic> data);
+  Future<AdSuccessModel?> postCarsAd(Map<String, dynamic> data);
+  Future<AdSuccessModel?> postPropertyAd(Map<String, dynamic> data);
+  Future<AdSuccessModel?> postMobileAd(Map<String, dynamic> data);
 }
 
 class RemoteDataSourceImpl implements RemoteDataSource {
   Future<FormData> buildFormData(Map<String, dynamic> data) async {
     final formMap = <String, dynamic>{};
+
     for (final entry in data.entries) {
       final key = entry.key;
       final value = entry.value;
 
       if (value == null) continue;
-      final isFile =
-          value is String &&
+      if (value is List) {
+        formMap[key] = [
+          for (final v in value)
+            if (v is String && v.contains('/'))
+              await MultipartFile.fromFile(v, filename: v.split('/').last)
+            else
+              v,
+        ];
+      } else if (value is String &&
           value.contains('/') &&
-          (key.contains('image') ||
+          (key.contains('images') ||
               key.contains('aadhar_card_front') ||
               key.contains('aadhar_card_back') ||
               key.contains('pan_card_front') ||
               key.contains('pan_card_back') ||
               key.contains('driving_license_front') ||
               key.contains('driving_license_back') ||
-              key.contains('signature'));
-      if (isFile) {
+              key.contains('signature'))) {
         formMap[key] = await MultipartFile.fromFile(
           value,
           filename: value.split('/').last,
         );
-      } else {
+      }
+      // Normal fields
+      else {
         formMap[key] = value;
       }
     }
@@ -150,6 +171,200 @@ class RemoteDataSourceImpl implements RemoteDataSource {
       return AdSuccessModel.fromJson(response.data);
     } catch (e) {
       AppLogger.error('get CommonAd :: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<AdSuccessModel?> postMobileAd(Map<String, dynamic> data) async {
+    final formData = await buildFormData(data);
+    try {
+      Response response = await ApiClient.post(
+        "${APIEndpointUrls.post_mobile_ad}",
+        data: formData,
+      );
+      AppLogger.log('get MobileAd :${response.data}');
+      return AdSuccessModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('get MobileAd :: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<AdSuccessModel?> postPropertyAd(Map<String, dynamic> data) async {
+    final formData = await buildFormData(data);
+    try {
+      Response response = await ApiClient.post(
+        "${APIEndpointUrls.post_property_ad}",
+        data: formData,
+      );
+      AppLogger.log('get PropertyAd :${response.data}');
+      return AdSuccessModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('get PropertyAd :: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<AdSuccessModel?> postCarsAd(Map<String, dynamic> data) async {
+    final formData = await buildFormData(data);
+    try {
+      Response response = await ApiClient.post(
+        "${APIEndpointUrls.post_cars_ad}",
+        data: formData,
+      );
+      AppLogger.log('get CarsAd :${response.data}');
+      return AdSuccessModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('get CarsAd :: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<AdSuccessModel?> postBikeAd(Map<String, dynamic> data) async {
+    final formData = await buildFormData(data);
+    try {
+      Response response = await ApiClient.post(
+        "${APIEndpointUrls.post_bikes_ad}",
+        data: formData,
+      );
+      AppLogger.log('get BikesAd :${response.data}');
+      return AdSuccessModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('get BikesAd :: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<AdSuccessModel?> postCommercialVehicleAd(
+    Map<String, dynamic> data,
+  ) async {
+    final formData = await buildFormData(data);
+    try {
+      Response response = await ApiClient.post(
+        "${APIEndpointUrls.post_commercial_vehicle_ad}",
+        data: formData,
+      );
+      AppLogger.log('get CommercialVehicleAd :${response.data}');
+      return AdSuccessModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('get CommercialVehicleAd :: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<AdSuccessModel?> postPetsAd(Map<String, dynamic> data) async {
+    final formData = await buildFormData(data);
+    try {
+      Response response = await ApiClient.post(
+        "${APIEndpointUrls.post_pets_ad}",
+        data: formData,
+      );
+      AppLogger.log('get PetsAd :${response.data}');
+      return AdSuccessModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('get PetsAd :: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<AdSuccessModel?> postJobsAd(Map<String, dynamic> data) async {
+    final formData = await buildFormData(data);
+    try {
+      Response response = await ApiClient.post(
+        "${APIEndpointUrls.post_jobs_ad}",
+        data: formData,
+      );
+      AppLogger.log('get JobsAd :${response.data}');
+      return AdSuccessModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('get JobsAd :: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<AdSuccessModel?> postEducationAd(Map<String, dynamic> data) async {
+    final formData = await buildFormData(data);
+    try {
+      Response response = await ApiClient.post(
+        "${APIEndpointUrls.post_education_ad}",
+        data: formData,
+      );
+      AppLogger.log('get EducationAd :${response.data}');
+      return AdSuccessModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('get EducationAd :: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<AdSuccessModel?> postAstrologyAd(Map<String, dynamic> data) async {
+    final formData = await buildFormData(data);
+    try {
+      Response response = await ApiClient.post(
+        "${APIEndpointUrls.post_astrology_ad}",
+        data: formData,
+      );
+      AppLogger.log('get AstrologyAd :${response.data}');
+      return AdSuccessModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('get AstrologyAd :: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<AdSuccessModel?> postCommunityAd(Map<String, dynamic> data) async {
+    final formData = await buildFormData(data);
+    try {
+      Response response = await ApiClient.post(
+        "${APIEndpointUrls.post_community_ad}",
+        data: formData,
+      );
+      AppLogger.log('get CommunityAd :${response.data}');
+      return AdSuccessModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('get CommunityAd :: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<AdSuccessModel?> postCityRentalsAd(Map<String, dynamic> data) async {
+    final formData = await buildFormData(data);
+    try {
+      Response response = await ApiClient.post(
+        "${APIEndpointUrls.post_city_rentals_ad}",
+        data: formData,
+      );
+      AppLogger.log('get CityRentalsAd :${response.data}');
+      return AdSuccessModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('get CityRentalsAd :: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<AdSuccessModel?> postCoWorkingAd(Map<String, dynamic> data) async {
+    final formData = await buildFormData(data);
+    try {
+      Response response = await ApiClient.post(
+        "${APIEndpointUrls.post_co_working_ad}",
+        data: formData,
+      );
+      AppLogger.log('get CoWorkingAd :${response.data}');
+      return AdSuccessModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('get CoWorkingAd :: $e');
       return null;
     }
   }

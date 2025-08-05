@@ -21,6 +21,18 @@ class APIEndpointUrls {
 
   /// post apis
   static const String post_common_ad = '${apiUrl}add-common-list-to-listings';
+  static const String post_mobile_ad = '${apiUrl}add-mobile-to-listings';
+  static const String post_property_ad = '${apiUrl}add-property-to-listings';
+  static const String post_cars_ad = '${apiUrl}add-car-to-listings';
+  static const String post_bikes_ad = '${apiUrl}add-bike-to-listings';
+  static const String post_commercial_vehicle_ad = '${apiUrl}add-commercial-vehicle-to-listings';
+  static const String post_pets_ad = '${apiUrl}add-pets-to-listings';
+  static const String post_jobs_ad = '${apiUrl}add-jobs-to-listings';
+  static const String post_education_ad = '${apiUrl}add-education-to-listings';
+  static const String post_astrology_ad = '${apiUrl}add-astrology-to-listings';
+  static const String post_community_ad = '${apiUrl}add-community-to-listings';
+  static const String post_city_rentals_ad = '${apiUrl}add-city-rentals-to-listings';
+  static const String post_co_working_ad = '${apiUrl}add-co-working-to-listings';
 
 
 

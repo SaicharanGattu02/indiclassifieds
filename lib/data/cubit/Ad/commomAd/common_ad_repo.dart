@@ -1,5 +1,6 @@
 import 'package:indiclassifieds/model/AdSuccessModel.dart';
-import '../../remote_data_source.dart';
+
+import '../../../remote_data_source.dart';
 
 abstract class CommonAdRepository {
   Future<AdSuccessModel?> postCommonAd(Map<String, dynamic> data);
