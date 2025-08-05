@@ -6,7 +6,17 @@ import '../../theme/ThemeHelper.dart';
 import '../../widgets/CommonTextField.dart';
 
 class BikeAd extends StatefulWidget {
-  const BikeAd({super.key});
+  final String catId;
+  final String CatName;
+  final String SubCatName;
+  final String subCatId;
+  const BikeAd({
+    super.key,
+    required this.catId,
+    required this.CatName,
+    required this.SubCatName,
+    required this.subCatId,
+  });
 
   @override
   State<BikeAd> createState() => _BikeAdState();
@@ -26,7 +36,12 @@ class _BikeAdState extends State<BikeAd> {
   final localityController = TextEditingController();
 
   // Ownership states
-  final List<String> ownershipOptions = ['1st Owner', '2nd Owner', '3rd Owner', '4+ Owner'];
+  final List<String> ownershipOptions = [
+    '1st Owner',
+    '2nd Owner',
+    '3rd Owner',
+    '4+ Owner',
+  ];
   final Set<String> selectedOwnership = {};
 
   // Selection states
@@ -67,21 +82,24 @@ class _BikeAdState extends State<BikeAd> {
                 hint: 'Eg. Honda, Bajaj, Yamaha',
                 controller: makeController,
                 color: textColor,
-                validator: (v) => (v == null || v.trim().isEmpty) ? 'Make required' : null,
+                validator: (v) =>
+                    (v == null || v.trim().isEmpty) ? 'Make required' : null,
               ),
               CommonTextField1(
                 lable: 'Model',
                 hint: 'Eg. CBR, YZF, Classic 350',
                 controller: modelController,
                 color: textColor,
-                validator: (v) => (v == null || v.trim().isEmpty) ? 'Model required' : null,
+                validator: (v) =>
+                    (v == null || v.trim().isEmpty) ? 'Model required' : null,
               ),
               CommonTextField1(
                 lable: 'Year of Manufacture',
                 hint: 'Eg. 2020',
                 controller: yearController,
                 color: textColor,
-                validator: (v) => (v == null || v.trim().isEmpty) ? 'Year required' : null,
+                validator: (v) =>
+                    (v == null || v.trim().isEmpty) ? 'Year required' : null,
               ),
               CommonTextField1(
                 lable: 'Variant/Trim',
@@ -95,14 +113,16 @@ class _BikeAdState extends State<BikeAd> {
                 suffixIcon: Text('Kms', style: TextStyle(color: textColor)),
                 controller: kmsController,
                 color: textColor,
-                validator: (v) => (v == null || v.trim().isEmpty) ? 'Kms required' : null,
+                validator: (v) =>
+                    (v == null || v.trim().isEmpty) ? 'Kms required' : null,
               ),
               CommonTextField1(
                 lable: 'Color',
                 hint: 'Eg. Red, Black',
                 controller: colorController,
                 color: textColor,
-                validator: (v) => (v == null || v.trim().isEmpty) ? 'Color required' : null,
+                validator: (v) =>
+                    (v == null || v.trim().isEmpty) ? 'Color required' : null,
               ),
 
               _sectionTitle('Ownership', textColor),
@@ -111,7 +131,10 @@ class _BikeAdState extends State<BikeAd> {
                 children: ownershipOptions.map((option) {
                   final isSelected = selectedOwnership.contains(option);
                   return ChoiceChip(
-                    label: Text(option, style: AppTextStyles.bodySmall(textColor)),
+                    label: Text(
+                      option,
+                      style: AppTextStyles.bodySmall(textColor),
+                    ),
                     selected: isSelected,
                     onSelected: (selected) {
                       setState(() {
@@ -127,19 +150,35 @@ class _BikeAdState extends State<BikeAd> {
               ),
 
               _sectionTitle('Fuel Type', textColor),
-              _buildSelectableChips(['Petrol', 'Diesel', 'Electric'], selectedFuel,
-                      (val) => setState(() => selectedFuel = val), textColor),
+              _buildSelectableChips(
+                ['Petrol', 'Diesel', 'Electric'],
+                selectedFuel,
+                (val) => setState(() => selectedFuel = val),
+                textColor,
+              ),
 
               _sectionTitle('Transmission', textColor),
-              _buildSelectableChips(['Manual', 'Automatic'], selectedTransmission,
-                      (val) => setState(() => selectedTransmission = val), textColor),
+              _buildSelectableChips(
+                ['Manual', 'Automatic'],
+                selectedTransmission,
+                (val) => setState(() => selectedTransmission = val),
+                textColor,
+              ),
 
               _sectionTitle('Bike Type', textColor),
               _buildSelectableChips(
-                  ['Sport', 'Cruiser', 'Standard', 'Adventure', 'Touring', 'Scooter'],
-                  selectedBikeType,
-                      (val) => setState(() => selectedBikeType = val),
-                  textColor),
+                [
+                  'Sport',
+                  'Cruiser',
+                  'Standard',
+                  'Adventure',
+                  'Touring',
+                  'Scooter',
+                ],
+                selectedBikeType,
+                (val) => setState(() => selectedBikeType = val),
+                textColor,
+              ),
 
               _sectionTitle('Pricing & Availability', textColor),
               CommonTextField1(
@@ -148,8 +187,13 @@ class _BikeAdState extends State<BikeAd> {
                 controller: priceController,
                 color: textColor,
                 keyboardType: TextInputType.number,
-                prefixIcon: Icon(Icons.currency_rupee, color: textColor, size: 16),
-                validator: (v) => (v == null || v.trim().isEmpty) ? 'Price required' : null,
+                prefixIcon: Icon(
+                  Icons.currency_rupee,
+                  color: textColor,
+                  size: 16,
+                ),
+                validator: (v) =>
+                    (v == null || v.trim().isEmpty) ? 'Price required' : null,
               ),
               CommonTextField1(
                 lableFontSize: 12,
@@ -158,15 +202,17 @@ class _BikeAdState extends State<BikeAd> {
                 hint: 'Enter locality or area',
                 controller: localityController,
                 color: textColor,
-                validator: (v) =>
-                (v == null || v.trim().isEmpty) ? 'Locality required' : null,
+                validator: (v) => (v == null || v.trim().isEmpty)
+                    ? 'Locality required'
+                    : null,
               ),
 
               const SizedBox(height: 20),
               Text(
                 "Availability Status",
-                style: AppTextStyles.titleSmall(textColor)
-                    .copyWith(fontWeight: FontWeight.w600),
+                style: AppTextStyles.titleSmall(
+                  textColor,
+                ).copyWith(fontWeight: FontWeight.w600),
               ),
               Wrap(
                 spacing: 12,
@@ -178,8 +224,9 @@ class _BikeAdState extends State<BikeAd> {
               const SizedBox(height: 20),
               Text(
                 "Motorcycle Preview",
-                style: AppTextStyles.bodyLarge(textColor)
-                    .copyWith(fontWeight: FontWeight.w600),
+                style: AppTextStyles.bodyLarge(
+                  textColor,
+                ).copyWith(fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -192,7 +239,9 @@ class _BikeAdState extends State<BikeAd> {
             text: 'Submit Ad',
             onPlusTap: () {
               if (_formKey.currentState?.validate() ?? false) {
-                debugPrint('Submitted with: Fuel=$selectedFuel, Transmission=$selectedTransmission, Type=$selectedBikeType, Availability=$availability, Ownership=${selectedOwnership.join(',')}');
+                debugPrint(
+                  'Submitted with: Fuel=$selectedFuel, Transmission=$selectedTransmission, Type=$selectedBikeType, Availability=$availability, Ownership=${selectedOwnership.join(',')}',
+                );
               }
             },
           ),
@@ -206,14 +255,19 @@ class _BikeAdState extends State<BikeAd> {
       padding: const EdgeInsets.only(top: 20, bottom: 10),
       child: Text(
         title,
-        style: AppTextStyles.titleMedium(color)
-            .copyWith(fontSize: 15, fontWeight: FontWeight.w600),
+        style: AppTextStyles.titleMedium(
+          color,
+        ).copyWith(fontSize: 15, fontWeight: FontWeight.w600),
       ),
     );
   }
 
   Widget _buildSelectableChips(
-      List<String> options, String selected, Function(String) onSelected, Color color) {
+    List<String> options,
+    String selected,
+    Function(String) onSelected,
+    Color color,
+  ) {
     return Wrap(
       spacing: 8,
       runSpacing: 8,

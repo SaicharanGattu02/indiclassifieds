@@ -188,5 +188,8 @@ class StateInjector {
       create: (context) =>
           CoWorkingAdCubit(context.read<CoWorkingAdRepository>()),
     ),
+    BlocProvider<MobileAdCubit>(
+      create: (context) => MobileAdCubit(context.read<MobileAdRepository>()),
+    ),
   ];
 }

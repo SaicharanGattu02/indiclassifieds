@@ -520,8 +520,8 @@ class _CommonAdState extends State<CommonAd> {
                 controller: nameController,
                 color: textColor,
                 prefixIcon: Icon(Icons.person, color: textColor, size: 16),
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Name required' : null,
+                // validator: (v) =>
+                //     (v == null || v.trim().isEmpty) ? 'Name required' : null,
               ),
               CommonTextField1(
                 lable: 'Phone Number',
@@ -534,8 +534,8 @@ class _CommonAdState extends State<CommonAd> {
                 color: textColor,
                 keyboardType: TextInputType.phone,
                 prefixIcon: Icon(Icons.call, color: textColor, size: 16),
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Phone required' : null,
+                // validator: (v) =>
+                //     (v == null || v.trim().isEmpty) ? 'Phone required' : null,
               ),
               // CommonTextField1(
               //   lable: 'Email (Optional)',
@@ -549,9 +549,9 @@ class _CommonAdState extends State<CommonAd> {
                 hint: 'Enter Location',
                 controller: locationController,
                 color: textColor,
-                validator: (v) => (v == null || v.trim().isEmpty)
-                    ? 'Required location'
-                    : null,
+                // validator: (v) => (v == null || v.trim().isEmpty)
+                //     ? 'Required location'
+                //     : null,
               ),
               // Row(
               //   children: [

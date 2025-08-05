@@ -6,7 +6,15 @@ import '../../widgets/CommonTextField.dart';
 import '../../theme/AppTextStyles.dart';
 
 class AstrologyAd extends StatefulWidget {
-  const AstrologyAd({super.key});
+  final String catId;
+  final String CatName;
+  final String SubCatName;
+  final String subCatId;
+  const AstrologyAd({super.key,
+    required this.catId,
+    required this.CatName,
+    required this.SubCatName,
+    required this.subCatId,});
 
   @override
   State<AstrologyAd> createState() => _AstrologyAdState();

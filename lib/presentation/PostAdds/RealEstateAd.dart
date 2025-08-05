@@ -7,7 +7,18 @@ import '../../theme/ThemeHelper.dart';
 import '../../widgets/CommonTextField.dart';
 
 class RealEstate extends StatefulWidget {
-  const RealEstate({super.key});
+  final String catId;
+  final String CatName;
+  final String SubCatName;
+  final String subCatId;
+
+  const RealEstate({
+    super.key,
+    required this.catId,
+    required this.CatName,
+    required this.SubCatName,
+    required this.subCatId,
+  });
 
   @override
   State<RealEstate> createState() => _RealEstateState();

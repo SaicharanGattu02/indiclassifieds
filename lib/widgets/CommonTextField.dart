@@ -84,7 +84,7 @@ class CommonTextField extends StatelessWidget {
 }
 
 class CommonTextField1 extends StatefulWidget {
-  final String hint;
+  final String? hint;
   final String lable;
   final Color color;
   final double? lableFontSize;
@@ -102,7 +102,7 @@ class CommonTextField1 extends StatefulWidget {
 
   const CommonTextField1({
     super.key,
-    required this.hint,
+    this.hint,
     required this.color,
     required this.lable,
     this.maxLines = 1,

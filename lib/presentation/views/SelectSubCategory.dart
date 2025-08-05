@@ -37,7 +37,7 @@ class _SelectSubCategoryState extends State<SelectSubCategory> {
     final textColor = ThemeHelper.textColor(context);
     return Scaffold(
       backgroundColor: bgColor,
-      appBar: CustomAppBar1(title: "Life Style", actions: []),
+      appBar: CustomAppBar1(title: "${widget.categoryName ?? ""}", actions: []),
       body: Background1(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
@@ -84,7 +84,7 @@ class _SelectSubCategoryState extends State<SelectSubCategory> {
                             ),
                             onTap: () {
                               context.push(
-                                '/common_ad?catId=${widget.categoryId}&CatName=${widget.categoryName}&subCatId=${item.subCategoryId}',
+                                '/property_ad?catId=${widget.categoryId}&CatName=${widget.categoryName}&subCatId=${item.subCategoryId}&SubCatName=${item.name??""}',
                               );
                             },
                           ),

@@ -6,7 +6,17 @@ import '../../widgets/CommonTextField.dart';
 import '../../theme/AppTextStyles.dart';
 
 class EducationalAd extends StatefulWidget {
-  const EducationalAd({super.key});
+  final String catId;
+  final String CatName;
+  final String SubCatName;
+  final String subCatId;
+  const EducationalAd({
+    super.key,
+    required this.catId,
+    required this.CatName,
+    required this.SubCatName,
+    required this.subCatId,
+  });
 
   @override
   State<EducationalAd> createState() => _EducationalAdState();

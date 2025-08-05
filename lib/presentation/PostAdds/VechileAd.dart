@@ -7,7 +7,17 @@ import '../../theme/ThemeHelper.dart';
 import '../../widgets/CommonTextField.dart';
 
 class VechileAd extends StatefulWidget {
-  const VechileAd({super.key});
+  final String catId;
+  final String CatName;
+  final String SubCatName;
+  final String subCatId;
+  const VechileAd({
+    super.key,
+    required this.catId,
+    required this.CatName,
+    required this.SubCatName,
+    required this.subCatId,
+  });
 
   @override
   State<VechileAd> createState() => _VechileAdState();

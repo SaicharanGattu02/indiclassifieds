@@ -10,7 +10,17 @@ import '../../widgets/CommonTextField.dart';
 import '../../theme/AppTextStyles.dart';
 
 class CoWorkingSpaceAd extends StatefulWidget {
-  const CoWorkingSpaceAd({super.key});
+  final String catId;
+  final String CatName;
+  final String SubCatName;
+  final String subCatId;
+  const CoWorkingSpaceAd({
+    super.key,
+    required this.catId,
+    required this.CatName,
+    required this.SubCatName,
+    required this.subCatId,
+  });
 
   @override
   State<CoWorkingSpaceAd> createState() => _CoWorkingSpaceAdState();

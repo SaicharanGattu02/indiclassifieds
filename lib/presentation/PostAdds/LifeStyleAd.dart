@@ -6,7 +6,17 @@ import '../../widgets/CommonTextField.dart';
 import '../../theme/AppTextStyles.dart';
 
 class LifeStyleAd extends StatefulWidget {
-  const LifeStyleAd({super.key});
+  final String catId;
+  final String CatName;
+  final String SubCatName;
+  final String subCatId;
+  const LifeStyleAd({
+    super.key,
+    required this.catId,
+    required this.CatName,
+    required this.SubCatName,
+    required this.subCatId,
+  });
 
   @override
   State<LifeStyleAd> createState() => _LifeStyleAdState();
@@ -29,7 +39,7 @@ class _LifeStyleAdState extends State<LifeStyleAd> {
     'Sports & Fitness',
     'Wellness Spa',
     'Musical Instruments',
-    'Perfumes'
+    'Perfumes',
   ];
 
   @override
@@ -59,16 +69,20 @@ class _LifeStyleAdState extends State<LifeStyleAd> {
               _sectionTitle('Item Information', textColor),
               _sectionSubTitle('Category', textColor),
               _buildSingleSelectChips(
-                  categories, selectedCategory,
-                      (val) => setState(() => selectedCategory = val), textColor),
+                categories,
+                selectedCategory,
+                (val) => setState(() => selectedCategory = val),
+                textColor,
+              ),
 
               CommonTextField1(
                 lable: 'Item Name/Brand',
                 hint: 'e.g., Ray-Ban Aviator, Yoga Mat Set',
                 controller: itemController,
                 color: textColor,
-                validator: (v) =>
-                (v == null || v.trim().isEmpty) ? 'Item name required' : null,
+                validator: (v) => (v == null || v.trim().isEmpty)
+                    ? 'Item name required'
+                    : null,
               ),
               CommonTextField1(
                 lable: 'Specifications',
@@ -84,7 +98,7 @@ class _LifeStyleAdState extends State<LifeStyleAd> {
                 controller: nameController,
                 color: textColor,
                 validator: (v) =>
-                (v == null || v.trim().isEmpty) ? 'Name required' : null,
+                    (v == null || v.trim().isEmpty) ? 'Name required' : null,
               ),
               CommonTextField1(
                 lable: 'Phone Number',
@@ -94,7 +108,7 @@ class _LifeStyleAdState extends State<LifeStyleAd> {
                 color: textColor,
                 prefixIcon: Icon(Icons.phone, color: textColor, size: 16),
                 validator: (v) =>
-                (v == null || v.trim().isEmpty) ? 'Phone required' : null,
+                    (v == null || v.trim().isEmpty) ? 'Phone required' : null,
               ),
               CommonTextField1(
                 lable: 'Email Address',
@@ -123,7 +137,8 @@ class _LifeStyleAdState extends State<LifeStyleAd> {
             onPlusTap: () {
               if (_formKey.currentState?.validate() ?? false) {
                 debugPrint(
-                    'Category: $selectedCategory, Item: ${itemController.text}, Seller: ${nameController.text}, Phone: ${phoneController.text}');
+                  'Category: $selectedCategory, Item: ${itemController.text}, Seller: ${nameController.text}, Phone: ${phoneController.text}',
+                );
               }
             },
           ),
@@ -137,8 +152,9 @@ class _LifeStyleAdState extends State<LifeStyleAd> {
       padding: const EdgeInsets.only(top: 20, bottom: 8),
       child: Text(
         title,
-        style: AppTextStyles.titleMedium(color)
-            .copyWith(fontSize: 15, fontWeight: FontWeight.w600),
+        style: AppTextStyles.titleMedium(
+          color,
+        ).copyWith(fontSize: 15, fontWeight: FontWeight.w600),
       ),
     );
   }
@@ -148,14 +164,19 @@ class _LifeStyleAdState extends State<LifeStyleAd> {
       padding: const EdgeInsets.only(bottom: 8),
       child: Text(
         title,
-        style: AppTextStyles.bodyLarge(color)
-            .copyWith(fontWeight: FontWeight.w500),
+        style: AppTextStyles.bodyLarge(
+          color,
+        ).copyWith(fontWeight: FontWeight.w500),
       ),
     );
   }
 
   Widget _buildSingleSelectChips(
-      List<String> options, String selected, Function(String) onSelected, Color color) {
+    List<String> options,
+    String selected,
+    Function(String) onSelected,
+    Color color,
+  ) {
     return Wrap(
       spacing: 8,
       runSpacing: 8,

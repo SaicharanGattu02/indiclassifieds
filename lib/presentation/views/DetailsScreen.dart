@@ -4,7 +4,17 @@ import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 
 class DetailsScreen extends StatefulWidget {
-  const DetailsScreen({super.key});
+  final String catId;
+  final String CatName;
+  final String SubCatName;
+  final String subCatId;
+  const DetailsScreen({
+    super.key,
+    required this.catId,
+    required this.CatName,
+    required this.SubCatName,
+    required this.subCatId,
+  });
 
   @override
   State<DetailsScreen> createState() => _DetailsScreenState();
@@ -23,12 +33,15 @@ class _DetailsScreenState extends State<DetailsScreen> {
         backgroundColor: bgColor,
         elevation: 0,
         iconTheme: IconThemeData(color: textColor),
-        title: Text('2023 Tesla Model', style: AppTextStyles.headlineSmall(textColor)),
+        title: Text(
+          '2023 Tesla Model',
+          style: AppTextStyles.headlineSmall(textColor),
+        ),
         actions: [
           IconButton(
             icon: Icon(Icons.share, color: textColor),
             onPressed: () {},
-          )
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -69,11 +82,17 @@ class _DetailsScreenState extends State<DetailsScreen> {
             const SizedBox(height: 12),
             // Price & title
             Text('₹43,85,000', style: AppTextStyles.headlineMedium(textColor)),
-            Text('2023 Tesla Model Y Long Range AWD', style: AppTextStyles.bodyMedium(textColor)),
+            Text(
+              '2023 Tesla Model Y Long Range AWD',
+              style: AppTextStyles.bodyMedium(textColor),
+            ),
             const SizedBox(height: 16),
 
             // Vehicle info
-            Text('Vehicle Information', style: AppTextStyles.titleLarge(textColor)),
+            Text(
+              'Vehicle Information',
+              style: AppTextStyles.titleLarge(textColor),
+            ),
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -126,7 +145,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
             const SizedBox(height: 8),
             Text(
               'This 2023 Tesla Model Y Long Range AWD is in pristine condition... '
-                  'Recently serviced, charged, and ready for delivery. Located in Mumbai’s premium location with great resale value. Listed at ₹43,85,000.',
+              'Recently serviced, charged, and ready for delivery. Located in Mumbai’s premium location with great resale value. Listed at ₹43,85,000.',
               style: AppTextStyles.bodyMedium(textColor),
             ),
 
@@ -158,7 +177,11 @@ class _DetailsScreenState extends State<DetailsScreen> {
         Icon(Icons.circle, size: 20, color: Colors.blue),
         const SizedBox(height: 4),
         Text(title, style: AppTextStyles.labelMedium(color)),
-        Text(value, style: AppTextStyles.bodySmall(color), textAlign: TextAlign.center),
+        Text(
+          value,
+          style: AppTextStyles.bodySmall(color),
+          textAlign: TextAlign.center,
+        ),
       ],
     );
   }

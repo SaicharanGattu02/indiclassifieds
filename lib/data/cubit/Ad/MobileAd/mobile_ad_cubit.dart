@@ -13,7 +13,11 @@ class MobileAdCubit extends Cubit<MobileAdStates> {
       if (response != null && response.success == true) {
         emit(MobileAdSuccess(response));
       } else {
-        emit(MobileAdFailure(response?.message ?? ""));
+        emit(
+          MobileAdFailure(
+            "Error:${response?.message ?? ""}.${response?.error ?? ""}",
+          ),
+        );
       }
     } catch (e) {
       emit(MobileAdFailure(e.toString()));

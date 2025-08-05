@@ -6,8 +6,17 @@ import '../../theme/ThemeHelper.dart';
 import '../../widgets/CommonTextField.dart';
 
 class JobAd extends StatefulWidget {
-  const JobAd({super.key});
-
+  final String catId;
+  final String CatName;
+  final String SubCatName;
+  final String subCatId;
+  const JobAd({
+    super.key,
+    required this.catId,
+    required this.CatName,
+    required this.SubCatName,
+    required this.subCatId,
+  });
   @override
   State<JobAd> createState() => _JobAdState();
 }

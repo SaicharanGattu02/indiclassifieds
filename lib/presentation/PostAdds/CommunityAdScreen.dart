@@ -11,7 +11,15 @@ import '../../theme/ThemeHelper.dart';
 import '../../widgets/CommonTextField.dart';
 
 class CommunityAdScreen extends StatefulWidget {
-  const CommunityAdScreen({super.key});
+  final String catId;
+  final String CatName;
+  final String SubCatName;
+  final String subCatId;
+  const CommunityAdScreen({super.key,
+    required this.catId,
+    required this.CatName,
+    required this.SubCatName,
+    required this.subCatId,});
 
   @override
   State<CommunityAdScreen> createState() => _CommunityAdScreenState();
