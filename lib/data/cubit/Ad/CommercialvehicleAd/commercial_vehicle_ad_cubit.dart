@@ -6,7 +6,7 @@ class CommercialVehileAdCubit extends Cubit<CommercialVehileAdStates> {
   CommercialVehileAdRepository propertyAdRepository;
   CommercialVehileAdCubit(this.propertyAdRepository) : super(CommercialVehileAdInitially());
 
-  Future<void> postBikeAd(Map<String, dynamic> data) async {
+  Future<void> postCommercialVehicleAd(Map<String, dynamic> data) async {
     emit(CommercialVehileAdLoading());
     try {
       final response = await propertyAdRepository.postCommercialVehileAd(data);

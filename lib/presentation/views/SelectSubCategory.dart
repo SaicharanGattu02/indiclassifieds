@@ -84,7 +84,7 @@ class _SelectSubCategoryState extends State<SelectSubCategory> {
                             ),
                             onTap: () {
                               context.push(
-                                '/property_ad?catId=${widget.categoryId}&CatName=${widget.categoryName}&subCatId=${item.subCategoryId}&SubCatName=${item.name??""}',
+                                '/educational_ad?catId=${widget.categoryId}&CatName=${widget.categoryName}&subCatId=${item.subCategoryId}&SubCatName=${item.name ?? ""}',
                               );
                             },
                           ),

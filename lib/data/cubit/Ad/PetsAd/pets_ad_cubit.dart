@@ -6,7 +6,7 @@ class PetsAdCubit extends Cubit<PetsAdStates> {
   PetsAdRepository petsAdRepository;
   PetsAdCubit(this.petsAdRepository) : super(PetsAdInitially());
 
-  Future<void> postBikeAd(Map<String, dynamic> data) async {
+  Future<void> postPetsAd(Map<String, dynamic> data) async {
     emit(PetsAdLoading());
     try {
       final response = await petsAdRepository.postPetsAd(data);

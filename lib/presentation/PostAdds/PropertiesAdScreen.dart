@@ -21,8 +21,7 @@ import '../../Components/ShakeWidget.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../utils/ImageUtils.dart';
 import '../../utils/color_constants.dart';
-import '../../widgets/CommonTextField.dart';
-import '../../theme/AppTextStyles.dart';
+import '../../widgets/CommonWrapChipSelector.dart';
 import '../../widgets/SelectCityBottomSheet.dart';
 import '../../widgets/SelectStateBottomSheet.dart';
 
@@ -44,7 +43,7 @@ class PropertiesAdScreen extends StatefulWidget {
   State<PropertiesAdScreen> createState() => _PropertiesAdScreenState();
 }
 
-class _PropertiesAdScreenState extends State<PropertiesAdScreen>  {
+class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
   final _formKey = GlobalKey<FormState>();
   bool negotiable = false;
   int? selectedStateId;
@@ -58,16 +57,26 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen>  {
   final locationController = TextEditingController();
   final titleController = TextEditingController();
   final bhkController = TextEditingController();
-  final no = TextEditingController();
-  final priceController = TextEditingController();
-  final carParkingController = TextEditingController();
-  // final ramController = TextEditingController();
+  final noOfBathroomsController = TextEditingController();
+  final priceSquareFeetController = TextEditingController();
+  final totelPriceController = TextEditingController();
+  final parkingController = TextEditingController();
+  final floorNoController = TextEditingController();
+  final roomNoController = TextEditingController();
   final phoneController = TextEditingController();
   final emailController = TextEditingController();
   final stateController = TextEditingController();
   final cityController = TextEditingController();
   final nameController = TextEditingController();
-  List<String> selectedConditions = [];
+  String? facingDirection;
+  String? propertyType;
+  String? furnishingStatus;
+  String? projectStatus;
+  String? listedBy;
+  String? imagePath;
+  List<File> _images = [];
+  final int _maxImages = 6;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -75,11 +84,6 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen>  {
     brandController.text = widget.SubCatName ?? "";
   }
 
-  File? _image;
-  String? imagePath;
-  List<File> _images = [];
-  final int _maxImages = 6;
-  final ImagePicker _picker = ImagePicker();
   Future<void> _pickImage() async {
     showModalBottomSheet(
       context: context,
@@ -203,6 +207,32 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen>  {
     });
   }
 
+  String _getLabel() {
+    switch (widget.SubCatName) {
+      case "For Rent":
+        return "Monthly Rent Price";
+      case "For Sale":
+        return "Total Sale Price";
+      case "Commercial":
+        return "Price";
+      default:
+        return "Price";
+    }
+  }
+
+  String _getHint() {
+    switch (widget.SubCatName) {
+      case "For Rent":
+        return "Enter Monthly Rent";
+      case "For Sale":
+        return "Enter Sale Price";
+      case "Commercial":
+        return "Enter Price";
+      default:
+        return "Enter Price";
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final textColor = ThemeHelper.textColor(context);
@@ -228,24 +258,42 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen>  {
                 controller: titleController,
                 color: textColor,
                 validator: (v) =>
-                (v == null || v.trim().isEmpty) ? 'Required title' : null,
+                    (v == null || v.trim().isEmpty) ? 'Required title' : null,
               ),
               CommonTextField1(
                 lable: 'BHK Type',
                 hint: 'EX: 2bhk ,3bh',
                 controller: bhkController,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(10),
+                ],
                 color: textColor,
-                validator: (v) =>
-                (v == null || v.trim().isEmpty) ? 'Required BHK Type' : null,
+                validator: (v) => (v == null || v.trim().isEmpty)
+                    ? 'Required BHK Type'
+                    : null,
               ),
               CommonTextField1(
                 lable: 'No Of Bathrooms',
                 hint: 'Enter Number Of Bathrooms',
-                controller: bhkController,
+                controller: noOfBathroomsController,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 color: textColor,
-                validator: (v) =>
-                (v == null || v.trim().isEmpty) ? 'Required No Of Bathrooms' : null,
+                validator: (v) => (v == null || v.trim().isEmpty)
+                    ? 'Required No Of Bathrooms'
+                    : null,
               ),
+              CommonTextField1(
+                lable: 'Car Parking',
+                hint: 'Enter Number of Parking Slots',
+                controller: parkingController,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                color: textColor,
+                validator: (v) => (v == null || v.trim().isEmpty)
+                    ? 'Required Car Parking'
+                    : null,
+              ),
+
               CommonTextField1(
                 lable: 'Description',
                 hint: 'Enter  Upto  500 words',
@@ -258,27 +306,6 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen>  {
                   }
                   return null;
                 },
-              ),
-
-              // _sectionTitle('Condition', textColor),
-              // _buildChips(
-              //   ['Brand New', 'Like New', 'Used', 'For Parts Only'],
-              //   textColor,
-              //   isDarkMode,
-              // ),
-              CommonTextField1(
-                lable: 'Price For Sq.ft',
-                hint: 'Enter price',
-                controller: priceController,
-                color: textColor,
-                keyboardType: TextInputType.number,
-                prefixIcon: Icon(
-                  Icons.currency_rupee,
-                  color: textColor,
-                  size: 16,
-                ),
-                validator: (v) =>
-                (v == null || v.trim().isEmpty) ? 'Price required' : null,
               ),
 
               GestureDetector(
@@ -420,109 +447,109 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen>  {
                 ),
                 child: _images.isEmpty
                     ? InkWell(
-                  onTap: _pickImage,
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.photo_camera,
-                          color: textColor.withOpacity(0.6),
-                          size: 40,
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          '+ Add Photos ${_maxImages}',
-                          style: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 14,
-                            color: textColor.withOpacity(0.6),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-                    : GridView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 4,
-                    crossAxisSpacing: 8,
-                    mainAxisSpacing: 8,
-                    childAspectRatio: 1.8,
-                  ),
-                  itemCount: _images.length < _maxImages
-                      ? _images.length + 1
-                      : _images.length,
-                  itemBuilder: (context, index) {
-                    if (index == _images.length &&
-                        _images.length < _maxImages) {
-                      return InkWell(
                         onTap: _pickImage,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: const Color(0xFFE5E7EB),
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
+                        child: Center(
                           child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
-                                Icons.add_photo_alternate,
+                                Icons.photo_camera,
                                 color: textColor.withOpacity(0.6),
-                                size: 24,
+                                size: 40,
                               ),
-                              const SizedBox(height: 4),
+                              SizedBox(height: 8),
                               Text(
-                                'Add Photo',
+                                '+ Add Photos ${_maxImages}',
                                 style: TextStyle(
                                   fontFamily: 'Poppins',
-                                  fontSize: 12,
+                                  fontSize: 14,
                                   color: textColor.withOpacity(0.6),
                                 ),
                               ),
                             ],
                           ),
                         ),
-                      );
-                    }
-                    return Stack(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.file(
-                            _images[index],
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            height: double.infinity,
-                          ),
+                      )
+                    : GridView.builder(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 4,
+                          crossAxisSpacing: 8,
+                          mainAxisSpacing: 8,
+                          childAspectRatio: 1.8,
                         ),
-                        Positioned(
-                          top: 4,
-                          right: 4,
-                          child: GestureDetector(
-                            onTap: () => _removeImage(index),
-                            child: Container(
-                              padding: const EdgeInsets.all(2),
-                              decoration: BoxDecoration(
-                                color: Colors.red.withOpacity(0.7),
-                                shape: BoxShape.circle,
+                        itemCount: _images.length < _maxImages
+                            ? _images.length + 1
+                            : _images.length,
+                        itemBuilder: (context, index) {
+                          if (index == _images.length &&
+                              _images.length < _maxImages) {
+                            return InkWell(
+                              onTap: _pickImage,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: const Color(0xFFE5E7EB),
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.add_photo_alternate,
+                                      color: textColor.withOpacity(0.6),
+                                      size: 24,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Add Photo',
+                                      style: TextStyle(
+                                        fontFamily: 'Poppins',
+                                        fontSize: 12,
+                                        color: textColor.withOpacity(0.6),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                              child: const Icon(
-                                Icons.close,
-                                color: Colors.white,
-                                size: 16,
+                            );
+                          }
+                          return Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.file(
+                                  _images[index],
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                ),
                               ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
+                              Positioned(
+                                top: 4,
+                                right: 4,
+                                child: GestureDetector(
+                                  onTap: () => _removeImage(index),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(2),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red.withOpacity(0.7),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.close,
+                                      color: Colors.white,
+                                      size: 16,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
               ),
               if (_showimagesError && _images.isEmpty) ...[
                 Padding(
@@ -544,19 +571,105 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen>  {
                   ),
                 ),
               ],
-              CommonTextField1(
-                lable: 'Car Parking',
-                hint: 'Enter Car Parking',
-                controller: carParkingController,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
+              const SizedBox(height: 12),
+              ChipSelector(
+                title: "Facing Direction",
+                options: [
+                  {"label": "East", "value": "east"},
+                  {"label": "West", "value": "west"},
+                  {"label": "South", "value": "south"},
+                  {"label": "North", "value": "north"},
+                  {"label": "North East", "value": "north-east"},
+                  {"label": "South East", "value": "south-east"},
+                  {"label": "North West", "value": "north-west"},
+                  {"label": "South West", "value": "south-west"},
                 ],
-                color: textColor,
-                validator: (v) => (v == null || v.trim().isEmpty)
-                    ? 'Car Parking required'
-                    : null,
+                onSelected: (val) => setState(() => facingDirection = val),
+              ),
+              const SizedBox(height: 12),
+              ChipSelector(
+                title: "Furnishing Status",
+                options: [
+                  {"label": "Unfurnished", "value": "unfurnished"},
+                  {"label": "Semi-Furnished", "value": "semi-furnished"},
+                  {"label": "Fully-Furnished", "value": "fully-furnished"},
+                ],
+                onSelected: (val) => setState(() => furnishingStatus = val),
+              ),
+              const SizedBox(height: 12),
+              ChipSelector(
+                title: "Project Status",
+                options: [
+                  {
+                    "label": "Under Construction",
+                    "value": "under construction",
+                  },
+                  {"label": "Ready to Move", "value": "ready to move"},
+                  {"label": "New Launch", "value": "new launch"},
+                ],
+                onSelected: (val) => setState(() => projectStatus = val),
+              ),
+              const SizedBox(height: 12),
+              ChipSelector(
+                title: "Listed By",
+                options: [
+                  {"label": "Owner", "value": "owner"},
+                  {"label": "Builder", "value": "builder"},
+                  {"label": "Dealer", "value": "dealer"},
+                ],
+                onSelected: (val) => setState(() => listedBy = val),
               ),
 
+              CommonTextField1(
+                lable: 'Floor Number',
+                hint: 'Enter Floor Number',
+                controller: floorNoController,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                color: textColor,
+                validator: (v) => (v == null || v.trim().isEmpty)
+                    ? 'Required Floor Number'
+                    : null,
+              ),
+              CommonTextField1(
+                lable: 'Room Number',
+                hint: 'Enter Room Number',
+                controller: roomNoController,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                color: textColor,
+                validator: (v) => (v == null || v.trim().isEmpty)
+                    ? 'Required Room Number'
+                    : null,
+              ),
+              if (widget.SubCatName == "For Sale") ...[
+                CommonTextField1(
+                  lable: 'Price For Sq.ft',
+                  hint: 'Enter Price For Sq.ft',
+                  controller: priceSquareFeetController,
+                  color: textColor,
+                  keyboardType: TextInputType.number,
+                  prefixIcon: Icon(
+                    Icons.currency_rupee,
+                    color: textColor,
+                    size: 16,
+                  ),
+                  validator: (v) =>
+                      (v == null || v.trim().isEmpty) ? 'Price required' : null,
+                ),
+              ],
+              CommonTextField1(
+                lable: _getLabel(),
+                hint: _getHint(),
+                controller: totelPriceController,
+                color: textColor,
+                keyboardType: TextInputType.number,
+                prefixIcon: Icon(
+                  Icons.currency_rupee,
+                  color: textColor,
+                  size: 16,
+                ),
+                validator: (v) =>
+                    (v == null || v.trim().isEmpty) ? 'Price required' : null,
+              ),
               CommonTextField1(
                 lable: 'Name',
                 hint: 'Enter name',
@@ -592,29 +705,6 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen>  {
                 //     ? 'Required Address '
                 //     : null,
               ),
-              // Row(
-              //   children: [
-              //     Expanded(
-              //       child: Column(
-              //         crossAxisAlignment: CrossAxisAlignment.start,
-              //         children: [
-              //
-              //         ],
-              //       ),
-              //     ),
-              //
-              //     SizedBox(width: 8),
-              //     Expanded(
-              //       child: Column(
-              //         crossAxisAlignment: CrossAxisAlignment.start,
-              //         children: [
-              //
-              //         ],
-              //       ),
-              //     ),
-              //
-              //   ],
-              // ),
             ],
           ),
         ),
@@ -636,6 +726,16 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen>  {
                 text: 'Submit Ad',
                 onPlusTap: () {
                   if (_formKey.currentState?.validate() ?? false) {
+                    String? propertyType;
+
+                    if (widget.SubCatName == "For Sale") {
+                      propertyType = "sale";
+                    } else if (widget.SubCatName == "For Rent") {
+                      propertyType = "rent";
+                    } else if (widget.SubCatName == "Commercial") {
+                      propertyType = "commercial";
+                    }
+
                     final Map<String, dynamic> data = {
                       "title": titleController.text,
                       "brand": brandController.text,
@@ -646,11 +746,22 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen>  {
                       "mobile_number": phoneController.text,
                       "plan_id": "1",
                       "package_id": "3",
-                      "price": priceController.text,
+                      "price": totelPriceController.text,
+                      if (widget.SubCatName == "For Sale")
+                        "squre_pt": priceSquareFeetController.text,
                       "full_name": nameController.text,
                       "state_id": selectedStateId,
                       "city_id": selectedCityId,
-
+                      "bhk_type": "${bhkController.text} BHK",
+                      "no_of_bathrooms": noOfBathroomsController.text,
+                      "no_of_carparking_spaces": parkingController.text,
+                      "facing_direction": facingDirection,
+                      "furnishing_status": furnishingStatus,
+                      "project_status": projectStatus,
+                      "listed_by": listedBy,
+                      "floor_number": floorNoController.text,
+                      "room_no": roomNoController.text,
+                      "property_type": propertyType,
                     };
                     if (_images.isNotEmpty) {
                       data["images"] = _images

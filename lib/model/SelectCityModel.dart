@@ -48,19 +48,19 @@ class SelectCityModel {
 }
 
 class CityData {
-  int? cityId;
+  int? id;
   String? name;
 
-  CityData({this.cityId, this.name});
+  CityData({this.id, this.name});
 
   CityData.fromJson(Map<String, dynamic> json) {
-    cityId = json['city_id'];
+    id = json['city_id'];
     name = json['name'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> map = {};
-    map['city_id'] = cityId;
+    map['city_id'] = id;
     map['name'] = name;
     return map;
   }

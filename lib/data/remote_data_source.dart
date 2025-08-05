@@ -335,6 +335,7 @@ class RemoteDataSourceImpl implements RemoteDataSource {
   @override
   Future<AdSuccessModel?> postJobsAd(Map<String, dynamic> data) async {
     final formData = await buildFormData(data);
+    AppLogger.log('JobsAd :${data}');
     try {
       Response response = await ApiClient.post(
         "${APIEndpointUrls.post_jobs_ad}",

@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,8 +9,10 @@ import '../../Components/CustomAppButton.dart';
 import '../../Components/CustomSnackBar.dart';
 import '../../Components/CutomAppBar.dart';
 import '../../Components/ShakeWidget.dart';
-import '../../data/cubit/Ad/EducationAd/education_ad_cubit.dart';
-import '../../data/cubit/Ad/EducationAd/education_ad_states.dart';
+import '../../data/cubit/Ad/CarsAd/cars_ad_cubit.dart';
+import '../../data/cubit/Ad/CarsAd/cars_ad_states.dart';
+import '../../data/cubit/Ad/CommercialvehicleAd/commercial_vehicle_ad_cubit.dart';
+import '../../data/cubit/Ad/CommercialvehicleAd/commercial_vehicle_ad_states.dart';
 import '../../data/cubit/States/states_cubit.dart';
 import '../../data/cubit/States/states_repository.dart';
 import '../../data/remote_data_source.dart';
@@ -18,15 +21,16 @@ import '../../theme/ThemeHelper.dart';
 import '../../utils/ImageUtils.dart';
 import '../../utils/color_constants.dart';
 import '../../widgets/CommonTextField.dart';
+import '../../widgets/CommonWrapChipSelector.dart';
 import '../../widgets/SelectCityBottomSheet.dart';
 import '../../widgets/SelectStateBottomSheet.dart';
 
-class EducationalAd extends StatefulWidget {
+class CommercialVehicleAd extends StatefulWidget {
   final String catId;
   final String CatName;
   final String SubCatName;
   final String subCatId;
-  const EducationalAd({
+  const CommercialVehicleAd({
     super.key,
     required this.catId,
     required this.CatName,
@@ -35,12 +39,12 @@ class EducationalAd extends StatefulWidget {
   });
 
   @override
-  State<EducationalAd> createState() => _EducationalAdState();
+  State<CommercialVehicleAd> createState() => _CommercialVehicleAdState();
 }
 
-class _EducationalAdState extends State<EducationalAd> {
+class _CommercialVehicleAdState extends State<CommercialVehicleAd> {
   final _formKey = GlobalKey<FormState>();
-
+  bool negotiable = false;
   int? selectedStateId;
   int? selectedCityId;
   bool _showStateError = false;
@@ -55,8 +59,7 @@ class _EducationalAdState extends State<EducationalAd> {
   final stateController = TextEditingController();
   final cityController = TextEditingController();
   final nameController = TextEditingController();
-  final instituteNameController = TextEditingController();
-  final costOfFeeController = TextEditingController();
+  final vehicleNumberController = TextEditingController();
 
   @override
   void initState() {
@@ -212,7 +215,7 @@ class _EducationalAdState extends State<EducationalAd> {
                 color: textColor,
               ),
               CommonTextField1(
-                lable: 'Add Title',
+                lable: ' Add Title',
                 hint: 'Enter Title',
                 controller: titleController,
                 color: textColor,
@@ -220,30 +223,21 @@ class _EducationalAdState extends State<EducationalAd> {
                     (v == null || v.trim().isEmpty) ? 'Required title' : null,
               ),
               CommonTextField1(
-                lable: 'Institute Name',
-                hint: 'Enter Institute Name',
-                controller: instituteNameController,
+                lable: 'Vehicle Number',
+                hint: 'Enter Vehicle Number',
+                controller: vehicleNumberController,
                 color: textColor,
                 validator: (v) => (v == null || v.trim().isEmpty)
-                    ? 'Institute name is required'
+                    ? 'Vehicle Number is required'
                     : null,
               ),
+
               CommonTextField1(
-                lable: 'Cost of Fee',
-                hint: 'Enter Cost of Fee',
-                controller: costOfFeeController,
-                color: textColor,
-                keyboardType: TextInputType.number,
-                validator: (v) => (v == null || v.trim().isEmpty)
-                    ? 'Cost of fee is required'
-                    : null,
-              ),
-              CommonTextField1(
-                maxLines: 5,
-                lable: 'Job Description',
-                hint: 'Describe the job role in detail',
+                lable: 'Description',
+                hint: 'Enter  Upto  500 words',
                 controller: descriptionController,
                 color: textColor,
+                maxLines: 5,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
                     return 'Description required';
@@ -251,6 +245,22 @@ class _EducationalAdState extends State<EducationalAd> {
                   return null;
                 },
               ),
+
+              CommonTextField1(
+                lable: 'Price',
+                hint: 'Enter price',
+                controller: priceController,
+                color: textColor,
+                keyboardType: TextInputType.number,
+                prefixIcon: Icon(
+                  Icons.currency_rupee,
+                  color: textColor,
+                  size: 16,
+                ),
+                validator: (v) =>
+                    (v == null || v.trim().isEmpty) ? 'Price required' : null,
+              ),
+
               GestureDetector(
                 onTap: () async {
                   final selectedState = await showModalBottomSheet(
@@ -272,11 +282,11 @@ class _EducationalAdState extends State<EducationalAd> {
                   if (selectedState != null) {
                     stateController.text = selectedState.name ?? "";
                     selectedStateId = selectedState.id ?? "";
-
                     setState(() {});
                   }
                 },
                 child: AbsorbPointer(
+                  // 👈 stops inner TextField from eating taps
                   child: CommonTextField1(
                     lable: 'State',
                     hint: 'Select State',
@@ -325,10 +335,10 @@ class _EducationalAdState extends State<EducationalAd> {
                       );
                     },
                   );
+
                   if (selectedCity != null) {
                     cityController.text = selectedCity.name ?? "";
-                    selectedCityId = selectedCity.id;
-                    debugPrint("selectedCityId:${selectedCityId}");
+                    selectedCityId = selectedCity.id ?? "";
                     setState(() {});
                   }
                 },
@@ -546,17 +556,17 @@ class _EducationalAdState extends State<EducationalAd> {
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-          child: BlocConsumer<EducationAdCubit, EducationAdStates>(
+          child: BlocConsumer<CommercialVehileAdCubit, CommercialVehileAdStates>(
             listener: (context, state) {
-              if (state is EducationAdSuccess) {
+              if (state is CommercialVehileAdSuccess) {
                 context.pushReplacement("/successfully");
-              } else if (state is EducationAdFailure) {
+              } else if (state is CommercialVehileAdFailure) {
                 CustomSnackBar1.show(context, state.error);
               }
             },
             builder: (context, state) {
               return CustomAppButton1(
-                isLoading: state is EducationAdLoading,
+                isLoading: state is CommercialVehileAdLoading,
                 text: 'Submit Ad',
                 onPlusTap: () {
                   if (_formKey.currentState?.validate() ?? false) {
@@ -568,22 +578,20 @@ class _EducationalAdState extends State<EducationalAd> {
                       "category_id": widget.catId,
                       "location": locationController.text,
                       "mobile_number": phoneController.text,
-                      "plan_id": "4",
-                      "package_id": "1",
+                      "plan_id": "1",
+                      "package_id": "3",
                       "price": priceController.text,
                       "full_name": nameController.text,
                       "state_id": selectedStateId,
                       "city_id": selectedCityId,
-                      "institute_name": instituteNameController.text,
-                      "cost_of_fee": costOfFeeController.text,
+                      "vehicle_number": vehicleNumberController.text,
                     };
                     if (_images.isNotEmpty) {
                       data["images"] = _images
                           .map((file) => file.path)
                           .toList();
                     }
-
-                    context.read<EducationAdCubit>().postEducationAd(data);
+                    context.read<CommercialVehileAdCubit>().postCommercialVehicleAd(data);
                   }
                 },
               );
