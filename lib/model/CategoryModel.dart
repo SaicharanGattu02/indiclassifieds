@@ -31,7 +31,7 @@ class Data {
   int? categoryId;
   String? name;
   String? image;
-  String? noOfCounts;
+  int? noOfCounts;
 
   Data({this.categoryId, this.name, this.image, this.noOfCounts});
 

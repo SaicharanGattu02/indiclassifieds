@@ -239,7 +239,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 crossAxisCount: 4,
                                 mainAxisSpacing: 12,
                                 crossAxisSpacing: 12,
-                                childAspectRatio: 1.45,
+                                childAspectRatio: 1.3,
                               ),
                           delegate: SliverChildBuilderDelegate((
                             context,
@@ -306,7 +306,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                     SizedBox(height: 2),
                                     Text(
-                                      categoryItem.noOfCounts??"",
+                                      categoryItem.noOfCounts.toString()??"0",
                                       textAlign: TextAlign.center,
                                       style: AppTextStyles.labelSmall(textColor)
                                           .copyWith(
