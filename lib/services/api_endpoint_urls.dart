@@ -8,8 +8,10 @@ class APIEndpointUrls {
   static const String send_login_otp = '${apiUrl}send-otp';
   static const String resend_login_otp = '${apiUrl}resend-login-otp';
   static const String verify_login_otp = '${apiUrl}verify-otp';
-  static const String get_my_profile_details = '${apiUrl}get-my-profile-details';
-  static const String update_user_details_by_user = '${apiUrl}update-user-details-by-user';
+  static const String get_my_profile_details =
+      '${apiUrl}get-my-profile-details';
+  static const String update_user_details_by_user =
+      '${apiUrl}update-user-details-by-user';
 
   /// User Urls
 
@@ -27,12 +29,18 @@ class APIEndpointUrls {
   static const String get_states = '${apiUrl}get-all-states';
   static const String get_city = '${apiUrl}get-all-cities';
   static const String get_all_active_plans = '${apiUrl}get-all-active-plans';
-  static const String get_all_packages_by_plan = '${apiUrl}get-all-packages-by-plan';
-  static const String get_single_listing_details = '${apiUrl}get-single-listing-details';
+  static const String get_all_packages_by_plan =
+      '${apiUrl}get-all-packages-by-plan';
+  static const String get_single_listing_details =
+      '${apiUrl}get-single-listing-details';
   static const String get_my_listings_list = '${apiUrl}get-my-listings-list';
-  static const String get_all_my_advertisements = '${apiUrl}get-all-my-advertisements';
+  static const String get_all_my_advertisements =
+      '${apiUrl}get-all-my-advertisements';
   static const String add_a_advertisement = '${apiUrl}add-a-advertisement';
-  static const String get_active_adversments_details = '${apiUrl}get-active-adversments-details';
+  static const String get_active_adversments_details =
+      '${apiUrl}get-active-adversments-details';
+  static const String get_all_carousels = '${apiUrl}get-all-carousels';
+  static const String get_user_active_plans = '${apiUrl}get-user-active-plans';
 
   /// post apis
   static const String post_common_ad = '${apiUrl}add-common-list-to-listings';

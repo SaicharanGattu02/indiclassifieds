@@ -1,8 +1,10 @@
 import 'package:indiclassifieds/data/remote_data_source.dart';
 import 'package:indiclassifieds/model/PlansModel.dart';
+import 'package:indiclassifieds/model/UserActivePlansModel.dart';
 
 abstract class PlansRepository {
   Future<PlansModel?> getPlans();
+  Future<UserActivePlansModel?> getUserActivePlans();
 }
 
 class PlansRepositoryImpl implements PlansRepository {
@@ -11,5 +13,10 @@ class PlansRepositoryImpl implements PlansRepository {
   @override
   Future<PlansModel?> getPlans() async {
     return await remoteDataSource.getPlans();
+  }
+
+  @override
+  Future<UserActivePlansModel?> getUserActivePlans() async{
+    return await remoteDataSource.getUserActivePlans();
   }
 }

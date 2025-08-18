@@ -5,6 +5,7 @@ import 'package:indiclassifieds/utils/AppLogger.dart';
 import '../model/AdSuccessModel.dart';
 import '../model/AdvertisementDetailsModel.dart';
 import '../model/AdvertisementModel.dart';
+import '../model/BannersModel.dart';
 import '../model/MyAdsModel.dart';
 import '../model/PackagesModel.dart';
 import '../model/PlansModel.dart';
@@ -15,6 +16,7 @@ import '../model/SelectStatesModel.dart';
 import '../model/SendOtpModel.dart';
 import '../model/SubCategoryModel.dart';
 import '../model/SubcategoryProductsModel.dart';
+import '../model/UserActivePlansModel.dart';
 import '../model/VerifyOtpModel.dart';
 import '../model/WishlistModel.dart';
 import '../services/ApiClient.dart';
@@ -26,6 +28,7 @@ abstract class RemoteDataSource {
   Future<ProfileModel?> getProfileDetails();
   Future<AdSuccessModel?> updateProfileDetails(Map<String, dynamic> data);
   Future<CategoryModel?> getCategory();
+  Future<BannersModel?> getBanners();
   Future<SubCategoryModel?> getSubCategory(String categoryId);
   Future<SubcategoryProductsModel?> getProducts(
     String sub_category_id,
@@ -37,6 +40,7 @@ abstract class RemoteDataSource {
   Future<SelectStatesModel?> getStates(String search);
   Future<SelectCityModel?> getCity(int state_id, String search, int page);
   Future<PlansModel?> getPlans();
+  Future<UserActivePlansModel?> getUserActivePlans();
   Future<PackagesModel?> getPackages(int id);
   Future<AdvertisementModel?> getAdvertisements(int page, String type);
   Future<AdSuccessModel?> postAdvertisement(Map<String, dynamic> data);
@@ -90,44 +94,72 @@ class RemoteDataSourceImpl implements RemoteDataSource {
     return FormData.fromMap(formMap);
   }
 
-  Future<FormData> buildFormData1(Map<String, dynamic> data) async {
-    final formMap = <String, dynamic>{};
-    for (final entry in data.entries) {
-      final key = entry.key;
-      final value = entry.value;
-      if (value == null) continue;
-      final isFile =
-          value is String &&
-          value.contains('/') &&
-          (key.contains('image') ||
-              key.contains('file') ||
-              key.contains('uploaded_file') ||
-              key.contains('picture') ||
-              key.contains('payment_screenshot'));
+  // Future<FormData> buildFormData1(Map<String, dynamic> data) async {
+  //   final formMap = <String, dynamic>{};
+  //   for (final entry in data.entries) {
+  //     final key = entry.key;
+  //     final value = entry.value;
+  //     if (value == null) continue;
+  //     final isFile =
+  //         value is String &&
+  //         value.contains('/') &&
+  //         (key.contains('image') ||
+  //             key.contains('file') ||
+  //             key.contains('uploaded_file') ||
+  //             key.contains('picture') ||
+  //             key.contains('payment_screenshot'));
+  //
+  //     if (isFile) {
+  //       final file = await MultipartFile.fromFile(
+  //         value,
+  //         filename: value.split('/').last,
+  //       );
+  //       formMap[key] = file;
+  //     } else {
+  //       formMap[key] = value;
+  //     }
+  //   }
+  //
+  //   // 🔥 Print the data before returning
+  //   formMap.forEach((key, value) {
+  //     AppLogger.log('$key -> $value');
+  //   });
+  //
+  //   return FormData.fromMap(formMap);
+  // }
 
-      if (isFile) {
-        final file = await MultipartFile.fromFile(
-          value,
-          filename: value.split('/').last,
-        );
-        formMap[key] = file;
-      } else {
-        formMap[key] = value;
-      }
+  @override
+  Future<UserActivePlansModel?> getUserActivePlans() async {
+    try {
+      Response response = await ApiClient.get(
+        "${APIEndpointUrls.get_user_active_plans}",
+      );
+      AppLogger.log('getUserActivePlans:${response.data}');
+      return UserActivePlansModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('getUserActivePlans :: $e');
+      return null;
     }
+  }
 
-    // 🔥 Print the data before returning
-    formMap.forEach((key, value) {
-      AppLogger.log('$key -> $value');
-    });
-
-    return FormData.fromMap(formMap);
+  @override
+  Future<BannersModel?> getBanners() async {
+    try {
+      Response response = await ApiClient.get(
+        "${APIEndpointUrls.get_all_carousels}",
+      );
+      AppLogger.log('getBanners:${response.data}');
+      return BannersModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('getBanners :: $e');
+      return null;
+    }
   }
 
   @override
   Future<AdSuccessModel?> postAdvertisement(Map<String, dynamic> data) async {
     try {
-      final formdata = await buildFormData1(data);
+      final formdata = await buildFormData(data);
       Response response = await ApiClient.post(
         "${APIEndpointUrls.add_a_advertisement}",
         data: formdata,

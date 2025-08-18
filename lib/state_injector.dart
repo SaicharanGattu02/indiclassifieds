@@ -4,6 +4,8 @@ import 'package:indiclassifieds/data/cubit/AddToWishlist/addToWishlistStates.dar
 import 'package:indiclassifieds/data/cubit/Advertisement/advertisement_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Advertisement/advertisement_repo.dart';
 import 'package:indiclassifieds/data/cubit/AdvertisementDetails/advertisement_details_cubit.dart';
+import 'package:indiclassifieds/data/cubit/Banners/banner_cubit.dart';
+import 'package:indiclassifieds/data/cubit/Banners/banner_repository.dart';
 import 'package:indiclassifieds/data/cubit/City/city_cubit.dart';
 import 'package:indiclassifieds/data/cubit/MyAds/my_ads_cubit.dart';
 import 'package:indiclassifieds/data/cubit/MyAds/my_ads_repo.dart';
@@ -18,6 +20,7 @@ import 'package:indiclassifieds/data/cubit/Products/products_repository.dart';
 import 'package:indiclassifieds/data/cubit/Profile/profile_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Profile/profile_repo.dart';
 import 'package:indiclassifieds/data/cubit/UpdateProfile/update_profile_cubit.dart';
+import 'package:indiclassifieds/data/cubit/UserActivePlans/user_active_plans_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Wishlist/wishlist_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Wishlist/wishlist_repository.dart';
 import 'package:indiclassifieds/data/cubit/subCategory/sub_category_cubit.dart';
@@ -179,6 +182,16 @@ class StateInjector {
         remoteDataSource: context.read<RemoteDataSource>(),
       ),
     ),
+    RepositoryProvider<BannersRepository>(
+      create: (context) => BannersRepositoryImpl(
+        remoteDataSource: context.read<RemoteDataSource>(),
+      ),
+    ),
+    RepositoryProvider<PlansRepository>(
+      create: (context) => PlansRepositoryImpl(
+        remoteDataSource: context.read<RemoteDataSource>(),
+      ),
+    ),
   ];
 
   static final blocProviders = <BlocProvider>[
@@ -190,6 +203,12 @@ class StateInjector {
     ),
     BlocProvider<CategoryCubit>(
       create: (context) => CategoryCubit(context.read<CategoryRepository>()),
+    ),
+    BlocProvider<BannerCubit>(
+      create: (context) => BannerCubit(context.read<BannersRepository>()),
+    ),
+    BlocProvider<UserActivePlanCubit>(
+      create: (context) => UserActivePlanCubit(context.read<PlansRepository>()),
     ),
     BlocProvider<SubCategoryCubit>(
       create: (context) =>
