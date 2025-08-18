@@ -35,7 +35,7 @@ class User {
   String? rememberToken;
   String? createdAt;
   String? updatedAt;
-  String? otp;
+  int? otp;
   String? otpCreatedAt;
   String? resetToken;
   String? resetTokenCreatedAt;

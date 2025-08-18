@@ -69,7 +69,6 @@ class _ProductsListScreenState extends State<ProductsListScreen> {
           const SizedBox(width: 16),
         ],
       ),
-
       body: BlocListener<AddToWishlistCubit, AddToWishlistStates>(
         listener: (context, state) {
           if (state is AddToWishlistLoaded) {

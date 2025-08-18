@@ -3,6 +3,7 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:indiclassifieds/presentation/views/AdvertisementScreen.dart';
 import 'package:indiclassifieds/presentation/views/PlansScreen.dart';
 import 'package:indiclassifieds/presentation/PostAdds/CommunityAdScreen.dart';
 import 'package:indiclassifieds/presentation/PostAdds/EducationalAd.dart';
@@ -28,6 +29,7 @@ import '../presentation/authentication/OTPScreen.dart';
 import '../presentation/views/DetailsScreen.dart';
 import '../presentation/views/NotificationScreen.dart';
 import '../presentation/views/CategoryScreen.dart';
+import '../presentation/views/PostAdvertisementScreen.dart';
 import '../presentation/views/ProfileScreen.dart';
 import '../presentation/views/SelectSubCategory.dart';
 import '../presentation/views/SuccessScreen.dart';
@@ -97,10 +99,15 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/products_list',
       pageBuilder: (context, state) {
-        final sub_categoryId = state.uri.queryParameters['sub_categoryId'] ?? "";
-        final subCategoryname = state.uri.queryParameters['subCategoryname'] ?? "";
+        final sub_categoryId =
+            state.uri.queryParameters['sub_categoryId'] ?? "";
+        final subCategoryname =
+            state.uri.queryParameters['subCategoryname'] ?? "";
         return buildSlideTransitionPage(
-          ProductsListScreen(subCategoryId: sub_categoryId,subCategoryname: subCategoryname,),
+          ProductsListScreen(
+            subCategoryId: sub_categoryId,
+            subCategoryname: subCategoryname,
+          ),
           state,
         );
       },
@@ -110,12 +117,17 @@ final GoRouter appRouter = GoRouter(
       pageBuilder: (context, state) {
         // read from query params
         final listingIdStr = state.uri.queryParameters['listingId'];
+        final subcategory_idstr = state.uri.queryParameters['subcategory_id'];
 
         // safely parse to int
         final listingId = int.tryParse(listingIdStr ?? '') ?? 0;
+        final subcategory_id = int.tryParse(subcategory_idstr ?? '') ?? 0;
 
         return buildSlideTransitionPage(
-          ProductDetailsScreen(listingId: listingId),
+          ProductDetailsScreen(
+            listingId: listingId,
+            subcategory_id: subcategory_id,
+          ),
           state,
         );
       },
@@ -417,6 +429,18 @@ final GoRouter appRouter = GoRouter(
           ),
           state,
         );
+      },
+    ),
+    GoRoute(
+      path: '/advertisements',
+      pageBuilder: (context, state) {
+        return buildSlideTransitionPage(AdvertisementScreen(), state);
+      },
+    ),
+    GoRoute(
+      path: '/post_advertisements',
+      pageBuilder: (context, state) {
+        return buildSlideTransitionPage(PostAdvertisementScreen(), state);
       },
     ),
   ],

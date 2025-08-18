@@ -1,38 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../data/cubit/MyAds/my_ads_cubit.dart';
+import '../../data/cubit/MyAds/my_ads_states.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/ThemeHelper.dart';
+import '../../widgets/AdCardDynamic.dart';
 
-enum AdStatus { active, pending, expired }
+enum AdStatus { approved, pending, expired }
 
 extension AdStatusLabel on AdStatus {
   String get label {
     switch (this) {
-      case AdStatus.active:
-        return 'Active';
-      case AdStatus.pending:
-        return 'Pending';
-      case AdStatus.expired:
-        return 'Expired';
+      case AdStatus.approved: return 'Approved';
+      case AdStatus.pending:  return 'Pending';
+      case AdStatus.expired:  return 'Expired';
     }
   }
-}
 
-class Ad {
-  final String title, imageUrl, yearKmTrans, price, postedDate;
-  final int views, interested;
-  final AdStatus status;
-
-  Ad({
-    required this.title,
-    required this.imageUrl,
-    required this.yearKmTrans,
-    required this.price,
-    required this.postedDate,
-    required this.views,
-    required this.interested,
-    required this.status,
-  });
+  /// API param to send
+  String get apiParam {
+    switch (this) {
+      case AdStatus.approved: return 'approved';
+      case AdStatus.pending:  return 'pending';
+      case AdStatus.expired:  return 'expired';
+    }
+  }
 }
 
 class AdsScreen extends StatefulWidget {
@@ -43,68 +36,37 @@ class AdsScreen extends StatefulWidget {
 }
 
 class _AdsScreenState extends State<AdsScreen> {
-  AdStatus selectedStatus = AdStatus.active;
+  AdStatus selectedStatus = AdStatus.approved;
 
-  final List<Ad> _allAds = [
-    Ad(
-      title: 'Mercedes-Benz GLC',
-      imageUrl: 'assets/images/carimg.png',
-      yearKmTrans: '2023 • 15,000 km • Automatic',
-      price: '₹9,58,900',
-      postedDate: 'Posted Jul 1, 2025',
-      views: 245,
-      interested: 12,
-      status: AdStatus.active,
-    ),
-    Ad(
-      title: 'Audi RS7 Sportback',
-      imageUrl: 'assets/images/carimg.png',
-      yearKmTrans: '2024 • 8,500 km • Automatic',
-      price: '₹1,115,000',
-      postedDate: 'Posted Jun 28, 2025',
-      views: 189,
-      interested: 8,
-      status: AdStatus.active,
-    ),
-    Ad(
-      title: 'Tesla Model 3 Long Range',
-      imageUrl: 'assets/images/carimg.png',
-      yearKmTrans: '2024 • 5,200 km • Automatic',
-      price: '₹1,45,500',
-      postedDate: 'Posted Jun 25, 2025',
-      views: 312,
-      interested: 15,
-      status: AdStatus.pending,
-    ),
-    Ad(
-      title: 'Honda Fit Hybrid',
-      imageUrl: 'assets/images/carimg.png',
-      yearKmTrans: '2021 • 28,500 km • Automatic',
-      price: '₹8,19,800',
-      postedDate: 'Posted Jun 20, 2025',
-      views: 178,
-      interested: 6,
-      status: AdStatus.expired,
-    ),
-    Ad(
-      title: 'BMW 5 Series 530i',
-      imageUrl: 'assets/images/carimg.png',
-      yearKmTrans: '2023 • 12,000 km • Automatic',
-      price: '₹7,62,500',
-      postedDate: 'Posted Jun 15, 2025',
-      views: 201,
-      interested: 9,
-      status: AdStatus.active,
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    // initial fetch for "approved"
+    context.read<MyAdsCubit>().getMyAds(selectedStatus.apiParam);
+  }
+
+  void _onChangeTab(AdStatus status) {
+    setState(() => selectedStatus = status);
+    context.read<MyAdsCubit>().getMyAds(status.apiParam); // resets to page 1
+  }
+
+  bool _onScrollNotification(ScrollNotification sn, bool hasNextPage) {
+    if (!hasNextPage) return false;
+
+    final isScrollEnd = sn.metrics.pixels >= (sn.metrics.maxScrollExtent - 200);
+    final movingForward = sn is ScrollUpdateNotification && sn.scrollDelta != null && sn.scrollDelta! > 0;
+
+    if (isScrollEnd && movingForward) {
+      context.read<MyAdsCubit>().getMoreMyAds(selectedStatus.apiParam);
+    }
+    return false;
+  }
 
   @override
   Widget build(BuildContext context) {
     final isDark = ThemeHelper.isDarkMode(context);
     final textColor = ThemeHelper.textColor(context);
-    final bgColor = ThemeHelper.backgroundColor(context);
-
-    final List<Ad> visibleAds = _allAds.where((a) => a.status == selectedStatus).toList();
+    final bgColor   = ThemeHelper.backgroundColor(context);
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -116,6 +78,7 @@ class _AdsScreenState extends State<AdsScreen> {
       ),
       body: Column(
         children: [
+          // Tabs
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
@@ -125,12 +88,10 @@ class _AdsScreenState extends State<AdsScreen> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4),
                     child: TextButton(
-                      onPressed: () => setState(() => selectedStatus = status),
+                      onPressed: () => _onChangeTab(status),
                       style: TextButton.styleFrom(
                         backgroundColor: isSelected ? AppColors.primary : Colors.grey.shade200,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
-                        ),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
                       child: Text(
@@ -145,21 +106,63 @@ class _AdsScreenState extends State<AdsScreen> {
               }).toList(),
             ),
           ),
+
+          // List + pagination
           Expanded(
-            child: visibleAds.isEmpty
-                ? Center(
-              child: Text(
-                'No ${selectedStatus.label.toLowerCase()} ads',
-                style: AppTextStyles.bodyMedium(textColor),
-              ),
-            )
-                : ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: visibleAds.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 16),
-              itemBuilder: (_, index) {
-                final ad = visibleAds[index];
-                return _AdCard(ad: ad, isDark: isDark, textColor: textColor);
+            child: BlocBuilder<MyAdsCubit, MyAdsStates>(
+              builder: (context, state) {
+                final isLoading     = state is MyAdsLoading || state is MyAdsInitially;
+                final isLoadingMore = state is MyAdsLoadingMore;
+                final hasNextPage   = (state is MyAdsLoaded) ? state.hasNextPage
+                    : (state is MyAdsLoadingMore) ? state.hasNextPage
+                    : false;
+
+                if (isLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (state is MyAdsFailure) {
+                  return Center(
+                    child: Text(state.error.isEmpty ? 'Failed to load ads' : state.error,
+                        style: AppTextStyles.bodyMedium(textColor)),
+                  );
+                }
+
+                final model = (state is MyAdsLoaded)
+                    ? state.myAdsModel
+                    : (state is MyAdsLoadingMore)
+                    ? state.myAdsModel
+                    : null ;
+
+                final items = model?.data ?? [];
+
+                if (items.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'No ${selectedStatus.label.toLowerCase()} ads',
+                      style: AppTextStyles.bodyMedium(textColor),
+                    ),
+                  );
+                }
+
+                return NotificationListener<ScrollNotification>(
+                  onNotification: (sn) => _onScrollNotification(sn, hasNextPage),
+                  child: ListView.separated(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: items.length + (isLoadingMore ? 1 : 0),
+                    separatorBuilder: (_, __) => const SizedBox(height: 16),
+                    itemBuilder: (_, index) {
+                      if (isLoadingMore && index == items.length) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+                      final ad = items[index];
+                      return AdCardDynamic(ad: ad, isDark: isDark, textColor: textColor);
+                    },
+                  ),
+                );
               },
             ),
           ),
@@ -168,174 +171,5 @@ class _AdsScreenState extends State<AdsScreen> {
     );
   }
 }
-class _AdCard extends StatelessWidget {
-  final Ad ad;
-  final bool isDark;
-  final Color textColor;
-
-  const _AdCard({
-    required this.ad,
-    required this.isDark,
-    required this.textColor,
-    Key? key,
-  }) : super(key: key);
-
-  Color getStatusColor(AdStatus status) {
-    switch (status) {
-      case AdStatus.active:
-        return Colors.green.shade700;
-      case AdStatus.pending:
-        return Colors.orange.shade800;
-      case AdStatus.expired:
-        return Colors.red.shade700;
-    }
-  }
-
-  Color getStatusBgColor(AdStatus status) {
-    switch (status) {
-      case AdStatus.active:
-        return Colors.green.shade100;
-      case AdStatus.pending:
-        return Colors.orange.shade100;
-      case AdStatus.expired:
-        return Colors.red.shade100;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark ? Colors.grey[900] : Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
-        boxShadow: isDark
-            ? []
-            : [
-          BoxShadow(
-            color: Colors.black12.withOpacity(0.03),
-            blurRadius: 4,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          // Top: Image, title, specs, price, status
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.asset(
-                  ad.imageUrl,
-                  width: 64,
-                  height: 64,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      ad.title,
-                      style: AppTextStyles.bodyMedium(textColor).copyWith(fontWeight: FontWeight.w600),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      ad.yearKmTrans,
-                      style: AppTextStyles.bodySmall(Colors.grey.shade600),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      ad.price,
-                      style: AppTextStyles.titleLarge(Colors.blue),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: getStatusBgColor(ad.status),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  ad.status.label,
-                  style: AppTextStyles.labelSmall(getStatusColor(ad.status)),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 12),
-
-          // Middle: stats + posted date
-          Row(
-            children: [
-              Icon(Icons.remove_red_eye_outlined, size: 16, color: Colors.grey.shade600),
-              const SizedBox(width: 4),
-              Text("${ad.views} views", style: AppTextStyles.labelSmall(Colors.grey.shade600)),
-              const SizedBox(width: 16),
-              Icon(Icons.person_outline, size: 16, color: Colors.grey.shade600),
-              const SizedBox(width: 4),
-              Text("${ad.interested} interested", style: AppTextStyles.labelSmall(Colors.grey.shade600)),
-              const Spacer(),
-              Text(ad.postedDate, style: AppTextStyles.labelSmall(Colors.grey.shade600)),
-            ],
-          ),
-
-          const Divider(height: 24),
-
-          // Bottom: Actions
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _ActionButton(icon: Icons.edit_outlined, label: 'Edit', onTap: () {}),
-              _ActionButton(icon: Icons.delete_outline, label: 'Delete', textColor: Colors.grey.shade600, onTap: () {}),
-              _ActionButton(icon: Icons.campaign_outlined, label: 'Promote', onTap: () {}),
-              _ActionButton(icon: Icons.sell_outlined, label: 'Mark Sold', onTap: () {}),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 
-class _ActionButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color textColor;
-  final VoidCallback onTap;
-
-  const _ActionButton({
-    required this.icon,
-    required this.label,
-    this.textColor = AppColors.primary,
-    required this.onTap,
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(6),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
-        child: Row(
-          children: [
-            Icon(icon, size: 16, color: textColor),
-            const SizedBox(width: 4),
-            Text(label, style: AppTextStyles.bodyMedium(textColor)),
-          ],
-        ),
-      ),
-    );
-  }
-}

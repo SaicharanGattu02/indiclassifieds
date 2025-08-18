@@ -1,7 +1,12 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:indiclassifieds/data/cubit/AddToWishlist/addToWishlistCubit.dart';
 import 'package:indiclassifieds/data/cubit/AddToWishlist/addToWishlistStates.dart';
+import 'package:indiclassifieds/data/cubit/Advertisement/advertisement_cubit.dart';
+import 'package:indiclassifieds/data/cubit/Advertisement/advertisement_repo.dart';
+import 'package:indiclassifieds/data/cubit/AdvertisementDetails/advertisement_details_cubit.dart';
 import 'package:indiclassifieds/data/cubit/City/city_cubit.dart';
+import 'package:indiclassifieds/data/cubit/MyAds/my_ads_cubit.dart';
+import 'package:indiclassifieds/data/cubit/MyAds/my_ads_repo.dart';
 import 'package:indiclassifieds/data/cubit/Packages/packages_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Packages/packages_repository.dart';
 import 'package:indiclassifieds/data/cubit/Plans/plans_cubit.dart';
@@ -10,6 +15,9 @@ import 'package:indiclassifieds/data/cubit/ProductDetails/product_details_cubit.
 import 'package:indiclassifieds/data/cubit/ProductDetails/product_details_repo.dart';
 import 'package:indiclassifieds/data/cubit/Products/products_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Products/products_repository.dart';
+import 'package:indiclassifieds/data/cubit/Profile/profile_cubit.dart';
+import 'package:indiclassifieds/data/cubit/Profile/profile_repo.dart';
+import 'package:indiclassifieds/data/cubit/UpdateProfile/update_profile_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Wishlist/wishlist_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Wishlist/wishlist_repository.dart';
 import 'package:indiclassifieds/data/cubit/subCategory/sub_category_cubit.dart';
@@ -45,6 +53,7 @@ import 'data/cubit/Ad/PropertyAd/property_ad_repo.dart';
 import 'data/cubit/City/city_repository.dart';
 import 'data/cubit/LogInWithMobile/login_with_mobile.dart';
 import 'data/cubit/LogInWithMobile/login_with_mobile_repository.dart';
+import 'data/cubit/PostAdvertisement/post_advertisement_cubit.dart';
 import 'data/cubit/States/states_cubit.dart';
 import 'data/cubit/States/states_repository.dart';
 import 'data/cubit/category/category_cubit.dart';
@@ -157,6 +166,19 @@ class StateInjector {
         remoteDataSource: context.read<RemoteDataSource>(),
       ),
     ),
+    RepositoryProvider<MyAdsRepo>(
+      create: (context) =>
+          MyAdsRepoImpl(remoteDataSource: context.read<RemoteDataSource>()),
+    ),
+    RepositoryProvider<ProfileRepo>(
+      create: (context) =>
+          ProfileRepoImpl(remoteDataSource: context.read<RemoteDataSource>()),
+    ),
+    RepositoryProvider<AdvertisementRepo>(
+      create: (context) => AdvertisementRepoImpl(
+        remoteDataSource: context.read<RemoteDataSource>(),
+      ),
+    ),
   ];
 
   static final blocProviders = <BlocProvider>[
@@ -244,7 +266,29 @@ class StateInjector {
       create: (context) => PackagesCubit(context.read<PackagesRepository>()),
     ),
     BlocProvider<ProductDetailsCubit>(
-      create: (context) => ProductDetailsCubit(context.read<ProductDetailsRepo>()),
+      create: (context) =>
+          ProductDetailsCubit(context.read<ProductDetailsRepo>()),
+    ),
+    BlocProvider<MyAdsCubit>(
+      create: (context) => MyAdsCubit(context.read<MyAdsRepo>()),
+    ),
+    BlocProvider<ProfileCubit>(
+      create: (context) => ProfileCubit(context.read<ProfileRepo>()),
+    ),
+    BlocProvider<UpdateProfileCubit>(
+      create: (context) => UpdateProfileCubit(context.read<ProfileRepo>()),
+    ),
+    BlocProvider<AdvertisementsCubit>(
+      create: (context) =>
+          AdvertisementsCubit(context.read<AdvertisementRepo>()),
+    ),
+    BlocProvider<PostAdvertisementsCubit>(
+      create: (context) =>
+          PostAdvertisementsCubit(context.read<AdvertisementRepo>()),
+    ),
+    BlocProvider<AdvertisementDetailsCubit>(
+      create: (context) =>
+          AdvertisementDetailsCubit(context.read<AdvertisementRepo>()),
     ),
   ];
 }

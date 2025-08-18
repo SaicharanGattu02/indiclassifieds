@@ -24,7 +24,7 @@ class ProductCard extends StatelessWidget {
 
     return InkWell(
       onTap: (){
-        context.push("/products_details?listingId=${products.id}");
+        context.push("/products_details?listingId=${products.id}&subcategory_id=${products.subCategory}");
       },
       child: Container(
         decoration: BoxDecoration(

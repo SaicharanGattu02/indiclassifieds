@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:indiclassifieds/data/cubit/Products/products_cubit.dart';
+import 'package:indiclassifieds/model/WishlistModel.dart';
 import 'package:intl/intl.dart';
 
 import '../../data/cubit/ProductDetails/product_details_cubit.dart';
@@ -7,6 +9,7 @@ import '../../data/cubit/ProductDetails/product_details_states.dart';
 import '../../model/ProductDetailsModel.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
+import '../../widgets/SimilarProductsSection.dart';
 
 extension DetailsX on Details {
   /// Merged, display-ready map from toJson(), removing technical keys/nulls.
@@ -22,7 +25,8 @@ extension DetailsX on Details {
 
 class ProductDetailsScreen extends StatefulWidget {
   final int listingId;
-  const ProductDetailsScreen({super.key, required this.listingId});
+  final int subcategory_id;
+  const ProductDetailsScreen({super.key, required this.listingId, required this.subcategory_id});
 
   @override
   State<ProductDetailsScreen> createState() => _ProductDetailsScreenState();
@@ -36,6 +40,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   void initState() {
     super.initState();
     context.read<ProductDetailsCubit>().getProductDetails(widget.listingId);
+    context.read<ProductsCubit>().getProducts(widget.subcategory_id.toString());
   }
 
   @override
@@ -308,16 +313,11 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               SliverToBoxAdapter(
                 child: SizedBox(
                   height: 250,
-                  child: ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-                    scrollDirection: Axis.horizontal,
-                    itemCount: 4,
-                    separatorBuilder: (_, __) => const SizedBox(width: 12),
-                    itemBuilder: (_, i) => _SimilarCard(
-                      title: "Similar item #${i + 1}",
-                      price: "₹${_formatINR(listing.price)}",
-                      location: location,
-                    ),
+                  child: SimilarProductsSection(
+                    subCategoryId: listing.subCategoryId!.toString(),
+                    excludeId: listing.id,
+                    onTap: (prod) {
+                    },
                   ),
                 ),
               ),

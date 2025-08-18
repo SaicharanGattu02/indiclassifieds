@@ -1,0 +1,22 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:indiclassifieds/data/cubit/Profile/profile_repo.dart';
+import 'package:indiclassifieds/data/cubit/UpdateProfile/update_profile_states.dart';
+
+class UpdateProfileCubit extends Cubit<UpdateProfileStates> {
+  ProfileRepo profileRepo;
+  UpdateProfileCubit(this.profileRepo) : super(UpdateProfileInitially());
+
+  Future<void> updateProfileDetails(Map<String, dynamic> data) async {
+    emit(UpdateProfileLoading());
+    try {
+      final response = await profileRepo.updateProfileDetails(data);
+      if (response != null && response.success == true) {
+        emit(UpdateProfileLoaded(response));
+      } else {
+        emit(UpdateProfileFailure(response?.message ?? ""));
+      }
+    } catch (e) {
+      emit(UpdateProfileFailure(e.toString()));
+    }
+  }
+}

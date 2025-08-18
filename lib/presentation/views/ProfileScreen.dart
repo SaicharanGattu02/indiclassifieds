@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:indiclassifieds/data/cubit/Profile/profile_cubit.dart';
+import 'package:indiclassifieds/data/cubit/Profile/profile_states.dart';
 import '../../Components/CustomAppButton.dart';
 import '../../services/AuthService.dart';
 import '../../theme/AppTextStyles.dart';
@@ -14,6 +17,12 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<ProfileCubit>().getProfileDetails();
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = ThemeHelper.isDarkMode(context);
@@ -166,159 +175,175 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // Profile header
-            CircleAvatar(
-              radius: 40,
-              backgroundImage: AssetImage('assets/images/user_photo.png'),
-            ),
-            const SizedBox(height: 8),
-            Text('Manikanta.N', style: AppTextStyles.headlineSmall(textColor)),
-            Text(
-              'Member since June 2023',
-              style: AppTextStyles.bodySmall(textColor),
-            ),
-            const SizedBox(height: 8),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-              ),
-              onPressed: () {},
-              child: const Text('Edit Profile'),
-            ),
-            const SizedBox(height: 20),
+        child: BlocBuilder<ProfileCubit, ProfileStates>(
+          builder: (context, state) {
+            if (state is ProfileLoading) {
+              return Center(child: CircularProgressIndicator());
+            } else if (state is ProfileLoaded) {
+              final user_data = state.profileModel.data;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  CircleAvatar(
+                    radius: 40,
+                    backgroundImage: AssetImage('assets/images/user_photo.png'),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    user_data?.name ?? "",
+                    style: AppTextStyles.headlineSmall(textColor),
+                  ),
+                  Text(
+                    user_data?.email ?? "",
+                    style: AppTextStyles.bodySmall(textColor),
+                  ),
+                  const SizedBox(height: 8),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    onPressed: () {},
+                    child: const Text('Edit Profile'),
+                  ),
+                  const SizedBox(height: 20),
+                  //
+                  // // Stats
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  //   children: [
+                  //     _statTile('28', 'Sales', textColor),
+                  //     _statTile('4.9', 'Rating', textColor),
+                  //     _statTile('45', 'Reviews', textColor),
+                  //   ],
+                  // ),
+                  //
+                  // const SizedBox(height: 20),
+                  //
+                  // // Achievements
+                  // Align(
+                  //   alignment: Alignment.centerLeft,
+                  //   child: Text(
+                  //     'Achievements',
+                  //     style: AppTextStyles.titleLarge(textColor),
+                  //   ),
+                  // ),
+                  // const SizedBox(height: 12),
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  //   children: [
+                  //     _achievementTile(
+                  //       Icons.verified,
+                  //       Colors.green,
+                  //       'Verified Seller',
+                  //       textColor,
+                  //     ),
+                  //     _achievementTile(
+                  //       Icons.local_shipping,
+                  //       Colors.blue,
+                  //       'Fast Shipper',
+                  //       textColor,
+                  //     ),
+                  //     _achievementTile(
+                  //       Icons.star,
+                  //       Colors.amber,
+                  //       'Top Rated',
+                  //       textColor,
+                  //     ),
+                  //   ],
+                  // ),
+                  //
+                  // const SizedBox(height: 20),
 
-            // Stats
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _statTile('28', 'Sales', textColor),
-                _statTile('4.9', 'Rating', textColor),
-                _statTile('45', 'Reviews', textColor),
-              ],
-            ),
+                  // Settings list
+                  _settingsTile(
+                    Icons.unsubscribe_outlined,
+                    Colors.blue.shade100,
+                    'Subscription',
+                    isDark,
+                    textColor,
+                    trailing: Icons.arrow_forward_ios,
+                    onTap: () {
+                      context.push("/plans");
+                    },
+                  ),
+                  _settingsTile(
+                    Icons.unsubscribe_outlined,
+                    Colors.blue.shade100,
+                    'Advertisements',
+                    isDark,
+                    textColor,
+                    trailing: Icons.arrow_forward_ios,
+                    onTap: () {
+                      context.push("/advertisements");
+                    },
+                  ),
+                  _settingsTile(
+                    Icons.favorite,
+                    Colors.red.shade100,
+                    'Wishlist',
+                    isDark,
+                    textColor,
+                    trailing: Icons.arrow_forward_ios,
+                  ),
+                  _settingsTile(
+                    Icons.nightlight_round,
+                    Colors.purple.shade100,
+                    'Dark Theme',
+                    isDark,
+                    textColor,
+                    isSwitch: true,
+                  ),
+                  _settingsTile(
+                    Icons.share,
+                    Colors.orange.shade100,
+                    'Share this App',
+                    isDark,
+                    textColor,
+                    trailing: Icons.arrow_forward_ios,
+                  ),
+                  _settingsTile(
+                    Icons.star_rate,
+                    Colors.yellow.shade100,
+                    'Rate us',
+                    isDark,
+                    textColor,
+                    trailing: Icons.arrow_forward_ios,
+                  ),
+                  _settingsTile(
+                    Icons.headset_mic,
+                    Colors.lightBlue.shade100,
+                    'Contact us',
+                    isDark,
+                    textColor,
+                    trailing: Icons.arrow_forward_ios,
+                  ),
+                  _settingsTile(
+                    Icons.info,
+                    Colors.purple.shade100,
+                    'About us',
+                    isDark,
+                    textColor,
+                    trailing: Icons.arrow_forward_ios,
+                  ),
 
-            const SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
-            // Achievements
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Achievements',
-                style: AppTextStyles.titleLarge(textColor),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _achievementTile(
-                  Icons.verified,
-                  Colors.green,
-                  'Verified Seller',
-                  textColor,
-                ),
-                _achievementTile(
-                  Icons.local_shipping,
-                  Colors.blue,
-                  'Fast Shipper',
-                  textColor,
-                ),
-                _achievementTile(
-                  Icons.star,
-                  Colors.amber,
-                  'Top Rated',
-                  textColor,
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 20),
-
-            // Settings list
-            _settingsTile(
-              Icons.unsubscribe_outlined,
-              Colors.blue.shade100,
-              'Subscription',
-              isDark,
-              textColor,
-              trailing: Icons.arrow_forward_ios,
-              onTap: () {
-                context.push("/plans");
-              },
-            ),
-            _settingsTile(
-              Icons.language,
-              Colors.green.shade100,
-              'Language',
-              isDark,
-              textColor,
-              trailingText: 'English',
-            ),
-            _settingsTile(
-              Icons.nightlight_round,
-              Colors.purple.shade100,
-              'Dark Theme',
-              isDark,
-              textColor,
-              isSwitch: true,
-            ),
-            _settingsTile(
-              Icons.share,
-              Colors.orange.shade100,
-              'Share this App',
-              isDark,
-              textColor,
-              trailing: Icons.arrow_forward_ios,
-            ),
-            _settingsTile(
-              Icons.star_rate,
-              Colors.yellow.shade100,
-              'Rate us',
-              isDark,
-              textColor,
-              trailing: Icons.arrow_forward_ios,
-            ),
-            _settingsTile(
-              Icons.headset_mic,
-              Colors.lightBlue.shade100,
-              'Contact us',
-              isDark,
-              textColor,
-              trailing: Icons.arrow_forward_ios,
-            ),
-            _settingsTile(
-              Icons.favorite,
-              Colors.red.shade100,
-              'Wishlist',
-              isDark,
-              textColor,
-              trailing: Icons.arrow_forward_ios,
-            ),
-            _settingsTile(
-              Icons.info,
-              Colors.purple.shade100,
-              'About us',
-              isDark,
-              textColor,
-              trailing: Icons.arrow_forward_ios,
-            ),
-
-            const SizedBox(height: 20),
-
-            CustomAppButton1(
-              text: "Log Out",
-              onPlusTap: () {
-                showLogoutDialog(context);
-              },
-            ),
-            const SizedBox(height: 20),
-          ],
+                  CustomAppButton1(
+                    text: "Log Out",
+                    onPlusTap: () {
+                      showLogoutDialog(context);
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              );
+            } else {
+              return Center(child: Text("No data Found!"));
+            }
+          },
         ),
       ),
     );

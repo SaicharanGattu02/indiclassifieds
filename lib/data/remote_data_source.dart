@@ -3,9 +3,13 @@ import 'package:indiclassifieds/model/AddToWishlistModel.dart';
 import 'package:indiclassifieds/model/CategoryModel.dart';
 import 'package:indiclassifieds/utils/AppLogger.dart';
 import '../model/AdSuccessModel.dart';
+import '../model/AdvertisementDetailsModel.dart';
+import '../model/AdvertisementModel.dart';
+import '../model/MyAdsModel.dart';
 import '../model/PackagesModel.dart';
 import '../model/PlansModel.dart';
 import '../model/ProductDetailsModel.dart';
+import '../model/ProfileModel.dart';
 import '../model/SelectCityModel.dart';
 import '../model/SelectStatesModel.dart';
 import '../model/SendOtpModel.dart';
@@ -19,6 +23,8 @@ import '../services/api_endpoint_urls.dart';
 abstract class RemoteDataSource {
   Future<SendOtpModel?> sendMobileOTP(Map<String, dynamic> data);
   Future<VerifyOtpModel?> verifyMobileOTP(Map<String, dynamic> data);
+  Future<ProfileModel?> getProfileDetails();
+  Future<AdSuccessModel?> updateProfileDetails(Map<String, dynamic> data);
   Future<CategoryModel?> getCategory();
   Future<SubCategoryModel?> getSubCategory(String categoryId);
   Future<SubcategoryProductsModel?> getProducts(
@@ -32,6 +38,10 @@ abstract class RemoteDataSource {
   Future<SelectCityModel?> getCity(int state_id, String search, int page);
   Future<PlansModel?> getPlans();
   Future<PackagesModel?> getPackages(int id);
+  Future<AdvertisementModel?> getAdvertisements(int page, String type);
+  Future<AdSuccessModel?> postAdvertisement(Map<String, dynamic> data);
+  Future<AdvertisementDetailsModel?> getAdvertisementDetails();
+  Future<MyAdsModel?> getMyAds(String type, int page);
   Future<AdSuccessModel?> postCommonAd(Map<String, dynamic> data);
   Future<AdSuccessModel?> postCoWorkingAd(Map<String, dynamic> data);
   Future<AdSuccessModel?> postCityRentalsAd(Map<String, dynamic> data);
@@ -66,14 +76,7 @@ class RemoteDataSourceImpl implements RemoteDataSource {
         ];
       } else if (value is String &&
           value.contains('/') &&
-          (key.contains('images') ||
-              key.contains('aadhar_card_front') ||
-              key.contains('aadhar_card_back') ||
-              key.contains('pan_card_front') ||
-              key.contains('pan_card_back') ||
-              key.contains('driving_license_front') ||
-              key.contains('driving_license_back') ||
-              key.contains('signature'))) {
+          (key.contains('images') || key.contains('signature'))) {
         formMap[key] = await MultipartFile.fromFile(
           value,
           filename: value.split('/').last,
@@ -85,6 +88,130 @@ class RemoteDataSourceImpl implements RemoteDataSource {
       }
     }
     return FormData.fromMap(formMap);
+  }
+
+  Future<FormData> buildFormData1(Map<String, dynamic> data) async {
+    final formMap = <String, dynamic>{};
+    for (final entry in data.entries) {
+      final key = entry.key;
+      final value = entry.value;
+      if (value == null) continue;
+      final isFile =
+          value is String &&
+          value.contains('/') &&
+          (key.contains('image') ||
+              key.contains('file') ||
+              key.contains('uploaded_file') ||
+              key.contains('picture') ||
+              key.contains('payment_screenshot'));
+
+      if (isFile) {
+        final file = await MultipartFile.fromFile(
+          value,
+          filename: value.split('/').last,
+        );
+        formMap[key] = file;
+      } else {
+        formMap[key] = value;
+      }
+    }
+
+    // 🔥 Print the data before returning
+    formMap.forEach((key, value) {
+      AppLogger.log('$key -> $value');
+    });
+
+    return FormData.fromMap(formMap);
+  }
+
+  @override
+  Future<AdSuccessModel?> postAdvertisement(Map<String, dynamic> data) async {
+    try {
+      final formdata = await buildFormData1(data);
+      Response response = await ApiClient.post(
+        "${APIEndpointUrls.add_a_advertisement}",
+        data: formdata,
+      );
+      AppLogger.log('postAdvertisement:${response.data}');
+      return AdSuccessModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('postAdvertisement :: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<AdvertisementDetailsModel?> getAdvertisementDetails() async {
+    try {
+      Response response = await ApiClient.get(
+        "${APIEndpointUrls.get_active_adversments_details}",
+      );
+      AppLogger.log('getAdvertisementDetails:${response.data}');
+      return AdvertisementDetailsModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('getAdvertisementDetails :: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<AdvertisementModel?> getAdvertisements(int page, String type) async {
+    try {
+      Response response = await ApiClient.get(
+        "${APIEndpointUrls.get_all_my_advertisements}?page=${page}&status=${type}",
+      );
+      AppLogger.log('getAdvertisements:${response.data}');
+      return AdvertisementModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('getAdvertisements :: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<AdSuccessModel?> updateProfileDetails(
+    Map<String, dynamic> data,
+  ) async {
+    try {
+      final formdata = await buildFormData(data);
+      Response response = await ApiClient.put(
+        "${APIEndpointUrls.update_user_details_by_user}",
+        data: formdata,
+      );
+      AppLogger.log('updateProfileDetails:${response.data}');
+      return AdSuccessModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('updateProfileDetails :: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<ProfileModel?> getProfileDetails() async {
+    try {
+      Response response = await ApiClient.get(
+        "${APIEndpointUrls.get_my_profile_details}",
+      );
+      AppLogger.log('getProfileDetails:${response.data}');
+      return ProfileModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('getProfileDetails :: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<MyAdsModel?> getMyAds(String type, int page) async {
+    try {
+      Response response = await ApiClient.get(
+        "${APIEndpointUrls.get_my_listings_list}?status=${type}&page=$page",
+      );
+      AppLogger.log('getMyAds:${response.data}');
+      return MyAdsModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('getMyAds :: $e');
+      return null;
+    }
   }
 
   @override
