@@ -12,7 +12,12 @@ import '../../widgets/ProductCard.dart';
 
 class ProductsListScreen extends StatefulWidget {
   final String subCategoryId;
-  const ProductsListScreen({super.key, required this.subCategoryId});
+  final String subCategoryname;
+  const ProductsListScreen({
+    super.key,
+    required this.subCategoryId,
+    required this.subCategoryname,
+  });
 
   @override
   State<ProductsListScreen> createState() => _ProductsListScreenState();
@@ -24,10 +29,8 @@ class _ProductsListScreenState extends State<ProductsListScreen> {
   @override
   void initState() {
     super.initState();
-
     // Initial load
     context.read<ProductsCubit>().getProducts(widget.subCategoryId);
-
     // Pagination on scroll
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
@@ -58,7 +61,7 @@ class _ProductsListScreenState extends State<ProductsListScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Coworking Spaces',
+          widget.subCategoryname,
           style: AppTextStyles.headlineSmall(textColor),
         ),
         actions: [

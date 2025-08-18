@@ -2,6 +2,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:indiclassifieds/data/cubit/AddToWishlist/addToWishlistCubit.dart';
 import 'package:indiclassifieds/data/cubit/AddToWishlist/addToWishlistStates.dart';
 import 'package:indiclassifieds/data/cubit/City/city_cubit.dart';
+import 'package:indiclassifieds/data/cubit/Packages/packages_cubit.dart';
+import 'package:indiclassifieds/data/cubit/Packages/packages_repository.dart';
+import 'package:indiclassifieds/data/cubit/Plans/plans_cubit.dart';
+import 'package:indiclassifieds/data/cubit/Plans/plans_repository.dart';
+import 'package:indiclassifieds/data/cubit/ProductDetails/product_details_cubit.dart';
+import 'package:indiclassifieds/data/cubit/ProductDetails/product_details_repo.dart';
 import 'package:indiclassifieds/data/cubit/Products/products_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Products/products_repository.dart';
 import 'package:indiclassifieds/data/cubit/Wishlist/wishlist_cubit.dart';
@@ -136,6 +142,21 @@ class StateInjector {
         remoteDataSource: context.read<RemoteDataSource>(),
       ),
     ),
+    RepositoryProvider<PlansRepository>(
+      create: (context) => PlansRepositoryImpl(
+        remoteDataSource: context.read<RemoteDataSource>(),
+      ),
+    ),
+    RepositoryProvider<PackagesRepository>(
+      create: (context) => PackagesRepositoryImpl(
+        remoteDataSource: context.read<RemoteDataSource>(),
+      ),
+    ),
+    RepositoryProvider<ProductDetailsRepo>(
+      create: (context) => ProductDetailsRepoImpl(
+        remoteDataSource: context.read<RemoteDataSource>(),
+      ),
+    ),
   ];
 
   static final blocProviders = <BlocProvider>[
@@ -215,6 +236,15 @@ class StateInjector {
     BlocProvider<AddToWishlistCubit>(
       create: (context) =>
           AddToWishlistCubit(context.read<WishlistRepository>()),
+    ),
+    BlocProvider<PlansCubit>(
+      create: (context) => PlansCubit(context.read<PlansRepository>()),
+    ),
+    BlocProvider<PackagesCubit>(
+      create: (context) => PackagesCubit(context.read<PackagesRepository>()),
+    ),
+    BlocProvider<ProductDetailsCubit>(
+      create: (context) => ProductDetailsCubit(context.read<ProductDetailsRepo>()),
     ),
   ];
 }

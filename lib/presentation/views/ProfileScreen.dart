@@ -248,6 +248,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               isDark,
               textColor,
               trailing: Icons.arrow_forward_ios,
+              onTap: () {
+                context.push("/plans");
+              },
             ),
             _settingsTile(
               Icons.language,
@@ -358,42 +361,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
     IconData? trailing,
     String? trailingText,
     bool isSwitch = false,
+    VoidCallback? onTap, // <-- add onTap
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(10)),
-        gradient: isDark
-            ? LinearGradient(
-                colors: [
-                  Colors.black.withOpacity(0.2),
-                  Colors.black.withOpacity(0.8),
-                ],
-              )
-            : LinearGradient(
-                colors: [
-                  Color(0xffF9FAFB).withOpacity(0.8),
-                  Color(0xffFFFFFF).withOpacity(0.8),
-                ],
-              ),
-      ),
-      padding: const EdgeInsets.all(16),
-      margin: EdgeInsets.only(bottom: 6),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 18,
-            backgroundColor: iconBg,
-            child: Icon(icon, size: 18, color: Colors.black),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(label, style: AppTextStyles.bodyMedium(textcolor)),
-          ),
-          if (trailingText != null)
-            Text(trailingText, style: AppTextStyles.bodySmall(textcolor)),
-          if (trailing != null) Icon(trailing, size: 16, color: Colors.grey),
-          if (isSwitch) Switch(value: false, onChanged: (val) {}),
-        ],
+    return InkWell(
+      onTap: onTap, // <-- handle tap
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: const BorderRadius.all(Radius.circular(10)),
+          gradient: isDark
+              ? LinearGradient(
+                  colors: [
+                    Colors.black.withOpacity(0.2),
+                    Colors.black.withOpacity(0.8),
+                  ],
+                )
+              : LinearGradient(
+                  colors: [
+                    const Color(0xffF9FAFB).withOpacity(0.8),
+                    const Color(0xffFFFFFF).withOpacity(0.8),
+                  ],
+                ),
+        ),
+        padding: const EdgeInsets.all(16),
+        margin: const EdgeInsets.only(bottom: 6),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 18,
+              backgroundColor: iconBg,
+              child: Icon(icon, size: 18, color: Colors.black),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(label, style: AppTextStyles.bodyMedium(textcolor)),
+            ),
+            if (trailingText != null)
+              Text(trailingText, style: AppTextStyles.bodySmall(textcolor)),
+            if (trailing != null) Icon(trailing, size: 16, color: Colors.grey),
+            if (isSwitch) Switch(value: false, onChanged: (val) {}),
+          ],
+        ),
       ),
     );
   }

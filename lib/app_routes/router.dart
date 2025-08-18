@@ -3,10 +3,11 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:indiclassifieds/presentation/BoostYourSalesScreen.dart';
+import 'package:indiclassifieds/presentation/views/PlansScreen.dart';
 import 'package:indiclassifieds/presentation/PostAdds/CommunityAdScreen.dart';
 import 'package:indiclassifieds/presentation/PostAdds/EducationalAd.dart';
 import 'package:indiclassifieds/presentation/PostAdds/VechileAd.dart';
+import 'package:indiclassifieds/presentation/views/ProductDetailsScreen.dart';
 import 'package:indiclassifieds/presentation/views/SplashScreen.dart';
 import 'package:indiclassifieds/presentation/views/SubCategoriesScreen.dart';
 import '../model/CategoryModel.dart';
@@ -38,7 +39,7 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/',
       pageBuilder: (context, state) =>
-          buildSlideTransitionPage(BoostYourSalesScreen(), state),
+          buildSlideTransitionPage(Splashscreen(), state),
     ),
     GoRoute(
       path: '/dashboard',
@@ -48,7 +49,7 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/plans',
       pageBuilder: (context, state) =>
-          buildSlideTransitionPage(BoostYourSalesScreen(), state),
+          buildSlideTransitionPage(PlansScreen(), state),
     ),
     GoRoute(
       path: '/notifications',
@@ -96,10 +97,25 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/products_list',
       pageBuilder: (context, state) {
-        final sub_categoryId =
-            state.uri.queryParameters['sub_categoryId'] ?? "";
+        final sub_categoryId = state.uri.queryParameters['sub_categoryId'] ?? "";
+        final subCategoryname = state.uri.queryParameters['subCategoryname'] ?? "";
         return buildSlideTransitionPage(
-          ProductsListScreen(subCategoryId: sub_categoryId),
+          ProductsListScreen(subCategoryId: sub_categoryId,subCategoryname: subCategoryname,),
+          state,
+        );
+      },
+    ),
+    GoRoute(
+      path: '/products_details',
+      pageBuilder: (context, state) {
+        // read from query params
+        final listingIdStr = state.uri.queryParameters['listingId'];
+
+        // safely parse to int
+        final listingId = int.tryParse(listingIdStr ?? '') ?? 0;
+
+        return buildSlideTransitionPage(
+          ProductDetailsScreen(listingId: listingId),
           state,
         );
       },

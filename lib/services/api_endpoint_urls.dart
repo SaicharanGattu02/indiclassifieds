@@ -2,8 +2,6 @@ class APIEndpointUrls {
   static const String baseUrl = 'http://192.168.80.107:8081/';
   static const String apiUrl = 'api/app/';
 
-
-
   /// Authentiocation Urls
   static const String register = '${apiUrl}Register';
   static const String refreshtoken = '${apiUrl}login';
@@ -13,19 +11,22 @@ class APIEndpointUrls {
 
   /// User Urls
 
-
-
   /// get Apis
   static const String get_category = '${apiUrl}get-all-categories';
   static const String get_sub_category = '${apiUrl}get-all-sub-categories';
-  static const String get_listings_by_sub_category = '${apiUrl}get-listings-by-sub-category';
-  static const String get_all_listings_with_pagination = '${apiUrl}get-all-listings-with-pagination';
-  static const String get_all_liked_listings = '${apiUrl}get-all-liked-listings';
-  static const String like_toggle_to_product = '${apiUrl}like-toggle-to-product';
+  static const String get_listings_by_sub_category =
+      '${apiUrl}get-listings-by-sub-category';
+  static const String get_all_listings_with_pagination =
+      '${apiUrl}get-all-listings-with-pagination';
+  static const String get_all_liked_listings =
+      '${apiUrl}get-all-liked-listings';
+  static const String like_toggle_to_product =
+      '${apiUrl}like-toggle-to-product';
   static const String get_states = '${apiUrl}get-all-states';
   static const String get_city = '${apiUrl}get-all-cities';
-
-
+  static const String get_all_active_plans = '${apiUrl}get-all-active-plans';
+  static const String get_all_packages_by_plan = '${apiUrl}get-all-packages-by-plan';
+  static const String get_single_listing_details = '${apiUrl}get-single-listing-details';
 
   /// post apis
   static const String post_common_ad = '${apiUrl}add-common-list-to-listings';
@@ -33,15 +34,15 @@ class APIEndpointUrls {
   static const String post_property_ad = '${apiUrl}add-property-to-listings';
   static const String post_cars_ad = '${apiUrl}add-car-to-listings';
   static const String post_bikes_ad = '${apiUrl}add-bike-to-listings';
-  static const String post_commercial_vehicle_ad = '${apiUrl}add-commercial-vehicle-to-listings';
+  static const String post_commercial_vehicle_ad =
+      '${apiUrl}add-commercial-vehicle-to-listings';
   static const String post_pets_ad = '${apiUrl}add-pets-to-listings';
   static const String post_jobs_ad = '${apiUrl}add-jobs-to-listings';
   static const String post_education_ad = '${apiUrl}add-education-to-listings';
   static const String post_astrology_ad = '${apiUrl}add-astrology-to-listings';
   static const String post_community_ad = '${apiUrl}add-community-to-listings';
-  static const String post_city_rentals_ad = '${apiUrl}add-city-rentals-to-listings';
-  static const String post_co_working_ad = '${apiUrl}add-co-working-to-listings';
-
-
-
+  static const String post_city_rentals_ad =
+      '${apiUrl}add-city-rentals-to-listings';
+  static const String post_co_working_ad =
+      '${apiUrl}add-co-working-to-listings';
 }

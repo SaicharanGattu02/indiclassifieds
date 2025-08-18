@@ -1,11 +1,13 @@
 class PlansModel {
   bool? success;
+  String? message;
   List<Plans>? plans;
 
-  PlansModel({this.success, this.plans});
+  PlansModel({this.success, this.plans,this.message});
 
   PlansModel.fromJson(Map<String, dynamic> json) {
     success = json['success'];
+    message = json['message'];
     if (json['data'] != null) {
       plans = <Plans>[];
       json['data'].forEach((v) {
@@ -17,6 +19,7 @@ class PlansModel {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['success'] = this.success;
+    data['message'] = this.message;
     if (this.plans != null) {
       data['data'] = this.plans!.map((v) => v.toJson()).toList();
     }

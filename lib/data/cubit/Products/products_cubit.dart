@@ -18,7 +18,6 @@ class ProductsCubit extends Cubit<ProductsStates> {
   Future<void> getProducts(String subCategoryId) async {
     emit(ProductsLoading());
     _currentPage = 1;
-
     try {
       final response = await productsRepo.getProducts(
         subCategoryId,
@@ -86,6 +85,4 @@ class ProductsCubit extends Cubit<ProductsStates> {
     productsModel = productsModel.copyWith(products: updatedProducts);
     emit(ProductsLoaded(productsModel, _hasNextPage));
   }
-
 }
-

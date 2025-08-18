@@ -3,6 +3,9 @@ import 'package:indiclassifieds/model/AddToWishlistModel.dart';
 import 'package:indiclassifieds/model/CategoryModel.dart';
 import 'package:indiclassifieds/utils/AppLogger.dart';
 import '../model/AdSuccessModel.dart';
+import '../model/PackagesModel.dart';
+import '../model/PlansModel.dart';
+import '../model/ProductDetailsModel.dart';
 import '../model/SelectCityModel.dart';
 import '../model/SelectStatesModel.dart';
 import '../model/SendOtpModel.dart';
@@ -22,10 +25,13 @@ abstract class RemoteDataSource {
     String sub_category_id,
     int page,
   );
+  Future<ProductDetailsModel?> getProductDetails(int id);
   Future<WishlistModel?> getWishlistProducts(int page);
   Future<AddToWishlistModel?> addToWishlist(int product_id);
   Future<SelectStatesModel?> getStates(String search);
   Future<SelectCityModel?> getCity(int state_id, String search, int page);
+  Future<PlansModel?> getPlans();
+  Future<PackagesModel?> getPackages(int id);
   Future<AdSuccessModel?> postCommonAd(Map<String, dynamic> data);
   Future<AdSuccessModel?> postCoWorkingAd(Map<String, dynamic> data);
   Future<AdSuccessModel?> postCityRentalsAd(Map<String, dynamic> data);
@@ -82,6 +88,48 @@ class RemoteDataSourceImpl implements RemoteDataSource {
   }
 
   @override
+  Future<ProductDetailsModel?> getProductDetails(int id) async {
+    try {
+      Response response = await ApiClient.get(
+        "${APIEndpointUrls.get_single_listing_details}/${id}",
+      );
+      AppLogger.log('getProductDetails:${response.data}');
+      return ProductDetailsModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('getProductDetails :: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<PackagesModel?> getPackages(int id) async {
+    try {
+      Response response = await ApiClient.get(
+        "${APIEndpointUrls.get_all_packages_by_plan}/${id}",
+      );
+      AppLogger.log('getPackages:${response.data}');
+      return PackagesModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('getPackages :: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<PlansModel?> getPlans() async {
+    try {
+      Response response = await ApiClient.get(
+        "${APIEndpointUrls.get_all_active_plans}",
+      );
+      AppLogger.log('getPlans:${response.data}');
+      return PlansModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('getPlans :: $e');
+      return null;
+    }
+  }
+
+  @override
   Future<AddToWishlistModel?> addToWishlist(int product_id) async {
     try {
       Map<String, dynamic> data = {"listingId": product_id};
@@ -118,7 +166,7 @@ class RemoteDataSourceImpl implements RemoteDataSource {
   ) async {
     try {
       Response response = await ApiClient.get(
-        "${APIEndpointUrls.get_all_listings_with_pagination}?page=${page}",
+        "${APIEndpointUrls.get_all_listings_with_pagination}?page=${page}&sub_category_id=${sub_category_id}",
       );
       AppLogger.log('getProducts:${response.data}');
       return SubcategoryProductsModel.fromJson(response.data);
