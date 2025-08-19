@@ -85,6 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
           } else if (state is DashBoardLoaded) {
             final banner_data = state.bannersModel;
             final category_data = state.categoryModel;
+            final new_category_data = state.NewcategoryModel;
             final products_data = state.subcategoryProductsModel;
             return SingleChildScrollView(
               child: Padding(
@@ -92,41 +93,39 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ), // Padding inside the container
-                      decoration: BoxDecoration(
-                        color:
-                            Colors.white, // Background color for the container
-                        borderRadius: BorderRadius.circular(
-                          12,
-                        ), // Border radius
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 5,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.search,
-                            color: Color(0xff6B72820),
-                          ), // Prefix Icon
-                          SizedBox(width: 8), // Space between icon and text
-                          Text(
-                            'Search products, brands, .....', // Your text
-                            style: TextStyle(
-                              color: textColor,
-                            ), // Custom text color
-                          ),
-                          // Spacer(),  // To push the suffix icon to the right
-                          // Icon(Icons.mic, color: AppColors.primary),  // Suffix Icon
-                        ],
+                    InkWell(
+                      onTap: () {
+                        context.push("/search_screen");
+                      },
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 5,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.search,
+                              color: Color(0xff6B72820),
+                            ), // Prefix Icon
+                            SizedBox(width: 8),
+                            Text(
+                              'Search products, brands, .....',
+                              style: TextStyle(color: textColor),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     SizedBox(height: 16),
@@ -202,43 +201,97 @@ class _HomeScreenState extends State<HomeScreen> {
                                 crossAxisCount: 4,
                                 mainAxisSpacing: 12,
                                 crossAxisSpacing: 12,
-                                childAspectRatio: 1,
+                                childAspectRatio: 0.9,
                               ),
-                          delegate: SliverChildBuilderDelegate((
-                            context,
-                            index,
-                          ) {
-                            return Container(
-                              padding: EdgeInsets.fromLTRB(2, 12, 2, 2),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Column(
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(4),
-                                    child: Image.asset(
-                                      'assets/images/findInvestor.png',
-                                      fit: BoxFit.cover,
-                                    ),
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) {
+                              final new_categoryItem =
+                                  new_category_data?.categoriesList![index];
+                              return InkResponse(
+                                onTap: () {
+                                  context.push(
+                                    '/sub_categories',
+                                    extra:
+                                        new_categoryItem, // pass the full object
+                                  );
+                                },
+                                child: Container(
+                                  padding: EdgeInsets.fromLTRB(2, 12, 2, 2),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
-                                  SizedBox(height: 6),
-                                  Text(
-                                    "Find Investor",
-                                    textAlign: TextAlign.center,
-                                    style: AppTextStyles.titleSmall(textColor)
-                                        .copyWith(
-                                          fontWeight: FontWeight.w500,
-                                          color: Color(
-                                            isDarkMode
-                                                ? 0xffD7E4FF
-                                                : 0xff374151,
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                          color: Color(0xffF8FAFE),
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                            4,
+                                          ),
+                                          child: CachedNetworkImage(
+                                            imageUrl:
+                                                new_categoryItem?.image ?? "",
+                                            fit: BoxFit.cover,
+                                            width: SizeConfig.screenWidth * 0.2,
+                                            height:
+                                                SizeConfig.screenHeight * 0.04,
+                                            placeholder: (context, url) =>
+                                                Center(
+                                                  child: spinkits
+                                                      .getSpinningLinespinkit(),
+                                                ),
+                                            errorWidget:
+                                                (
+                                                  context,
+                                                  url,
+                                                  error,
+                                                ) => Container(
+                                                  decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          8,
+                                                        ),
+                                                    color: Color(0xffF8FAFE),
+                                                  ),
+                                                  child: Icon(
+                                                    Icons.broken_image,
+                                                    size: 40,
+                                                    color: Colors.grey,
+                                                  ),
+                                                ),
                                           ),
                                         ),
-                                  ),],
-                              ),
-                            );
-                          }, childCount: 4),
+                                      ),
+
+                                      SizedBox(height: 6),
+                                      Text(
+                                        new_categoryItem?.name ?? "Un Known",
+                                        textAlign: TextAlign.center,
+                                        style:
+                                            AppTextStyles.titleSmall(
+                                              textColor,
+                                            ).copyWith(
+                                              fontWeight: FontWeight.w500,
+                                              color: Color(
+                                                isDarkMode
+                                                    ? 0xffD7E4FF
+                                                    : 0xff374151,
+                                              ),
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                            childCount:
+                                new_category_data?.categoriesList?.length,
+                          ),
                         ),
                       ],
                     ),

@@ -14,14 +14,24 @@ class ProductsCubit extends Cubit<ProductsStates> {
   bool _hasNextPage = true;
   bool _isLoadingMore = false;
 
-  /// Initial fetch (reset to page 1)
-  Future<void> getProducts(String subCategoryId) async {
+  // Updated getProducts method to handle optional parameters
+  Future<void> getProducts({
+    String? categoryId,
+    String? subCategoryId,
+    String? search,
+    String? state_id,
+    String? city_id,
+  }) async {
     emit(ProductsLoading());
     _currentPage = 1;
     try {
       final response = await productsRepo.getProducts(
-        subCategoryId,
-        _currentPage, // 👈 pass page number
+        categoryId: categoryId,
+        subCategoryId: subCategoryId,
+        search: search,
+        state_id: state_id,
+        city_id: city_id,
+        page: _currentPage,
       );
 
       if (response != null && response.success == true) {
@@ -48,8 +58,8 @@ class ProductsCubit extends Cubit<ProductsStates> {
 
     try {
       final newData = await productsRepo.getProducts(
-        subCategoryId,
-        _currentPage, // 👈 pass next page
+        subCategoryId: subCategoryId,
+        page: _currentPage, // 👈 pass next page
       );
 
       if (newData != null && newData.products?.isNotEmpty == true) {
@@ -86,3 +96,4 @@ class ProductsCubit extends Cubit<ProductsStates> {
     emit(ProductsLoaded(productsModel, _hasNextPage));
   }
 }
+

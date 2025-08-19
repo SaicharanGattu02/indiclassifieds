@@ -28,12 +28,17 @@ abstract class RemoteDataSource {
   Future<ProfileModel?> getProfileDetails();
   Future<AdSuccessModel?> updateProfileDetails(Map<String, dynamic> data);
   Future<CategoryModel?> getCategory();
+  Future<CategoryModel?> getNewCategory();
   Future<BannersModel?> getBanners();
   Future<SubCategoryModel?> getSubCategory(String categoryId);
   Future<SubcategoryProductsModel?> getProducts(
-    String sub_category_id,
-    int page,
-  );
+      {required int page,
+        String? categoryId,
+        String? subCategoryId,
+        String? search,
+        String? state_id,
+        String? city_id}
+      );
   Future<ProductDetailsModel?> getProductDetails(int id);
   Future<WishlistModel?> getWishlistProducts(int page);
   Future<AddToWishlistModel?> addToWishlist(int product_id);
@@ -319,18 +324,43 @@ class RemoteDataSourceImpl implements RemoteDataSource {
   }
 
   @override
-  Future<SubcategoryProductsModel?> getProducts(
-    String sub_category_id,
-    int page,
-  ) async {
+  Future<SubcategoryProductsModel?> getProducts({
+    String? categoryId,
+    String? subCategoryId,
+    String? search,
+    String? state_id,
+    String? city_id,
+    required int page,  // Make sure page is required
+  }) async {
     try {
-      Response response = await ApiClient.get(
-        "${APIEndpointUrls.get_all_listings_with_pagination}?page=${page}&sub_category_id=${sub_category_id}",
-      );
-      AppLogger.log('getProducts:${response.data}');
+      // Start with the base URL
+      String url = "${APIEndpointUrls.get_all_listings_with_pagination}?page=$page";
+
+      // Append parameters conditionally
+      if (subCategoryId != null) {
+        url += "&sub_category_id=$subCategoryId";
+      }
+      if (categoryId != null) {
+        url += "&category_id=$categoryId";
+      }
+      if (search != null) {
+        url += "&search=$search";
+      }
+      if (state_id != null) {
+        url += "&state_id=$state_id";
+      }
+      if (city_id != null) {
+        url += "&city_id=$city_id";
+      }
+
+      // Make the GET request with the constructed URL
+      Response response = await ApiClient.get(url);
+      AppLogger.log('getProducts response: ${response.data}');
+
+      // Parse and return the response
       return SubcategoryProductsModel.fromJson(response.data);
     } catch (e) {
-      AppLogger.error('getProducts:: $e');
+      AppLogger.error('getProducts error: $e');
       return null;
     }
   }
@@ -361,6 +391,20 @@ class RemoteDataSourceImpl implements RemoteDataSource {
       return VerifyOtpModel.fromJson(response.data);
     } catch (e) {
       AppLogger.error('verify Mobile OTP :: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<CategoryModel?> getNewCategory() async {
+    try {
+      Response response = await ApiClient.get(
+        "${APIEndpointUrls.get_category}?featured_category=true",
+      );
+      AppLogger.log('getNewCategory :${response.data}');
+      return CategoryModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('getNewCategory :: $e');
       return null;
     }
   }

@@ -9,6 +9,7 @@ import 'package:indiclassifieds/presentation/PostAdds/CommunityAdScreen.dart';
 import 'package:indiclassifieds/presentation/PostAdds/EducationalAd.dart';
 import 'package:indiclassifieds/presentation/PostAdds/VechileAd.dart';
 import 'package:indiclassifieds/presentation/views/ProductDetailsScreen.dart';
+import 'package:indiclassifieds/presentation/views/SearchScreen.dart';
 import 'package:indiclassifieds/presentation/views/SplashScreen.dart';
 import 'package:indiclassifieds/presentation/views/SubCategoriesScreen.dart';
 import '../model/CategoryModel.dart';
@@ -68,6 +69,12 @@ final GoRouter appRouter = GoRouter(
       pageBuilder: (context, state) {
         final mobile = state.uri.queryParameters['mobile'] ?? "";
         return buildSlideTransitionPage(Otpscreen(mobile: mobile), state);
+      },
+    ),
+    GoRoute(
+      path: '/search_screen',
+      pageBuilder: (context, state) {
+        return buildSlideTransitionPage(SearchScreen(), state);
       },
     ),
     GoRoute(

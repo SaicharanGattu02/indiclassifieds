@@ -11,6 +11,7 @@ import 'package:indiclassifieds/data/cubit/City/city_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Dashboard/DashboardCubit.dart';
 import 'package:indiclassifieds/data/cubit/MyAds/my_ads_cubit.dart';
 import 'package:indiclassifieds/data/cubit/MyAds/my_ads_repo.dart';
+import 'package:indiclassifieds/data/cubit/NewCategories/new_categories_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Packages/packages_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Packages/packages_repository.dart';
 import 'package:indiclassifieds/data/cubit/Plans/plans_cubit.dart';
@@ -207,6 +208,9 @@ class StateInjector {
     BlocProvider<CategoriesCubit>(
       create: (context) => CategoriesCubit(context.read<CategoriesRepo>()),
     ),
+    BlocProvider<NewCategoriesCubit>(
+      create: (context) => NewCategoriesCubit(context.read<CategoriesRepo>()),
+    ),
     BlocProvider<ProductsCubit>(
       create: (context) => ProductsCubit(context.read<ProductsRepo>()),
     ),
@@ -313,6 +317,7 @@ class StateInjector {
     BlocProvider<DashboardCubit>(
       create: (context) => DashboardCubit(
         bannersCubit: context.read<BannerCubit>(),
+        newCategoriesCubit: context.read<NewCategoriesCubit>(),
         categoryCubit: context.read<CategoriesCubit>(),
         productsCubit: context.read<ProductsCubit>(),
       ),

@@ -1,6 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:indiclassifieds/data/cubit/Banners/banner_states.dart';
 import 'package:indiclassifieds/data/cubit/Categories/categories_cubit.dart';
+import 'package:indiclassifieds/data/cubit/NewCategories/new_categories_cubit.dart';
+import 'package:indiclassifieds/data/cubit/NewCategories/new_categories_states.dart';
 import 'package:indiclassifieds/data/cubit/Products/products_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Products/products_states.dart';
 import 'package:indiclassifieds/model/BannersModel.dart';
@@ -13,12 +15,14 @@ import 'DashboardState.dart';
 class DashboardCubit extends Cubit<DashBoardState> {
   final BannerCubit bannersCubit;
   final CategoriesCubit categoryCubit;
+  final NewCategoriesCubit newCategoriesCubit;
   final ProductsCubit productsCubit;
 
   DashboardCubit({
     required this.bannersCubit,
     required this.categoryCubit,
     required this.productsCubit,
+    required this.newCategoriesCubit,
   }) : super(DashBoardInitially());
 
   Future<void> fetchDashboard() async {
@@ -26,6 +30,7 @@ class DashboardCubit extends Cubit<DashBoardState> {
 
     BannersModel? bannerModel;
     CategoryModel? categoryModel;
+    CategoryModel? newcategoryModel;
     SubcategoryProductsModel? subcategoryProductsModel;
 
     try {
@@ -46,9 +51,18 @@ class DashboardCubit extends Cubit<DashBoardState> {
         } else if (state is CategoriesFailure) {}
       } catch (e) {}
 
+      // --- Fetch new categories ---
+      try {
+        await newCategoriesCubit.getNewCategories();
+        final state = newCategoriesCubit.state;
+        if (state is NewCategoryLoaded) {
+          newcategoryModel = state.NewcategoryModel;
+        } else if (state is NewCategoryFailure) {}
+      } catch (e) {}
+
       // --- Fetch products ---
       try {
-        await productsCubit.getProducts("");
+        await productsCubit.getProducts();
         final state = productsCubit.state;
         if (state is ProductsLoaded) {
           subcategoryProductsModel = state.productsModel;
@@ -60,6 +74,7 @@ class DashboardCubit extends Cubit<DashBoardState> {
         emit(
           DashBoardLoaded(
             bannersModel: bannerModel,
+            NewcategoryModel: newcategoryModel,
             categoryModel: categoryModel,
             subcategoryProductsModel: subcategoryProductsModel,
           ),

@@ -4,20 +4,37 @@ import '../../../model/SubcategoryProductsModel.dart';
 
 abstract class ProductsRepo {
   Future<SubcategoryProductsModel?> getProducts(
-    String sub_category_id,
-      int page
-  );
+      {required int page,
+        String? categoryId,
+        String? subCategoryId,
+        String? search,
+        String? state_id,
+        String? city_id}
+      );
 }
 
 class ProductsRepoImpl implements ProductsRepo {
-  RemoteDataSource remoteDataSource;
+  final RemoteDataSource remoteDataSource;
+
   ProductsRepoImpl({required this.remoteDataSource});
 
   @override
-  Future<SubcategoryProductsModel?> getProducts(
-    String sub_category_id,
-      int page
-  ) async {
-    return await remoteDataSource.getProducts(sub_category_id,page);
+  Future<SubcategoryProductsModel?> getProducts({
+    required int page,  // Make sure to include page in the method signature
+    String? categoryId,
+    String? subCategoryId,
+    String? search,
+    String? state_id,
+    String? city_id,
+  }) async {
+    return await remoteDataSource.getProducts(
+      categoryId: categoryId,
+      subCategoryId: subCategoryId,
+      search: search,
+      state_id: state_id,
+      city_id: city_id,
+      page: page, // Pass page to remote data source
+    );
   }
 }
+

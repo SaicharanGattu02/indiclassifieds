@@ -30,7 +30,9 @@ class _ProductsListScreenState extends State<ProductsListScreen> {
   void initState() {
     super.initState();
     // Initial load
-    context.read<ProductsCubit>().getProducts(widget.subCategoryId);
+    context.read<ProductsCubit>().getProducts(
+      subCategoryId: widget.subCategoryId,
+    );
     // Pagination on scroll
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=

@@ -37,7 +37,7 @@ class _SimilarProductsSectionState extends State<SimilarProductsSection> {
     super.initState();
     // Initial fetch
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _cubit.getProducts(widget.subCategoryId);
+      _cubit.getProducts(subCategoryId: widget.subCategoryId);
       _attachListenerIfNeeded();
     });
   }
@@ -100,7 +100,7 @@ class _SimilarProductsSectionState extends State<SimilarProductsSection> {
                 Text(state.error, style: AppTextStyles.bodyMedium(textColor)),
                 const SizedBox(height: 8),
                 OutlinedButton.icon(
-                  onPressed: () => _cubit.getProducts(widget.subCategoryId),
+                  onPressed: () => _cubit.getProducts(subCategoryId: widget.subCategoryId),
                   icon: const Icon(Icons.refresh),
                   label: const Text("Retry"),
                 ),
