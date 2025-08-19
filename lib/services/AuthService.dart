@@ -7,6 +7,7 @@ import '../utils/constants.dart';
 
 class AuthService {
   static const String _accessTokenKey = "access_token";
+  static const String _plan_status = "plan_status";
   // static const String _refreshTokenKey = "refresh_token";
   // static const String _tokenExpiryKey = "token_expiry";
 
@@ -21,6 +22,24 @@ class AuthService {
   /// Get stored access token
   static Future<String?> getAccessToken() async {
     return await _storage.read(key: _accessTokenKey);
+  }
+
+  /// Get stored access token
+  static Future<void> setPlanStatus(String status) async {
+    await _storage.write(key: _plan_status, value: status);
+  }
+
+  static Future<String?> getPlanStatus() async {
+    return await _storage.read(key: _plan_status);
+  }
+
+  static Future<bool> get isEligibleForAd async {
+    final status = await getPlanStatus();
+    if (status == "false") {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   /// Get stored refresh token
@@ -77,8 +96,9 @@ class AuthService {
     await _storage.write(key: _accessTokenKey, value: accessToken);
     // await _storage.write(key: _refreshTokenKey, value: refreshToken ?? "");
     // await _storage.write(key: _tokenExpiryKey, value: expiresIn.toString());
-    debugPrint('Tokens saved: accessToken=$accessToken, '
-        // 'expiryTime=$expiresIn'
+    debugPrint(
+      'Tokens saved: accessToken=$accessToken, ',
+      // 'expiryTime=$expiresIn'
     );
   }
 

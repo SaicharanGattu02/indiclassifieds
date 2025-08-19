@@ -30,15 +30,17 @@ class SubCategoryModel {
 class SubCategories {
   int? subCategoryId;
   String? name;
+  String? path;
   String? image;
   int? noOfCounts;
 
-  SubCategories({this.subCategoryId, this.name, this.image, this.noOfCounts});
+  SubCategories({this.subCategoryId, this.name, this.image, this.noOfCounts, this.path});
 
   SubCategories.fromJson(Map<String, dynamic> json) {
     subCategoryId = json['sub_category_id'];
     name = json['name'];
     image = json['image'];
+    path = json['path'];
     noOfCounts = json['no_of_counts'];
   }
 
@@ -47,6 +49,7 @@ class SubCategories {
     data['sub_category_id'] = this.subCategoryId;
     data['name'] = this.name;
     data['image'] = this.image;
+    data['path'] = this.path;
     data['no_of_counts'] = this.noOfCounts;
     return data;
   }

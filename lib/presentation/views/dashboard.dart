@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:indiclassifieds/presentation/views/Home.dart';
 import 'package:indiclassifieds/presentation/views/ProfileScreen.dart';
+import 'package:indiclassifieds/services/AuthService.dart';
 import 'package:indiclassifieds/theme/app_colors.dart';
 
+import '../../data/cubit/UserActivePlans/user_active_plans_cubit.dart';
 import '../../theme/ThemeHelper.dart';
 import 'AddsScreen.dart';
 import 'FavouritesScreen.dart';
@@ -26,6 +29,16 @@ class _DashboardState extends State<Dashboard> {
     super.initState();
     _selectedIndex = widget.initialTab;
     pageController = PageController(initialPage: _selectedIndex);
+    getData();
+  }
+
+  Future<void> getData() async {
+    final plan = await context
+        .read<UserActivePlanCubit>()
+        .getUserActivePlansData();
+    if (plan != null) {
+      AuthService.setPlanStatus(plan.goToPlansPage.toString() ?? "");
+    }
   }
 
   void onItemTapped(int index) {
@@ -64,7 +77,7 @@ class _DashboardState extends State<Dashboard> {
         floatingActionButton: Container(
           width: 50,
           height: 50,
-          // margin: EdgeInsets.only(top: 40),
+          margin: EdgeInsets.only(top: 40),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             boxShadow: [

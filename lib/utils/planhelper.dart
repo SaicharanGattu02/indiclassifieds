@@ -1,0 +1,125 @@
+// utils.dart
+
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../data/cubit/UserActivePlans/user_active_plans_cubit.dart';
+import '../data/cubit/UserActivePlans/user_active_plans_states.dart';
+import '../model/UserActivePlansModel.dart';
+import '../theme/AppTextStyles.dart';
+import '../theme/ThemeHelper.dart';
+
+
+void showPlanBottomSheet({
+  required BuildContext context,
+  required TextEditingController controller,
+  required Function(Plans) onSelectPlan,
+  String? title = 'Select Plan', // Optional title for the bottom sheet
+}) {
+  showModalBottomSheet(
+    context: context,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+    ),
+    builder: (context) {
+      return BlocBuilder<UserActivePlanCubit, UserActivePlanStates>(
+        builder: (context, state) {
+          // Get the current theme colors from ThemeHelper
+          final textColor = ThemeHelper.textColor(context);
+          final backgroundColor = ThemeHelper.backgroundColor(context);
+          final cardColor = ThemeHelper.cardColor(context);
+
+          if (state is UserActivePlanLoading) {
+            return Center(child: CircularProgressIndicator());
+          }
+
+          if (state is UserActivePlanFailure) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error, color: Colors.red, size: 40),
+                  SizedBox(height: 10),
+                  Text(
+                    'Error loading plans',
+                    style: AppTextStyles.bodyLarge(textColor),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          if (state is UserActivePlanLoaded) {
+            final plans = state.userActivePlansModel.plans ?? [];
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (title != null) // Display title if provided
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: Text(
+                        title,
+                        style: AppTextStyles.headlineMedium(textColor),
+                      ),
+                    ),
+                  Expanded(
+                    child: ListView.separated(
+                      itemCount: plans.length,
+                      itemBuilder: (context, index) {
+                        final plan = plans[index];
+                        return Card(
+                          elevation: 5,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          margin: EdgeInsets.only(bottom: 12),
+                          color: cardColor,
+                          child: ListTile(
+                            contentPadding: EdgeInsets.all(16),
+                            title: Text(
+                              plan.planName ?? 'No name',
+                              style: AppTextStyles.titleLarge(textColor),
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  plan.packageName ?? 'No package',
+                                  style: AppTextStyles.bodyMedium(textColor),
+                                ),
+                                SizedBox(height: 4),
+                                Text(
+                                  'Start Date: ${plan.startDate}',
+                                  style: AppTextStyles.bodySmall(textColor),
+                                ),
+                                Text(
+                                  'End Date: ${plan.endDate}',
+                                  style: AppTextStyles.bodySmall(textColor),
+                                ),
+                              ],
+                            ),
+                            onTap: () {
+                              controller.text = plan.planName ?? ''; // Set the selected plan name in the text field
+                              onSelectPlan(plan); // Callback function when a plan is selected
+                              Navigator.pop(context); // Close the bottom sheet
+                            },
+                          ),
+                        );
+                      },
+                      separatorBuilder: (context, index) => Divider(thickness: 1.5, color: textColor.withOpacity(0.2)),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return Center(child: Text('No plans available', style: AppTextStyles.bodyMedium(textColor)));
+        },
+      );
+    },
+  );
+}
+

@@ -13,11 +13,15 @@ import '../../data/cubit/Ad/CommonAd/common_ad_cubit.dart';
 import '../../data/cubit/Ad/CommonAd/common_ad_states.dart';
 import '../../data/cubit/States/states_cubit.dart';
 import '../../data/cubit/States/states_repository.dart';
+import '../../data/cubit/UserActivePlans/user_active_plans_cubit.dart';
 import '../../data/remote_data_source.dart';
+import '../../services/AuthService.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
+import '../../utils/ImagePickerHelper.dart';
 import '../../utils/ImageUtils.dart';
 import '../../utils/color_constants.dart';
+import '../../utils/planhelper.dart';
 import '../../widgets/CommonTextField.dart';
 import '../../widgets/SelectCityBottomSheet.dart';
 import '../../widgets/SelectStateBottomSheet.dart';
@@ -58,133 +62,28 @@ class _CommonAdState extends State<CommonAd> {
   final emailController = TextEditingController();
   final stateController = TextEditingController();
   final cityController = TextEditingController();
+  final planController = TextEditingController();
   List<String> selectedConditions = [];
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  File? _image;
-  String? imagePath;
   List<File> _images = [];
   final int _maxImages = 6;
-  final ImagePicker _picker = ImagePicker();
-  Future<void> _pickImage() async {
-    showModalBottomSheet(
+  int? planId;
+  int? packageId;
+
+  // Function to call the ImagePickerBottomSheet
+  void _pickImage() {
+    ImagePickerHelper.showImagePickerBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      backgroundColor: Colors.white,
-      builder: (BuildContext context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Drag handle
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    decoration: BoxDecoration(
-                      color: primarycolor.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.close, color: Colors.red),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ],
-                ),
-                ListTile(
-                  leading: Icon(Icons.photo_library, color: primarycolor),
-                  title: const Text(
-                    'Choose from Gallery',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 16,
-                      color: Colors.black87,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _pickImageFromGallery();
-                  },
-                ),
-
-                // Camera Option
-                ListTile(
-                  leading: Icon(Icons.camera_alt, color: primarycolor),
-                  title: const Text(
-                    'Take a Photo',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 16,
-                      color: Colors.black87,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _pickImageFromCamera();
-                  },
-                ),
-
-                const SizedBox(height: 8),
-              ],
-            ),
-          ),
-        );
+      onImageSelected: (image) {
+        setState(() {
+          if (_images.length < _maxImages) {
+            _images.add(image); // Add the selected image to the list
+          }
+        });
       },
+      maxImages: _maxImages,
+      images: _images,
     );
-  }
-
-  Future<void> _pickImageFromGallery() async {
-    final XFile? pickedFile = await _picker.pickImage(
-      source: ImageSource.gallery,
-    );
-    if (pickedFile != null) {
-      File? compressedFile = await ImageUtils.compressImage(
-        File(pickedFile.path),
-      );
-      if (compressedFile != null) {
-        setState(() {
-          if (_images.length < _maxImages) {
-            _images.add(compressedFile); // ✅ add to list
-          }
-        });
-      }
-    }
-  }
-
-  Future<void> _pickImageFromCamera() async {
-    final XFile? pickedFile = await _picker.pickImage(
-      source: ImageSource.camera,
-    );
-    if (pickedFile != null) {
-      File? compressedFile = await ImageUtils.compressImage(
-        File(pickedFile.path),
-      );
-      if (compressedFile != null) {
-        setState(() {
-          if (_images.length < _maxImages) {
-            _images.add(compressedFile); // ✅ add to list
-          }
-        });
-      }
-    }
   }
 
   void _removeImage(int index) {
@@ -520,8 +419,8 @@ class _CommonAdState extends State<CommonAd> {
                 controller: nameController,
                 color: textColor,
                 prefixIcon: Icon(Icons.person, color: textColor, size: 16),
-                // validator: (v) =>
-                //     (v == null || v.trim().isEmpty) ? 'Name required' : null,
+                validator: (v) =>
+                    (v == null || v.trim().isEmpty) ? 'Name required' : null,
               ),
               CommonTextField1(
                 lable: 'Phone Number',
@@ -534,8 +433,8 @@ class _CommonAdState extends State<CommonAd> {
                 color: textColor,
                 keyboardType: TextInputType.phone,
                 prefixIcon: Icon(Icons.call, color: textColor, size: 16),
-                // validator: (v) =>
-                //     (v == null || v.trim().isEmpty) ? 'Phone required' : null,
+                validator: (v) =>
+                    (v == null || v.trim().isEmpty) ? 'Phone required' : null,
               ),
               // CommonTextField1(
               //   lable: 'Email (Optional)',
@@ -549,33 +448,34 @@ class _CommonAdState extends State<CommonAd> {
                 hint: 'Enter Location',
                 controller: locationController,
                 color: textColor,
-                // validator: (v) => (v == null || v.trim().isEmpty)
-                //     ? 'Required location'
-                //     : null,
+                validator: (v) => (v == null || v.trim().isEmpty)
+                    ? 'Required location'
+                    : null,
               ),
-              // Row(
-              //   children: [
-              //     Expanded(
-              //       child: Column(
-              //         crossAxisAlignment: CrossAxisAlignment.start,
-              //         children: [
-              //
-              //         ],
-              //       ),
-              //     ),
-              //
-              //     SizedBox(width: 8),
-              //     Expanded(
-              //       child: Column(
-              //         crossAxisAlignment: CrossAxisAlignment.start,
-              //         children: [
-              //
-              //         ],
-              //       ),
-              //     ),
-              //
-              //   ],
-              // ),
+              CommonTextField1(
+                lable: 'Plan',
+                isRead: true,
+                hint: 'Select Plan',
+                controller: planController,
+                color: textColor,
+                validator: (v) => (v == null || v.trim().isEmpty)
+                    ? 'Plan is Required'
+                    : null,
+                onTap: () {
+                  context.read<UserActivePlanCubit>().getUserActivePlansData();
+                  showPlanBottomSheet(
+                    context: context,
+                    controller: planController,
+                    onSelectPlan: (selectedPlan) {
+                      print('Selected plan: ${selectedPlan.planName}');
+                      planId = selectedPlan.planId;
+                      packageId = selectedPlan.packageId;
+                    },
+                    title:
+                        'Choose Your Plan', // Optional title for the bottom sheet
+                  );
+                },
+              ),
             ],
           ),
         ),
@@ -583,41 +483,51 @@ class _CommonAdState extends State<CommonAd> {
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-          child: BlocConsumer<CommonAdCubit, CommonAdStates>(
-            listener: (context, state) {
-              if (state is CommonAdSuccess) {
-                context.pushReplacement("/successfully");
-              } else if (state is CommonAdFailure) {
-                CustomSnackBar1.show(context, state.error);
-              }
-            },
-            builder: (context, state) {
-              return CustomAppButton1(
-                isLoading: state is CommonAdLoading,
-                text: 'Submit Ad',
-                onPlusTap: () {
-                  if (_formKey.currentState?.validate() ?? false) {
-                    final Map<String, dynamic> data = {
-                      "title": titleController.text,
-                      "description": descriptionController.text,
-                      "sub_category_id": widget.subCatId,
-                      "category_id": widget.catId,
-                      "location": locationController.text,
-                      "mobile_number": phoneController.text,
-                      "plan_id": "1",
-                      "package_id": "3",
-                      "price": priceController.text,
-                      "full_name": nameController.text,
-                      "state_id": selectedStateId,
-                      "city_id": selectedCityId,
-                    };
-                    if (_images.isNotEmpty) {
-                      data["images"] = _images
-                          .map((file) => file.path)
-                          .toList();
-                    }
-                    context.read<CommonAdCubit>().postCommonAd(data);
+          child: FutureBuilder(
+            future: AuthService.isEligibleForAd,
+            builder: (context, asyncSnapshot) {
+              final isEligible = asyncSnapshot.data ?? false;
+              return BlocConsumer<CommonAdCubit, CommonAdStates>(
+                listener: (context, state) {
+                  if (state is CommonAdSuccess) {
+                    context.pushReplacement("/successfully");
+                  } else if (state is CommonAdFailure) {
+                    CustomSnackBar1.show(context, state.error);
                   }
+                },
+                builder: (context, state) {
+                  return CustomAppButton1(
+                    isLoading: state is CommonAdLoading,
+                    text: 'Submit Ad',
+                    onPlusTap: isEligible
+                        ? () {
+                            if (_formKey.currentState?.validate() ?? false) {
+                              final Map<String, dynamic> data = {
+                                "title": titleController.text,
+                                "description": descriptionController.text,
+                                "sub_category_id": widget.subCatId,
+                                "category_id": widget.catId,
+                                "location": locationController.text,
+                                "mobile_number": phoneController.text,
+                                "plan_id": planId,
+                                "package_id": packageId,
+                                "price": priceController.text,
+                                "full_name": nameController.text,
+                                "state_id": selectedStateId,
+                                "city_id": selectedCityId,
+                              };
+                              if (_images.isNotEmpty) {
+                                data["images"] = _images
+                                    .map((file) => file.path)
+                                    .toList();
+                              }
+                              context.read<CommonAdCubit>().postCommonAd(data);
+                            }
+                          }
+                        : () {
+                            context.push("/plans");
+                          },
+                  );
                 },
               );
             },

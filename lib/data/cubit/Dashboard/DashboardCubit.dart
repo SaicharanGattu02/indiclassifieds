@@ -1,19 +1,18 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:indiclassifieds/data/cubit/Banners/banner_states.dart';
-import 'package:indiclassifieds/data/cubit/Category/category_state.dart';
+import 'package:indiclassifieds/data/cubit/Categories/categories_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Products/products_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Products/products_states.dart';
 import 'package:indiclassifieds/model/BannersModel.dart';
 import 'package:indiclassifieds/model/SubcategoryProductsModel.dart';
 import '../../../model/CategoryModel.dart';
-import '../../../services/AuthService.dart';
 import '../Banners/banner_cubit.dart';
-import '../Category/category_cubit.dart';
+import '../Categories/categories_states.dart';
 import 'DashboardState.dart';
 
 class DashboardCubit extends Cubit<DashBoardState> {
   final BannerCubit bannersCubit;
-  final CategoryCubit categoryCubit;
+  final CategoriesCubit categoryCubit;
   final ProductsCubit productsCubit;
 
   DashboardCubit({
@@ -40,11 +39,11 @@ class DashboardCubit extends Cubit<DashBoardState> {
 
       // --- Fetch categories ---
       try {
-        await categoryCubit.getCategory();
+        await categoryCubit.getCategories();
         final state = categoryCubit.state;
-        if (state is CategoryLoaded) {
+        if (state is CategoriesLoaded) {
           categoryModel = state.categoryModel;
-        } else if (state is CategoryFailure) {}
+        } else if (state is CategoriesFailure) {}
       } catch (e) {}
 
       // --- Fetch products ---

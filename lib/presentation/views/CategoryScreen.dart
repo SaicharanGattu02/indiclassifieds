@@ -2,9 +2,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:indiclassifieds/data/cubit/category/category_cubit.dart';
-import 'package:indiclassifieds/data/cubit/category/category_state.dart';
+import 'package:indiclassifieds/data/cubit/Categories/categories_states.dart';
 import 'package:indiclassifieds/utils/color_constants.dart';
+import '../../data/cubit/Categories/categories_cubit.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../utils/spinkittsLoader.dart';
@@ -19,8 +19,9 @@ class CategoryScreen extends StatefulWidget {
 class _CategoryScreenState extends State<CategoryScreen> {
   @override
   void initState() {
-    context.read<CategoryCubit>().getCategory();
     super.initState();
+   context.read<CategoriesCubit>().getCategories();
+
   }
 
   @override
@@ -51,11 +52,11 @@ class _CategoryScreenState extends State<CategoryScreen> {
               style: AppTextStyles.bodyMedium(Colors.grey),
             ),
             const SizedBox(height: 20),
-            BlocBuilder<CategoryCubit, CategoryStates>(
+            BlocBuilder<CategoriesCubit, CategoriesStates>(
               builder: (context, state) {
-                if (state is CategoryLoading) {
+                if (state is CategoriesLoading) {
                   return Center(child: CircularProgressIndicator());
-                } else if (state is CategoryLoaded) {
+                } else if (state is CategoriesLoaded) {
                   final categories = state.categoryModel.categoriesList;
                   return Expanded(
                     child: GridView.builder(
@@ -129,7 +130,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                       },
                     ),
                   );
-                } else if (state is CategoryFailure) {
+                } else if (state is CategoriesFailure) {
                   return Center(child: Text(state.error ?? ""));
                 }
                 return Center(child: Text("No Data"));

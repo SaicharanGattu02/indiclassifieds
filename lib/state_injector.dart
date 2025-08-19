@@ -5,6 +5,8 @@ import 'package:indiclassifieds/data/cubit/Advertisement/advertisement_repo.dart
 import 'package:indiclassifieds/data/cubit/AdvertisementDetails/advertisement_details_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Banners/banner_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Banners/banner_repository.dart';
+import 'package:indiclassifieds/data/cubit/Categories/categories_cubit.dart';
+import 'package:indiclassifieds/data/cubit/Categories/categories_repository.dart';
 import 'package:indiclassifieds/data/cubit/City/city_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Dashboard/DashboardCubit.dart';
 import 'package:indiclassifieds/data/cubit/MyAds/my_ads_cubit.dart';
@@ -53,15 +55,12 @@ import 'data/cubit/Ad/PetsAd/pets_ad_cubit.dart';
 import 'data/cubit/Ad/PetsAd/pets_ad_repo.dart';
 import 'data/cubit/Ad/PropertyAd/popperty_ad_cubit.dart';
 import 'data/cubit/Ad/PropertyAd/property_ad_repo.dart';
-import 'data/cubit/Category/category_cubit.dart';
 import 'data/cubit/City/city_repository.dart';
 import 'data/cubit/LogInWithMobile/login_with_mobile.dart';
 import 'data/cubit/LogInWithMobile/login_with_mobile_repository.dart';
 import 'data/cubit/PostAdvertisement/post_advertisement_cubit.dart';
 import 'data/cubit/States/states_cubit.dart';
 import 'data/cubit/States/states_repository.dart';
-import 'data/cubit/category/category_repository.dart';
-
 import 'data/remote_data_source.dart';
 
 class StateInjector {
@@ -74,10 +73,19 @@ class StateInjector {
         remoteDataSource: context.read<RemoteDataSource>(),
       ),
     ),
-    RepositoryProvider<CategoryRepository>(
-      create: (context) => CategoryRepositoryImpl(
+    RepositoryProvider<BannersRepository>(
+      create: (context) => BannersRepositoryImpl(
         remoteDataSource: context.read<RemoteDataSource>(),
       ),
+    ),
+    RepositoryProvider<CategoriesRepo>(
+      create: (context) => CategoriesRepoImpl(
+        remoteDataSource: context.read<RemoteDataSource>(),
+      ),
+    ),
+    RepositoryProvider<ProductsRepo>(
+      create: (context) =>
+          ProductsRepoImpl(remoteDataSource: context.read<RemoteDataSource>()),
     ),
     RepositoryProvider<SubCategoryRepository>(
       create: (context) => SubCategoryRepositoryImpl(
@@ -145,10 +153,7 @@ class StateInjector {
       create: (context) =>
           CoWorkingAdImpl(remoteDataSource: context.read<RemoteDataSource>()),
     ),
-    RepositoryProvider<ProductsRepo>(
-      create: (context) =>
-          ProductsRepoImpl(remoteDataSource: context.read<RemoteDataSource>()),
-    ),
+
     RepositoryProvider<WishlistRepository>(
       create: (context) => WishlistRepositoryImpl(
         remoteDataSource: context.read<RemoteDataSource>(),
@@ -182,11 +187,6 @@ class StateInjector {
         remoteDataSource: context.read<RemoteDataSource>(),
       ),
     ),
-    RepositoryProvider<BannersRepository>(
-      create: (context) => BannersRepositoryImpl(
-        remoteDataSource: context.read<RemoteDataSource>(),
-      ),
-    ),
     RepositoryProvider<PlansRepository>(
       create: (context) => PlansRepositoryImpl(
         remoteDataSource: context.read<RemoteDataSource>(),
@@ -204,16 +204,13 @@ class StateInjector {
     BlocProvider<BannerCubit>(
       create: (context) => BannerCubit(context.read<BannersRepository>()),
     ),
-    BlocProvider<CategoryCubit>(
-      create: (context) => CategoryCubit(context.read<CategoryRepository>()),
+    BlocProvider<CategoriesCubit>(
+      create: (context) => CategoriesCubit(context.read<CategoriesRepo>()),
     ),
-    BlocProvider<DashboardCubit>(
-      create: (context) => DashboardCubit(
-        bannersCubit: BannerCubit(context.read<BannersRepository>()),
-        categoryCubit: CategoryCubit(context.read<CategoryRepository>()),
-        productsCubit: ProductsCubit(context.read<ProductsRepo>()),
-      ),
+    BlocProvider<ProductsCubit>(
+      create: (context) => ProductsCubit(context.read<ProductsRepo>()),
     ),
+
     BlocProvider<UserActivePlanCubit>(
       create: (context) => UserActivePlanCubit(context.read<PlansRepository>()),
     ),
@@ -275,9 +272,6 @@ class StateInjector {
     BlocProvider<MobileAdCubit>(
       create: (context) => MobileAdCubit(context.read<MobileAdRepository>()),
     ),
-    BlocProvider<ProductsCubit>(
-      create: (context) => ProductsCubit(context.read<ProductsRepo>()),
-    ),
     BlocProvider<WishlistCubit>(
       create: (context) => WishlistCubit(context.read<WishlistRepository>()),
     ),
@@ -315,6 +309,13 @@ class StateInjector {
     BlocProvider<AdvertisementDetailsCubit>(
       create: (context) =>
           AdvertisementDetailsCubit(context.read<AdvertisementRepo>()),
+    ),
+    BlocProvider<DashboardCubit>(
+      create: (context) => DashboardCubit(
+        bannersCubit: context.read<BannerCubit>(),
+        categoryCubit: context.read<CategoriesCubit>(),
+        productsCubit: context.read<ProductsCubit>(),
+      ),
     ),
   ];
 }

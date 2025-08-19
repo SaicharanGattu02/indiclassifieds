@@ -6,12 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:indiclassifieds/data/cubit/Dashboard/DashboardCubit.dart';
 import 'package:indiclassifieds/data/cubit/Dashboard/DashboardState.dart';
 import 'package:indiclassifieds/theme/app_colors.dart';
-import 'package:indiclassifieds/widgets/CommonTextField.dart';
 import 'package:intl/intl.dart';
-
 import '../../data/cubit/Products/products_cubit.dart';
-import '../../data/cubit/category/category_cubit.dart';
-import '../../data/cubit/category/category_state.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../utils/media_query_helper.dart';
