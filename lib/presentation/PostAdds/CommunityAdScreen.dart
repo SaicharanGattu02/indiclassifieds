@@ -2,12 +2,15 @@ import 'dart:io';
 
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../Components/CustomAppButton.dart';
 import '../../Components/CutomAppBar.dart';
+import '../../data/cubit/UserActivePlans/user_active_plans_cubit.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
+import '../../utils/planhelper.dart';
 import '../../widgets/CommonTextField.dart';
 
 class CommunityAdScreen extends StatefulWidget {
@@ -33,6 +36,9 @@ class _CommunityAdScreenState extends State<CommunityAdScreen> {
   final availableslotsController = TextEditingController();
   final availableplayerslotsController = TextEditingController();
   final detailsController = TextEditingController();
+  final planController = TextEditingController();
+  int? planId;
+  int? packageId;
 
   File? selectedImage;
 
@@ -169,6 +175,29 @@ class _CommunityAdScreenState extends State<CommunityAdScreen> {
                 maxLines: 3,
                 controller: detailsController,
                 color: textColor,
+              ),
+              CommonTextField1(
+                lable: 'Plan',
+                isRead: true,
+                hint: 'Select Plan',
+                controller: planController,
+                color: textColor,
+                validator: (v) =>
+                (v == null || v.trim().isEmpty) ? 'Plan is Required' : null,
+                onTap: () {
+                  context.read<UserActivePlanCubit>().getUserActivePlansData();
+                  showPlanBottomSheet(
+                    context: context,
+                    controller: planController,
+                    onSelectPlan: (selectedPlan) {
+                      print('Selected plan: ${selectedPlan.planName}');
+                      planId = selectedPlan.planId;
+                      packageId = selectedPlan.packageId;
+                    },
+                    title:
+                    'Choose Your Plan', // Optional title for the bottom sheet
+                  );
+                },
               ),
             ],
           ),

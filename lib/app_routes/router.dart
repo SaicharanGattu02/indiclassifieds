@@ -340,6 +340,24 @@ final GoRouter appRouter = GoRouter(
       },
     ),
     GoRoute(
+      path: '/bikes_ad',
+      pageBuilder: (context, state) {
+        final categoryId = state.uri.queryParameters['catId'] ?? "";
+        final categoryName = state.uri.queryParameters['CatName'] ?? "";
+        final SubCategoryName = state.uri.queryParameters['SubCatName'] ?? "";
+        final subCatId = state.uri.queryParameters['subCatId'] ?? "";
+        return buildSlideFromBottomPage(
+          BikeAd(
+            catId: categoryId,
+            CatName: categoryName,
+            subCatId: subCatId,
+            SubCatName: SubCategoryName,
+          ),
+          state,
+        );
+      },
+    ),
+    GoRoute(
       path: '/educational_ad',
       pageBuilder: (context, state) {
         final categoryId = state.uri.queryParameters['catId'] ?? "";

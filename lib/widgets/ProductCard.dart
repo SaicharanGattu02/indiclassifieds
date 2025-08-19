@@ -198,8 +198,6 @@ class ProductCard1 extends StatelessWidget {
                     ),
                   ),
                 ),
-
-                // Wishlist Icon (Top Right)
                 Positioned(
                   top: 8,
                   right: 8,

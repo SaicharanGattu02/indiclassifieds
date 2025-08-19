@@ -12,11 +12,13 @@ import '../../data/cubit/Ad/EducationAd/education_ad_cubit.dart';
 import '../../data/cubit/Ad/EducationAd/education_ad_states.dart';
 import '../../data/cubit/States/states_cubit.dart';
 import '../../data/cubit/States/states_repository.dart';
+import '../../data/cubit/UserActivePlans/user_active_plans_cubit.dart';
 import '../../data/remote_data_source.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../utils/ImageUtils.dart';
 import '../../utils/color_constants.dart';
+import '../../utils/planhelper.dart' show showPlanBottomSheet;
 import '../../widgets/CommonTextField.dart';
 import '../../widgets/SelectCityBottomSheet.dart';
 import '../../widgets/SelectStateBottomSheet.dart';
@@ -57,6 +59,9 @@ class _EducationalAdState extends State<EducationalAd> {
   final nameController = TextEditingController();
   final instituteNameController = TextEditingController();
   final costOfFeeController = TextEditingController();
+  final planController = TextEditingController();
+  int? planId;
+  int? packageId;
 
   @override
   void initState() {
@@ -539,6 +544,29 @@ class _EducationalAdState extends State<EducationalAd> {
                 controller: locationController,
                 color: textColor,
               ),
+              CommonTextField1(
+                lable: 'Plan',
+                isRead: true,
+                hint: 'Select Plan',
+                controller: planController,
+                color: textColor,
+                validator: (v) =>
+                (v == null || v.trim().isEmpty) ? 'Plan is Required' : null,
+                onTap: () {
+                  context.read<UserActivePlanCubit>().getUserActivePlansData();
+                  showPlanBottomSheet(
+                    context: context,
+                    controller: planController,
+                    onSelectPlan: (selectedPlan) {
+                      print('Selected plan: ${selectedPlan.planName}');
+                      planId = selectedPlan.planId;
+                      packageId = selectedPlan.packageId;
+                    },
+                    title:
+                    'Choose Your Plan', // Optional title for the bottom sheet
+                  );
+                },
+              ),
             ],
           ),
         ),
@@ -568,8 +596,8 @@ class _EducationalAdState extends State<EducationalAd> {
                       "category_id": widget.catId,
                       "location": locationController.text,
                       "mobile_number": phoneController.text,
-                      "plan_id": "4",
-                      "package_id": "1",
+                      "plan_id": planId,
+                      "package_id": packageId,
                       "price": priceController.text,
                       "full_name": nameController.text,
                       "state_id": selectedStateId,

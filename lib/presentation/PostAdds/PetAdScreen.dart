@@ -12,11 +12,13 @@ import '../../Components/ShakeWidget.dart';
 import '../../data/cubit/Ad/PetsAd/pets_ad_states.dart';
 import '../../data/cubit/States/states_cubit.dart';
 import '../../data/cubit/States/states_repository.dart';
+import '../../data/cubit/UserActivePlans/user_active_plans_cubit.dart';
 import '../../data/remote_data_source.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../utils/ImageUtils.dart';
 import '../../utils/color_constants.dart';
+import '../../utils/planhelper.dart';
 import '../../widgets/CommonTextField.dart';
 import '../../widgets/CommonWrapChipSelector.dart';
 import '../../widgets/SelectCityBottomSheet.dart';
@@ -59,6 +61,9 @@ class _PetAdScreenState extends State<PetAdScreen> {
   final breedController = TextEditingController();
   final ageController = TextEditingController();
   String _selectedGender = "male";
+  final planController = TextEditingController();
+  int? planId;
+  int? packageId;
 
   @override
   void initState() {
@@ -577,6 +582,29 @@ class _PetAdScreenState extends State<PetAdScreen> {
                 controller: locationController,
                 color: textColor,
               ),
+              CommonTextField1(
+                lable: 'Plan',
+                isRead: true,
+                hint: 'Select Plan',
+                controller: planController,
+                color: textColor,
+                validator: (v) =>
+                (v == null || v.trim().isEmpty) ? 'Plan is Required' : null,
+                onTap: () {
+                  context.read<UserActivePlanCubit>().getUserActivePlansData();
+                  showPlanBottomSheet(
+                    context: context,
+                    controller: planController,
+                    onSelectPlan: (selectedPlan) {
+                      print('Selected plan: ${selectedPlan.planName}');
+                      planId = selectedPlan.planId;
+                      packageId = selectedPlan.packageId;
+                    },
+                    title:
+                    'Choose Your Plan', // Optional title for the bottom sheet
+                  );
+                },
+              ),
             ],
           ),
         ),
@@ -606,8 +634,8 @@ class _PetAdScreenState extends State<PetAdScreen> {
                       "category_id": widget.catId,
                       "location": locationController.text,
                       "mobile_number": phoneController.text,
-                      "plan_id": "1",
-                      "package_id": "3",
+                      "plan_id": planId,
+                      "package_id": packageId,
                       "price": priceController.text,
                       "full_name": nameController.text,
                       "state_id": selectedStateId,

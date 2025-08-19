@@ -6,9 +6,11 @@ import 'package:indiclassifieds/data/cubit/Ad/PropertyAd/popperty_ad_cubit.dart'
 import 'package:indiclassifieds/data/cubit/Ad/PropertyAd/property_ad_states.dart';
 import '../../data/cubit/States/states_cubit.dart';
 import '../../data/cubit/States/states_repository.dart';
+import '../../data/cubit/UserActivePlans/user_active_plans_cubit.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../theme/app_colors.dart';
+import '../../utils/planhelper.dart';
 import '../../widgets/CommonTextField.dart';
 import '../../data/remote_data_source.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -68,6 +70,9 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
   final stateController = TextEditingController();
   final cityController = TextEditingController();
   final nameController = TextEditingController();
+  final planController = TextEditingController();
+  int? planId;
+  int? packageId;
   String? facingDirection;
   String? propertyType;
   String? furnishingStatus;
@@ -705,6 +710,29 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
                 //     ? 'Required Address '
                 //     : null,
               ),
+              CommonTextField1(
+                lable: 'Plan',
+                isRead: true,
+                hint: 'Select Plan',
+                controller: planController,
+                color: textColor,
+                validator: (v) =>
+                (v == null || v.trim().isEmpty) ? 'Plan is Required' : null,
+                onTap: () {
+                  context.read<UserActivePlanCubit>().getUserActivePlansData();
+                  showPlanBottomSheet(
+                    context: context,
+                    controller: planController,
+                    onSelectPlan: (selectedPlan) {
+                      print('Selected plan: ${selectedPlan.planName}');
+                      planId = selectedPlan.planId;
+                      packageId = selectedPlan.packageId;
+                    },
+                    title:
+                    'Choose Your Plan', // Optional title for the bottom sheet
+                  );
+                },
+              ),
             ],
           ),
         ),
@@ -744,8 +772,8 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
                       "category_id": widget.catId,
                       "location": locationController.text,
                       "mobile_number": phoneController.text,
-                      "plan_id": "1",
-                      "package_id": "3",
+                      "plan_id": planId,
+                      "package_id": packageId,
                       "price": totelPriceController.text,
                       if (widget.SubCatName == "For Sale")
                         "squre_pt": priceSquareFeetController.text,
