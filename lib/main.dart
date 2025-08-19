@@ -46,7 +46,7 @@ class _MyAppState extends State<MyApp> {
             themeMode = ThemeMode.system;
         }
         return MaterialApp.router(
-          title: 'Flutter Theme Example',
+          title: 'IND Classifieds',
           theme: AppTheme.getLightTheme(),
           darkTheme: AppTheme.getDarkTheme(),
           themeMode: themeMode,

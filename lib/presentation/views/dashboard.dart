@@ -62,39 +62,32 @@ class _DashboardState extends State<Dashboard> {
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         floatingActionButton: Container(
-          width: 70,
-          height: 70,
+          width: 50,
+          height: 50,
+          // margin: EdgeInsets.only(top: 40),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
                 color: Colors.blue.withOpacity(0.4),
-                blurRadius: 10,
+                blurRadius: 5,
                 offset: Offset(0, 6),
               ),
             ],
           ),
           child: FloatingActionButton(
-            backgroundColor: Colors.blue,
+            backgroundColor: AppColors.primary,
             onPressed: () {
               context.push("/category");
             },
             child: Icon(Icons.add, size: 32, color: Colors.white),
           ),
         ),
-        bottomNavigationBar: Padding(
-          padding: EdgeInsets.all(8.0),
+        bottomNavigationBar: SafeArea(
           child: Container(
             height: 65,
             decoration: BoxDecoration(
               color: Color(isDarkMode ? 0xff0D0D0D : 0xffffffff),
-              boxShadow: [
-                BoxShadow(
-                  offset: Offset(0, -1),
-                  blurRadius: 8,
-                  color: Colors.grey.withOpacity(0.2),
-                ),
-              ],
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,

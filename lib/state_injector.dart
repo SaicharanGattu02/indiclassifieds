@@ -1,12 +1,12 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:indiclassifieds/data/cubit/AddToWishlist/addToWishlistCubit.dart';
-import 'package:indiclassifieds/data/cubit/AddToWishlist/addToWishlistStates.dart';
 import 'package:indiclassifieds/data/cubit/Advertisement/advertisement_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Advertisement/advertisement_repo.dart';
 import 'package:indiclassifieds/data/cubit/AdvertisementDetails/advertisement_details_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Banners/banner_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Banners/banner_repository.dart';
 import 'package:indiclassifieds/data/cubit/City/city_cubit.dart';
+import 'package:indiclassifieds/data/cubit/Dashboard/DashboardCubit.dart';
 import 'package:indiclassifieds/data/cubit/MyAds/my_ads_cubit.dart';
 import 'package:indiclassifieds/data/cubit/MyAds/my_ads_repo.dart';
 import 'package:indiclassifieds/data/cubit/Packages/packages_cubit.dart';
@@ -53,13 +53,13 @@ import 'data/cubit/Ad/PetsAd/pets_ad_cubit.dart';
 import 'data/cubit/Ad/PetsAd/pets_ad_repo.dart';
 import 'data/cubit/Ad/PropertyAd/popperty_ad_cubit.dart';
 import 'data/cubit/Ad/PropertyAd/property_ad_repo.dart';
+import 'data/cubit/Category/category_cubit.dart';
 import 'data/cubit/City/city_repository.dart';
 import 'data/cubit/LogInWithMobile/login_with_mobile.dart';
 import 'data/cubit/LogInWithMobile/login_with_mobile_repository.dart';
 import 'data/cubit/PostAdvertisement/post_advertisement_cubit.dart';
 import 'data/cubit/States/states_cubit.dart';
 import 'data/cubit/States/states_repository.dart';
-import 'data/cubit/category/category_cubit.dart';
 import 'data/cubit/category/category_repository.dart';
 
 import 'data/remote_data_source.dart';
@@ -201,11 +201,18 @@ class StateInjector {
       create: (context) =>
           LogInwithMobileCubit(context.read<LogInWithMobileRepository>()),
     ),
+    BlocProvider<BannerCubit>(
+      create: (context) => BannerCubit(context.read<BannersRepository>()),
+    ),
     BlocProvider<CategoryCubit>(
       create: (context) => CategoryCubit(context.read<CategoryRepository>()),
     ),
-    BlocProvider<BannerCubit>(
-      create: (context) => BannerCubit(context.read<BannersRepository>()),
+    BlocProvider<DashboardCubit>(
+      create: (context) => DashboardCubit(
+        bannersCubit: BannerCubit(context.read<BannersRepository>()),
+        categoryCubit: CategoryCubit(context.read<CategoryRepository>()),
+        productsCubit: ProductsCubit(context.read<ProductsRepo>()),
+      ),
     ),
     BlocProvider<UserActivePlanCubit>(
       create: (context) => UserActivePlanCubit(context.read<PlansRepository>()),

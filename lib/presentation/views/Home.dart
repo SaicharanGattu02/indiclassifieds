@@ -3,15 +3,20 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:indiclassifieds/data/cubit/Dashboard/DashboardCubit.dart';
+import 'package:indiclassifieds/data/cubit/Dashboard/DashboardState.dart';
 import 'package:indiclassifieds/theme/app_colors.dart';
 import 'package:indiclassifieds/widgets/CommonTextField.dart';
+import 'package:intl/intl.dart';
 
+import '../../data/cubit/Products/products_cubit.dart';
 import '../../data/cubit/category/category_cubit.dart';
 import '../../data/cubit/category/category_state.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../utils/media_query_helper.dart';
 import '../../utils/spinkittsLoader.dart';
+import '../../widgets/SimilarProductCard.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -21,17 +26,10 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final List<Map<String, String>> topBanners = [
-    {'image': 'assets/images/banner.png', 'url': 'assets/images/banner.png'},
-  ];
   int currentIndex = 0;
-
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<CategoryCubit>().getCategory();
-      context.read<CategoryCubit>().getCategory();
-    });
+    context.read<DashboardCubit>().fetchDashboard();
     super.initState();
   }
 
@@ -39,6 +37,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final textColor = ThemeHelper.textColor(context);
     final isDarkMode = ThemeHelper.isDarkMode(context);
+    final borderColor = ThemeHelper.isDarkMode(context)
+        ? Colors.white12
+        : Colors.black12;
     SizeConfig.init(context);
     return Scaffold(
       appBar: AppBar(
@@ -81,156 +82,180 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CommonTextField(
-                suffixIcon: Icon(Icons.mic, color: AppColors.primary),
-                prefixIcon: Icon(Icons.search, color: Color(0xff6B72820)),
-                hint: 'Search products, brands, .....',
-                color: textColor,
-              ),
-              SizedBox(height: 16),
-              CarouselSlider(
-                options: CarouselOptions(
-                  height: SizeConfig.screenHeight * 0.2,
-                  onPageChanged: (index, reason) {
-                    setState(() {
-                      currentIndex = index;
-                    });
-                  },
-                  enableInfiniteScroll: true,
-                  viewportFraction: 1,
-                  enlargeCenterPage: false,
-                  autoPlay: true,
-                  scrollDirection: Axis.horizontal,
-                  pauseAutoPlayOnTouch: true,
-                  aspectRatio: 1,
-                ),
-                items: topBanners.map((banner) {
-                  return InkWell(
-                    // onTap: () => _launchUrl(banner['url']!),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Image.asset(
-                          banner["image"]!,
-                          fit: BoxFit.fitWidth,
+      body: BlocBuilder<DashboardCubit, DashBoardState>(
+        builder: (context, state) {
+          if (state is DashBoardLoading) {
+            return Center(child: CircularProgressIndicator());
+          } else if (state is DashBoardLoaded) {
+            final banner_data = state.bannersModel;
+            final category_data = state.categoryModel;
+            final products_data = state.subcategoryProductsModel;
+            return SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ), // Padding inside the container
+                      decoration: BoxDecoration(
+                        color:
+                            Colors.white, // Background color for the container
+                        borderRadius: BorderRadius.circular(
+                          12,
+                        ), // Border radius
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 5,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.search,
+                            color: Color(0xff6B72820),
+                          ), // Prefix Icon
+                          SizedBox(width: 8), // Space between icon and text
+                          Text(
+                            'Search products, brands, .....', // Your text
+                            style: TextStyle(
+                              color: textColor,
+                            ), // Custom text color
+                          ),
+                          // Spacer(),  // To push the suffix icon to the right
+                          // Icon(Icons.mic, color: AppColors.primary),  // Suffix Icon
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    CarouselSlider(
+                      options: CarouselOptions(
+                        height: SizeConfig.screenHeight * 0.2,
+                        onPageChanged: (index, reason) {
+                          setState(() {
+                            currentIndex = index;
+                          });
+                        },
+                        enableInfiniteScroll: true,
+                        viewportFraction: 1,
+                        enlargeCenterPage: false,
+                        autoPlay: true,
+                        scrollDirection: Axis.horizontal,
+                        pauseAutoPlayOnTouch: true,
+                        aspectRatio: 1,
+                      ),
+                      items: banner_data?.data?.map((banner) {
+                        return InkWell(
+                          // onTap: () => _launchUrl(banner['url']!),
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: Image.network(
+                                banner.image ?? "",
+                                fit: BoxFit.fitWidth,
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(
+                        banner_data?.data?.length ?? 0,
+                        (index) => Container(
+                          margin: EdgeInsets.all(3),
+                          height: SizeConfig.screenHeight * 0.008,
+                          width: currentIndex == index
+                              ? SizeConfig.screenWidth * 0.025
+                              : SizeConfig.screenWidth * 0.014,
+                          decoration: BoxDecoration(
+                            color: currentIndex == index
+                                ? AppColors.primary
+                                : Color(0xff90A9D3),
+                            borderRadius: BorderRadius.circular(100),
+                          ),
                         ),
                       ),
                     ),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  topBanners.length,
-                  (index) => Container(
-                    margin: EdgeInsets.all(3),
-                    height: SizeConfig.screenHeight * 0.008,
-                    width: currentIndex == index
-                        ? SizeConfig.screenWidth * 0.025
-                        : SizeConfig.screenWidth * 0.014,
-                    decoration: BoxDecoration(
-                      color: currentIndex == index
-                          ? AppColors.primary
-                          : Color(0xff90A9D3),
-                      borderRadius: BorderRadius.circular(100),
+                    SizedBox(height: 20),
+                    Text(
+                      "What's New",
+                      style: AppTextStyles.titleLarge(textColor).copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: Color(isDarkMode ? 0xffDDDDDD : 0xff222222),
+                      ),
                     ),
-                  ),
-                ),
-              ),
-              SizedBox(height: 20),
-              Text(
-                "What's New",
-                style: AppTextStyles.titleLarge(textColor).copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: Color(isDarkMode ? 0xffDDDDDD : 0xff222222),
-                ),
-              ),
-              SizedBox(height: 8),
-              CustomScrollView(
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                slivers: [
-                  SliverGrid(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 4,
-                      mainAxisSpacing: 12,
-                      crossAxisSpacing: 12,
-                      childAspectRatio: 1,
-                    ),
-                    delegate: SliverChildBuilderDelegate((context, index) {
-                      return Container(
-                        padding: EdgeInsets.fromLTRB(2, 12, 2, 2),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Column(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(4),
-                              child: Image.asset(
-                                'assets/images/findInvestor.png',
-                                fit: BoxFit.cover,
+                    SizedBox(height: 8),
+                    CustomScrollView(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      slivers: [
+                        SliverGrid(
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 4,
+                                mainAxisSpacing: 12,
+                                crossAxisSpacing: 12,
+                                childAspectRatio: 1,
                               ),
-                            ),
-                            SizedBox(height: 6),
-                            Text(
-                              "Find Investor",
-                              textAlign: TextAlign.center,
-                              style: AppTextStyles.titleSmall(textColor)
-                                  .copyWith(
-                                    fontWeight: FontWeight.w500,
-                                    color: Color(
-                                      isDarkMode ? 0xffD7E4FF : 0xff374151,
+                          delegate: SliverChildBuilderDelegate((
+                            context,
+                            index,
+                          ) {
+                            return Container(
+                              padding: EdgeInsets.fromLTRB(2, 12, 2, 2),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Column(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(4),
+                                    child: Image.asset(
+                                      'assets/images/findInvestor.png',
+                                      fit: BoxFit.cover,
                                     ),
                                   ),
-                            ),
-                            SizedBox(height: 2),
-                            Text(
-                              "144",
-                              textAlign: TextAlign.center,
-                              style: AppTextStyles.labelSmall(textColor)
-                                  .copyWith(
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(
-                                      isDarkMode ? 0xffB5B5B5 : 0xff6B7280,
-                                    ),
-                                  ),
-                            ),
-                          ],
+                                  SizedBox(height: 6),
+                                  Text(
+                                    "Find Investor",
+                                    textAlign: TextAlign.center,
+                                    style: AppTextStyles.titleSmall(textColor)
+                                        .copyWith(
+                                          fontWeight: FontWeight.w500,
+                                          color: Color(
+                                            isDarkMode
+                                                ? 0xffD7E4FF
+                                                : 0xff374151,
+                                          ),
+                                        ),
+                                  ),],
+                              ),
+                            );
+                          }, childCount: 4),
                         ),
-                      );
-                    }, childCount: 4),
-                  ),
-                ],
-              ),
-
-              SizedBox(height: 20),
-              Text(
-                "Categories",
-                style: AppTextStyles.titleLarge(textColor).copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: Color(isDarkMode ? 0xffDDDDDD : 0xff222222),
-                ),
-              ),
-              SizedBox(height: 8),
-              BlocBuilder<CategoryCubit, CategoryStates>(
-                builder: (context, state) {
-                  if (state is CategoryLoading) {
-                    return Center(child: CircularProgressIndicator());
-                  } else if (state is CategoryLoaded) {
-                    final categories = state.categoryModel.categoriesList;
-                    return CustomScrollView(
+                      ],
+                    ),
+                    SizedBox(height: 20),
+                    Text(
+                      "Categories",
+                      style: AppTextStyles.titleLarge(textColor).copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: Color(isDarkMode ? 0xffDDDDDD : 0xff222222),
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    CustomScrollView(
                       shrinkWrap: true,
                       physics: NeverScrollableScrollPhysics(),
                       slivers: [
@@ -242,259 +267,217 @@ class _HomeScreenState extends State<HomeScreen> {
                                 crossAxisSpacing: 12,
                                 childAspectRatio: 0.85,
                               ),
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) {
+                              final categoryItem =
+                                  category_data?.categoriesList![index];
+                              return InkResponse(
+                                onTap: () {
+                                  context.push(
+                                    '/sub_categories',
+                                    extra: categoryItem, // pass the full object
+                                  );
+                                },
+                                child: Container(
+                                  padding: EdgeInsets.fromLTRB(2, 12, 2, 2),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                          color: Color(0xffF8FAFE),
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                            4,
+                                          ),
+                                          child: CachedNetworkImage(
+                                            imageUrl: categoryItem?.image ?? "",
+                                            fit: BoxFit.cover,
+                                            width: SizeConfig.screenWidth * 0.2,
+                                            height:
+                                                SizeConfig.screenHeight * 0.04,
+                                            placeholder: (context, url) =>
+                                                Center(
+                                                  child: spinkits
+                                                      .getSpinningLinespinkit(),
+                                                ),
+                                            errorWidget:
+                                                (
+                                                  context,
+                                                  url,
+                                                  error,
+                                                ) => Container(
+                                                  decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          8,
+                                                        ),
+                                                    color: Color(0xffF8FAFE),
+                                                  ),
+                                                  child: Icon(
+                                                    Icons.broken_image,
+                                                    size: 40,
+                                                    color: Colors.grey,
+                                                  ),
+                                                ),
+                                          ),
+                                        ),
+                                      ),
+
+                                      SizedBox(height: 6),
+                                      Text(
+                                        categoryItem?.name ?? "Un Known",
+                                        textAlign: TextAlign.center,
+                                        style:
+                                            AppTextStyles.titleSmall(
+                                              textColor,
+                                            ).copyWith(
+                                              fontWeight: FontWeight.w500,
+                                              color: Color(
+                                                isDarkMode
+                                                    ? 0xffD7E4FF
+                                                    : 0xff374151,
+                                              ),
+                                            ),
+                                      ),
+                                      // SizedBox(height: 2),
+                                      // Text(
+                                      //   categoryItem.noOfCounts.toString()??"0",
+                                      //   textAlign: TextAlign.center,
+                                      //   style: AppTextStyles.labelSmall(textColor)
+                                      //       .copyWith(
+                                      //     fontWeight: FontWeight.w400,
+                                      //     color: Color(
+                                      //       isDarkMode ? 0xffB5B5B5 : 0xff6B7280,
+                                      //     ),
+                                      //   ),
+                                      // ),
+                                      // SizedBox(height: 2),
+                                      // Text(
+                                      //   categoryItem.name??"Un Known",
+                                      //   textAlign: TextAlign.center,
+                                      //   style: AppTextStyles.labelSmall(textColor)
+                                      //       .copyWith(
+                                      //         fontWeight: FontWeight.w400,
+                                      //         color: Color(
+                                      //           isDarkMode
+                                      //               ? 0xffB5B5B5
+                                      //               : 0xff6B7280,
+                                      //         ),
+                                      //       ),
+                                      // ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                            childCount:
+                                category_data?.categoriesList?.length ?? 0,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Products",
+                          style: AppTextStyles.titleLarge(textColor).copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: Color(isDarkMode ? 0xffDDDDDD : 0xff222222),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {},
+                          child: Text(
+                            "See All",
+                            style: AppTextStyles.bodyMedium(textColor).copyWith(
+                              fontWeight: FontWeight.w400,
+                              color: Color(
+                                isDarkMode ? 0xffDDDDDD : 0xff222222,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8),
+                    CustomScrollView(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      slivers: [
+                        SliverGrid(
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                mainAxisSpacing: 12,
+                                crossAxisSpacing: 12,
+                                childAspectRatio: 0.95,
+                              ),
                           delegate: SliverChildBuilderDelegate((
                             context,
                             index,
                           ) {
-                            final categoryItem = categories![index];
-                            return InkResponse(
+                            final p = products_data?.products?[index];
+                            final title = (p?.title ?? "—").trim();
+                            final price = "₹${_formatINR(p?.price)}";
+                            final location = (p?.location ?? "").trim();
+                            final img = p?.image;
+                            return SimilarProductCard(
+                              title: title,
+                              price: price,
+                              location: location,
+                              imageUrl: img,
+                              isLiked: p?.isFavorited ?? false,
+                              onLikeToggle: () {
+                                if (p?.id != null) {
+                                  final newVal = !(p?.isFavorited ?? false);
+                                  context
+                                      .read<ProductsCubit>()
+                                      .updateWishlistStatus(p?.id ?? 0, newVal);
+                                }
+                              },
                               onTap: () {
-                                context.push(
-                                  '/sub_categories',
-                                  extra: categoryItem, // pass the full object
+                                context.pushReplacement(
+                                  "/products_details?listingId=${p?.id}&subcategory_id=${p?.subCategory}",
                                 );
                               },
-                              child: Container(
-                                padding: EdgeInsets.fromLTRB(2, 12, 2, 2),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Column(
-                                  children: [
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(8),
-                                        color: Color(0xffF8FAFE),
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(4),
-                                        child: CachedNetworkImage(
-                                          imageUrl: categoryItem.image ?? "",
-                                          fit: BoxFit.cover,
-                                          width: SizeConfig.screenWidth * 0.2,
-                                          height:
-                                              SizeConfig.screenHeight * 0.04,
-                                          placeholder: (context, url) => Center(
-                                            child: spinkits
-                                                .getSpinningLinespinkit(),
-                                          ),
-                                          errorWidget: (context, url, error) =>
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                  color: Color(0xffF8FAFE),
-                                                ),
-                                                child: Icon(
-                                                  Icons.broken_image,
-                                                  size: 40,
-                                                  color: Colors.grey,
-                                                ),
-                                              ),
-                                        ),
-                                      ),
-                                    ),
-
-                                    SizedBox(height: 6),
-                                    Text(
-                                      categoryItem.name ?? "Un Known",
-                                      textAlign: TextAlign.center,
-                                      style: AppTextStyles.titleSmall(textColor)
-                                          .copyWith(
-                                            fontWeight: FontWeight.w500,
-                                            color: Color(
-                                              isDarkMode
-                                                  ? 0xffD7E4FF
-                                                  : 0xff374151,
-                                            ),
-                                          ),
-                                    ),
-                                    // SizedBox(height: 2),
-                                    // Text(
-                                    //   categoryItem.noOfCounts.toString()??"0",
-                                    //   textAlign: TextAlign.center,
-                                    //   style: AppTextStyles.labelSmall(textColor)
-                                    //       .copyWith(
-                                    //     fontWeight: FontWeight.w400,
-                                    //     color: Color(
-                                    //       isDarkMode ? 0xffB5B5B5 : 0xff6B7280,
-                                    //     ),
-                                    //   ),
-                                    // ),
-                                    // SizedBox(height: 2),
-                                    // Text(
-                                    //   categoryItem.name??"Un Known",
-                                    //   textAlign: TextAlign.center,
-                                    //   style: AppTextStyles.labelSmall(textColor)
-                                    //       .copyWith(
-                                    //         fontWeight: FontWeight.w400,
-                                    //         color: Color(
-                                    //           isDarkMode
-                                    //               ? 0xffB5B5B5
-                                    //               : 0xff6B7280,
-                                    //         ),
-                                    //       ),
-                                    // ),
-                                  ],
-                                ),
-                              ),
+                              borderColor: borderColor,
                             );
-                          }, childCount: categories?.length ?? 0),
+                          }, childCount: 4),
                         ),
                       ],
-                    );
-                  } else if (state is CategoryFailure) {
-                    return Center(child: Text(state.error ?? ""));
-                  }
-                  return Center(child: Text("No Data"));
-                },
-              ),
-
-              SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Products",
-                    style: AppTextStyles.titleLarge(textColor).copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: Color(isDarkMode ? 0xffDDDDDD : 0xff222222),
                     ),
-                  ),
-                  TextButton(
-                    onPressed: () {},
-                    child: Text(
-                      "See All",
-                      style: AppTextStyles.bodyMedium(textColor).copyWith(
-                        fontWeight: FontWeight.w400,
-                        color: Color(isDarkMode ? 0xffDDDDDD : 0xff222222),
-                      ),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-              SizedBox(height: 8),
-              CustomScrollView(
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                slivers: [
-                  SliverGrid(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 12,
-                      crossAxisSpacing: 12,
-                      childAspectRatio: 0.65,
-                    ),
-                    delegate: SliverChildBuilderDelegate((context, index) {
-                      return Stack(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Color(
-                                isDarkMode ? 0xff0D0D0D : 0xffFFFFFF,
-                              ),
-                              borderRadius: BorderRadius.circular(10),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Color(
-                                    isDarkMode ? 0xffffffff : 0x1A000000,
-                                  ),
-                                  offset: Offset(0, 2), // x, y
-                                  blurRadius: 5,
-                                  spreadRadius: -4,
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Center(
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(4),
-                                    child: Image.asset(
-                                      width: 120,
-                                      height: 120,
-                                      'assets/images/product.png',
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(height: 8),
-                                Text(
-                                  "₹1,899.99",
-                                  style: AppTextStyles.titleLarge(textColor)
-                                      .copyWith(
-                                        fontWeight: FontWeight.w700,
-                                        color: AppColors.primary,
-                                      ),
-                                ),
-                                SizedBox(height: 2),
-                                Text(
-                                  "Peloton Bike+ - With rotating screen and accessories",
-                                  style: AppTextStyles.labelLarge(textColor)
-                                      .copyWith(
-                                        fontWeight: FontWeight.w600,
-                                        color: Color(
-                                          isDarkMode ? 0xffB5B5B5 : 0xff6B7280,
-                                        ),
-                                      ),
-                                ),
-                                SizedBox(height: 10),
-                                Row(
-                                  spacing: 3,
-                                  children: [
-                                    Icon(
-                                      Icons.location_pin,
-                                      color: Color(0xff6B7280),
-                                    ),
-                                    Text(
-                                      "kavali",
-                                      style: AppTextStyles.labelSmall(textColor)
-                                          .copyWith(
-                                            fontWeight: FontWeight.w400,
-                                            color: Color(0xff6B7280),
-                                          ),
-                                    ),
-                                    SizedBox(width: 16),
-                                    Text(
-                                      "• 2 days ago",
-                                      style: AppTextStyles.labelSmall(textColor)
-                                          .copyWith(
-                                            fontWeight: FontWeight.w400,
-                                            color: Color(0xff6B7280),
-                                          ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                          Positioned(
-                            right: -2,
-                            top: 14,
-                            child: OutlinedButton(
-                              style: OutlinedButton.styleFrom(
-                                backgroundColor: AppColors.primary.withOpacity(
-                                  0.5,
-                                ),
-                                shape: CircleBorder(),
-                                padding: EdgeInsets.all(12), // adjust as needed
-                              ),
-                              onPressed: () {},
-                              child: Icon(Icons.favorite, color: Colors.white),
-                            ),
-                          ),
-                        ],
-                      );
-                    }, childCount: 4),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
+            );
+          } else if (state is DashBoardFailure) {
+            return Center(child: Text("No Data Found!"));
+          }
+          return Center(child: Text("No Data Found!"));
+        },
       ),
     );
+  }
+
+  // ===== Utility formatting =====
+
+  String _formatINR(String? price) {
+    final val = double.tryParse(price ?? "");
+    if (val == null) return "0";
+    final f = NumberFormat.currency(
+      locale: 'en_IN',
+      symbol: "",
+      decimalDigits: 0,
+    );
+    return f.format(val);
   }
 }

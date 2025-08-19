@@ -19,9 +19,7 @@ class CategoryScreen extends StatefulWidget {
 class _CategoryScreenState extends State<CategoryScreen> {
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<CategoryCubit>().getCategory();
-    });
+    context.read<CategoryCubit>().getCategory();
     super.initState();
   }
 

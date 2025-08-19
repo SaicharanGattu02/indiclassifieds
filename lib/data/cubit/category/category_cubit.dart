@@ -1,6 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:indiclassifieds/data/cubit/category/category_repository.dart';
-
 import 'category_state.dart';
 
 class CategoryCubit extends Cubit<CategoryStates> {
