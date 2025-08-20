@@ -8,6 +8,7 @@ import '../../data/cubit/AddToWishlist/addToWishlistStates.dart';
 import '../../data/cubit/Products/products_states.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
+import '../../widgets/CommonLoader.dart';
 import '../../widgets/ProductCard.dart';
 
 class ProductsListScreen extends StatefulWidget {
@@ -86,7 +87,7 @@ class _ProductsListScreenState extends State<ProductsListScreen> {
         child: BlocBuilder<ProductsCubit, ProductsStates>(
           builder: (context, state) {
             if (state is ProductsLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return Center(child:DottedProgressWithLogo());
             } else if (state is ProductsFailure) {
               return Center(child: Text(state.error));
             } else if (state is ProductsLoaded ||

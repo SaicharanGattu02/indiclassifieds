@@ -9,6 +9,7 @@ import '../../data/cubit/ProductDetails/product_details_states.dart';
 import '../../model/ProductDetailsModel.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
+import '../../widgets/CommonLoader.dart';
 import '../../widgets/SimilarProductsSection.dart';
 
 extension DetailsX on Details {
@@ -82,7 +83,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         builder: (context, state) {
           if (state is ProductDetailsLoading ||
               state is ProductDetailsInitially) {
-            return const _Skeleton();
+            // return const _Skeleton();
+            return Center(child:DottedProgressWithLogo());
           }
           if (state is ProductDetailsFailure) {
             return _ErrorView(

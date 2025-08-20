@@ -6,6 +6,7 @@ import '../../theme/AppTextStyles.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../widgets/AdCardDynamic.dart';
+import '../../widgets/CommonLoader.dart';
 
 enum AdStatus { approved, pending, expired }
 
@@ -118,7 +119,7 @@ class _AdsScreenState extends State<AdsScreen> {
                     : false;
 
                 if (isLoading) {
-                  return const Center(child: CircularProgressIndicator());
+                  return Center(child:DottedProgressWithLogo());
                 }
 
                 if (state is MyAdsFailure) {

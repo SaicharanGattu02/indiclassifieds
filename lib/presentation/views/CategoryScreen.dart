@@ -8,6 +8,7 @@ import '../../data/cubit/Categories/categories_cubit.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../utils/spinkittsLoader.dart';
+import '../../widgets/CommonLoader.dart';
 
 class CategoryScreen extends StatefulWidget {
   const CategoryScreen({super.key});
@@ -55,7 +56,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
             BlocBuilder<CategoriesCubit, CategoriesStates>(
               builder: (context, state) {
                 if (state is CategoriesLoading) {
-                  return Center(child: CircularProgressIndicator());
+                  return Center(child:DottedProgressWithLogo());
                 } else if (state is CategoriesLoaded) {
                   final categories = state.categoryModel.categoriesList;
                   return Expanded(

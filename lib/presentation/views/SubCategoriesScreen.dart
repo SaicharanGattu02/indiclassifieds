@@ -8,6 +8,7 @@ import '../../data/cubit/subCategory/sub_category_cubit.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../utils/spinkittsLoader.dart';
+import '../../widgets/CommonLoader.dart';
 
 class SubCategoriesScreen extends StatefulWidget {
   final CategoriesList? categoriesList;
@@ -46,7 +47,7 @@ class _SubCategoriesScreenState extends State<SubCategoriesScreen> {
       body: BlocBuilder<SubCategoryCubit, SubCategoryStates>(
         builder: (context, state) {
           if (state is SubCategoryLoading) {
-            return Center(child: CircularProgressIndicator());
+            return Center(child:DottedProgressWithLogo());
           } else if (state is SubCategoryLoaded) {
             final subcategories = state.subCategoryModel.subcategories;
             return CustomScrollView(

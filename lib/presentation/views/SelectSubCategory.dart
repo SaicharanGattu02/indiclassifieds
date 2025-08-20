@@ -8,6 +8,7 @@ import 'package:indiclassifieds/widgets/CommonBackground.dart';
 import '../../data/cubit/subCategory/sub_category_cubit.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
+import '../../widgets/CommonLoader.dart';
 
 class SelectSubCategory extends StatefulWidget {
   final String categoryId;
@@ -44,7 +45,7 @@ class _SelectSubCategoryState extends State<SelectSubCategory> {
           child: BlocBuilder<SubCategoryCubit, SubCategoryStates>(
             builder: (context, state) {
               if (state is SubCategoryLoading) {
-                return const Center(child: CircularProgressIndicator());
+                return Center(child:DottedProgressWithLogo());
               } else if (state is SubCategoryLoaded) {
                 final subcategories =
                     state.subCategoryModel.subcategories ?? [];

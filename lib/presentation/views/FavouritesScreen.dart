@@ -10,6 +10,7 @@ import '../../data/cubit/AddToWishlist/addToWishlistStates.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../utils/AppLogger.dart';
+import '../../widgets/CommonLoader.dart';
 import '../../widgets/ProductCard.dart';
 
 class WishlistListScreen extends StatefulWidget {
@@ -83,7 +84,7 @@ class _WishlistListScreenState extends State<WishlistListScreen> {
         child: BlocBuilder<WishlistCubit, WishlistStates>(
           builder: (context, state) {
             if (state is WishlistLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return Center(child:DottedProgressWithLogo());
             } else if (state is WishlistFailure) {
               return Center(child: Text(state.error));
             } else if (state is WishlistLoaded || state is WishlistLoadingMore) {

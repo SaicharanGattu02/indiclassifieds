@@ -12,6 +12,7 @@ import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../utils/media_query_helper.dart';
 import '../../utils/spinkittsLoader.dart';
+import '../../widgets/CommonLoader.dart';
 import '../../widgets/SimilarProductCard.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -81,7 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: BlocBuilder<DashboardCubit, DashBoardState>(
         builder: (context, state) {
           if (state is DashBoardLoading) {
-            return Center(child: CircularProgressIndicator());
+            return Center(child:DottedProgressWithLogo());
           } else if (state is DashBoardLoaded) {
             final banner_data = state.bannersModel;
             final category_data = state.categoryModel;

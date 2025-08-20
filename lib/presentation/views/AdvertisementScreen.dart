@@ -9,6 +9,7 @@ import '../../model/AdvertisementModel.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../theme/app_colors.dart';
+import '../../widgets/CommonLoader.dart';
 import 'AddsScreen.dart';
 
 class AdvertisementScreen extends StatefulWidget {
@@ -126,7 +127,7 @@ class _AdvertisementScreenState extends State<AdvertisementScreen> {
                     : false;
 
                 if (isLoading) {
-                  return const Center(child: CircularProgressIndicator());
+                  return Center(child:DottedProgressWithLogo());
                 }
 
                 if (state is AdvertisementFailure) {

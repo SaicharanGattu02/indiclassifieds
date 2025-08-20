@@ -7,6 +7,7 @@ import '../../data/cubit/Plans/plans_states.dart';
 import '../../model/PlansModel.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
+import '../../widgets/CommonLoader.dart';
 
 class PlansScreen extends StatefulWidget {
   const PlansScreen({super.key});
@@ -44,7 +45,8 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
       body: BlocBuilder<PlansCubit, PlansStates>(
         builder: (context, state) {
           if (state is PlansLoading) {
-            return const _PlansLoadingView();
+            // return const _PlansLoadingView();
+            return Center(child:DottedProgressWithLogo());
           }
           if (state is PlansFailure) {
             return _PlansErrorView(
@@ -476,20 +478,21 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
                 );
 
                 if (state is PackagesLoading || state is PackagesInitially) {
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      header,
-                      const Divider(height: 1),
-                      const SizedBox(height: 16),
-                      _SkeletonPackageTile(color: cardColor),
-                      const SizedBox(height: 12),
-                      _SkeletonPackageTile(color: cardColor),
-                      const SizedBox(height: 12),
-                      _SkeletonPackageTile(color: cardColor),
-                      const SizedBox(height: 24),
-                    ],
-                  );
+                  // return Column(
+                  //   mainAxisSize: MainAxisSize.min,
+                  //   children: [
+                  //     header,
+                  //     const Divider(height: 1),
+                  //     const SizedBox(height: 16),
+                  //     _SkeletonPackageTile(color: cardColor),
+                  //     const SizedBox(height: 12),
+                  //     _SkeletonPackageTile(color: cardColor),
+                  //     const SizedBox(height: 12),
+                  //     _SkeletonPackageTile(color: cardColor),
+                  //     const SizedBox(height: 24),
+                  //   ],
+                  // );
+                  return Center(child:DottedProgressWithLogo());
                 }
 
                 if (state is PackagesFailure) {
@@ -497,7 +500,6 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       header,
-                      const Divider(height: 1),
                       const SizedBox(height: 24),
                       Icon(
                         Icons.error_outline,
@@ -538,7 +540,6 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
                     return Column(
                       children: [
                         header,
-                        const Divider(height: 1),
                         Padding(
                           padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
                           child: _AvailabilityAndUSP(
@@ -798,11 +799,12 @@ class _PackageTile extends StatelessWidget {
                         border: Border.all(color: Colors.black12),
                       ),
                       alignment: Alignment.center,
-                      child: const Text(
+                      child: Text(
                         "+",
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 14,
+                          color: textColor
                         ),
                       ),
                     ),
