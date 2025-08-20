@@ -6,6 +6,7 @@ import '../model/AdSuccessModel.dart';
 import '../model/AdvertisementDetailsModel.dart';
 import '../model/AdvertisementModel.dart';
 import '../model/BannersModel.dart';
+import '../model/CreatePaymentModel.dart';
 import '../model/MyAdsModel.dart';
 import '../model/PackagesModel.dart';
 import '../model/PlansModel.dart';
@@ -64,6 +65,7 @@ abstract class RemoteDataSource {
   Future<AdSuccessModel?> postCarsAd(Map<String, dynamic> data);
   Future<AdSuccessModel?> postPropertyAd(Map<String, dynamic> data);
   Future<AdSuccessModel?> postMobileAd(Map<String, dynamic> data);
+  Future<CreatePaymentModel?> createPayment(Map<String, dynamic> data);
 }
 
 class RemoteDataSourceImpl implements RemoteDataSource {
@@ -679,4 +681,22 @@ class RemoteDataSourceImpl implements RemoteDataSource {
       return null;
     }
   }
+
+  @override
+  Future<CreatePaymentModel?> createPayment(Map<String, dynamic> data) async {
+    final formData = await buildFormData(data);
+    try {
+      Response res = await ApiClient.post(
+        "${APIEndpointUrls.create_payment_order}",
+        data: formData,
+      );
+      AppLogger.log('create Payment ::${res.data}');
+      return CreatePaymentModel.fromJson(res.data);
+    } catch (e) {
+      AppLogger.error('create Payment  ::${e}');
+
+      return null;
+    }
+  }
+  ///
 }

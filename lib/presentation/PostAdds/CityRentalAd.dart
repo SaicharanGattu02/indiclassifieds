@@ -1,37 +1,35 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:indiclassifieds/data/cubit/Ad/CoWorkingAd/co_working_ad_cubit.dart';
 
 import '../../Components/CustomAppButton.dart';
 import '../../Components/CustomSnackBar.dart';
 import '../../Components/CutomAppBar.dart';
 import '../../Components/ShakeWidget.dart';
-import '../../data/cubit/Ad/CoWorkingAd/co_working_ad_states.dart';
+import '../../data/cubit/Ad/CityRentalsAd/city_rentals_ad_cubit.dart';
+import '../../data/cubit/Ad/CityRentalsAd/city_rentals_ad_states.dart';
 import '../../data/cubit/States/states_cubit.dart';
 import '../../data/cubit/States/states_repository.dart';
 import '../../data/cubit/UserActivePlans/user_active_plans_cubit.dart';
 import '../../data/remote_data_source.dart';
 import '../../services/AuthService.dart';
+import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../utils/ImagePickerHelper.dart';
 import '../../utils/planhelper.dart';
 import '../../widgets/CommonTextField.dart';
-import '../../theme/AppTextStyles.dart';
-import '../../widgets/CommonWrapChipSelector.dart';
 import '../../widgets/SelectCityBottomSheet.dart';
 import '../../widgets/SelectStateBottomSheet.dart';
 
-class CoWorkingSpaceAd extends StatefulWidget {
+class CityRentalsAd extends StatefulWidget {
   final String catId;
   final String CatName;
   final String SubCatName;
   final String subCatId;
-  const CoWorkingSpaceAd({
+  const CityRentalsAd({
     super.key,
     required this.catId,
     required this.CatName,
@@ -40,66 +38,39 @@ class CoWorkingSpaceAd extends StatefulWidget {
   });
 
   @override
-  State<CoWorkingSpaceAd> createState() => _CoWorkingSpaceAdState();
+  State<CityRentalsAd> createState() => _CityRentalsAdState();
 }
 
-class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
+class _CityRentalsAdState extends State<CityRentalsAd> {
   final _formKey = GlobalKey<FormState>();
+
+  bool negotiable = false;
+  int? selectedStateId;
+  int? selectedCityId;
   bool _showStateError = false;
   bool _showCityError = false;
-  bool _showImagesError = false;
+  bool _showimagesError = false;
 
-  final titleController = TextEditingController();
   final descriptionController = TextEditingController();
-  final areaSizeController = TextEditingController();
-  final availableSeatsController = TextEditingController();
-  final deskCapacityController = TextEditingController();
+  final brandController = TextEditingController();
+  final locationController = TextEditingController();
+  final vechicleNumber = TextEditingController();
+  final rentalDuration = TextEditingController();
+  final titleController = TextEditingController();
   final priceController = TextEditingController();
   final nameController = TextEditingController();
   final phoneController = TextEditingController();
   final emailController = TextEditingController();
-  final locationController = TextEditingController();
   final stateController = TextEditingController();
   final cityController = TextEditingController();
   final planController = TextEditingController();
 
-  @override
-  void dispose() {
-    titleController.dispose();
-    descriptionController.dispose();
-    areaSizeController.dispose();
-    availableSeatsController.dispose();
-    deskCapacityController.dispose();
-    priceController.dispose();
-    nameController.dispose();
-    phoneController.dispose();
-    emailController.dispose();
-    locationController.dispose();
-    stateController.dispose();
-    cityController.dispose();
-    planController.dispose();
-
-    super.dispose();
-  }
-
-
-  int? selectedStateId;
-  int? selectedCityId;
-
-  String? seatTypeOffered;
-
-
+  List<String> selectedConditions = [];
   List<File> _images = [];
   final int _maxImages = 6;
 
   int? planId;
   int? packageId;
-
-  @override
-  void initState() {
-    super.initState();
-    titleController.text = widget.SubCatName;
-  }
 
   void _pickImage() {
     ImagePickerHelper.showImagePickerBottomSheet(
@@ -107,7 +78,7 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
       onImageSelected: (image) {
         setState(() {
           if (_images.length < _maxImages) {
-            _images.add(image);
+            _images.add(image); // Add the selected image to the list
           }
         });
       },
@@ -117,64 +88,15 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
   }
 
   void _removeImage(int index) {
-    setState(() => _images.removeAt(index));
+    setState(() {
+      _images.removeAt(index);
+    });
   }
 
-  void _submitAd(BuildContext context) {
-
-    if (!(_formKey.currentState?.validate() ?? false)) return;
-
-    bool hasError = false;
-
-
-    if (_images.isEmpty) {
-      setState(() => _showImagesError = true);
-      hasError = true;
-    } else {
-      setState(() => _showImagesError = false);
-    }
-
-    if (selectedStateId == null) {
-      setState(() => _showStateError = true);
-      hasError = true;
-    } else {
-      setState(() => _showStateError = false);
-    }
-
-    if (selectedCityId == null) {
-      setState(() => _showCityError = true);
-      hasError = true;
-    } else {
-      setState(() => _showCityError = false);
-    }
-
-    if (hasError) return;
-
-    final Map<String, dynamic> data = {
-      "title": titleController.text.trim(),
-      "description": descriptionController.text.trim(),
-      "sub_category_id": widget.subCatId,
-      "category_id": widget.catId,
-      "location": locationController.text.trim(),
-      "mobile_number": phoneController.text.trim(),
-      "email": emailController.text.trim(),
-      "plan_id": planId,
-      "package_id": packageId,
-      "price": priceController.text.trim(),
-      "full_name": nameController.text.trim(),
-      "state_id": selectedStateId,
-      "city_id": selectedCityId,
-      "area_size": "${areaSizeController.text.trim()} sqft",
-      "available_seats": availableSeatsController.text.trim(),
-      "desk_capacity": deskCapacityController.text.trim(),
-      "seat_type": seatTypeOffered,
-    };
-
-    if (_images.isNotEmpty) {
-      data["images"] = _images.map((file) => file.path).toList();
-    }
-
-    context.read<CoWorkingAdCubit>().postCoWorkingAd(data);
+  @override
+  void initState() {
+    super.initState();
+    titleController.text = widget.SubCatName;
   }
 
   @override
@@ -182,67 +104,35 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
     final textColor = ThemeHelper.textColor(context);
 
     return Scaffold(
-      appBar: CustomAppBar1(title: '${widget.SubCatName} Ad', actions: []),
+      appBar: CustomAppBar1(title: '${widget.CatName}', actions: []),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CommonTextField1(
-                lable: 'Add Title',
+                lable: ' Add Title',
                 hint: 'Enter Title',
                 controller: titleController,
                 color: textColor,
                 validator: (v) =>
                     (v == null || v.trim().isEmpty) ? 'Required title' : null,
               ),
-
               CommonTextField1(
                 lable: 'Description',
-                hint: 'Enter up to 500 words',
+                hint: 'Enter Upto 500 words',
                 controller: descriptionController,
                 color: textColor,
                 maxLines: 5,
-                validator: (v) => (v == null || v.trim().isEmpty)
-                    ? 'Description required'
-                    : null,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Description required';
+                  }
+                  return null;
+                },
               ),
-
-              CommonTextField1(
-                lable: 'Area Size',
-                hint: 'Enter area (sq. ft.)',
-                controller: areaSizeController,
-                color: textColor,
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                validator: (v) => (v == null || v.trim().isEmpty)
-                    ? 'Area size required'
-                    : null,
-              ),
-
-              CommonTextField1(
-                lable: 'Available Seats',
-                hint: 'Enter number',
-                controller: availableSeatsController,
-                color: textColor,
-                keyboardType: TextInputType.number,
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Seats required' : null,
-              ),
-
-              CommonTextField1(
-                lable: 'Room/  Desk capacity',
-                hint: 'Example 8  or 4 ',
-                controller: deskCapacityController,
-                color: textColor,
-                keyboardType: TextInputType.number,
-                validator: (v) => (v == null || v.trim().isEmpty)
-                    ? 'Desk capacity required'
-                    : null,
-              ),
-
               CommonTextField1(
                 lable: 'Price',
                 hint: 'Enter price',
@@ -257,55 +147,23 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
                 validator: (v) =>
                     (v == null || v.trim().isEmpty) ? 'Price required' : null,
               ),
-
-              _sectionTitle('Upload Product Images', textColor),
-              _imagePickerSection(textColor),
-              if (_showImagesError && _images.isEmpty) _imageErrorWidget(),
-
-              const SizedBox(height: 12),
-
-              ChipSelector(
-                title: "Seat Type Offered",
-                options: [
-                  {"label": "Hot Desk", "value": "hot_desk"},
-                  {"label": "Dedicated Desk", "value": "dedicated_desk"},
-                  {"label": "Private Cabin", "value": "private_cabin"},
-                  {"label": "Meeting Room", "value": "meeting_room"},
-                  {"label": "Others", "value": "others"},
-                ],
-                onSelected: (val) => setState(() => seatTypeOffered = val),
-              ),
-
-              _sectionTitle('Contact Information', textColor),
               CommonTextField1(
-                lable: 'Name',
-                hint: 'Enter name',
-                controller: nameController,
+                lable: 'Vehicle Number',
+                hint: 'Enter Vehicle Number',
+                controller: vechicleNumber,
                 color: textColor,
-                prefixIcon: Icon(Icons.person, color: textColor, size: 16),
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Name required' : null,
+                validator: (v) => (v == null || v.trim().isEmpty)
+                    ? 'Vehicle number required'
+                    : null,
               ),
               CommonTextField1(
-                lable: 'Phone Number',
-                hint: 'Enter phone number',
-                controller: phoneController,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(10),
-                ],
+                lable: 'Rental Duration',
+                hint: 'Enter Rental Duration (e.g. 6 months, 1 year)',
+                controller: rentalDuration,
                 color: textColor,
-                keyboardType: TextInputType.phone,
-                prefixIcon: Icon(Icons.call, color: textColor, size: 16),
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Phone required' : null,
-              ),
-              CommonTextField1(
-                lable: 'Email (Optional)',
-                hint: 'Enter email',
-                controller: emailController,
-                color: textColor,
-                prefixIcon: Icon(Icons.mail, color: textColor, size: 16),
+                validator: (v) => (v == null || v.trim().isEmpty)
+                    ? 'Rental duration required'
+                    : null,
               ),
               GestureDetector(
                 onTap: () async {
@@ -343,13 +201,12 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
                       color: textColor,
                       size: 16,
                     ),
-                    // validator: (v) =>
-                    // (v == null || v.trim().isEmpty) ? 'State required' : null,
                   ),
                 ),
               ),
-              if (_showStateError) _stateErrorWidget(),
+              if (_showStateError) _buildErrorText("Please Select State"),
 
+              /// CITY FIELD
               GestureDetector(
                 onTap: () async {
                   final selectedCity = await showModalBottomSheet(
@@ -362,6 +219,7 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
                       );
                     },
                   );
+
                   if (selectedCity != null) {
                     cityController.text = selectedCity.name ?? "";
                     selectedCityId = selectedCity.id ?? 0;
@@ -380,12 +238,47 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
                       color: textColor,
                       size: 16,
                     ),
-                    // validator: (v) =>
-                    // (v == null || v.trim().isEmpty) ? 'City required' : null,
                   ),
                 ),
               ),
-              if (_showCityError) _cityErrorWidget(),
+              if (_showCityError) _buildErrorText("Please Select City"),
+
+              _sectionTitle('Upload Product Images', textColor),
+              _buildImagePicker(textColor),
+              if (_showimagesError && _images.isEmpty)
+                _buildErrorText("Please upload at least one image"),
+
+              _sectionTitle('Contact Information', textColor),
+              CommonTextField1(
+                lable: 'Name',
+                hint: 'Enter name',
+                controller: nameController,
+                color: textColor,
+                prefixIcon: Icon(Icons.person, color: textColor, size: 16),
+                validator: (v) =>
+                    (v == null || v.trim().isEmpty) ? 'Name required' : null,
+              ),
+              CommonTextField1(
+                lable: 'Phone Number',
+                hint: 'Enter phone number',
+                controller: phoneController,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(10),
+                ],
+                color: textColor,
+                keyboardType: TextInputType.phone,
+                prefixIcon: Icon(Icons.call, color: textColor, size: 16),
+                validator: (v) =>
+                    (v == null || v.trim().isEmpty) ? 'Phone required' : null,
+              ),
+              CommonTextField1(
+                lable: 'Email (Optional)',
+                hint: 'Enter email',
+                controller: emailController,
+                color: textColor,
+                prefixIcon: Icon(Icons.mail, color: textColor, size: 16),
+              ),
               CommonTextField1(
                 lable: 'Address',
                 hint: 'Enter Location',
@@ -395,14 +288,14 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
                     ? 'Required location'
                     : null,
               ),
+
+              /// PLAN
               CommonTextField1(
                 lable: 'Plan',
                 isRead: true,
                 hint: 'Select Plan',
                 controller: planController,
                 color: textColor,
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Plan is Required' : null,
                 onTap: () {
                   context.read<UserActivePlanCubit>().getUserActivePlansData();
                   showPlanBottomSheet(
@@ -411,6 +304,7 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
                     onSelectPlan: (selectedPlan) {
                       planId = selectedPlan.planId;
                       packageId = selectedPlan.packageId;
+                      setState(() {});
                     },
                     title: 'Choose Your Plan',
                   );
@@ -421,6 +315,7 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
         ),
       ),
 
+      /// SUBMIT BUTTON
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
@@ -428,21 +323,85 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
             future: AuthService.isEligibleForAd,
             builder: (context, asyncSnapshot) {
               final isEligible = asyncSnapshot.data ?? false;
-              return BlocConsumer<CoWorkingAdCubit, CoWorkingAdStates>(
+              return BlocConsumer<CityRentalsAdCubit, CityRentalsAdStates>(
                 listener: (context, state) {
-                  if (state is CoWorkingAdSuccess) {
+                  if (state is CityRentalsAdSuccess) {
                     context.pushReplacement("/successfully");
-                  } else if (state is CoWorkingAdFailure) {
+                  } else if (state is CityRentalsAdFailure) {
                     CustomSnackBar1.show(context, state.error);
                   }
                 },
                 builder: (context, state) {
                   return CustomAppButton1(
-                    isLoading: state is CoWorkingAdLoading,
+                    isLoading: state is CityRentalsAdLoading,
                     text: 'Submit Ad',
                     onPlusTap: isEligible
-                        ? () => _submitAd(context)
-                        : () => context.push("/plans"),
+                        ? () {
+                            if (_formKey.currentState?.validate() ?? false) {
+                              bool isValid = true;
+
+                              if (selectedStateId == null) {
+                                setState(() => _showStateError = true);
+                                isValid = false;
+                              } else {
+                                setState(() => _showStateError = false);
+                              }
+
+                              if (selectedCityId == null) {
+                                setState(() => _showCityError = true);
+                                isValid = false;
+                              } else {
+                                setState(() => _showCityError = false);
+                              }
+
+                              if (_images.isEmpty) {
+                                setState(() => _showimagesError = true);
+                                isValid = false;
+                              } else {
+                                setState(() => _showimagesError = false);
+                              }
+
+                              if (planId == null || packageId == null) {
+                                CustomSnackBar1.show(
+                                  context,
+                                  "Please select a plan",
+                                );
+                                isValid = false;
+                              }
+
+                              if (!isValid) return;
+
+                              final Map<String, dynamic> data = {
+                                "title": titleController.text,
+                                "description": descriptionController.text,
+                                "sub_category_id": widget.subCatId,
+                                "category_id": widget.catId,
+                                "location": locationController.text,
+                                "mobile_number": phoneController.text,
+                                "vehicle_number": vechicleNumber.text,
+                                "rental_duration": rentalDuration.text,
+                                "plan_id": planId,
+                                "package_id": packageId,
+                                "price": priceController.text,
+                                "full_name": nameController.text,
+                                "state_id": selectedStateId,
+                                "city_id": selectedCityId,
+                              };
+
+                              if (_images.isNotEmpty) {
+                                data["images"] = _images
+                                    .map((file) => file.path)
+                                    .toList();
+                              }
+
+                              context
+                                  .read<CityRentalsAdCubit>()
+                                  .postCityRentalsAd(data);
+                            }
+                          }
+                        : () {
+                            context.push("/plans");
+                          },
                   );
                 },
               );
@@ -455,7 +414,7 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
 
   Widget _sectionTitle(String title, Color color) {
     return Padding(
-      padding: const EdgeInsets.only(top: 20, bottom: 8),
+      padding: const EdgeInsets.only(top: 20, bottom: 10),
       child: Text(
         title,
         style: AppTextStyles.titleMedium(
@@ -465,19 +424,31 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
     );
   }
 
-  Widget _imagePickerSection(Color textColor) {
+  Widget _buildErrorText(String message) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 5),
+      child: ShakeWidget(
+        key: Key("error_${DateTime.now().millisecondsSinceEpoch}"),
+        duration: const Duration(milliseconds: 700),
+        child: Text(
+          message,
+          style: const TextStyle(
+            fontFamily: 'roboto_serif',
+            fontSize: 12,
+            color: Colors.red,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImagePicker(Color textColor) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: BoxDecoration(
         border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
         borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0x0D000000),
-            offset: const Offset(0, 1),
-            blurRadius: 2,
-          ),
-        ],
       ),
       child: _images.isEmpty
           ? InkWell(
@@ -491,9 +462,9 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
                       color: textColor.withOpacity(0.6),
                       size: 40,
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text(
-                      '+ Add Photos $_maxImages',
+                      '+ Add Photos ($_maxImages)',
                       style: TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 14,
@@ -506,8 +477,8 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
             )
           : GridView.builder(
               shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 4,
                 crossAxisSpacing: 8,
                 mainAxisSpacing: 8,
@@ -581,65 +552,6 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
                 );
               },
             ),
-    );
-  }
-
-  Widget _imageErrorWidget() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 5),
-      child: ShakeWidget(
-        key: Key("images_error_${DateTime.now().millisecondsSinceEpoch}"),
-        duration: const Duration(milliseconds: 700),
-        child: const Text(
-          'Please upload at least one image',
-          style: TextStyle(
-            fontFamily: 'roboto_serif',
-            fontSize: 12,
-            color: Colors.red,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _stateErrorWidget() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 5),
-      child: ShakeWidget(
-        key: Key("state"),
-        duration: const Duration(milliseconds: 700),
-        child: const Text(
-          'Please Select State',
-          style: TextStyle(
-            fontFamily: 'roboto_serif',
-            fontSize: 12,
-            color: Colors.red,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _cityErrorWidget() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 5),
-      child: ShakeWidget(
-        key: Key(
-          "dropdown_city_error_${DateTime.now().millisecondsSinceEpoch}",
-        ),
-        duration: const Duration(milliseconds: 700),
-        child: const Text(
-          'Please Select City',
-          style: TextStyle(
-            fontFamily: 'roboto_serif',
-            fontSize: 12,
-            color: Colors.red,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ),
     );
   }
 }

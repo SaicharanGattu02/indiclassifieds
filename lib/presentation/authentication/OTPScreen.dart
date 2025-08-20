@@ -140,7 +140,9 @@ class _OtpscreenState extends State<Otpscreen> {
                         appContext: context,
                         controller: _otpController,
                         focusNode: _otpFocusNode,
-                        backgroundColor: isDark ? Colors.transparent : Colors.transparent,
+                        backgroundColor: isDark
+                            ? Colors.transparent
+                            : Colors.transparent,
                         length: 6,
                         onChanged: _onOtpChanged,
                         animationType: AnimationType.fade,
@@ -267,8 +269,9 @@ class _OtpscreenState extends State<Otpscreen> {
                             final tokens = state.verifyOtpModel;
                             await AuthService.saveTokens(
                               tokens.token ?? "",
-                              // ""
-                              // 21313232213,
+                              tokens.user?.name ?? "",
+                              tokens.user?.email ?? "",
+                              tokens.user?.mobile ?? "",
                             );
                             context.pushReplacement('/dashboard');
                           } else if (state is OtpVerifyFailure) {

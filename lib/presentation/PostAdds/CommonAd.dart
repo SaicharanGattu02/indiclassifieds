@@ -70,7 +70,6 @@ class _CommonAdState extends State<CommonAd> {
   int? planId;
   int? packageId;
 
-  // Function to call the ImagePickerBottomSheet
   void _pickImage() {
     ImagePickerHelper.showImagePickerBottomSheet(
       context: context,
@@ -91,11 +90,14 @@ class _CommonAdState extends State<CommonAd> {
       _images.removeAt(index);
     });
   }
-
+  @override
+  void initState() {
+    super.initState();
+    titleController.text = widget.SubCatName ?? "";
+  }
   @override
   Widget build(BuildContext context) {
     final textColor = ThemeHelper.textColor(context);
-    final isDarkMode = ThemeHelper.isDarkMode(context);
     return Scaffold(
       appBar: CustomAppBar1(title: '${widget.CatName}', actions: []),
       body: SingleChildScrollView(
@@ -127,12 +129,6 @@ class _CommonAdState extends State<CommonAd> {
                 },
               ),
 
-              // _sectionTitle('Condition', textColor),
-              // _buildChips(
-              //   ['Brand New', 'Like New', 'Used', 'For Parts Only'],
-              //   textColor,
-              //   isDarkMode,
-              // ),
               CommonTextField1(
                 lable: 'Price',
                 hint: 'Enter price',
@@ -173,7 +169,6 @@ class _CommonAdState extends State<CommonAd> {
                   }
                 },
                 child: AbsorbPointer(
-                  // 👈 stops inner TextField from eating taps
                   child: CommonTextField1(
                     lable: 'State',
                     hint: 'Select State',
@@ -501,32 +496,65 @@ class _CommonAdState extends State<CommonAd> {
                     text: 'Submit Ad',
                     onPlusTap: isEligible
                         ? () {
-                            if (_formKey.currentState?.validate() ?? false) {
-                              final Map<String, dynamic> data = {
-                                "title": titleController.text,
-                                "description": descriptionController.text,
-                                "sub_category_id": widget.subCatId,
-                                "category_id": widget.catId,
-                                "location": locationController.text,
-                                "mobile_number": phoneController.text,
-                                "plan_id": planId,
-                                "package_id": packageId,
-                                "price": priceController.text,
-                                "full_name": nameController.text,
-                                "state_id": selectedStateId,
-                                "city_id": selectedCityId,
-                              };
-                              if (_images.isNotEmpty) {
-                                data["images"] = _images
-                                    .map((file) => file.path)
-                                    .toList();
-                              }
-                              context.read<CommonAdCubit>().postCommonAd(data);
-                            }
+                      if (_formKey.currentState?.validate() ?? false) {
+                        bool isValid = true;
+
+                        if (_images.isEmpty) {
+                          setState(() => _showimagesError = true);
+                          isValid = false;
+                        } else {
+                          setState(() => _showimagesError = false);
+                        }
+                        if (selectedStateId == null) {
+                          setState(() => _showStateError = true);
+                          isValid = false;
+                        } else {
+                          setState(() => _showStateError = false);
+                        }
+
+                        if (selectedCityId == null) {
+                          setState(() => _showCityError = true);
+                          isValid = false;
+                        } else {
+                          setState(() => _showCityError = false);
+                        }
+
+                        // Validate plan
+                        if (planId == null || packageId == null) {
+                          setState(() => _showPaymentError = true);
+                          isValid = false;
+                        } else {
+                          setState(() => _showPaymentError = false);
+                        }
+
+                        if (isValid) {
+                          final Map<String, dynamic> data = {
+                            "title": titleController.text,
+                            "description": descriptionController.text,
+                            "sub_category_id": widget.subCatId,
+                            "category_id": widget.catId,
+                            "location": locationController.text,
+                            "mobile_number": phoneController.text,
+                            "plan_id": planId,
+                            "package_id": packageId,
+                            "price": priceController.text,
+                            "full_name": nameController.text,
+                            "state_id": selectedStateId,
+                            "city_id": selectedCityId,
+                          };
+
+                          if (_images.isNotEmpty) {
+                            data["images"] = _images.map((file) => file.path).toList();
                           }
+
+                          context.read<CommonAdCubit>().postCommonAd(data);
+                        }
+                      }
+                    }
                         : () {
-                            context.push("/plans");
-                          },
+                      context.push("/plans");
+                    },
+
                   );
                 },
               );
@@ -549,55 +577,5 @@ class _CommonAdState extends State<CommonAd> {
     );
   }
 
-  Widget _buildChips(List<String> items, Color color, bool isDark) {
-    return Wrap(
-      spacing: 8,
-      children: items
-          .map(
-            (e) => FilterChip(
-              selected: selectedConditions.contains(e),
-              label: Text(e, style: AppTextStyles.bodySmall(color)),
-              selectedColor: Colors.blue.withOpacity(0.2),
-              backgroundColor: isDark ? Colors.black : Colors.grey.shade200,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(7),
-                side: BorderSide(
-                  color: selectedConditions.contains(e)
-                      ? Colors.blue
-                      : (isDark
-                            ? const Color(0xff666666)
-                            : const Color(0xffD9D9D9)),
-                ),
-              ),
-              onSelected: (bool selected) {
-                setState(() {
-                  if (selected) {
-                    selectedConditions.add(e);
-                  } else {
-                    selectedConditions.remove(e);
-                  }
-                });
-              },
-            ),
-          )
-          .toList(),
-    );
-  }
 
-  Widget _buildSwitchRow(String label, Color color) {
-    return Row(
-      children: [
-        Transform.scale(
-          scale: 0.8,
-          child: Switch(
-            inactiveTrackColor: color.withOpacity(0.2),
-            value: negotiable,
-            onChanged: (v) => setState(() => negotiable = v),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Text(label, style: AppTextStyles.bodyMedium(color)),
-      ],
-    );
-  }
 }

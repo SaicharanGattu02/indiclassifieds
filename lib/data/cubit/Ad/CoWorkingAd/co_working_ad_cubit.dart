@@ -13,7 +13,7 @@ class CoWorkingAdCubit extends Cubit<CoWorkingAdStates> {
       if (response != null && response.success == true) {
         emit(CoWorkingAdSuccess(response));
       } else {
-        emit(CoWorkingAdFailure(response?.message ?? ""));
+        emit(CoWorkingAdFailure("${response?.message ?? ""}.${response?.error ?? ""}"));
       }
     } catch (e) {
       emit(CoWorkingAdFailure(e.toString()));

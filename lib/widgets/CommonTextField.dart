@@ -148,8 +148,8 @@ class _CommonTextField1State extends State<CommonTextField1> {
         ),
         SizedBox(height: 10),
         TextFormField(readOnly:  widget.isRead ?? false,
-          inputFormatters: widget.inputFormatters ?? const [],
-          onTap: widget.onTap, // Trigger the onTap callback
+          inputFormatters: widget.inputFormatters,
+          onTap: widget.onTap,
           style: AppTextStyles.bodyMedium(widget.color),
           controller: widget.controller,
           keyboardType: widget.keyboardType,

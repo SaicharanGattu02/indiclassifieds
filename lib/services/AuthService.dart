@@ -10,6 +10,9 @@ class AuthService {
   static const String _plan_status = "plan_status";
   // static const String _refreshTokenKey = "refresh_token";
   // static const String _tokenExpiryKey = "token_expiry";
+  static const String _userName = "user_name";
+  static const String _email = "email";
+  static const String _mobile = "mobile";
 
   static final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
@@ -17,6 +20,16 @@ class AuthService {
   static Future<bool> get isGuest async {
     final token = await getAccessToken();
     return token == null || token.isEmpty;
+  }
+
+  static Future<String?> getName() async {
+    return await _storage.read(key: _userName);
+  }
+  static Future<String?> getEmail() async {
+    return await _storage.read(key: _email);
+  }
+  static Future<String?> getMobile() async {
+    return await _storage.read(key: _mobile);
   }
 
   /// Get stored access token
@@ -89,11 +102,14 @@ class AuthService {
 
   /// Save tokens and expiry time
   static Future<void> saveTokens(
-    String accessToken,
+    String accessToken,String userName, String email,String mobile
     // String? refreshToken,
     // int expiresIn,
   ) async {
     await _storage.write(key: _accessTokenKey, value: accessToken);
+    await _storage.write(key: _userName, value: userName.toString());
+    await _storage.write(key: _email, value: email.toString());
+    await _storage.write(key: _mobile, value: mobile.toString());
     // await _storage.write(key: _refreshTokenKey, value: refreshToken ?? "");
     // await _storage.write(key: _tokenExpiryKey, value: expiresIn.toString());
     debugPrint(

@@ -1,14 +1,27 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../../Components/CustomAppButton.dart';
+import '../../Components/CustomSnackBar.dart';
 import '../../Components/CutomAppBar.dart';
+import '../../Components/ShakeWidget.dart';
+import '../../data/cubit/Ad/AstrologyAd/astrology_ad_cubit.dart';
+import '../../data/cubit/Ad/AstrologyAd/astrology_ad_states.dart';
+import '../../data/cubit/States/states_cubit.dart';
+import '../../data/cubit/States/states_repository.dart';
+import '../../data/cubit/UserActivePlans/user_active_plans_cubit.dart';
+import '../../data/remote_data_source.dart';
+import '../../services/AuthService.dart';
 import '../../theme/ThemeHelper.dart';
-import '../../utils/ImageUtils.dart';
-import '../../utils/color_constants.dart';
+import '../../utils/ImagePickerHelper.dart';
+import '../../utils/planhelper.dart';
 import '../../widgets/CommonTextField.dart';
 import '../../theme/AppTextStyles.dart';
+import '../../widgets/SelectCityBottomSheet.dart';
+import '../../widgets/SelectStateBottomSheet.dart';
 
 class AstrologyAd extends StatefulWidget {
   final String catId;
@@ -30,148 +43,47 @@ class AstrologyAd extends StatefulWidget {
 class _AstrologyAdState extends State<AstrologyAd> {
   final _formKey = GlobalKey<FormState>();
 
-  final fullNameController = TextEditingController();
-  final contactController = TextEditingController();
   final locationController = TextEditingController();
+  final titleController = TextEditingController();
   final dateController = TextEditingController();
   final timeController = TextEditingController();
   final priceController = TextEditingController();
-  final notesController = TextEditingController();
+  // final costOfFeeController = TextEditingController();
+  final descriptionController = TextEditingController();
   final planController = TextEditingController();
+  final nameController = TextEditingController();
+  final phoneController = TextEditingController();
+  final emailController = TextEditingController();
+  final stateController = TextEditingController();
+  final cityController = TextEditingController();
+  List<String> selectedConditions = [];
+  List<File> _images = [];
+  final int _maxImages = 6;
   bool _showStateError = false;
   bool _showCityError = false;
   bool _showimagesError = false;
 
-  @override
-  void initState() {
-    super.initState();
-    // brandController.text = widget.SubCatName ?? "";
-  }
   int? selectedStateId;
   int? selectedCityId;
   int? planId;
   int? packageId;
-  String? imagePath;
-  List<File> _images = [];
-  final int _maxImages = 6;
-  final ImagePicker _picker = ImagePicker();
+
   final Set<String> selectedLanguages = {};
-  final List<String> languages = ['English', 'Hindi', 'Sanskrit'];
-  Future<void> _pickImage() async {
-    showModalBottomSheet(
+  final List<String> languages = ['English', 'Hindi', 'Sanskrit', 'Telugu'];
+
+  void _pickImage() {
+    ImagePickerHelper.showImagePickerBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      backgroundColor: Colors.white,
-      builder: (BuildContext context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Drag handle
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    decoration: BoxDecoration(
-                      color: primarycolor.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.close, color: Colors.red),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ],
-                ),
-                ListTile(
-                  leading: Icon(Icons.photo_library, color: primarycolor),
-                  title: const Text(
-                    'Choose from Gallery',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 16,
-                      color: Colors.black87,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _pickImageFromGallery();
-                  },
-                ),
-
-                // Camera Option
-                ListTile(
-                  leading: Icon(Icons.camera_alt, color: primarycolor),
-                  title: const Text(
-                    'Take a Photo',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 16,
-                      color: Colors.black87,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _pickImageFromCamera();
-                  },
-                ),
-
-                const SizedBox(height: 8),
-              ],
-            ),
-          ),
-        );
+      onImageSelected: (image) {
+        setState(() {
+          if (_images.length < _maxImages) {
+            _images.add(image);
+          }
+        });
       },
+      maxImages: _maxImages,
+      images: _images,
     );
-  }
-
-  Future<void> _pickImageFromGallery() async {
-    final XFile? pickedFile = await _picker.pickImage(
-      source: ImageSource.gallery,
-    );
-    if (pickedFile != null) {
-      File? compressedFile = await ImageUtils.compressImage(
-        File(pickedFile.path),
-      );
-      if (compressedFile != null) {
-        setState(() {
-          if (_images.length < _maxImages) {
-            _images.add(compressedFile); // ✅ add to list
-          }
-        });
-      }
-    }
-  }
-
-  Future<void> _pickImageFromCamera() async {
-    final XFile? pickedFile = await _picker.pickImage(
-      source: ImageSource.camera,
-    );
-    if (pickedFile != null) {
-      File? compressedFile = await ImageUtils.compressImage(
-        File(pickedFile.path),
-      );
-      if (compressedFile != null) {
-        setState(() {
-          if (_images.length < _maxImages) {
-            _images.add(compressedFile); // ✅ add to list
-          }
-        });
-      }
-    }
   }
 
   void _removeImage(int index) {
@@ -179,16 +91,26 @@ class _AstrologyAdState extends State<AstrologyAd> {
       _images.removeAt(index);
     });
   }
-
+  @override
+  void initState() {
+    super.initState();
+    titleController.text = widget.SubCatName ?? "";
+  }
   @override
   void dispose() {
-    fullNameController.dispose();
-    contactController.dispose();
     locationController.dispose();
+    titleController.dispose();
     dateController.dispose();
     timeController.dispose();
     priceController.dispose();
-    notesController.dispose();
+    // costOfFeeController.dispose();
+    descriptionController.dispose();
+    planController.dispose();
+    nameController.dispose();
+    phoneController.dispose();
+    emailController.dispose();
+    stateController.dispose();
+    cityController.dispose();
     super.dispose();
   }
 
@@ -233,15 +155,26 @@ class _AstrologyAdState extends State<AstrologyAd> {
             children: [
               _sectionTitle('Astrologer Information', textColor),
               CommonTextField1(
-                lable: 'Full Name',
-                hint: 'Enter your full name',
-                controller: fullNameController,
+                lable: ' Add Title',
+                hint: 'Enter Title',
+                controller: titleController,
                 color: textColor,
-                validator: (v) => (v == null || v.trim().isEmpty)
-                    ? 'Full name required'
-                    : null,
+                validator: (v) =>
+                (v == null || v.trim().isEmpty) ? 'Required title' : null,
               ),
-
+              CommonTextField1(
+                lable: 'Description',
+                hint: 'Enter  Upto  500 words',
+                controller: descriptionController,
+                color: textColor,
+                maxLines: 5,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Description required';
+                  }
+                  return null;
+                },
+              ),
               _sectionSubTitle('Languages', textColor),
               Wrap(
                 spacing: 8,
@@ -266,85 +199,356 @@ class _AstrologyAdState extends State<AstrologyAd> {
                   );
                 }).toList(),
               ),
-
               CommonTextField1(
-                lable: 'Contact Number',
-                hint: 'Enter your contact number',
-                controller: contactController,
-                color: textColor,
-                keyboardType: TextInputType.phone,
-                prefixIcon: Icon(Icons.phone, color: textColor, size: 16),
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Contact required' : null,
-              ),
-              CommonTextField1(
-                prefixIcon: Icon(Icons.location_on, color: textColor, size: 16),
-                lable: 'Location',
-                hint: 'Enter location',
-                controller: locationController,
-                color: textColor,
-                validator: (v) => (v == null || v.trim().isEmpty)
-                    ? 'Location required'
-                    : null,
-              ),
-              GestureDetector(
-                onTap: () => _selectDate(context),
-                child: AbsorbPointer(
-                  child: CommonTextField1(
-                    prefixIcon: Icon(
-                      Icons.calendar_today,
-                      color: textColor,
-                      size: 16,
-                    ),
-                    lable: 'Consultation Date',
-                    hint: 'Select date',
-                    controller: dateController,
-                    color: textColor,
-                    validator: (v) => (v == null || v.trim().isEmpty)
-                        ? 'Date required'
-                        : null,
-                  ),
-                ),
-              ),
-              GestureDetector(
-                onTap: () => _selectTime(context),
-                child: AbsorbPointer(
-                  child: CommonTextField1(
-                    prefixIcon: Icon(
-                      Icons.access_time,
-                      color: textColor,
-                      size: 16,
-                    ),
-                    lable: 'Consultation Time',
-                    hint: 'Select time',
-                    controller: timeController,
-                    color: textColor,
-                    validator: (v) => (v == null || v.trim().isEmpty)
-                        ? 'Time required'
-                        : null,
-                  ),
-                ),
-              ),
-              CommonTextField1(
-                prefixIcon: Icon(
-                  Icons.attach_money,
-                  color: textColor,
-                  size: 16,
-                ),
-                lable: 'Consultation Price',
-                hint: 'Enter consultation price',
+                lable: 'Price',
+                hint: 'Enter Price',
                 controller: priceController,
                 color: textColor,
                 keyboardType: TextInputType.number,
+                prefixIcon: Icon(
+                  Icons.currency_rupee,
+                  color: textColor,
+                  size: 16,
+                ),
                 validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Price required' : null,
+                (v == null || v.trim().isEmpty) ? 'Price required' : null,
+              ),
+              // CommonTextField1(
+              //   lable: 'Cost Of Fee',
+              //   hint: 'Enter Cost Of Fee',
+              //   controller: costOfFeeController,
+              //   color: textColor,
+              //   keyboardType: TextInputType.number,
+              //   prefixIcon: Icon(
+              //     Icons.currency_rupee,
+              //     color: textColor,
+              //     size: 16,
+              //   ),
+              //   validator: (v) =>
+              //   (v == null || v.trim().isEmpty) ? 'Fee required' : null,
+              // ),
+              _sectionTitle('Upload Product Images', textColor),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
+                decoration: BoxDecoration(
+                  border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0x0D000000),
+                      offset: const Offset(0, 1),
+                      blurRadius: 2,
+                    ),
+                  ],
+                ),
+                child: _images.isEmpty
+                    ? InkWell(
+                  onTap: _pickImage,
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.photo_camera,
+                          color: textColor.withOpacity(0.6),
+                          size: 40,
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          '+ Add Photos ${_maxImages}',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 14,
+                            color: textColor.withOpacity(0.6),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+                    : GridView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                    childAspectRatio: 1.8,
+                  ),
+                  itemCount: _images.length < _maxImages
+                      ? _images.length + 1
+                      : _images.length,
+                  itemBuilder: (context, index) {
+                    if (index == _images.length &&
+                        _images.length < _maxImages) {
+                      return InkWell(
+                        onTap: _pickImage,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: const Color(0xFFE5E7EB),
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.add_photo_alternate,
+                                color: textColor.withOpacity(0.6),
+                                size: 24,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Add Photo',
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 12,
+                                  color: textColor.withOpacity(0.6),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
+                    return Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.file(
+                            _images[index],
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                          ),
+                        ),
+                        Positioned(
+                          top: 4,
+                          right: 4,
+                          child: GestureDetector(
+                            onTap: () => _removeImage(index),
+                            child: Container(
+                              padding: const EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                color: Colors.red.withOpacity(0.7),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.close,
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+              if (_showimagesError && _images.isEmpty) ...[
+                Padding(
+                  padding: const EdgeInsets.only(top: 5),
+                  child: ShakeWidget(
+                    key: Key(
+                      "images_error_${DateTime.now().millisecondsSinceEpoch}",
+                    ),
+                    duration: const Duration(milliseconds: 700),
+                    child: const Text(
+                      'Please upload at least one image',
+                      style: TextStyle(
+                        fontFamily: 'roboto_serif',
+                        fontSize: 12,
+                        color: Colors.red,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+
+              _sectionTitle('Contact Information', textColor),
+              CommonTextField1(
+                lable: 'Name',
+                hint: 'Enter name',
+                controller: nameController,
+                color: textColor,
+                prefixIcon: Icon(Icons.person, color: textColor, size: 16),
+                validator: (v) =>
+                (v == null || v.trim().isEmpty) ? 'Name required' : null,
               ),
               CommonTextField1(
-                maxLines: 3,
-                lable: 'Additional Notes',
-                hint: 'Any special requirements or notes',
-                controller: notesController,
+                lable: 'Phone Number',
+                hint: 'Enter phone number',
+                controller: phoneController,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(10),
+                ],
                 color: textColor,
+                keyboardType: TextInputType.phone,
+                prefixIcon: Icon(Icons.call, color: textColor, size: 16),
+                validator: (v) =>
+                (v == null || v.trim().isEmpty) ? 'Phone required' : null,
+              ),
+              GestureDetector(
+                onTap: () async {
+                  final selectedState = await showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) {
+                      return BlocProvider(
+                        create: (_) => SelectStatesCubit(
+                          SelectStatesImpl(
+                            remoteDataSource: RemoteDataSourceImpl(),
+                          ),
+                        ),
+                        child: SelectStateBottomSheet(),
+                      );
+                    },
+                  );
+
+                  if (selectedState != null) {
+                    stateController.text = selectedState.name ?? "";
+                    selectedStateId = selectedState.id;
+                    setState(() {});
+                  }
+                },
+                child: AbsorbPointer(
+                  child: CommonTextField1(
+                    lable: 'State',
+                    hint: 'Select State',
+                    controller: stateController,
+                    color: textColor,
+                    keyboardType: TextInputType.text,
+                    isRead: true,
+                    prefixIcon: Icon(
+                      Icons.location_city_outlined,
+                      color: textColor,
+                      size: 16,
+                    ),
+                    // validator: (v) => (v == null || v.trim().isEmpty)
+                    //     ? 'State required'
+                    //     : null,
+                  ),
+                ),
+              ),
+              if (_showStateError) ...[
+                Padding(
+                  padding: const EdgeInsets.only(top: 5),
+                  child: ShakeWidget(
+                    key: Key("state"),
+                    duration: const Duration(milliseconds: 700),
+                    child: const Text(
+                      'Please Select State',
+                      style: TextStyle(
+                        fontFamily: 'roboto_serif',
+                        fontSize: 12,
+                        color: Colors.red,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+              GestureDetector(
+                onTap: () async {
+                  final selectedCity = await showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) {
+                      return SelectCityBottomSheet(
+                        stateId: selectedStateId ?? 0,
+                      );
+                    },
+                  );
+
+                  if (selectedCity != null) {
+                    cityController.text = selectedCity.name ?? "";
+                    selectedCityId = selectedCity.id;
+                    setState(() {});
+                  }
+                },
+                child: AbsorbPointer(
+                  child: CommonTextField1(
+                    lable: 'City',
+                    hint: 'Select City',
+                    controller: cityController,
+                    color: textColor,
+                    keyboardType: TextInputType.text,
+                    isRead: true,
+                    prefixIcon: Icon(
+                      Icons.location_city_outlined,
+                      color: textColor,
+                      size: 16,
+                    ),
+                    // validator: (v) =>
+                    // (v == null || v.trim().isEmpty) ? 'City required' : null,
+                  ),
+                ),
+              ),
+              if (_showCityError) ...[
+                Padding(
+                  padding: const EdgeInsets.only(top: 5),
+                  child: ShakeWidget(
+                    key: Key(
+                      "dropdown_city_error_${DateTime.now().millisecondsSinceEpoch}",
+                    ),
+                    duration: const Duration(milliseconds: 700),
+                    child: const Text(
+                      'Please Select City',
+                      style: TextStyle(
+                        fontFamily: 'roboto_serif',
+                        fontSize: 12,
+                        color: Colors.red,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+              CommonTextField1(
+                lable: 'Email (Optional)',
+                hint: 'Enter email',
+                controller: emailController,
+                color: textColor,
+                prefixIcon: Icon(Icons.mail, color: textColor, size: 16),
+              ),
+              CommonTextField1(
+                lable: 'Address',
+                hint: 'Enter Location',
+                controller: locationController,
+                color: textColor,
+                validator: (v) => (v == null || v.trim().isEmpty)
+                    ? 'Required location'
+                    : null,
+              ),
+              CommonTextField1(
+                lable: 'Plan',
+                isRead: true,
+                hint: 'Select Plan',
+                controller: planController,
+                color: textColor,
+                validator: (v) =>
+                (v == null || v.trim().isEmpty) ? 'Plan is Required' : null,
+                onTap: () {
+                  context.read<UserActivePlanCubit>().getUserActivePlansData();
+                  showPlanBottomSheet(
+                    context: context,
+                    controller: planController,
+                    onSelectPlan: (selectedPlan) {
+                      planId = selectedPlan.planId;
+                      packageId = selectedPlan.packageId;
+                    },
+                    title: 'Choose Your Plan',
+                  );
+                },
               ),
             ],
           ),
@@ -353,14 +557,100 @@ class _AstrologyAdState extends State<AstrologyAd> {
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
-          child: CustomAppButton1(
-            text: 'Submit Details',
-            onPlusTap: () {
-              if (_formKey.currentState?.validate() ?? false) {
-                debugPrint(
-                  'Astrologer: ${fullNameController.text}, Languages: ${selectedLanguages.join(',')}, Contact: ${contactController.text}, Date: ${dateController.text}, Time: ${timeController.text}, Price: ${priceController.text}',
-                );
-              }
+          child: FutureBuilder(
+            future: AuthService.isEligibleForAd,
+            builder: (context, asyncSnapshot) {
+              final isEligible = asyncSnapshot.data ?? false;
+              return BlocConsumer<AstrologyAdCubit, AstrologyAdStates>(
+                listener: (context, state) {
+                  if (state is AstrologyAdSuccess) {
+                    context.pushReplacement("/successfully");
+                  } else if (state is AstrologyAdFailure) {
+                    CustomSnackBar1.show(context, state.error);
+                  }
+                },
+                builder: (context, state) {
+                  return CustomAppButton1(
+                    isLoading: state is AstrologyAdLoading,
+                    text: 'Submit Ad',
+                    onPlusTap: isEligible
+                        ? () {
+                      if (_formKey.currentState?.validate() ?? false) {
+                        bool isValid = true;
+
+                        // Validate State
+                        if (selectedStateId == null) {
+                          setState(() {
+                            _showStateError = true;
+                          });
+                          isValid = false;
+                        } else {
+                          setState(() {
+                            _showStateError = false;
+                          });
+                        }
+
+                        // Validate City
+                        if (selectedCityId == null) {
+                          setState(() {
+                            _showCityError = true;
+                          });
+                          isValid = false;
+                        } else {
+                          setState(() {
+                            _showCityError = false;
+                          });
+                        }
+
+                        // Validate Images
+                        if (_images.isEmpty) {
+                          setState(() {
+                            _showimagesError = true;
+                          });
+                          isValid = false;
+                        } else {
+                          setState(() {
+                            _showimagesError = false;
+                          });
+                        }
+
+                        if (isValid) {
+                          final Map<String, dynamic> data = {
+                            "title": titleController.text,
+                            "description": descriptionController.text,
+                            "sub_category_id": widget.subCatId,
+                            "category_id": widget.catId,
+                            "location": locationController.text,
+                            "mobile_number": phoneController.text,
+                            "languages_spoken": selectedLanguages.join(", "),
+                            "plan_id": planId,
+                            "package_id": packageId,
+                            "price": priceController.text,
+                            // "cost_of_fee": costOfFeeController.text,
+                            "full_name": nameController.text,
+                            "state_id": selectedStateId,
+                            "city_id": selectedCityId,
+                          };
+
+                          if (emailController.text.trim().isNotEmpty) {
+                            data["email"] = emailController.text.trim();
+                          }
+
+                          if (_images.isNotEmpty) {
+                            data["images"] = _images.map((file) => file.path).toList();
+                          }
+
+                          context.read<AstrologyAdCubit>().postAstrologyAd(data);
+                        }
+                      }
+                    }
+                        : () {
+                      context.push("/plans");
+                    },
+
+                  );
+                },
+              );
             },
           ),
         ),

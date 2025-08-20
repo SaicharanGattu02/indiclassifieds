@@ -58,7 +58,6 @@ class _EducationalAdState extends State<EducationalAd> {
   final cityController = TextEditingController();
   final nameController = TextEditingController();
   final instituteNameController = TextEditingController();
-  final costOfFeeController = TextEditingController();
   final planController = TextEditingController();
   int? planId;
   int? packageId;
@@ -236,7 +235,7 @@ class _EducationalAdState extends State<EducationalAd> {
               CommonTextField1(
                 lable: 'Cost of Fee',
                 hint: 'Enter Cost of Fee',
-                controller: costOfFeeController,
+                controller: priceController,
                 color: textColor,
                 keyboardType: TextInputType.number,
                 validator: (v) => (v == null || v.trim().isEmpty)
@@ -603,7 +602,7 @@ class _EducationalAdState extends State<EducationalAd> {
                       "state_id": selectedStateId,
                       "city_id": selectedCityId,
                       "institute_name": instituteNameController.text,
-                      "cost_of_fee": costOfFeeController.text,
+
                     };
                     if (_images.isNotEmpty) {
                       data["images"] = _images

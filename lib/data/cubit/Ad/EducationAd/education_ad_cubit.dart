@@ -13,7 +13,7 @@ class EducationAdCubit extends Cubit<EducationAdStates> {
       if (response != null && response.success == true) {
         emit(EducationAdSuccess(response));
       } else {
-        emit(EducationAdFailure(response?.message ?? ""));
+        emit(EducationAdFailure("${response?.message ?? ""}.${response?.error ?? ""}"));
       }
     } catch (e) {
       emit(EducationAdFailure(e.toString()));

@@ -1,13 +1,20 @@
+import 'dart:developer' as AppLogger;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:indiclassifieds/Components/CustomAppButton.dart';
 import 'package:indiclassifieds/data/cubit/Plans/plans_cubit.dart';
+import 'package:indiclassifieds/utils/color_constants.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
+import '../../Components/CustomSnackBar.dart';
 import '../../data/cubit/Packages/packages_cubit.dart';
 import '../../data/cubit/Packages/packages_states.dart';
+import '../../data/cubit/Payment/payment_cubit.dart';
+import '../../data/cubit/Payment/payment_states.dart';
 import '../../data/cubit/Plans/plans_states.dart';
 import '../../model/PlansModel.dart';
+import '../../services/AuthService.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
-import '../../widgets/CommonLoader.dart';
 
 class PlansScreen extends StatefulWidget {
   const PlansScreen({super.key});
@@ -17,10 +24,68 @@ class PlansScreen extends StatefulWidget {
 }
 
 class _BoostYourSalesScreenState extends State<PlansScreen> {
+  late Razorpay _razorpay;
+  final ValueNotifier<String?> userNameNotifier = ValueNotifier<String?>("");
+  final ValueNotifier<String?> userEmailNotifier = ValueNotifier<String?>("");
+  final ValueNotifier<String?> userMobileNotifier = ValueNotifier<String?>("");
+
   @override
   void initState() {
     super.initState();
-    context.read<PlansCubit>().getPlans();
+    getUserDetails();
+    _razorpay = Razorpay();
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<PlansCubit>().getPlans();
+    });
+  }
+  Future<void> getUserDetails() async {
+    userNameNotifier.value = await AuthService.getName();
+    userEmailNotifier.value = await AuthService.getEmail();
+    userMobileNotifier.value = await AuthService.getMobile();
+  }
+
+  void _handlePaymentSuccess(PaymentSuccessResponse response) {
+    AppLogger.log(
+      "✅ Payment successful: ${response.paymentId} ${response.signature}",
+    );
+    Map<String, dynamic> data = {
+      "razorpay_order_id": response.orderId,
+      "razorpay_payment_id": response.paymentId,
+      "razorpay_signature": response.signature,
+    };
+    // context.read<PaymentCubit>().verifyPayment(data);
+  }
+
+  void _handlePaymentError(PaymentFailureResponse response) {
+    AppLogger.log("❌ Payment failed: ${response.message}");
+  }
+
+  void _handleExternalWallet(ExternalWalletResponse response) {
+    AppLogger.log("💼 External wallet selected: ${response.walletName}");
+  }
+  void _openCheckout(String key, int amount, String order_id) {
+    var options = {
+      'key': '$key',
+      'amount': amount,
+      'currency': 'INR',
+      'name': userNameNotifier.value,
+      'order_id': '$order_id',
+      'description': 'purchase',
+      'timeout': 60,
+      'prefill': {
+        'contact': userMobileNotifier.value ?? "",
+        'email': userEmailNotifier.value ?? "",
+      },
+    };
+    try {
+      _razorpay.open(options);
+    } catch (e) {
+      AppLogger.log('Error: $e');
+    }
   }
 
   @override
@@ -45,8 +110,7 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
       body: BlocBuilder<PlansCubit, PlansStates>(
         builder: (context, state) {
           if (state is PlansLoading) {
-            // return const _PlansLoadingView();
-            return Center(child:DottedProgressWithLogo());
+            return const _PlansLoadingView();
           }
           if (state is PlansFailure) {
             return _PlansErrorView(
@@ -101,7 +165,6 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
                           price: plan.startingPriceFrom != null
                               ? "Starting from ₹${plan.startingPriceFrom}"
                               : "Custom pricing",
-                          // oldPrice/discount aren’t in API: hide them by passing empty
                           oldPrice: null,
                           discount: null,
                           gradient: visuals.gradient,
@@ -448,8 +511,10 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
     required String planName,
     required int durationDays,
   }) async {
-    // Reuse existing cubit if provided higher up; otherwise provide a new one.
     final existing = context.read<PackagesCubit>();
+    final ValueNotifier<int?> selectedIndex = ValueNotifier(null);
+    final ValueNotifier<String?> price = ValueNotifier("");
+    final ValueNotifier<bool> isLoadingNotifier = ValueNotifier<bool>(false);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -458,7 +523,6 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (sheetCtx) {
-        // Trigger fetch after build microtask to avoid setState during build.
         Future.microtask(() => existing.getPackages(planId));
 
         final textColor = ThemeHelper.textColor(sheetCtx);
@@ -478,21 +542,20 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
                 );
 
                 if (state is PackagesLoading || state is PackagesInitially) {
-                  // return Column(
-                  //   mainAxisSize: MainAxisSize.min,
-                  //   children: [
-                  //     header,
-                  //     const Divider(height: 1),
-                  //     const SizedBox(height: 16),
-                  //     _SkeletonPackageTile(color: cardColor),
-                  //     const SizedBox(height: 12),
-                  //     _SkeletonPackageTile(color: cardColor),
-                  //     const SizedBox(height: 12),
-                  //     _SkeletonPackageTile(color: cardColor),
-                  //     const SizedBox(height: 24),
-                  //   ],
-                  // );
-                  return Center(child:DottedProgressWithLogo());
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      header,
+                      const Divider(height: 1),
+                      const SizedBox(height: 16),
+                      _SkeletonPackageTile(color: cardColor),
+                      const SizedBox(height: 12),
+                      _SkeletonPackageTile(color: cardColor),
+                      const SizedBox(height: 12),
+                      _SkeletonPackageTile(color: cardColor),
+                      const SizedBox(height: 24),
+                    ],
+                  );
                 }
 
                 if (state is PackagesFailure) {
@@ -500,6 +563,7 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       header,
+                      const Divider(height: 1),
                       const SizedBox(height: 24),
                       Icon(
                         Icons.error_outline,
@@ -527,10 +591,8 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
                     ],
                   );
                 }
-
                 final model = (state as PackagesLoaded).packagesModel;
-                final packages = model.packages ?? []; // List<PackageItem>
-
+                final packages = model.packages ?? [];
                 return DraggableScrollableSheet(
                   expand: false,
                   initialChildSize: 0.85,
@@ -540,6 +602,7 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
                     return Column(
                       children: [
                         header,
+                        const Divider(height: 1),
                         Padding(
                           padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
                           child: _AvailabilityAndUSP(
@@ -564,26 +627,95 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
                               final savings = _computeSavingsPercent(
                                 p.price,
                                 p.price,
-                              ); // optional
-                              return _PackageTile(
-                                title:
-                                    "${p.listingsCount ?? 0} ads", // primary line
-                                subTag: (p.name ?? "").isEmpty
-                                    ? null
-                                    : p.name!, // STARTER / Popular / etc.
-                                price: p.price, // “₹…”
-                                mrp: p.price, // optional (null -> hidden)
-                                savingsPercent: savings, // optional
-                                badgeText: badgeText,
-                                badgeGradient: badgeColors.gradient,
-                                onTap: () {
-                                  // TODO: Handle choose/buy package
-                                  // e.g., Navigator.pop(context, p);
+                              );
+
+                              return ValueListenableBuilder<int?>(
+                                valueListenable: selectedIndex,
+                                builder: (_, selected, __) {
+                                  final isSelected = selected == index;
+                                  return _PackageTile(
+                                    title: "${p.listingsCount ?? 0} ads",
+                                    subTag: (p.name ?? "").isEmpty
+                                        ? null
+                                        : p.name!,
+                                    price: p.price,
+                                    mrp: p.price,
+                                    savingsPercent: savings,
+                                    badgeText: badgeText,
+                                    badgeGradient: badgeColors.gradient,
+                                    isSelected: isSelected,
+                                    onTap: () {
+                                      if (isSelected) {
+                                        selectedIndex.value = null; // deselect
+                                      } else {
+                                        selectedIndex.value = index; // select
+                                      }
+                                    },
+                                  );
                                 },
                               );
                             },
                           ),
                         ),
+
+                        ValueListenableBuilder<int?>(
+                          valueListenable: selectedIndex,
+                          builder: (_, selected, __) {
+                            if (selected == null) return const SizedBox.shrink();
+
+                            final selectedPkg = packages[selected];
+                            return SafeArea(
+                              child: Padding(
+                                padding: EdgeInsets.fromLTRB(16, 0, 16, 20),
+                                child: BlocConsumer<PaymentCubit, PaymentStates>(
+                                  listener: (context, state) {
+                                    isLoadingNotifier.value = state is PaymentLoading;
+                                    if (state is PaymentCreated) {
+                                      final payment_created_data = state.createPaymentModel;
+                                      _openCheckout(
+                                        payment_created_data.razorpayKey ?? "",
+                                        payment_created_data.amount ?? 0,
+                                        payment_created_data.orderId ?? "",
+                                      );
+                                    }
+                                    // else if (state is PaymentVerified) {
+
+                                      // context.pushReplacement(
+                                      //   '/payment_success'
+                                      //       '?title=${Uri.encodeComponent("Payment is Done Successfully")}',
+                                      // );
+                                    // } else if (state is PaymentFailure) {
+                                    //   CustomSnackBar1.show(context, state.error);
+                                    // }
+                                  },
+                                  builder: (context, state) {
+                                    return CustomAppButton1(
+                                      isLoading: state is PaymentLoading,
+                                      text: 'Submit',
+                                      onPlusTap: () {
+                                        if (selected == null) {
+                                          CustomSnackBar1.show(
+                                            context,
+                                            "Please select a pack",
+                                          );
+                                          return;
+                                        } else {
+                                          final Map<String, dynamic> data = {
+                                            "plan_id": selectedPkg.planId,
+                                            "package_id": selectedPkg.id,
+                                            "price": price.value,
+                                          };
+                                          context.read<PaymentCubit>().createPayment(data);
+                                        }
+                                      },
+                                    );
+                                  },
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+
                       ],
                     );
                   },
@@ -597,7 +729,6 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
   }
 }
 
-/// ---------- HEADER ----------
 class _SheetHeader extends StatelessWidget {
   final String planName;
   final int durationDays;
@@ -717,16 +848,16 @@ class _AvailabilityAndUSP extends StatelessWidget {
   }
 }
 
-/// ---------- PACKAGE TILE ----------
 class _PackageTile extends StatelessWidget {
   final String title; // "1 ads"
   final String? subTag; // "STARTER" / "Popular"
   final String? price; // "133.00"
-  final String? mrp; // optional (struck)
-  final int? savingsPercent; // optional orange chip
-  final String badgeText; // "1" / "3" / "10+"
+  final String? mrp;
+  final int? savingsPercent;
+  final String badgeText;
   final List<Color> badgeGradient;
   final VoidCallback onTap;
+  final bool isSelected;
 
   const _PackageTile({
     super.key,
@@ -738,6 +869,7 @@ class _PackageTile extends StatelessWidget {
     required this.badgeText,
     required this.badgeGradient,
     required this.onTap,
+    this.isSelected = false,
   });
 
   @override
@@ -755,7 +887,13 @@ class _PackageTile extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: Colors.black12),
+            border: Border.all(
+              color: isSelected
+                  ? primarycolor
+                  : Colors.black12, // highlight if selected
+              width: isSelected ? 2 : 1,
+            ),
+            color: isSelected ? cardColor.withOpacity(0.95) : cardColor,
           ),
           child: Row(
             children: [
@@ -794,32 +932,31 @@ class _PackageTile extends StatelessWidget {
                       width: 22,
                       height: 22,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: isSelected ? primarycolor : Colors.white,
                         borderRadius: BorderRadius.circular(11),
                         border: Border.all(color: Colors.black12),
                       ),
                       alignment: Alignment.center,
-                      child: Text(
-                        "+",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 14,
-                          color: textColor
-                        ),
-                      ),
+                      child: isSelected
+                          ? const Icon(
+                        Icons.check,
+                        size: 14,
+                        color: Colors.white,
+                      )
+                          :  SizedBox.shrink(),
                     ),
                   ),
+
                 ],
               ),
 
               const SizedBox(width: 12),
 
-              // Title + tag
+
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // "1 ads"
                     Text(
                       title,
                       style: AppTextStyles.bodyLarge(
@@ -849,8 +986,6 @@ class _PackageTile extends StatelessWidget {
               ),
 
               const SizedBox(width: 10),
-
-              // Price & savings
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [

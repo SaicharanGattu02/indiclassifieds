@@ -8,7 +8,6 @@ import 'package:indiclassifieds/data/cubit/LogInWithMobile/login_with_mobile_sta
 import 'package:indiclassifieds/widgets/CommonTextField.dart';
 import '../../Components/CustomAppButton.dart';
 import '../../theme/ThemeHelper.dart';
-import '../../utils/color_constants.dart';
 
 class Loginscreen extends StatefulWidget {
   const Loginscreen({super.key});

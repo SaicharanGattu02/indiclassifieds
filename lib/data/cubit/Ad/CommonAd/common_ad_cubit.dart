@@ -13,7 +13,7 @@ class CommonAdCubit extends Cubit<CommonAdStates> {
       if (response != null && response.success == true) {
         emit(CommonAdSuccess(response));
       } else {
-        emit(CommonAdFailure(response?.message ?? ""));
+        emit(CommonAdFailure("${response?.message ?? ""}.${response?.error ?? ""}"));
       }
     } catch (e) {
       emit(CommonAdFailure(e.toString()));
