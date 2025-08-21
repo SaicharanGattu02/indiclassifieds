@@ -163,14 +163,14 @@ final GoRouter appRouter = GoRouter(
         final categoryName = state.uri.queryParameters['CatName'] ?? "";
         final SubCategoryName = state.uri.queryParameters['SubCatName'] ?? "";
         final subCatId = state.uri.queryParameters['subCatId'] ?? "";
-        final type = state.uri.queryParameters['type'] ?? "";
+        final editId = state.uri.queryParameters['editId'] ?? "";
         return buildSlideTransitionPage(
           CommonAd(
             catId: categoryId,
             CatName: categoryName,
             subCatId: subCatId,
             SubCatName: SubCategoryName,
-            type: type,
+            editId: editId,
           ),
           state,
         );

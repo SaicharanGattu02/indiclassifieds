@@ -25,6 +25,7 @@ import '../../utils/ImagePickerHelper.dart';
 import '../../utils/ImageUtils.dart';
 import '../../utils/color_constants.dart';
 import '../../utils/planhelper.dart';
+import '../../utils/spinkittsLoader.dart';
 import '../../widgets/CommonTextField.dart';
 import '../../widgets/SelectCityBottomSheet.dart';
 import '../../widgets/SelectStateBottomSheet.dart';
@@ -34,14 +35,14 @@ class CommonAd extends StatefulWidget {
   final String CatName;
   final String SubCatName;
   final String subCatId;
-  final String? type;
+  final String editId;
   const CommonAd({
     super.key,
     required this.catId,
     required this.CatName,
     required this.SubCatName,
     required this.subCatId,
-    this.type,
+    required this.editId,
   });
 
   @override
@@ -66,6 +67,7 @@ class _CommonAdState extends State<CommonAd> {
   final stateController = TextEditingController();
   final cityController = TextEditingController();
   final planController = TextEditingController();
+  int? imageId;
   List<String> selectedConditions = [];
   List<File> _images = [];
   List<String> _imageUrls = [];
@@ -97,7 +99,7 @@ class _CommonAdState extends State<CommonAd> {
   @override
   void initState() {
     super.initState();
-    debugPrint("typee:${widget.type}");
+    debugPrint("typee:${widget.editId}");
     titleController.text = widget.SubCatName ?? "";
     context.read<GetListingAdCubit>().getListingAd(widget.subCatId).then((
       commonAdData,
@@ -122,6 +124,7 @@ class _CommonAdState extends State<CommonAd> {
               .map((img) => img.image ?? "")
               .where((url) => url.isNotEmpty)
               .toList();
+          // imageId=commonAdData.data.listing.images.
         }
       }
 
@@ -134,7 +137,7 @@ class _CommonAdState extends State<CommonAd> {
     final textColor = ThemeHelper.textColor(context);
     return Scaffold(
       appBar: CustomAppBar1(
-        title: widget.type =="Edit"
+        title: widget.editId !=null
             ? "Edit ${widget.CatName}"
             : widget.CatName,
         actions: [],
@@ -367,13 +370,13 @@ class _CommonAdState extends State<CommonAd> {
                               height: double.infinity,
                             ),
                           ),
-                          widget.type=="Edit"?
+                          widget.editId != null?
                             Positioned(
                               top: 4,
                               right: 4,
                               child: GestureDetector(
                                 onTap: () {
-                                  setState(() => _imageUrls.removeAt(index));
+                                  // context.read<MarkAsListingCubit>().markAsDelete();
                                 },
                                 child: Container(
                                   padding: const EdgeInsets.all(2),
@@ -382,12 +385,13 @@ class _CommonAdState extends State<CommonAd> {
                                     shape: BoxShape.circle,
                                   ),
                                   child:  BlocConsumer<MarkAsListingCubit,MarkAsListingState>(listener: (context, state) {
-
-
-
+                                    if(state is MarkAsListingSuccess){
+                                      _imageUrls.removeAt(index);
+                                    }else if(state is MarkAsListingFailure){
+                                      return CustomSnackBar1.show(context, state.error);
+                                    }
                                   },builder: (context, state) {
-                                  return Icon(Icons.close, color: Colors.white, size: 16);
-
+                                  return state is MarkAsListingLoading?Center(child:spinkits.getSpinningLinespinkit() ):Icon(Icons.close, color: Colors.white, size: 16);
                                   },
                                   ),
                                 ),
@@ -692,7 +696,6 @@ class _CommonAdState extends State<CommonAd> {
                         ? () {
                             if (_formKey.currentState?.validate() ?? false) {
                               bool isValid = true;
-
                               if (_images.isEmpty) {
                                 setState(() => _showimagesError = true);
                                 isValid = false;

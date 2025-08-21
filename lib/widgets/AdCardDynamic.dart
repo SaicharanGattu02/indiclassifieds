@@ -161,7 +161,7 @@ class AdCardDynamic extends StatelessWidget {
                 label: 'Edit',
                 onTap: () {
                   context.push(
-                    '/${ad.category?.path??""}?catId=${ad.categoryId}&CatName=${ad.category?.name}&subCatId=${ad.subCategoryId}&SubCatName=${ad.subCategory?.name ?? ""}&type="Edit"',
+                    '/${ad.category?.path??""}?catId=${ad.categoryId}&CatName=${ad.category?.name}&subCatId=${ad.subCategoryId}&SubCatName=${ad.subCategory?.name ?? ""}&editId=${ad.id}',
                   );
                 },
               ),
