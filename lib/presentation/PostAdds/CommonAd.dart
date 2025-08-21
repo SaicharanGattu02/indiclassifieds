@@ -95,7 +95,7 @@ class _CommonAdState extends State<CommonAd> {
       _images.removeAt(index);
     });
   }
-
+  List<ImageData> _imageDataList = [];
   @override
   void initState() {
     super.initState();
@@ -120,12 +120,21 @@ class _CommonAdState extends State<CommonAd> {
           cityController.text = commonAdData.data?.listing?.cityName ?? '';
         }
         if (commonAdData.data?.listing?.images != null) {
-          _imageUrls = commonAdData.data!.listing!.images!
-              .map((img) => img.image ?? "")
-              .where((url) => url.isNotEmpty)
+          _imageDataList = commonAdData.data!.listing!.images!
+              .where((img) => (img.image ?? "").isNotEmpty)
+              .map((img) => ImageData(
+            id: img.id ?? 0,
+            url: img.image ?? "",
+          ))
               .toList();
-          // imageId=commonAdData.data.listing.images.
         }
+        // if (commonAdData.data?.listing?.images != null) {
+        //   _imageUrls = commonAdData.data!.listing!.images!
+        //       .map((img) => img.image ?? "")
+        //       .where((url) => url.isNotEmpty)
+        //       .toList();
+        //   // imageId=commonAdData.data.listing.images.
+        // }
       }
 
       setState(() => isLoading = false);
@@ -359,6 +368,7 @@ class _CommonAdState extends State<CommonAd> {
                       : _images.length + _imageUrls.length,
                   itemBuilder: (context, index) {
                     if (index < _imageUrls.length) {
+                      final image = _imageDataList[index];
                       return Stack(
                         children: [
                           ClipRRect(
@@ -376,7 +386,7 @@ class _CommonAdState extends State<CommonAd> {
                               right: 4,
                               child: GestureDetector(
                                 onTap: () {
-                                  // context.read<MarkAsListingCubit>().markAsDelete();
+                                  context.read<MarkAsListingCubit>().markAsDelete(image.id);
                                 },
                                 child: Container(
                                   padding: const EdgeInsets.all(2),
@@ -776,4 +786,11 @@ class _CommonAdState extends State<CommonAd> {
       ),
     );
   }
+}
+
+class ImageData {
+  final int id;
+  final String url;
+
+  ImageData({required this.id, required this.url});
 }
