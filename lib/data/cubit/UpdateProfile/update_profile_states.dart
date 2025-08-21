@@ -6,9 +6,9 @@ class UpdateProfileInitially extends UpdateProfileStates {}
 
 class UpdateProfileLoading extends UpdateProfileStates {}
 
-class UpdateProfileLoaded extends UpdateProfileStates {
+class UpdateProfileSuccess extends UpdateProfileStates {
   AdSuccessModel successModel;
-  UpdateProfileLoaded(this.successModel);
+  UpdateProfileSuccess(this.successModel);
 }
 
 class UpdateProfileFailure extends UpdateProfileStates {

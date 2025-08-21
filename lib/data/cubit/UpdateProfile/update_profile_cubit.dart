@@ -11,7 +11,7 @@ class UpdateProfileCubit extends Cubit<UpdateProfileStates> {
     try {
       final response = await profileRepo.updateProfileDetails(data);
       if (response != null && response.success == true) {
-        emit(UpdateProfileLoaded(response));
+        emit(UpdateProfileSuccess(response));
       } else {
         emit(UpdateProfileFailure(response?.message ?? ""));
       }

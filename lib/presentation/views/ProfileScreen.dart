@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -8,6 +9,7 @@ import '../../services/AuthService.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../utils/color_constants.dart';
+import '../../utils/spinkittsLoader.dart';
 import '../../widgets/CommonLoader.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -18,6 +20,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+
   @override
   void initState() {
     super.initState();
@@ -51,9 +54,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  CircleAvatar(
-                    radius: 40,
-                    backgroundImage: AssetImage('assets/images/user_photo.png'),
+                  Center(
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        CachedNetworkImage(
+                          imageUrl: user_data?.image ?? "",
+                          imageBuilder: (context, imageProvider) => Container(
+                            padding: EdgeInsets.all(12),
+                            width: 120,
+                            height: 120,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              image: DecorationImage(
+                                image: imageProvider,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          placeholder: (context, url) => Container(
+                            width: 120,
+                            height: 120,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(shape: BoxShape.circle),
+                            child: Center(
+                              child: spinkits.getSpinningLinespinkit(),
+                            ),
+                          ),
+                          errorWidget: (context, url, error) => Container(
+                            width: 120,
+                            height: 120,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              image: DecorationImage(
+                                image: AssetImage("assets/images/profile.png"),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -72,59 +113,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ),
-                    onPressed: () {},
-                    child: const Text('Edit Profile'),
+                    onPressed: () {
+                      context.push('/edit_profile_screen');
+                    },
+                    child: const Text('Edit Profile',style: TextStyle(color: Colors.white),),
                   ),
                   const SizedBox(height: 20),
-                  //
-                  // // Stats
-                  // Row(
-                  //   mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  //   children: [
-                  //     _statTile('28', 'Sales', textColor),
-                  //     _statTile('4.9', 'Rating', textColor),
-                  //     _statTile('45', 'Reviews', textColor),
-                  //   ],
-                  // ),
-                  //
-                  // const SizedBox(height: 20),
-                  //
-                  // // Achievements
-                  // Align(
-                  //   alignment: Alignment.centerLeft,
-                  //   child: Text(
-                  //     'Achievements',
-                  //     style: AppTextStyles.titleLarge(textColor),
-                  //   ),
-                  // ),
-                  // const SizedBox(height: 12),
-                  // Row(
-                  //   mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  //   children: [
-                  //     _achievementTile(
-                  //       Icons.verified,
-                  //       Colors.green,
-                  //       'Verified Seller',
-                  //       textColor,
-                  //     ),
-                  //     _achievementTile(
-                  //       Icons.local_shipping,
-                  //       Colors.blue,
-                  //       'Fast Shipper',
-                  //       textColor,
-                  //     ),
-                  //     _achievementTile(
-                  //       Icons.star,
-                  //       Colors.amber,
-                  //       'Top Rated',
-                  //       textColor,
-                  //     ),
-                  //   ],
-                  // ),
-                  //
-                  // const SizedBox(height: 20),
-
-                  // Settings list
                   _settingsTile(
                     Icons.unsubscribe_outlined,
                     Colors.blue.shade100,

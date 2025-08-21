@@ -34,8 +34,12 @@ class APIEndpointUrls {
   static const String get_single_listing_details =
       '${apiUrl}get-single-listing-details';
   static const String get_my_listings_list = '${apiUrl}get-my-listings-list';
-  static const String get_all_my_advertisements =
-      '${apiUrl}get-all-my-advertisements';
+  static const String change_status_to_sold = '${apiUrl}change-sold-status-to-listing';
+  static const String delete_listing_ad = '${apiUrl}delete-listing';
+  static const String update_listing_ad = '${apiUrl}edit-listing-by-user';
+  static const String get_listing_ad = '${apiUrl}get-single-listing-for-update';
+  static const String remove_image_on_listing_ad = '${apiUrl}delete-image-by-user';
+  static const String get_all_my_advertisements ='${apiUrl}get-all-my-advertisements';
   static const String add_a_advertisement = '${apiUrl}add-a-advertisement';
   static const String get_active_adversments_details =
       '${apiUrl}get-active-adversments-details';

@@ -45,7 +45,7 @@ class _SelectSubCategoryState extends State<SelectSubCategory> {
           child: BlocBuilder<SubCategoryCubit, SubCategoryStates>(
             builder: (context, state) {
               if (state is SubCategoryLoading) {
-                return Center(child:DottedProgressWithLogo());
+                return Center(child: DottedProgressWithLogo());
               } else if (state is SubCategoryLoaded) {
                 final subcategories =
                     state.subCategoryModel.subcategories ?? [];

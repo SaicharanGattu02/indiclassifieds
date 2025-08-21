@@ -14,13 +14,16 @@ class ProductsCubit extends Cubit<ProductsStates> {
   bool _hasNextPage = true;
   bool _isLoadingMore = false;
 
-  // Updated getProducts method to handle optional parameters
   Future<void> getProducts({
     String? categoryId,
     String? subCategoryId,
     String? search,
     String? state_id,
     String? city_id,
+    String? sort_by,
+    String? minPrice,
+    String? maxPrice,
+
   }) async {
     emit(ProductsLoading());
     _currentPage = 1;
@@ -31,6 +34,9 @@ class ProductsCubit extends Cubit<ProductsStates> {
         search: search,
         state_id: state_id,
         city_id: city_id,
+        sort_by: sort_by,
+        minPrice: minPrice,
+        maxPrice: maxPrice,
         page: _currentPage,
       );
 
@@ -47,7 +53,7 @@ class ProductsCubit extends Cubit<ProductsStates> {
     }
   }
 
-  /// Load more products (pagination)
+
   Future<void> getMoreProducts(String subCategoryId) async {
     if (_isLoadingMore || !_hasNextPage) return;
 

@@ -1,15 +1,29 @@
 class VerifyOtpModel {
   bool? success;
   String? message;
-  String? token;
+  String? accessToken;
+  String? refreshToken;
+  int? refreshTokenExpiry;
+  bool? newUser;
   User? user;
 
-  VerifyOtpModel({this.success, this.message, this.token, this.user});
+  VerifyOtpModel({
+    this.success,
+    this.message,
+    this.accessToken,
+    this.refreshToken,
+    this.refreshTokenExpiry,
+    this.newUser,
+    this.user,
+  });
 
   VerifyOtpModel.fromJson(Map<String, dynamic> json) {
     success = json['success'];
     message = json['message'];
-    token = json['token'];
+    accessToken = json['accessToken'];
+    refreshToken = json['refreshToken'];
+    refreshTokenExpiry = json['refreshTokenExpiry'];
+    newUser = json['new_user'];
     user = json['user'] != null ? User.fromJson(json['user']) : null;
   }
 
@@ -17,7 +31,10 @@ class VerifyOtpModel {
     final Map<String, dynamic> data = {};
     data['success'] = success;
     data['message'] = message;
-    data['token'] = token;
+    data['accessToken'] = accessToken;
+    data['refreshToken'] = refreshToken;
+    data['refreshTokenExpiry'] = refreshTokenExpiry;
+    data['new_user'] = newUser;
     if (user != null) {
       data['user'] = user!.toJson();
     }
@@ -30,22 +47,21 @@ class User {
   String? name;
   String? email;
   String? mobile;
-  String? emailVerifiedAt;
-  String? password;
-  String? rememberToken;
+  dynamic emailVerifiedAt;
+  dynamic password;
+  dynamic rememberToken;
   String? createdAt;
   String? updatedAt;
-  int? otp;
-  String? otpCreatedAt;
-  String? resetToken;
-  String? resetTokenCreatedAt;
+  dynamic otp;
+  dynamic otpCreatedAt;
+  dynamic resetToken;
+  dynamic resetTokenCreatedAt;
   String? role;
-  String? sellerCompanyName;
   String? country;
-  String? state;
-  String? city;
-  String? address;
-  String? image;
+  dynamic stateId;
+  dynamic cityId;
+  dynamic address;
+  dynamic image;
   String? bio;
   String? status;
   int? isVerified;
@@ -66,10 +82,9 @@ class User {
     this.resetToken,
     this.resetTokenCreatedAt,
     this.role,
-    this.sellerCompanyName,
     this.country,
-    this.state,
-    this.city,
+    this.stateId,
+    this.cityId,
     this.address,
     this.image,
     this.bio,
@@ -93,10 +108,9 @@ class User {
     resetToken = json['reset_token'];
     resetTokenCreatedAt = json['reset_token_created_at'];
     role = json['role'];
-    sellerCompanyName = json['seller_company_name'];
     country = json['country'];
-    state = json['state'];
-    city = json['city'];
+    stateId = json['state_id'];
+    cityId = json['city_id'];
     address = json['address'];
     image = json['image'];
     bio = json['bio'];
@@ -121,10 +135,9 @@ class User {
     data['reset_token'] = resetToken;
     data['reset_token_created_at'] = resetTokenCreatedAt;
     data['role'] = role;
-    data['seller_company_name'] = sellerCompanyName;
     data['country'] = country;
-    data['state'] = state;
-    data['city'] = city;
+    data['state_id'] = stateId;
+    data['city_id'] = cityId;
     data['address'] = address;
     data['image'] = image;
     data['bio'] = bio;

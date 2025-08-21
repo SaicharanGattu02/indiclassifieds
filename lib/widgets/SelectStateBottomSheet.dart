@@ -41,7 +41,6 @@ class _SelectStateBottomSheetState extends State<SelectStateBottomSheet> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ---- Drag Handle ----
             Center(
               child: Container(
                 margin: const EdgeInsets.symmetric(vertical: 10),
@@ -65,7 +64,6 @@ class _SelectStateBottomSheetState extends State<SelectStateBottomSheet> {
               ),
             ),
 
-            // ---- Search Bar ----
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: TextField(

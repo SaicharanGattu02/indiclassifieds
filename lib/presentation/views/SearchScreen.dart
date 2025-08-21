@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../Components/CustomSnackBar.dart';
 import '../../data/cubit/AddToWishlist/addToWishlistCubit.dart';
@@ -29,14 +30,12 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   void initState() {
     super.initState();
-    // Pagination on scroll
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
           _scrollController.position.maxScrollExtent - 200) {
         context.read<ProductsCubit>().getMoreProducts("");
       }
     });
-    // Listen to the search field changes
     searchController.addListener(() {
       _onSearchChanged(searchController.text);
     });
@@ -47,11 +46,11 @@ class _SearchScreenState extends State<SearchScreen> {
     _scrollController.dispose();
     searchController.dispose();
     if (_debounce?.isActive ?? false)
-      _debounce?.cancel(); // Cancel debounce on dispose
+      _debounce?.cancel();
     super.dispose();
   }
 
-  // Handle search with debounce
+
   void _onSearchChanged(String query) {
     if (_debounce?.isActive ?? false) _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), () {
@@ -78,7 +77,9 @@ class _SearchScreenState extends State<SearchScreen> {
         ),
         title: Text("Listings", style: AppTextStyles.headlineSmall(textColor)),
         actions: [
-          Icon(Icons.tune, color: textColor),
+          GestureDetector(onTap: (){
+            context.push('/filter');
+          },child: Icon(Icons.tune, color: textColor)),
           const SizedBox(width: 16),
         ],
       ),

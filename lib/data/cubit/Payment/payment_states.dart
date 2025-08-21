@@ -1,5 +1,7 @@
 import 'package:indiclassifieds/model/CreatePaymentModel.dart';
 
+import '../../../model/AdSuccessModel.dart';
+
 
 abstract class PaymentStates {}
 
@@ -12,10 +14,10 @@ class PaymentCreated extends PaymentStates {
   PaymentCreated(this.createPaymentModel);
 }
 
-// class PaymentVerified extends PaymentStates {
-//   VerifyPaymentModel verifyPaymentModel;
-//   PaymentVerified(this.verifyPaymentModel);
-// }
+class PaymentVerified extends PaymentStates {
+  AdSuccessModel successModel;
+  PaymentVerified(this.successModel);
+}
 
 class PaymentFailure extends PaymentStates {
   String error;

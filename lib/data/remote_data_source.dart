@@ -7,6 +7,7 @@ import '../model/AdvertisementDetailsModel.dart';
 import '../model/AdvertisementModel.dart';
 import '../model/BannersModel.dart';
 import '../model/CreatePaymentModel.dart';
+import '../model/MarkAsListingModel.dart';
 import '../model/MyAdsModel.dart';
 import '../model/PackagesModel.dart';
 import '../model/PlansModel.dart';
@@ -20,6 +21,7 @@ import '../model/SubcategoryProductsModel.dart';
 import '../model/UserActivePlansModel.dart';
 import '../model/VerifyOtpModel.dart';
 import '../model/WishlistModel.dart';
+import '../model/getListingAdModel.dart';
 import '../services/ApiClient.dart';
 import '../services/api_endpoint_urls.dart';
 
@@ -32,14 +34,17 @@ abstract class RemoteDataSource {
   Future<CategoryModel?> getNewCategory();
   Future<BannersModel?> getBanners();
   Future<SubCategoryModel?> getSubCategory(String categoryId);
-  Future<SubcategoryProductsModel?> getProducts(
-      {required int page,
-        String? categoryId,
-        String? subCategoryId,
-        String? search,
-        String? state_id,
-        String? city_id}
-      );
+  Future<SubcategoryProductsModel?> getProducts({
+    required int page,
+    String? categoryId,
+    String? subCategoryId,
+    String? search,
+    String? state_id,
+    String? city_id,
+    String? sort_by,
+    String? minPrice,
+    String? maxPrice,
+  });
   Future<ProductDetailsModel?> getProductDetails(int id);
   Future<WishlistModel?> getWishlistProducts(int page);
   Future<AddToWishlistModel?> addToWishlist(int product_id);
@@ -66,6 +71,12 @@ abstract class RemoteDataSource {
   Future<AdSuccessModel?> postPropertyAd(Map<String, dynamic> data);
   Future<AdSuccessModel?> postMobileAd(Map<String, dynamic> data);
   Future<CreatePaymentModel?> createPayment(Map<String, dynamic> data);
+  Future<AdSuccessModel?> verifyPayment(Map<String, dynamic> data);
+  Future<MarkAsListingModel?> markAsSold(int id);
+  Future<MarkAsListingModel?> deleteListingAd(int id);
+  Future<AdSuccessModel?> updateListingAd(int id);
+  Future<getListingAdModel?> getListingAd(String id);
+  Future<AdSuccessModel?> removeImageOnListingAd(int id);
 }
 
 class RemoteDataSourceImpl implements RemoteDataSource {
@@ -87,7 +98,9 @@ class RemoteDataSourceImpl implements RemoteDataSource {
         ];
       } else if (value is String &&
           value.contains('/') &&
-          (key.contains('images') || key.contains('signature'))) {
+          (key.contains('images') ||
+              key.contains('signature') ||
+              (key.contains('image')))) {
         formMap[key] = await MultipartFile.fromFile(
           value,
           filename: value.split('/').last,
@@ -100,40 +113,6 @@ class RemoteDataSourceImpl implements RemoteDataSource {
     }
     return FormData.fromMap(formMap);
   }
-
-  // Future<FormData> buildFormData1(Map<String, dynamic> data) async {
-  //   final formMap = <String, dynamic>{};
-  //   for (final entry in data.entries) {
-  //     final key = entry.key;
-  //     final value = entry.value;
-  //     if (value == null) continue;
-  //     final isFile =
-  //         value is String &&
-  //         value.contains('/') &&
-  //         (key.contains('image') ||
-  //             key.contains('file') ||
-  //             key.contains('uploaded_file') ||
-  //             key.contains('picture') ||
-  //             key.contains('payment_screenshot'));
-  //
-  //     if (isFile) {
-  //       final file = await MultipartFile.fromFile(
-  //         value,
-  //         filename: value.split('/').last,
-  //       );
-  //       formMap[key] = file;
-  //     } else {
-  //       formMap[key] = value;
-  //     }
-  //   }
-  //
-  //   // 🔥 Print the data before returning
-  //   formMap.forEach((key, value) {
-  //     AppLogger.log('$key -> $value');
-  //   });
-  //
-  //   return FormData.fromMap(formMap);
-  // }
 
   @override
   Future<UserActivePlansModel?> getUserActivePlans() async {
@@ -254,6 +233,72 @@ class RemoteDataSourceImpl implements RemoteDataSource {
   }
 
   @override
+  Future<MarkAsListingModel?> markAsSold(int id) async {
+    try {
+      Response response = await ApiClient.get(
+        "${APIEndpointUrls.change_status_to_sold}/${id}",
+      );
+      AppLogger.log('mark As Sold:${response.data}');
+      return MarkAsListingModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('mark As Sold :: $e');
+      return null;
+    }
+  }
+  @override
+  Future<MarkAsListingModel?> deleteListingAd(int id) async {
+    try {
+      Response response = await ApiClient.delete(
+        "${APIEndpointUrls.delete_listing_ad}/${id}",
+      );
+      AppLogger.log('mark As delete:${response.data}');
+      return MarkAsListingModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('mark As delete :: $e');
+      return null;
+    }
+  }
+  @override
+  Future<AdSuccessModel?> updateListingAd(int id) async {
+    try {
+      Response response = await ApiClient.delete(
+        "${APIEndpointUrls.update_listing_ad}/${id}",
+      );
+      AppLogger.log('mark As update:${response.data}');
+      return AdSuccessModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('mark As update :: $e');
+      return null;
+    }
+  }
+  @override
+  Future<AdSuccessModel?> removeImageOnListingAd(int id) async {
+    try {
+      Response response = await ApiClient.delete(
+        "${APIEndpointUrls.remove_image_on_listing_ad}/${id}",
+      );
+      AppLogger.log('removeImage On Listing Ad:${response.data}');
+      return AdSuccessModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('removeImage On Listing Ad :: $e');
+      return null;
+    }
+  }
+  @override
+  Future<getListingAdModel?> getListingAd(String id) async {
+    try {
+      Response response = await ApiClient.get(
+        "${APIEndpointUrls.get_listing_ad}/${id}",
+      );
+      AppLogger.log('mark As update:${response.data}');
+      return getListingAdModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('mark As update :: $e');
+      return null;
+    }
+  }
+
+  @override
   Future<ProductDetailsModel?> getProductDetails(int id) async {
     try {
       Response response = await ApiClient.get(
@@ -332,40 +377,51 @@ class RemoteDataSourceImpl implements RemoteDataSource {
     String? search,
     String? state_id,
     String? city_id,
-    required int page,  // Make sure page is required
+    String? sort_by,
+    String? minPrice,
+    String? maxPrice,
+    required int page,
   }) async {
     try {
-      // Start with the base URL
-      String url = "${APIEndpointUrls.get_all_listings_with_pagination}?page=$page";
+      String url =
+          "${APIEndpointUrls.get_all_listings_with_pagination}?page=$page";
 
-      // Append parameters conditionally
-      if (subCategoryId != null) {
-        url += "&sub_category_id=$subCategoryId";
-      }
-      if (categoryId != null) {
+      if (categoryId != null && categoryId.isNotEmpty) {
         url += "&category_id=$categoryId";
       }
-      if (search != null) {
+      if (subCategoryId != null && subCategoryId.isNotEmpty) {
+        url += "&sub_category_id=$subCategoryId";
+      }
+      if (search != null && search.isNotEmpty) {
         url += "&search=$search";
       }
-      if (state_id != null) {
+      if (sort_by != null && sort_by.isNotEmpty) {
+        url += "&sort_by=$sort_by";
+      }
+      if (minPrice != null && minPrice.isNotEmpty) {
+        url += "&min_price=$minPrice";
+      }
+      if (maxPrice != null && maxPrice.isNotEmpty) {
+        url += "&max_price=$maxPrice";
+      }
+      if (state_id != null && state_id.isNotEmpty) {
         url += "&state_id=$state_id";
       }
-      if (city_id != null) {
+      if (city_id != null && city_id.isNotEmpty) {
         url += "&city_id=$city_id";
       }
 
-      // Make the GET request with the constructed URL
       Response response = await ApiClient.get(url);
+      AppLogger.log('getProducts request: $url');
       AppLogger.log('getProducts response: ${response.data}');
 
-      // Parse and return the response
       return SubcategoryProductsModel.fromJson(response.data);
     } catch (e) {
       AppLogger.error('getProducts error: $e');
       return null;
     }
   }
+
 
   @override
   Future<SendOtpModel?> sendMobileOTP(Map<String, dynamic> data) async {
@@ -684,11 +740,10 @@ class RemoteDataSourceImpl implements RemoteDataSource {
 
   @override
   Future<CreatePaymentModel?> createPayment(Map<String, dynamic> data) async {
-    final formData = await buildFormData(data);
     try {
       Response res = await ApiClient.post(
         "${APIEndpointUrls.create_payment_order}",
-        data: formData,
+        data: data,
       );
       AppLogger.log('create Payment ::${res.data}');
       return CreatePaymentModel.fromJson(res.data);
@@ -698,5 +753,21 @@ class RemoteDataSourceImpl implements RemoteDataSource {
       return null;
     }
   }
-  ///
+
+  @override
+  Future<AdSuccessModel?> verifyPayment(Map<String, dynamic> data) async {
+    final formData = await buildFormData(data);
+    try {
+      Response res = await ApiClient.post(
+        "${APIEndpointUrls.verify_payment_order}",
+        data: formData,
+      );
+      AppLogger.log('verify Payment ::${res.data}');
+      return AdSuccessModel.fromJson(res.data);
+    } catch (e) {
+      AppLogger.error('verify Payment  ::${e}');
+
+      return null;
+    }
+  }
 }

@@ -48,6 +48,8 @@ class Data {
   String? createdAt;
   State? state;
   State? city;
+  Category? category;
+  State? subCategory;
   String? postedAt;
   int? totalLikes;
   String? image;
@@ -66,6 +68,8 @@ class Data {
         this.createdAt,
         this.state,
         this.city,
+        this.category,
+        this.subCategory,
         this.postedAt,
         this.totalLikes,
         this.image});
@@ -84,6 +88,12 @@ class Data {
     createdAt = json['created_at'];
     state = json['state'] != null ? new State.fromJson(json['state']) : null;
     city = json['city'] != null ? new State.fromJson(json['city']) : null;
+    category = json['Category'] != null
+        ? new Category.fromJson(json['Category'])
+        : null;
+    subCategory = json['SubCategory'] != null
+        ? new State.fromJson(json['SubCategory'])
+        : null;
     postedAt = json['posted_at'];
     totalLikes = json['total_likes'];
     image = json['image'];
@@ -108,6 +118,12 @@ class Data {
     if (this.city != null) {
       data['city'] = this.city!.toJson();
     }
+    if (this.category != null) {
+      data['Category'] = this.category!.toJson();
+    }
+    if (this.subCategory != null) {
+      data['SubCategory'] = this.subCategory!.toJson();
+    }
     data['posted_at'] = this.postedAt;
     data['total_likes'] = this.totalLikes;
     data['image'] = this.image;
@@ -130,6 +146,28 @@ class State {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
     data['name'] = this.name;
+    return data;
+  }
+}
+
+class Category {
+  int? id;
+  String? name;
+  String? path;
+
+  Category({this.id, this.name, this.path});
+
+  Category.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    name = json['name'];
+    path = json['path'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['name'] = this.name;
+    data['path'] = this.path;
     return data;
   }
 }

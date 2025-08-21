@@ -19,19 +19,19 @@ class PaymentCubit extends Cubit<PaymentStates> {
       emit(PaymentFailure(e.toString()));
     }
   }
-  //
-  // Future<void> verifyPayment(Map<String, dynamic> data) async {
-  //   emit(PaymentLoading());
-  //   try {
-  //     final response = await paymentRepository.verifyPayment(data);
-  //     if (response != null) {
-  //       emit(PaymentVerified(response));
-  //     } else {
-  //       emit(PaymentFailure(response?.message ?? ""));
-  //     }
-  //   } catch (e) {
-  //     emit(PaymentFailure(e.toString()));
-  //   }
-  // }
+
+  Future<void> verifyPayment(Map<String, dynamic> data) async {
+    emit(PaymentLoading());
+    try {
+      final response = await paymentRepository.verifyPayment(data);
+      if (response != null) {
+        emit(PaymentVerified(response));
+      } else {
+        emit(PaymentFailure(response?.message ?? ""));
+      }
+    } catch (e) {
+      emit(PaymentFailure(e.toString()));
+    }
+  }
 
 }

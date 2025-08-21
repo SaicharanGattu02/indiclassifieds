@@ -1,6 +1,7 @@
 import 'dart:developer' as AppLogger;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:indiclassifieds/Components/CustomAppButton.dart';
 import 'package:indiclassifieds/data/cubit/Plans/plans_cubit.dart';
 import 'package:indiclassifieds/utils/color_constants.dart';
@@ -42,6 +43,7 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
       context.read<PlansCubit>().getPlans();
     });
   }
+
   Future<void> getUserDetails() async {
     userNameNotifier.value = await AuthService.getName();
     userEmailNotifier.value = await AuthService.getEmail();
@@ -57,7 +59,7 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
       "razorpay_payment_id": response.paymentId,
       "razorpay_signature": response.signature,
     };
-    // context.read<PaymentCubit>().verifyPayment(data);
+    context.read<PaymentCubit>().verifyPayment(data);
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {
@@ -67,6 +69,7 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
   void _handleExternalWallet(ExternalWalletResponse response) {
     AppLogger.log("💼 External wallet selected: ${response.walletName}");
   }
+
   void _openCheckout(String key, int amount, String order_id) {
     var options = {
       'key': '$key',
@@ -114,8 +117,8 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
           }
           if (state is PlansFailure) {
             return _PlansErrorView(
-              message: state.error?.isNotEmpty == true
-                  ? state.error!
+              message: state.error.isNotEmpty == true
+                  ? state.error
                   : "Unable to load plans.",
               onRetry: () => context.read<PlansCubit>().getPlans(),
             );
@@ -513,6 +516,8 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
   }) async {
     final existing = context.read<PackagesCubit>();
     final ValueNotifier<int?> selectedIndex = ValueNotifier(null);
+    final ValueNotifier<int?> packageId = ValueNotifier(null);
+    final ValueNotifier<int?> plan_id = ValueNotifier(null);
     final ValueNotifier<String?> price = ValueNotifier("");
     final ValueNotifier<bool> isLoadingNotifier = ValueNotifier<bool>(false);
     showModalBottomSheet(
@@ -592,7 +597,7 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
                   );
                 }
                 final model = (state as PackagesLoaded).packagesModel;
-                final packages = model.packages ?? [];
+                final packages = model.data ?? [];
                 return DraggableScrollableSheet(
                   expand: false,
                   initialChildSize: 0.85,
@@ -639,16 +644,22 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
                                         ? null
                                         : p.name!,
                                     price: p.price,
-                                    mrp: p.price,
+                                    mrp: p.normalPrice,
                                     savingsPercent: savings,
                                     badgeText: badgeText,
                                     badgeGradient: badgeColors.gradient,
                                     isSelected: isSelected,
                                     onTap: () {
                                       if (isSelected) {
-                                        selectedIndex.value = null; // deselect
+                                        selectedIndex.value = null;
+                                        packageId.value = null;
+                                        plan_id.value = null;
+                                        price.value = "";
                                       } else {
-                                        selectedIndex.value = index; // select
+                                        selectedIndex.value = index;
+                                        packageId.value = p.id;
+                                        plan_id.value = planId;
+                                        price.value = p.price.toString();
                                       }
                                     },
                                   );
@@ -661,32 +672,34 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
                         ValueListenableBuilder<int?>(
                           valueListenable: selectedIndex,
                           builder: (_, selected, __) {
-                            if (selected == null) return const SizedBox.shrink();
-
-                            final selectedPkg = packages[selected];
+                            if (selected == null)
+                              return const SizedBox.shrink();
                             return SafeArea(
                               child: Padding(
                                 padding: EdgeInsets.fromLTRB(16, 0, 16, 20),
                                 child: BlocConsumer<PaymentCubit, PaymentStates>(
                                   listener: (context, state) {
-                                    isLoadingNotifier.value = state is PaymentLoading;
+                                    isLoadingNotifier.value =
+                                        state is PaymentLoading;
                                     if (state is PaymentCreated) {
-                                      final payment_created_data = state.createPaymentModel;
+                                      final payment_created_data =
+                                          state.createPaymentModel;
                                       _openCheckout(
                                         payment_created_data.razorpayKey ?? "",
                                         payment_created_data.amount ?? 0,
                                         payment_created_data.orderId ?? "",
                                       );
+                                    } else if (state is PaymentVerified) {
+                                      context.pushReplacement(
+                                        '/successfully'
+                                        '?title=${Uri.encodeComponent("Payment is Done Successfully")}',
+                                      );
+                                    } else if (state is PaymentFailure) {
+                                      CustomSnackBar1.show(
+                                        context,
+                                        state.error,
+                                      );
                                     }
-                                    // else if (state is PaymentVerified) {
-
-                                      // context.pushReplacement(
-                                      //   '/payment_success'
-                                      //       '?title=${Uri.encodeComponent("Payment is Done Successfully")}',
-                                      // );
-                                    // } else if (state is PaymentFailure) {
-                                    //   CustomSnackBar1.show(context, state.error);
-                                    // }
                                   },
                                   builder: (context, state) {
                                     return CustomAppButton1(
@@ -701,11 +714,13 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
                                           return;
                                         } else {
                                           final Map<String, dynamic> data = {
-                                            "plan_id": selectedPkg.planId,
-                                            "package_id": selectedPkg.id,
+                                            "plan_id": plan_id.value,
+                                            "package_id": packageId.value,
                                             "price": price.value,
                                           };
-                                          context.read<PaymentCubit>().createPayment(data);
+                                          context
+                                              .read<PaymentCubit>()
+                                              .createPayment(data);
                                         }
                                       },
                                     );
@@ -715,7 +730,6 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
                             );
                           },
                         ),
-
                       ],
                     );
                   },
@@ -939,19 +953,17 @@ class _PackageTile extends StatelessWidget {
                       alignment: Alignment.center,
                       child: isSelected
                           ? const Icon(
-                        Icons.check,
-                        size: 14,
-                        color: Colors.white,
-                      )
-                          :  SizedBox.shrink(),
+                              Icons.check,
+                              size: 14,
+                              color: Colors.white,
+                            )
+                          : SizedBox.shrink(),
                     ),
                   ),
-
                 ],
               ),
 
               const SizedBox(width: 12),
-
 
               Expanded(
                 child: Column(
@@ -984,8 +996,7 @@ class _PackageTile extends StatelessWidget {
                   ],
                 ),
               ),
-
-              const SizedBox(width: 10),
+              SizedBox(width: 10),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [

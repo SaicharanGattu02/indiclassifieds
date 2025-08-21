@@ -29,6 +29,8 @@ import 'package:indiclassifieds/presentation/views/ProductsListScreen.dart';
 import '../presentation/authentication/LoginScreen.dart';
 import '../presentation/authentication/OTPScreen.dart';
 import '../presentation/views/DetailsScreen.dart';
+import '../presentation/views/EditProfile.dart';
+import '../presentation/views/FilterScreen.dart';
 import '../presentation/views/NotificationScreen.dart';
 import '../presentation/views/CategoryScreen.dart';
 import '../presentation/views/PostAdvertisementScreen.dart';
@@ -161,13 +163,14 @@ final GoRouter appRouter = GoRouter(
         final categoryName = state.uri.queryParameters['CatName'] ?? "";
         final SubCategoryName = state.uri.queryParameters['SubCatName'] ?? "";
         final subCatId = state.uri.queryParameters['subCatId'] ?? "";
-
+        final type = state.uri.queryParameters['type'] ?? "";
         return buildSlideTransitionPage(
           CommonAd(
             catId: categoryId,
             CatName: categoryName,
             subCatId: subCatId,
             SubCatName: SubCategoryName,
+            type: type,
           ),
           state,
         );
@@ -215,6 +218,12 @@ final GoRouter appRouter = GoRouter(
       path: '/profile_screen',
       pageBuilder: (context, state) {
         return buildSlideTransitionPage(ProfileScreen(), state);
+      },
+    ),
+    GoRoute(
+      path: '/edit_profile_screen',
+      pageBuilder: (context, state) {
+        return buildSlideTransitionPage(EditProfile(), state);
       },
     ),
     GoRoute(
@@ -452,6 +461,12 @@ final GoRouter appRouter = GoRouter(
       path: '/post_advertisements',
       pageBuilder: (context, state) {
         return buildSlideTransitionPage(PostAdvertisementScreen(), state);
+      },
+    ),
+    GoRoute(
+      path: '/filter',
+      pageBuilder: (context, state) {
+        return buildSlideTransitionPage(FilterScreen(), state);
       },
     ),
   ],

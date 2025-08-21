@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:indiclassifieds/Components/CutomAppBar.dart';
 import '../../data/cubit/MyAds/my_ads_cubit.dart';
 import '../../data/cubit/MyAds/my_ads_states.dart';
 import '../../theme/AppTextStyles.dart';
@@ -19,7 +20,7 @@ extension AdStatusLabel on AdStatus {
     }
   }
 
-  /// API param to send
+
   String get apiParam {
     switch (this) {
       case AdStatus.approved: return 'approved';
@@ -42,13 +43,12 @@ class _AdsScreenState extends State<AdsScreen> {
   @override
   void initState() {
     super.initState();
-    // initial fetch for "approved"
     context.read<MyAdsCubit>().getMyAds(selectedStatus.apiParam);
   }
 
   void _onChangeTab(AdStatus status) {
     setState(() => selectedStatus = status);
-    context.read<MyAdsCubit>().getMyAds(status.apiParam); // resets to page 1
+    context.read<MyAdsCubit>().getMyAds(status.apiParam);
   }
 
   bool _onScrollNotification(ScrollNotification sn, bool hasNextPage) {
@@ -71,12 +71,7 @@ class _AdsScreenState extends State<AdsScreen> {
 
     return Scaffold(
       backgroundColor: bgColor,
-      appBar: AppBar(
-        backgroundColor: bgColor,
-        elevation: 0,
-        leading: BackButton(color: textColor),
-        title: Text('Your Ads', style: AppTextStyles.titleLarge(textColor)),
-      ),
+      appBar: CustomAppBar1(title: 'My Ads', actions: []),
       body: Column(
         children: [
           // Tabs
@@ -108,7 +103,6 @@ class _AdsScreenState extends State<AdsScreen> {
             ),
           ),
 
-          // List + pagination
           Expanded(
             child: BlocBuilder<MyAdsCubit, MyAdsStates>(
               builder: (context, state) {

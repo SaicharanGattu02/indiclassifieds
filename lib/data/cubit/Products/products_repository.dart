@@ -9,7 +9,11 @@ abstract class ProductsRepo {
         String? subCategoryId,
         String? search,
         String? state_id,
-        String? city_id}
+        String? city_id,
+        String? sort_by,
+        String? minPrice,
+        String? maxPrice,
+      }
       );
 }
 
@@ -20,12 +24,15 @@ class ProductsRepoImpl implements ProductsRepo {
 
   @override
   Future<SubcategoryProductsModel?> getProducts({
-    required int page,  // Make sure to include page in the method signature
+    required int page,
     String? categoryId,
     String? subCategoryId,
     String? search,
     String? state_id,
     String? city_id,
+    String? sort_by,
+    String? minPrice,
+    String? maxPrice,
   }) async {
     return await remoteDataSource.getProducts(
       categoryId: categoryId,
@@ -33,7 +40,10 @@ class ProductsRepoImpl implements ProductsRepo {
       search: search,
       state_id: state_id,
       city_id: city_id,
-      page: page, // Pass page to remote data source
+      sort_by: sort_by,
+      minPrice: minPrice,
+      maxPrice: maxPrice,
+      page: page,
     );
   }
 }

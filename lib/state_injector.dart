@@ -9,11 +9,13 @@ import 'package:indiclassifieds/data/cubit/Categories/categories_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Categories/categories_repository.dart';
 import 'package:indiclassifieds/data/cubit/City/city_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Dashboard/DashboardCubit.dart';
+import 'package:indiclassifieds/data/cubit/MyAds/MarkAsListing/mark_as_listing_cubit.dart';
 import 'package:indiclassifieds/data/cubit/MyAds/my_ads_cubit.dart';
 import 'package:indiclassifieds/data/cubit/MyAds/my_ads_repo.dart';
 import 'package:indiclassifieds/data/cubit/NewCategories/new_categories_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Packages/packages_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Packages/packages_repository.dart';
+import 'package:indiclassifieds/data/cubit/Payment/payment_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Plans/plans_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Plans/plans_repository.dart';
 import 'package:indiclassifieds/data/cubit/ProductDetails/product_details_cubit.dart';
@@ -59,6 +61,8 @@ import 'data/cubit/Ad/PropertyAd/property_ad_repo.dart';
 import 'data/cubit/City/city_repository.dart';
 import 'data/cubit/LogInWithMobile/login_with_mobile.dart';
 import 'data/cubit/LogInWithMobile/login_with_mobile_repository.dart';
+import 'data/cubit/MyAds/GetMarkAsListing/get_listing_ad_cubit.dart';
+import 'data/cubit/Payment/payment_repository.dart';
 import 'data/cubit/PostAdvertisement/post_advertisement_cubit.dart';
 import 'data/cubit/States/states_cubit.dart';
 import 'data/cubit/States/states_repository.dart';
@@ -193,6 +197,11 @@ class StateInjector {
         remoteDataSource: context.read<RemoteDataSource>(),
       ),
     ),
+    RepositoryProvider<PaymentRepository>(
+      create: (context) => PaymentRepositoryImpl(
+        remoteDataSource: context.read<RemoteDataSource>(),
+      ),
+    ),
   ];
 
   static final blocProviders = <BlocProvider>[
@@ -296,6 +305,12 @@ class StateInjector {
     BlocProvider<MyAdsCubit>(
       create: (context) => MyAdsCubit(context.read<MyAdsRepo>()),
     ),
+    BlocProvider<MarkAsListingCubit>(
+      create: (context) => MarkAsListingCubit(context.read<MyAdsRepo>()),
+    ),
+    BlocProvider<GetListingAdCubit>(
+      create: (context) => GetListingAdCubit(context.read<MyAdsRepo>()),
+    ),
     BlocProvider<ProfileCubit>(
       create: (context) => ProfileCubit(context.read<ProfileRepo>()),
     ),
@@ -314,6 +329,10 @@ class StateInjector {
       create: (context) =>
           AdvertisementDetailsCubit(context.read<AdvertisementRepo>()),
     ),
+    BlocProvider<PaymentCubit>(
+      create: (context) => PaymentCubit(context.read<PaymentRepository>()),
+    ),
+
     BlocProvider<DashboardCubit>(
       create: (context) => DashboardCubit(
         bannersCubit: context.read<BannerCubit>(),

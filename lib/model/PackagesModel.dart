@@ -1,24 +1,19 @@
 class PackagesModel {
   bool? success;
   String? message;
-  List<Plans>? plans;
-  List<Packages>? packages;
+  Plan? plan;
+  List<Data>? data;
 
-  PackagesModel({this.success, this.message, this.plans, this.packages});
+  PackagesModel({this.success, this.message, this.plan, this.data});
 
   PackagesModel.fromJson(Map<String, dynamic> json) {
     success = json['success'];
     message = json['message'];
-    if (json['plans'] != null) {
-      plans = <Plans>[];
-      json['plans'].forEach((v) {
-        plans!.add(new Plans.fromJson(v));
-      });
-    }
+    plan = json['plan'] != null ? new Plan.fromJson(json['plan']) : null;
     if (json['data'] != null) {
-      packages = <Packages>[];
+      data = <Data>[];
       json['data'].forEach((v) {
-        packages!.add(new Packages.fromJson(v));
+        data!.add(new Data.fromJson(v));
       });
     }
   }
@@ -27,23 +22,23 @@ class PackagesModel {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['success'] = this.success;
     data['message'] = this.message;
-    if (this.plans != null) {
-      data['plans'] = this.plans!.map((v) => v.toJson()).toList();
+    if (this.plan != null) {
+      data['plan'] = this.plan!.toJson();
     }
-    if (this.packages != null) {
-      data['data'] = this.packages!.map((v) => v.toJson()).toList();
+    if (this.data != null) {
+      data['data'] = this.data!.map((v) => v.toJson()).toList();
     }
     return data;
   }
 }
 
-class Plans {
+class Plan {
   String? name;
   int? durationDays;
 
-  Plans({this.name, this.durationDays});
+  Plan({this.name, this.durationDays});
 
-  Plans.fromJson(Map<String, dynamic> json) {
+  Plan.fromJson(Map<String, dynamic> json) {
     name = json['name'];
     durationDays = json['duration_days'];
   }
@@ -56,7 +51,7 @@ class Plans {
   }
 }
 
-class Packages {
+class Data {
   int? id;
   int? planId;
   String? name;
@@ -65,25 +60,28 @@ class Packages {
   int? pinnedCount;
   int? spotlightCount;
   String? price;
+  String? normalPrice;
   String? status;
   String? createdAt;
   String? updatedAt;
+  int? durationDays;
 
-  Packages({
-    this.id,
-    this.planId,
-    this.name,
-    this.listingsCount,
-    this.adsCount,
-    this.pinnedCount,
-    this.spotlightCount,
-    this.price,
-    this.status,
-    this.createdAt,
-    this.updatedAt,
-  });
+  Data(
+      {this.id,
+        this.planId,
+        this.name,
+        this.listingsCount,
+        this.adsCount,
+        this.pinnedCount,
+        this.spotlightCount,
+        this.price,
+        this.normalPrice,
+        this.status,
+        this.createdAt,
+        this.updatedAt,
+        this.durationDays});
 
-  Packages.fromJson(Map<String, dynamic> json) {
+  Data.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     planId = json['plan_id'];
     name = json['name'];
@@ -92,9 +90,11 @@ class Packages {
     pinnedCount = json['pinned_count'];
     spotlightCount = json['spotlight_count'];
     price = json['price'];
+    normalPrice = json['normal_price'];
     status = json['status'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
+    durationDays = json['duration_days'];
   }
 
   Map<String, dynamic> toJson() {
@@ -107,9 +107,11 @@ class Packages {
     data['pinned_count'] = this.pinnedCount;
     data['spotlight_count'] = this.spotlightCount;
     data['price'] = this.price;
+    data['normal_price'] = this.normalPrice;
     data['status'] = this.status;
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
+    data['duration_days'] = this.durationDays;
     return data;
   }
 }

@@ -1,10 +1,11 @@
 
+import '../../../model/AdSuccessModel.dart';
 import '../../../model/CreatePaymentModel.dart';
 import '../../remote_data_source.dart';
 
 abstract class PaymentRepository {
   Future<CreatePaymentModel?> createPayment(Map<String, dynamic> data);
-  // Future<VerifyPaymentModel?> verifyPayment(Map<String, dynamic> data);
+  Future<AdSuccessModel?> verifyPayment(Map<String, dynamic> data);
 }
 
 class PaymentRepositoryImpl implements PaymentRepository {
@@ -15,8 +16,8 @@ class PaymentRepositoryImpl implements PaymentRepository {
     return await remoteDataSource.createPayment(data);
   }
 
-  // @override
-  // Future<VerifyPaymentModel?> verifyPayment(Map<String, dynamic> data) async {
-  //   return await remoteDataSource.verifyPayment(data);
-  // }
+  @override
+  Future<AdSuccessModel?> verifyPayment(Map<String, dynamic> data) async {
+    return await remoteDataSource.verifyPayment(data);
+  }
 }

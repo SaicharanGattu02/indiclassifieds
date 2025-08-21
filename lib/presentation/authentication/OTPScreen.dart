@@ -268,7 +268,7 @@ class _OtpscreenState extends State<Otpscreen> {
                           if (state is verifyMobileSuccess) {
                             final tokens = state.verifyOtpModel;
                             await AuthService.saveTokens(
-                              tokens.token ?? "",
+                              tokens.accessToken ?? "",
                               tokens.user?.name ?? "",
                               tokens.user?.email ?? "",
                               tokens.user?.mobile ?? "",
