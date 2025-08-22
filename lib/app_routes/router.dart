@@ -189,13 +189,15 @@ final GoRouter appRouter = GoRouter(
         final categoryName = state.uri.queryParameters['CatName'] ?? "";
         final SubCategoryName = state.uri.queryParameters['SubCatName'] ?? "";
         final subCatId = state.uri.queryParameters['subCatId'] ?? "";
+        final editId = state.uri.queryParameters['editId'] ?? "";
+
 
         return buildSlideTransitionPage(
           PropertiesAdScreen(
             catId: categoryId,
             CatName: categoryName,
             subCatId: subCatId,
-            SubCatName: SubCategoryName,
+            SubCatName: SubCategoryName,editId: editId,
           ),
           state,
         );
@@ -245,84 +247,13 @@ final GoRouter appRouter = GoRouter(
         final categoryName = state.uri.queryParameters['CatName'] ?? "";
         final SubCategoryName = state.uri.queryParameters['SubCatName'] ?? "";
         final subCatId = state.uri.queryParameters['subCatId'] ?? "";
+        final editId = state.uri.queryParameters['editId'] ?? "";
         return buildSlideFromBottomPage(
           JobsAd(
             catId: categoryId,
             CatName: categoryName,
             subCatId: subCatId,
-            SubCatName: SubCategoryName,
-          ),
-          state,
-        );
-      },
-    ),
-    GoRoute(
-      path: '/bike_ad',
-      pageBuilder: (context, state) {
-        final categoryId = state.uri.queryParameters['catId'] ?? "";
-        final categoryName = state.uri.queryParameters['CatName'] ?? "";
-        final SubCategoryName = state.uri.queryParameters['SubCatName'] ?? "";
-        final subCatId = state.uri.queryParameters['subCatId'] ?? "";
-        return buildSlideFromBottomPage(
-          BikeAd(
-            catId: categoryId,
-            CatName: categoryName,
-            subCatId: subCatId,
-            SubCatName: SubCategoryName,
-          ),
-          state,
-        );
-      },
-    ),
-    GoRoute(
-      path: '/cars_ad',
-      pageBuilder: (context, state) {
-        final categoryId = state.uri.queryParameters['catId'] ?? "";
-        final categoryName = state.uri.queryParameters['CatName'] ?? "";
-        final SubCategoryName = state.uri.queryParameters['SubCatName'] ?? "";
-        final subCatId = state.uri.queryParameters['subCatId'] ?? "";
-        return buildSlideFromBottomPage(
-          CarsAd(
-            catId: categoryId,
-            CatName: categoryName,
-            subCatId: subCatId,
-            SubCatName: SubCategoryName,
-          ),
-          state,
-        );
-      },
-    ),
-    GoRoute(
-      path: '/commercial_vechile_ad',
-      pageBuilder: (context, state) {
-        final categoryId = state.uri.queryParameters['catId'] ?? "";
-        final categoryName = state.uri.queryParameters['CatName'] ?? "";
-        final SubCategoryName = state.uri.queryParameters['SubCatName'] ?? "";
-        final subCatId = state.uri.queryParameters['subCatId'] ?? "";
-        return buildSlideFromBottomPage(
-          CommercialVehicleAd(
-            catId: categoryId,
-            CatName: categoryName,
-            subCatId: subCatId,
-            SubCatName: SubCategoryName,
-          ),
-          state,
-        );
-      },
-    ),
-    GoRoute(
-      path: '/pets_ad',
-      pageBuilder: (context, state) {
-        final categoryId = state.uri.queryParameters['catId'] ?? "";
-        final categoryName = state.uri.queryParameters['CatName'] ?? "";
-        final SubCategoryName = state.uri.queryParameters['SubCatName'] ?? "";
-        final subCatId = state.uri.queryParameters['subCatId'] ?? "";
-        return buildSlideFromBottomPage(
-          PetAdScreen(
-            catId: categoryId,
-            CatName: categoryName,
-            subCatId: subCatId,
-            SubCatName: SubCategoryName,
+            SubCatName: SubCategoryName,editId: editId,
           ),
           state,
         );
@@ -335,12 +266,73 @@ final GoRouter appRouter = GoRouter(
         final categoryName = state.uri.queryParameters['CatName'] ?? "";
         final SubCategoryName = state.uri.queryParameters['SubCatName'] ?? "";
         final subCatId = state.uri.queryParameters['subCatId'] ?? "";
+        final editId = state.uri.queryParameters['editId'] ?? "";
         return buildSlideFromBottomPage(
           BikeAd(
             catId: categoryId,
             CatName: categoryName,
             subCatId: subCatId,
             SubCatName: SubCategoryName,
+            editId: editId,
+          ),
+          state,
+        );
+      },
+    ),
+    GoRoute(
+      path: '/cars_ad',
+      pageBuilder: (context, state) {
+        final categoryId = state.uri.queryParameters['catId'] ?? "";
+        final categoryName = state.uri.queryParameters['CatName'] ?? "";
+        final SubCategoryName = state.uri.queryParameters['SubCatName'] ?? "";
+        final subCatId = state.uri.queryParameters['subCatId'] ?? "";
+        final editId = state.uri.queryParameters['editId'] ?? "";
+        return buildSlideFromBottomPage(
+          CarsAd(
+            catId: categoryId,
+            CatName: categoryName,
+            subCatId: subCatId,
+            SubCatName: SubCategoryName,
+            editId: editId,
+          ),
+          state,
+        );
+      },
+    ),
+    GoRoute(
+      path: '/commercial_vechile_ad',
+      pageBuilder: (context, state) {
+        final categoryId = state.uri.queryParameters['catId'] ?? "";
+        final categoryName = state.uri.queryParameters['CatName'] ?? "";
+        final SubCategoryName = state.uri.queryParameters['SubCatName'] ?? "";
+        final subCatId = state.uri.queryParameters['subCatId'] ?? "";
+        final editId = state.uri.queryParameters['editId'] ?? "";
+        return buildSlideFromBottomPage(
+          CommercialVehicleAd(
+            catId: categoryId,
+            CatName: categoryName,
+            subCatId: subCatId,
+            SubCatName: SubCategoryName,
+            editId: editId,
+          ),
+          state,
+        );
+      },
+    ),
+    GoRoute(
+      path: '/pets_ad',
+      pageBuilder: (context, state) {
+        final categoryId = state.uri.queryParameters['catId'] ?? "";
+        final categoryName = state.uri.queryParameters['CatName'] ?? "";
+        final SubCategoryName = state.uri.queryParameters['SubCatName'] ?? "";
+        final subCatId = state.uri.queryParameters['subCatId'] ?? "";
+        final editId = state.uri.queryParameters['editId'] ?? "";
+        return buildSlideFromBottomPage(
+          PetAdScreen(
+            catId: categoryId,
+            CatName: categoryName,
+            subCatId: subCatId,
+            SubCatName: SubCategoryName,editId: editId,
           ),
           state,
         );
@@ -353,12 +345,14 @@ final GoRouter appRouter = GoRouter(
         final categoryName = state.uri.queryParameters['CatName'] ?? "";
         final SubCategoryName = state.uri.queryParameters['SubCatName'] ?? "";
         final subCatId = state.uri.queryParameters['subCatId'] ?? "";
+        final editId = state.uri.queryParameters['editId'] ?? "";
+
         return buildSlideFromBottomPage(
           EducationalAd(
             catId: categoryId,
             CatName: categoryName,
             subCatId: subCatId,
-            SubCatName: SubCategoryName,
+            SubCatName: SubCategoryName,editId: editId,
           ),
           state,
         );
@@ -371,12 +365,13 @@ final GoRouter appRouter = GoRouter(
         final categoryName = state.uri.queryParameters['CatName'] ?? "";
         final SubCategoryName = state.uri.queryParameters['SubCatName'] ?? "";
         final subCatId = state.uri.queryParameters['subCatId'] ?? "";
+        final editId = state.uri.queryParameters['editId'] ?? "";
         return buildSlideFromBottomPage(
           MobileAd(
             catId: categoryId,
             CatName: categoryName,
             subCatId: subCatId,
-            SubCatName: SubCategoryName,
+            SubCatName: SubCategoryName,editId: editId,
           ),
           state,
         );
@@ -390,12 +385,14 @@ final GoRouter appRouter = GoRouter(
         final categoryName = state.uri.queryParameters['CatName'] ?? "";
         final SubCategoryName = state.uri.queryParameters['SubCatName'] ?? "";
         final subCatId = state.uri.queryParameters['subCatId'] ?? "";
+        final editId = state.uri.queryParameters['editId'] ?? "";
         return buildSlideFromBottomPage(
           AstrologyAd(
             catId: categoryId,
             CatName: categoryName,
             subCatId: subCatId,
             SubCatName: SubCategoryName,
+            editId: editId,
           ),
           state,
         );
@@ -409,12 +406,14 @@ final GoRouter appRouter = GoRouter(
         final categoryName = state.uri.queryParameters['CatName'] ?? "";
         final SubCategoryName = state.uri.queryParameters['SubCatName'] ?? "";
         final subCatId = state.uri.queryParameters['subCatId'] ?? "";
+        final editId = state.uri.queryParameters['editId'] ?? "";
         return buildSlideFromBottomPage(
           CityRentalsAd(
             catId: categoryId,
             CatName: categoryName,
             subCatId: subCatId,
             SubCatName: SubCategoryName,
+            editId: editId,
           ),
           state,
         );
@@ -428,12 +427,13 @@ final GoRouter appRouter = GoRouter(
         final categoryName = state.uri.queryParameters['CatName'] ?? "";
         final SubCategoryName = state.uri.queryParameters['SubCatName'] ?? "";
         final subCatId = state.uri.queryParameters['subCatId'] ?? "";
+        final editId = state.uri.queryParameters['editId'] ?? "";
         return buildSlideFromBottomPage(
           CoWorkingSpaceAd(
             catId: categoryId,
             CatName: categoryName,
             subCatId: subCatId,
-            SubCatName: SubCategoryName,
+            SubCatName: SubCategoryName,editId: editId,
           ),
           state,
         );
@@ -446,12 +446,13 @@ final GoRouter appRouter = GoRouter(
         final categoryName = state.uri.queryParameters['CatName'] ?? "";
         final SubCategoryName = state.uri.queryParameters['SubCatName'] ?? "";
         final subCatId = state.uri.queryParameters['subCatId'] ?? "";
+        final editId = state.uri.queryParameters['editId'] ?? "";
         return buildSlideFromBottomPage(
           CommunityAdScreen(
             catId: categoryId,
             CatName: categoryName,
             subCatId: subCatId,
-            SubCatName: SubCategoryName,
+            SubCatName: SubCategoryName,editId: editId,
           ),
           state,
         );

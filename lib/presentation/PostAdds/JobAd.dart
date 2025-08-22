@@ -11,15 +11,21 @@ import '../../Components/ShakeWidget.dart';
 import '../../data/cubit/Ad/JobsAd/jobs_ad_cubit.dart';
 import '../../data/cubit/Ad/JobsAd/jobs_ad_states.dart';
 import '../../data/cubit/Ad/PetsAd/pets_ad_states.dart';
+import '../../data/cubit/MyAds/GetMarkAsListing/get_listing_ad_cubit.dart';
+import '../../data/cubit/MyAds/MarkAsListing/mark_as_listing_cubit.dart';
+import '../../data/cubit/MyAds/MarkAsListing/mark_as_listing_state.dart';
 import '../../data/cubit/States/states_cubit.dart';
 import '../../data/cubit/States/states_repository.dart';
 import '../../data/cubit/UserActivePlans/user_active_plans_cubit.dart';
 import '../../data/remote_data_source.dart';
+import '../../services/AuthService.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
+import '../../utils/ImagePickerHelper.dart';
 import '../../utils/ImageUtils.dart';
 import '../../utils/color_constants.dart';
 import '../../utils/planhelper.dart';
+import '../../widgets/CommonLoader.dart';
 import '../../widgets/CommonTextField.dart';
 import '../../widgets/CommonWrapChipSelector.dart';
 import '../../widgets/SelectCityBottomSheet.dart';
@@ -30,12 +36,14 @@ class JobsAd extends StatefulWidget {
   final String CatName;
   final String SubCatName;
   final String subCatId;
+  final String editId;
   const JobsAd({
     super.key,
     required this.catId,
     required this.CatName,
     required this.SubCatName,
     required this.subCatId,
+    required this.editId,
   });
 
   @override
@@ -65,9 +73,46 @@ class _JobsAdState extends State<JobsAd> {
   int? planId;
   int? packageId;
 
+  bool isLoading = true;
+  List<ImageData> _imageDataList = [];
   @override
   void initState() {
     super.initState();
+    final id = widget.editId.replaceAll('"', '').trim();
+    if (id != null && id.isNotEmpty) {
+      context.read<GetListingAdCubit>().getListingAd(widget.editId).then((
+          commonAdData,
+          ) {
+        if (commonAdData != null) {
+          descriptionController.text =
+              commonAdData.data?.listing?.description ?? '';
+          locationController.text = commonAdData.data?.listing?.location ?? '';
+          priceController.text = commonAdData.data?.listing?.price ?? '';
+          nameController.text = commonAdData.data?.listing?.fullName ?? '';
+          phoneController.text = commonAdData.data?.listing?.mobileNumber ?? '';
+          salaryRangeController.text = commonAdData.data?.listing?.salaryRange ?? '';
+          if (commonAdData.data?.listing?.stateId != null) {
+            selectedStateId = commonAdData.data?.listing?.stateId;
+            stateController.text = commonAdData.data?.listing?.stateName ?? '';
+          }
+          if (commonAdData.data?.listing?.cityId != null) {
+            selectedCityId = commonAdData.data?.listing?.cityId;
+            cityController.text = commonAdData.data?.listing?.cityName ?? '';
+          }
+
+          if (commonAdData.data?.listing?.images != null) {
+            _imageDataList = commonAdData.data!.listing!.images!
+                .where((img) => (img.image ?? "").isNotEmpty)
+                .map((img) => ImageData(id: img.id ?? 0, url: img.image ?? ""))
+                .toList();
+          }
+        }
+        setState(() => isLoading = false);
+      });
+    } else {
+      setState(() => isLoading = false);
+    }
+    titleController.text = widget.CatName ?? "";
     brandController.text = widget.SubCatName ?? "";
   }
 
@@ -76,136 +121,20 @@ class _JobsAdState extends State<JobsAd> {
   final int _maxImages = 6;
   final ImagePicker _picker = ImagePicker();
 
-  Future<void> _pickImage() async {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      backgroundColor: Colors.white,
-      builder: (BuildContext context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Drag handle
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    decoration: BoxDecoration(
-                      color: primarycolor.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.close, color: Colors.red),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ],
-                ),
-                ListTile(
-                  leading: Icon(Icons.photo_library, color: primarycolor),
-                  title: const Text(
-                    'Choose from Gallery',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 16,
-                      color: Colors.black87,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _pickImageFromGallery();
-                  },
-                ),
-
-                // Camera Option
-                ListTile(
-                  leading: Icon(Icons.camera_alt, color: primarycolor),
-                  title: const Text(
-                    'Take a Photo',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 16,
-                      color: Colors.black87,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _pickImageFromCamera();
-                  },
-                ),
-
-                const SizedBox(height: 8),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> _pickImageFromGallery() async {
-    final XFile? pickedFile = await _picker.pickImage(
-      source: ImageSource.gallery,
-    );
-    if (pickedFile != null) {
-      File? compressedFile = await ImageUtils.compressImage(
-        File(pickedFile.path),
-      );
-      if (compressedFile != null) {
-        setState(() {
-          if (_images.length < _maxImages) {
-            _images.add(compressedFile); // ✅ add to list
-          }
-        });
-      }
-    }
-  }
-
-  Future<void> _pickImageFromCamera() async {
-    final XFile? pickedFile = await _picker.pickImage(
-      source: ImageSource.camera,
-    );
-    if (pickedFile != null) {
-      File? compressedFile = await ImageUtils.compressImage(
-        File(pickedFile.path),
-      );
-      if (compressedFile != null) {
-        setState(() {
-          if (_images.length < _maxImages) {
-            _images.add(compressedFile); // ✅ add to list
-          }
-        });
-      }
-    }
-  }
-
-  void _removeImage(int index) {
-    setState(() {
-      _images.removeAt(index);
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     final textColor = ThemeHelper.textColor(context);
-    final isDarkMode = ThemeHelper.isDarkMode(context);
     return Scaffold(
-      appBar: CustomAppBar1(title: '${widget.SubCatName}', actions: []),
-      body: SingleChildScrollView(
+      appBar: CustomAppBar1(
+        title: (widget.editId.replaceAll('"', '').trim().isNotEmpty ?? false)
+            ? "Edit ${widget.CatName}"
+            : widget.CatName,
+        actions: [],
+      ),
+      body: isLoading
+          ? Center(child: DottedProgressWithLogo())
+          :  SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
@@ -213,18 +142,19 @@ class _JobsAdState extends State<JobsAd> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CommonTextField1(
-                isRead: true,
-                lable: 'Brand',
-                controller: brandController,
-                color: textColor,
-              ),
-              CommonTextField1(
                 lable: ' Add Title',
                 hint: 'Enter Title',
                 controller: titleController,
                 color: textColor,
                 validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Required title' : null,
+                (v == null || v.trim().isEmpty) ? 'Required title' : null,
+              ),
+
+              CommonTextField1(
+                isRead: true,
+                lable: 'Brand',
+                controller: brandController,
+                color: textColor,
               ),
               CommonTextField1(
                 lable: 'Salary Range',
@@ -366,129 +296,24 @@ class _JobsAdState extends State<JobsAd> {
                   ),
                 ),
               ],
-              _sectionTitle('Upload Product Images', textColor),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 16,
-                ),
-                decoration: BoxDecoration(
-                  border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0x0D000000),
-                      offset: const Offset(0, 1),
-                      blurRadius: 2,
-                    ),
-                  ],
-                ),
-                child: _images.isEmpty
-                    ? InkWell(
-                        onTap: _pickImage,
-                        child: Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.photo_camera,
-                                color: textColor.withOpacity(0.6),
-                                size: 40,
-                              ),
-                              SizedBox(height: 8),
-                              Text(
-                                '+ Add Photos ${_maxImages}',
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 14,
-                                  color: textColor.withOpacity(0.6),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
-                    : GridView.builder(
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 4,
-                          crossAxisSpacing: 8,
-                          mainAxisSpacing: 8,
-                          childAspectRatio: 1.8,
-                        ),
-                        itemCount: _images.length < _maxImages
-                            ? _images.length + 1
-                            : _images.length,
-                        itemBuilder: (context, index) {
-                          if (index == _images.length &&
-                              _images.length < _maxImages) {
-                            return InkWell(
-                              onTap: _pickImage,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: const Color(0xFFE5E7EB),
-                                  ),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.add_photo_alternate,
-                                      color: textColor.withOpacity(0.6),
-                                      size: 24,
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      'Add Photo',
-                                      style: TextStyle(
-                                        fontFamily: 'Poppins',
-                                        fontSize: 12,
-                                        color: textColor.withOpacity(0.6),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          }
-                          return Stack(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: Image.file(
-                                  _images[index],
-                                  fit: BoxFit.cover,
-                                  width: double.infinity,
-                                  height: double.infinity,
-                                ),
-                              ),
-                              Positioned(
-                                top: 4,
-                                right: 4,
-                                child: GestureDetector(
-                                  onTap: () => _removeImage(index),
-                                  child: Container(
-                                    padding: const EdgeInsets.all(2),
-                                    decoration: BoxDecoration(
-                                      color: Colors.red.withOpacity(0.7),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(
-                                      Icons.close,
-                                      color: Colors.white,
-                                      size: 16,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
+              SizedBox(height: 12),
+              CommonImagePicker(
+                title: "Upload Product Images",
+                images: _images,
+                existingImages: _imageDataList,
+                maxImages: _maxImages,
+                textColor: textColor,
+                showError: _showimagesError,
+                editId: widget.editId,
+                onImagesChanged: (newList) {
+                  setState(() => _images = newList);
+                },
+                onExistingImagesChanged: (newList) {
+                  setState(() => _imageDataList = newList);
+                },
               ),
+
+              const SizedBox(height: 12),
               if (_showimagesError && _images.isEmpty) ...[
                 Padding(
                   padding: const EdgeInsets.only(top: 5),
@@ -534,93 +359,127 @@ class _JobsAdState extends State<JobsAd> {
                 controller: locationController,
                 color: textColor,
               ),
-              CommonTextField1(
-                lable: 'Plan',
-                isRead: true,
-                hint: 'Select Plan',
-                controller: planController,
-                color: textColor,
-                validator: (v) =>
-                (v == null || v.trim().isEmpty) ? 'Plan is Required' : null,
-                onTap: () {
-                  context.read<UserActivePlanCubit>().getUserActivePlansData();
-                  showPlanBottomSheet(
-                    context: context,
-                    controller: planController,
-                    onSelectPlan: (selectedPlan) {
-                      print('Selected plan: ${selectedPlan.planName}');
-                      planId = selectedPlan.planId;
-                      packageId = selectedPlan.packageId;
-                    },
-                    title:
-                    'Choose Your Plan', // Optional title for the bottom sheet
-                  );
-                },
-              ),
+              if (widget.editId == null ||
+                  widget.editId.replaceAll('"', '').trim().isEmpty) ...[
+                CommonTextField1(
+                  lable: 'Plan',
+                  isRead: true,
+                  hint: 'Select Plan',
+                  controller: planController,
+                  color: textColor,
+                  validator: (v) => (v == null || v.trim().isEmpty)
+                      ? 'Plan is Required'
+                      : null,
+                  onTap: () {
+                    context
+                        .read<UserActivePlanCubit>()
+                        .getUserActivePlansData();
+                    showPlanBottomSheet(
+                      context: context,
+                      controller: planController,
+                      onSelectPlan: (selectedPlan) {
+                        print('Selected plan: ${selectedPlan.planName}');
+                        planId = selectedPlan.planId;
+                        packageId = selectedPlan.packageId;
+                      },
+                      title: 'Choose Your Plan',
+                    );
+                  },
+                ),
+              ],
             ],
           ),
         ),
       ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-          child: BlocConsumer<JobsAdCubit, JobsAdStates>(
-            listener: (context, state) {
-              if (state is JobsAdSuccess) {
-                context.pushReplacement("/successfully");
-              } else if (state is JobsAdFailure) {
-                CustomSnackBar1.show(context, state.error);
-              }
-            },
-            builder: (context, state) {
-              return CustomAppButton1(
-                isLoading: state is JobsAdLoading,
-                text: 'Submit Ad',
-                onPlusTap: () {
-                  if (_formKey.currentState?.validate() ?? false) {
-                    final Map<String, dynamic> data = {
-                      "title": titleController.text,
-                      "brand": brandController.text,
-                      "description": descriptionController.text,
-                      "sub_category_id": widget.subCatId,
-                      "category_id": widget.catId,
-                      "location": locationController.text,
-                      "mobile_number": phoneController.text,
-                      "plan_id": planId,
-                      "package_id": packageId,
-                      "price": priceController.text,
-                      "full_name": nameController.text,
-                      "state_id": selectedStateId,
-                      "city_id": selectedCityId,
-                      "company_name": companyNameController.text,
-                      "salary_range": salaryRangeController.text,
-                    };
-                    if (_images.isNotEmpty) {
-                      data["images"] = _images
-                          .map((file) => file.path)
-                          .toList();
+        bottomNavigationBar: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+            child: FutureBuilder<bool>(
+              future: AuthService.isEligibleForAd,
+              builder: (context, asyncSnapshot) {
+                if (asyncSnapshot.connectionState == ConnectionState.waiting) {
+                  return const SizedBox();
+                }
+
+                final isEligible = asyncSnapshot.data ?? false;
+                final editId = widget.editId.replaceAll('"', '').trim();
+
+                return BlocConsumer<MarkAsListingCubit, MarkAsListingState>(
+                  listener: (context, updateState) {
+                    if (updateState is MarkAsListingSuccess ||
+                        updateState is MarkAsListingUpdateSuccess) {
+                      context.pushReplacement("/successfully");
+                    } else if (updateState is MarkAsListingFailure) {
+                      CustomSnackBar1.show(context, updateState.error);
                     }
+                  },
+                  builder: (context, updateState) {
+                    return BlocConsumer<JobsAdCubit, JobsAdStates>(
+                      listener: (context, state) {
+                        if (state is JobsAdSuccess) {
+                          context.pushReplacement("/successfully");
+                        } else if (state is JobsAdFailure) {
+                          CustomSnackBar1.show(context, state.error);
+                        }
+                      },
+                      builder: (context, state) {
+                        return CustomAppButton1(
+                          isLoading: state is JobsAdLoading ||
+                              updateState is MarkAsListingUpdateLoading,
+                          text: 'Submit Ad',
+                          onPlusTap: isEligible
+                              ? () {
+                            if (_formKey.currentState?.validate() ?? false) {
+                              final Map<String, dynamic> data = {
+                                "title": titleController.text,
+                                "brand": brandController.text,
+                                "description": descriptionController.text,
+                                "sub_category_id": widget.subCatId,
+                                "category_id": widget.catId,
+                                "location": locationController.text,
+                                "mobile_number": phoneController.text,
+                                "price": priceController.text,
+                                "full_name": nameController.text,
+                                "state_id": selectedStateId,
+                                "city_id": selectedCityId,
+                                "company_name": companyNameController.text,
+                                "salary_range": salaryRangeController.text,
+                              };
 
-                    context.read<JobsAdCubit>().postjobsAd(data);
-                  }
-                },
-              );
-            },
+                              if (editId.isEmpty) {
+                                data["plan_id"] = planId;
+                                data["package_id"] = packageId;
+                              }
+
+                              if (_images.isNotEmpty) {
+                                data["images"] =
+                                    _images.map((file) => file.path).toList();
+                              }
+
+                              if (editId.isNotEmpty) {
+                                context
+                                    .read<MarkAsListingCubit>()
+                                    .markAsUpdate(editId, data);
+                              } else {
+                                context.read<JobsAdCubit>().postjobsAd(data);
+                              }
+                            }
+                          }
+                              : () {
+                            context.push("/plans");
+                          },
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            ),
           ),
-        ),
-      ),
+        )
+
     );
   }
 
-  Widget _sectionTitle(String title, Color color) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 20, bottom: 10),
-      child: Text(
-        title,
-        style: AppTextStyles.titleMedium(
-          color,
-        ).copyWith(fontSize: 15, fontWeight: FontWeight.w600),
-      ),
-    );
-  }
+
 }

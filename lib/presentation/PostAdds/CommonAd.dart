@@ -26,6 +26,7 @@ import '../../utils/ImageUtils.dart';
 import '../../utils/color_constants.dart';
 import '../../utils/planhelper.dart';
 import '../../utils/spinkittsLoader.dart';
+import '../../widgets/CommonLoader.dart';
 import '../../widgets/CommonTextField.dart';
 import '../../widgets/SelectCityBottomSheet.dart';
 import '../../widgets/SelectStateBottomSheet.dart';
@@ -74,26 +75,6 @@ class _CommonAdState extends State<CommonAd> {
   int? planId;
   int? packageId;
   bool isLoading = true;
-  void _pickImage() {
-    ImagePickerHelper.showImagePickerBottomSheet(
-      context: context,
-      onImageSelected: (image) {
-        setState(() {
-          if (_images.length < _maxImages) {
-            _images.add(image);
-          }
-        });
-      },
-      maxImages: _maxImages,
-      images: _images,
-    );
-  }
-
-  void _removeImage(int index) {
-    setState(() {
-      _images.removeAt(index);
-    });
-  }
 
   List<ImageData> _imageDataList = [];
   @override
@@ -101,10 +82,11 @@ class _CommonAdState extends State<CommonAd> {
     super.initState();
     debugPrint("typee:${widget.editId}");
     titleController.text = widget.SubCatName ?? "";
-    if(widget.editId!=null){
-      context.read<GetListingAdCubit>().getListingAd(widget.subCatId).then((
-          commonAdData,
-          ) {
+    final id = widget.editId.replaceAll('"', '').trim();
+    if (id != null && id.isNotEmpty) {
+      context.read<GetListingAdCubit>().getListingAd(widget.editId).then((
+        commonAdData,
+      ) {
         if (commonAdData != null) {
           descriptionController.text =
               commonAdData.data?.listing?.description ?? '';
@@ -112,6 +94,7 @@ class _CommonAdState extends State<CommonAd> {
           priceController.text = commonAdData.data?.listing?.price ?? '';
           nameController.text = commonAdData.data?.listing?.fullName ?? '';
           phoneController.text = commonAdData.data?.listing?.mobileNumber ?? '';
+
           if (commonAdData.data?.listing?.stateId != null) {
             selectedStateId = commonAdData.data?.listing?.stateId;
             stateController.text = commonAdData.data?.listing?.stateName ?? '';
@@ -120,6 +103,7 @@ class _CommonAdState extends State<CommonAd> {
             selectedCityId = commonAdData.data?.listing?.cityId;
             cityController.text = commonAdData.data?.listing?.cityName ?? '';
           }
+
           if (commonAdData.data?.listing?.images != null) {
             _imageDataList = commonAdData.data!.listing!.images!
                 .where((img) => (img.image ?? "").isNotEmpty)
@@ -127,11 +111,11 @@ class _CommonAdState extends State<CommonAd> {
                 .toList();
           }
         }
-
         setState(() => isLoading = false);
       });
+    } else {
+      setState(() => isLoading = false);
     }
-
   }
 
   void removeOldImage(ImageData image) {
@@ -145,13 +129,13 @@ class _CommonAdState extends State<CommonAd> {
     final textColor = ThemeHelper.textColor(context);
     return Scaffold(
       appBar: CustomAppBar1(
-        title: widget.editId != null
+        title: (widget.editId.replaceAll('"', '').trim().isNotEmpty ?? false)
             ? "Edit ${widget.CatName}"
             : widget.CatName,
         actions: [],
       ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: DottedProgressWithLogo())
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Form(
@@ -317,6 +301,7 @@ class _CommonAdState extends State<CommonAd> {
                         ),
                       ),
                     ],
+                    SizedBox(height: 12),
                     CommonImagePicker(
                       title: "Upload Product Images",
                       images: _images,
@@ -637,7 +622,8 @@ class _CommonAdState extends State<CommonAd> {
                           ? 'Required location'
                           : null,
                     ),
-                    if (widget.editId == null) ...[
+                    if (widget.editId == null ||
+                        widget.editId.replaceAll('"', '').trim().isEmpty) ...[
                       CommonTextField1(
                         lable: 'Plan',
                         isRead: true,
@@ -698,7 +684,7 @@ class _CommonAdState extends State<CommonAd> {
                       return CustomAppButton1(
                         isLoading:
                             state is CommonAdLoading ||
-                            updateState is MarkAsListingLoading,
+                            updateState is MarkAsListingUpdateLoading,
                         text: 'Submit Ad',
                         onPlusTap: isEligible
                             ? () {
@@ -706,9 +692,7 @@ class _CommonAdState extends State<CommonAd> {
                                     false) {
                                   bool isValid = true;
 
-                                  // Images validation
-                                  if (_images.isEmpty &&
-                                      widget.editId == null) {
+                                  if (_images.isEmpty) {
                                     setState(() => _showimagesError = true);
                                     isValid = false;
                                   } else {
@@ -723,16 +707,17 @@ class _CommonAdState extends State<CommonAd> {
                                     setState(() => _showStateError = false);
                                   }
 
-                                  // City validation
                                   if (selectedCityId == null) {
                                     setState(() => _showCityError = true);
                                     isValid = false;
                                   } else {
                                     setState(() => _showCityError = false);
                                   }
-
-                                  // Payment validation only for NEW ad
-                                  if (widget.editId == null) {
+                                  if (widget.editId == null ||
+                                      widget.editId
+                                          .replaceAll('"', '')
+                                          .trim()
+                                          .isEmpty) {
                                     if (planId == null || packageId == null) {
                                       setState(() => _showPaymentError = true);
                                       isValid = false;
@@ -749,9 +734,17 @@ class _CommonAdState extends State<CommonAd> {
                                       "category_id": widget.catId,
                                       "location": locationController.text,
                                       "mobile_number": phoneController.text,
-                                      if (widget.editId == null)
+                                      if (widget.editId == null ||
+                                          widget.editId
+                                              .replaceAll('"', '')
+                                              .trim()
+                                              .isEmpty)
                                         "plan_id": planId,
-                                      if (widget.editId == null)
+                                      if (widget.editId == null ||
+                                          widget.editId
+                                              .replaceAll('"', '')
+                                              .trim()
+                                              .isEmpty)
                                         "package_id": packageId,
                                       "price": priceController.text,
                                       "full_name": nameController.text,
@@ -764,8 +757,11 @@ class _CommonAdState extends State<CommonAd> {
                                           .map((file) => file.path)
                                           .toList();
                                     }
-                                    if (widget.editId != null &&
-                                        widget.editId.isNotEmpty) {
+                                    if (widget.editId
+                                            .replaceAll('"', '')
+                                            .trim()
+                                            .isNotEmpty ??
+                                        false) {
                                       context
                                           .read<MarkAsListingCubit>()
                                           .markAsUpdate(widget.editId, data);

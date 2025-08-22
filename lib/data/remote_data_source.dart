@@ -314,10 +314,10 @@ class RemoteDataSourceImpl implements RemoteDataSource {
       Response response = await ApiClient.get(
         "${APIEndpointUrls.get_listing_ad}/${id}",
       );
-      AppLogger.log('mark As update:${response.data}');
+      AppLogger.log('Get Listing ID:${response.data}');
       return getListingAdModel.fromJson(response.data);
     } catch (e) {
-      AppLogger.error('mark As update :: $e');
+      AppLogger.error('Listing ID :: $e');
       return null;
     }
   }

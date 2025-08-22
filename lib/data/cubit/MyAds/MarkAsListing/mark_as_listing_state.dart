@@ -6,6 +6,7 @@ abstract class MarkAsListingState {}
 class MarkAsListingInitially extends MarkAsListingState {}
 
 class MarkAsListingLoading extends MarkAsListingState {}
+class MarkAsListingUpdateLoading extends MarkAsListingState {}
 
 class MarkAsListingSuccess extends MarkAsListingState {
   MarkAsListingModel markAsListingModel;
@@ -18,6 +19,10 @@ class MarkAsListingDeleted extends MarkAsListingState {
 class MarkAsListingUpdateSuccess extends MarkAsListingState {
   AdSuccessModel adSuccessModel;
   MarkAsListingUpdateSuccess(this.adSuccessModel);
+}
+class MarkAsListingImageDelete extends MarkAsListingState {
+  AdSuccessModel adSuccessModel;
+  MarkAsListingImageDelete(this.adSuccessModel);
 }
 
 class MarkAsListingFailure extends MarkAsListingState {

@@ -35,7 +35,7 @@ class MarkAsListingCubit extends Cubit<MarkAsListingState> {
   }
 
   Future<void> markAsUpdate(String id,Map<String,dynamic> data) async {
-    emit(MarkAsListingLoading());
+    emit(MarkAsListingUpdateLoading());
     try {
       final response = await myAdsRepo.markAsUpdate(id,data);
       if (response != null && response.success == true) {
@@ -52,7 +52,7 @@ class MarkAsListingCubit extends Cubit<MarkAsListingState> {
     try {
       final response = await myAdsRepo.removeImageOnListingAD(id);
       if (response != null && response.success == true) {
-        emit(MarkAsListingUpdateSuccess(response));
+        emit(MarkAsListingImageDelete(response));
       } else {
         emit(MarkAsListingFailure(response?.message ?? ""));
       }

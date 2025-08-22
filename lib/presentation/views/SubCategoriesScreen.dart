@@ -72,8 +72,6 @@ class _SubCategoriesScreenState extends State<SubCategoriesScreen> {
                 ),
 
                 const SliverToBoxAdapter(child: SizedBox(height: 16)),
-
-                // ----- Categories Grid -----
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   sliver: SliverGrid(
