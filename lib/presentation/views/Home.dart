@@ -51,38 +51,38 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         actions: [
-          FilledButton(
-            onPressed: () {},
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all(
-                Color(isDarkMode ? 0xff171717 : 0xffF3F4F6),
-              ),
-              shape: WidgetStateProperty.all(CircleBorder()),
-              padding: WidgetStateProperty.all(EdgeInsets.all(16)),
-              minimumSize: WidgetStateProperty.all(Size.zero),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: Icon(Icons.location_pin, color: Color(0xff4B5563)),
-          ),
-          FilledButton(
-            onPressed: () {},
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all(
-                Color(isDarkMode ? 0xff171717 : 0xffF3F4F6),
-              ),
-              shape: WidgetStateProperty.all(CircleBorder()),
-              padding: WidgetStateProperty.all(EdgeInsets.all(16)),
-              minimumSize: WidgetStateProperty.all(Size.zero),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: Icon(Icons.notifications_active, color: Color(0xff4B5563)),
-          ),
+          // FilledButton(
+          //   onPressed: () {},
+          //   style: ButtonStyle(
+          //     backgroundColor: WidgetStateProperty.all(
+          //       Color(isDarkMode ? 0xff171717 : 0xffF3F4F6),
+          //     ),
+          //     shape: WidgetStateProperty.all(CircleBorder()),
+          //     padding: WidgetStateProperty.all(EdgeInsets.all(16)),
+          //     minimumSize: WidgetStateProperty.all(Size.zero),
+          //     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          //   ),
+          //   child: Icon(Icons.location_pin, color: Color(0xff4B5563)),
+          // ),
+          // FilledButton(
+          //   onPressed: () {},
+          //   style: ButtonStyle(
+          //     backgroundColor: WidgetStateProperty.all(
+          //       Color(isDarkMode ? 0xff171717 : 0xffF3F4F6),
+          //     ),
+          //     shape: WidgetStateProperty.all(CircleBorder()),
+          //     padding: WidgetStateProperty.all(EdgeInsets.all(16)),
+          //     minimumSize: WidgetStateProperty.all(Size.zero),
+          //     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          //   ),
+          //   child: Icon(Icons.notifications_active, color: Color(0xff4B5563)),
+          // ),
         ],
       ),
       body: BlocBuilder<DashboardCubit, DashBoardState>(
         builder: (context, state) {
           if (state is DashBoardLoading) {
-            return Center(child:DottedProgressWithLogo());
+            return Center(child: DottedProgressWithLogo());
           } else if (state is DashBoardLoaded) {
             final banner_data = state.bannersModel;
             final category_data = state.categoryModel;

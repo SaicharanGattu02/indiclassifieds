@@ -130,17 +130,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       context.push("/plans");
                     },
                   ),
-                  _settingsTile(
-                    Icons.unsubscribe_outlined,
-                    Colors.blue.shade100,
-                    'Advertisements',
-                    isDark,
-                    textColor,
-                    trailing: Icons.arrow_forward_ios,
-                    onTap: () {
-                      context.push("/advertisements");
-                    },
-                  ),
+                  // _settingsTile(
+                  //   Icons.unsubscribe_outlined,
+                  //   Colors.blue.shade100,
+                  //   'Advertisements',
+                  //   isDark,
+                  //   textColor,
+                  //   trailing: Icons.arrow_forward_ios,
+                  //   onTap: () {
+                  //     context.push("/advertisements");
+                  //   },
+                  // ),
                   _settingsTile(
                     Icons.favorite,
                     Colors.red.shade100,

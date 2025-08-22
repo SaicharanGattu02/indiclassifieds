@@ -53,23 +53,23 @@ class _SubCategoriesScreenState extends State<SubCategoriesScreen> {
             return CustomScrollView(
               slivers: [
                 // ----- Top Spacing -----
-                const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                // const SliverToBoxAdapter(child: SizedBox(height: 16)),
 
-                // ----- Banner -----
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.asset(
-                        'assets/images/banner1.png',
-                        fit: BoxFit.cover,
-                        height: 150,
-                        width: double.infinity,
-                      ),
-                    ),
-                  ),
-                ),
+                // // ----- Banner -----
+                // SliverToBoxAdapter(
+                //   child: Padding(
+                //     padding: const EdgeInsets.symmetric(horizontal: 16),
+                //     child: ClipRRect(
+                //       borderRadius: BorderRadius.circular(8),
+                //       child: Image.asset(
+                //         'assets/images/banner1.png',
+                //         fit: BoxFit.cover,
+                //         height: 150,
+                //         width: double.infinity,
+                //       ),
+                //     ),
+                //   ),
+                // ),
 
                 const SliverToBoxAdapter(child: SizedBox(height: 16)),
                 SliverPadding(

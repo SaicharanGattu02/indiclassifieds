@@ -7,12 +7,18 @@ import 'package:image_picker/image_picker.dart';
 import 'package:indiclassifieds/Components/CutomAppBar.dart';
 import '../../Components/CustomAppButton.dart';
 import '../../Components/CustomSnackBar.dart';
+import '../../Components/ShakeWidget.dart';
 import '../../data/cubit/Profile/profile_cubit.dart';
+import '../../data/cubit/States/states_cubit.dart';
+import '../../data/cubit/States/states_repository.dart';
 import '../../data/cubit/UpdateProfile/update_profile_cubit.dart';
 import '../../data/cubit/UpdateProfile/update_profile_states.dart';
+import '../../data/remote_data_source.dart';
 import '../../utils/ImageUtils.dart';
 import '../../utils/color_constants.dart';
 import '../../widgets/CommonTextField.dart';
+import '../../widgets/SelectCityBottomSheet.dart';
+import '../../widgets/SelectStateBottomSheet.dart';
 
 class EditProfile extends StatefulWidget {
   const EditProfile({super.key});
@@ -27,6 +33,10 @@ class _EditProfileState extends State<EditProfile> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
+  final cityController = TextEditingController();
+  final stateController = TextEditingController();
+  int? selectedStateId;
+  int? selectedCityId;
 
   File? _image;
   String? imagePath;
@@ -39,13 +49,18 @@ class _EditProfileState extends State<EditProfile> {
     super.initState();
     context.read<ProfileCubit>().getProfileDetails().then((userData) {
       if (userData != null) {
-        debugPrint("userData:${userData.data?.email??""}");
+        debugPrint("userData:${userData.data?.email ?? ""}");
         final data = userData.data;
         setState(() {
           _nameController.text = data?.name ?? "";
           _emailController.text = data?.email ?? "";
           _phoneController.text = data?.mobile?.toString() ?? "";
-          imagePath = data?.image??"";
+          stateController.text = data?.state_name?.toString() ?? "";
+          selectedStateId=  data?.state_id ?? 0;
+          selectedCityId =  data?.city_id ?? 0;
+          cityController.text = data?.city_name?.toString() ?? "";
+          _phoneController.text = data?.mobile?.toString() ?? "";
+          imagePath = data?.image ?? "";
         });
       }
       setState(() => isLoading = false);
@@ -127,96 +142,174 @@ class _EditProfileState extends State<EditProfile> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFF2F4FD),
-      appBar: CustomAppBar1(
-        title: "Edit Profile",
-        actions: [],
-      ),
+      appBar: CustomAppBar1(title: "Edit Profile", actions: []),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              // Profile Pic
-              Stack(
-                alignment: Alignment.bottomRight,
-                children: [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundImage: _image != null
-                        ? FileImage(_image!)
-                        : (imagePath?.startsWith('http') ?? false)
-                        ? CachedNetworkImageProvider(imagePath!)
-                        : const AssetImage('assets/images/profile.png')
-                    as ImageProvider,
-                  ),
-                  Positioned(
-                    bottom: 4,
-                    right: 4,
-                    child: GestureDetector(
-                      onTap: _pickImage,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: primarycolor,
-                          border: Border.all(
-                            color: Colors.white,
-                            width: 2,
+              padding: const EdgeInsets.all(16),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    // Profile Pic
+                    Stack(
+                      alignment: Alignment.bottomRight,
+                      children: [
+                        CircleAvatar(
+                          radius: 50,
+                          backgroundImage: _image != null
+                              ? FileImage(_image!)
+                              : (imagePath?.startsWith('http') ?? false)
+                              ? CachedNetworkImageProvider(imagePath!)
+                              : const AssetImage('assets/images/profile.png')
+                                    as ImageProvider,
+                        ),
+                        Positioned(
+                          bottom: 4,
+                          right: 4,
+                          child: GestureDetector(
+                            onTap: _pickImage,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: primarycolor,
+                                border: Border.all(
+                                  color: Colors.white,
+                                  width: 2,
+                                ),
+                              ),
+                              padding: const EdgeInsets.all(6),
+                              child: const Icon(
+                                Icons.edit,
+                                color: Colors.white,
+                                size: 18,
+                              ),
+                            ),
                           ),
                         ),
-                        padding: const EdgeInsets.all(6),
-                        child: const Icon(
-                          Icons.edit,
-                          color: Colors.white,
-                          size: 18,
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    CommonTextField1(
+                      lable: "Name",
+                      hint: 'Enter Name',
+                      controller: _nameController,
+                      color: textColor,
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? "Name required"
+                          : null,
+                    ),
+                    CommonTextField1(
+                      lable: "Email",
+                      hint: 'Enter Email',
+                      controller: _emailController,
+                      color: textColor,
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? "Email required"
+                          : null,
+                    ),
+                    CommonTextField1(
+                      lable: "Phone",
+                      hint: 'Enter Phone',
+                      controller: _phoneController,
+                      color: textColor,
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? "Email required"
+                          : null,
+                    ),
+                    GestureDetector(
+                      onTap: () async {
+                        final selectedState = await showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (context) {
+                            return BlocProvider(
+                              create: (_) => SelectStatesCubit(
+                                SelectStatesImpl(
+                                  remoteDataSource: RemoteDataSourceImpl(),
+                                ),
+                              ),
+                              child: const SelectStateBottomSheet(),
+                            );
+                          },
+                        );
+
+                        if (selectedState != null) {
+                          stateController.text = selectedState.name ?? "";
+                          selectedStateId = selectedState.id ?? "";
+                          setState(() {});
+                        }
+                      },
+                      child: AbsorbPointer(
+                        child: CommonTextField1(
+                          lable: 'State',
+                          hint: 'Select State',
+                          controller: stateController,
+                          color: textColor,
+                          keyboardType: TextInputType.text,
+                          isRead: true,
+                          prefixIcon: Icon(
+                            Icons.location_city_outlined,
+                            color: textColor,
+                            size: 16,
+                          ),
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'State required'
+                              : null,
                         ),
                       ),
                     ),
-                  ),
-                ],
+                    GestureDetector(
+                      onTap: () async {
+                        final selectedCity = await showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (context) {
+                            return SelectCityBottomSheet(
+                              stateId: selectedStateId ?? 0,
+                            );
+                          },
+                        );
+
+                        if (selectedCity != null) {
+                          cityController.text = selectedCity.name ?? "";
+                          selectedCityId = selectedCity.id ?? "";
+                          setState(() {});
+                        }
+                      },
+                      child: AbsorbPointer(
+                        child: CommonTextField1(
+                          lable: 'City',
+                          hint: 'Select City',
+                          controller: cityController,
+                          color: textColor,
+                          keyboardType: TextInputType.text,
+                          isRead: true,
+                          prefixIcon: Icon(
+                            Icons.location_city_outlined,
+                            color: textColor,
+                            size: 16,
+                          ),
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'City required'
+                              : null,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 24),
-              CommonTextField1(
-                lable:  "Name",
-                hint: 'Enter Name',
-                controller: _nameController,
-                color: textColor,
-                validator: (v) =>
-                (v == null || v.trim().isEmpty) ? "Name required" : null,
-              ),
-              CommonTextField1(
-                lable:"Email",
-                hint: 'Enter Email',
-                controller: _emailController,
-                color: textColor,
-                validator: (v) =>
-                (v == null || v.trim().isEmpty) ? "Email required" : null,
-              ), CommonTextField1(
-                lable:"Phone",
-                hint: 'Enter Phone',
-                controller:  _phoneController,
-                color: textColor,
-                validator: (v) =>
-                (v == null || v.trim().isEmpty) ? "Email required" : null,
-              ),
-            ],
-          ),
-        ),
-      ),
+            ),
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-          child:
-          BlocConsumer<UpdateProfileCubit, UpdateProfileStates>(
+          child: BlocConsumer<UpdateProfileCubit, UpdateProfileStates>(
             listener: (context, state) {
               if (state is UpdateProfileSuccess) {
                 context.read<ProfileCubit>().getProfileDetails();
-                CustomSnackBar1.show(
-                  context,
-                  state.successModel.message ?? "",
-                );
+                CustomSnackBar1.show(context, state.successModel.message ?? "");
                 context.pop();
               } else if (state is UpdateProfileFailure) {
                 CustomSnackBar1.show(context, state.error ?? "");
@@ -235,9 +328,12 @@ class _EditProfileState extends State<EditProfile> {
                         "email": _emailController.text.trim(),
                         "phone": _phoneController.text.trim(),
                         "image": _image?.path ?? imagePath,
-
+                        "state_id": selectedStateId,
+                        "city_id": selectedCityId,
                       };
-                      context.read<UpdateProfileCubit>().updateProfileDetails(data);
+                      context.read<UpdateProfileCubit>().updateProfileDetails(
+                        data,
+                      );
                     }
                   },
                 ),
