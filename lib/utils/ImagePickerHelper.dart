@@ -8,19 +8,19 @@ import 'package:flutter/material.dart';
 class ImagePickerHelper {
   static final ImagePicker _picker = ImagePicker();
 
-  // Function to pick an image from gallery
+
   static Future<File?> pickImageFromGallery(BuildContext context) async {
     final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     return _processPickedFile(pickedFile, context);
   }
 
-  // Function to pick an image from camera
+
   static Future<File?> pickImageFromCamera(BuildContext context) async {
     final XFile? pickedFile = await _picker.pickImage(source: ImageSource.camera);
     return _processPickedFile(pickedFile, context);
   }
 
-  // Process the picked file and return it as a compressed file
+
   static Future<File?> _processPickedFile(XFile? pickedFile, BuildContext context) async {
     if (pickedFile != null) {
       File? compressedFile = await ImageUtils.compressImage(File(pickedFile.path));
@@ -29,7 +29,7 @@ class ImagePickerHelper {
     return null;
   }
 
-  // Function to show the modal bottom sheet for picking an image
+
   static Future<void> showImagePickerBottomSheet({
     required BuildContext context,
     required Function(File) onImageSelected,
@@ -165,7 +165,7 @@ class _CommonImagePickerState extends State<CommonImagePicker> {
     widget.onImagesChanged(updated);
   }
 
-  void _removeExistingImage(int index, String id) {
+  void _removeExistingImage(int index, int id) {
     context.read<MarkAsListingCubit>().removeImageOnListingAd(id);
 
     final updated = [...widget.existingImages]..removeAt(index);

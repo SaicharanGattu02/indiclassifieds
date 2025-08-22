@@ -101,34 +101,37 @@ class _CommonAdState extends State<CommonAd> {
     super.initState();
     debugPrint("typee:${widget.editId}");
     titleController.text = widget.SubCatName ?? "";
-    context.read<GetListingAdCubit>().getListingAd(widget.subCatId).then((
-      commonAdData,
-    ) {
-      if (commonAdData != null) {
-        descriptionController.text =
-            commonAdData.data?.listing?.description ?? '';
-        locationController.text = commonAdData.data?.listing?.location ?? '';
-        priceController.text = commonAdData.data?.listing?.price ?? '';
-        nameController.text = commonAdData.data?.listing?.fullName ?? '';
-        phoneController.text = commonAdData.data?.listing?.mobileNumber ?? '';
-        if (commonAdData.data?.listing?.stateId != null) {
-          selectedStateId = commonAdData.data?.listing?.stateId;
-          stateController.text = commonAdData.data?.listing?.stateName ?? '';
+    if(widget.editId!=null){
+      context.read<GetListingAdCubit>().getListingAd(widget.subCatId).then((
+          commonAdData,
+          ) {
+        if (commonAdData != null) {
+          descriptionController.text =
+              commonAdData.data?.listing?.description ?? '';
+          locationController.text = commonAdData.data?.listing?.location ?? '';
+          priceController.text = commonAdData.data?.listing?.price ?? '';
+          nameController.text = commonAdData.data?.listing?.fullName ?? '';
+          phoneController.text = commonAdData.data?.listing?.mobileNumber ?? '';
+          if (commonAdData.data?.listing?.stateId != null) {
+            selectedStateId = commonAdData.data?.listing?.stateId;
+            stateController.text = commonAdData.data?.listing?.stateName ?? '';
+          }
+          if (commonAdData.data?.listing?.cityId != null) {
+            selectedCityId = commonAdData.data?.listing?.cityId;
+            cityController.text = commonAdData.data?.listing?.cityName ?? '';
+          }
+          if (commonAdData.data?.listing?.images != null) {
+            _imageDataList = commonAdData.data!.listing!.images!
+                .where((img) => (img.image ?? "").isNotEmpty)
+                .map((img) => ImageData(id: img.id ?? 0, url: img.image ?? ""))
+                .toList();
+          }
         }
-        if (commonAdData.data?.listing?.cityId != null) {
-          selectedCityId = commonAdData.data?.listing?.cityId;
-          cityController.text = commonAdData.data?.listing?.cityName ?? '';
-        }
-        if (commonAdData.data?.listing?.images != null) {
-          _imageDataList = commonAdData.data!.listing!.images!
-              .where((img) => (img.image ?? "").isNotEmpty)
-              .map((img) => ImageData(id: img.id ?? 0, url: img.image ?? ""))
-              .toList();
-        }
-      }
 
-      setState(() => isLoading = false);
-    });
+        setState(() => isLoading = false);
+      });
+    }
+
   }
 
   void removeOldImage(ImageData image) {
@@ -588,7 +591,6 @@ class _CommonAdState extends State<CommonAd> {
                     //     ),
                     //   ),
                     // ],
-
                     _sectionTitle('Contact Information', textColor),
                     CommonTextField1(
                       lable: 'Name',
@@ -762,7 +764,6 @@ class _CommonAdState extends State<CommonAd> {
                                           .map((file) => file.path)
                                           .toList();
                                     }
-
                                     if (widget.editId != null &&
                                         widget.editId.isNotEmpty) {
                                       context

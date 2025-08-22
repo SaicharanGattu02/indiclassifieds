@@ -279,6 +279,9 @@ class RemoteDataSourceImpl implements RemoteDataSource {
   @override
   Future<AdSuccessModel?> updateListingAd(String id,Map<String,dynamic> data) async {
     final formdata = await buildFormData(data);
+    formdata.fields.forEach((field) {
+      print('${field.key}: ${field.value}');
+    });
     try {
       Response response = await ApiClient.put(
         "${APIEndpointUrls.update_listing_ad}/${id}",data: formdata
