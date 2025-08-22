@@ -3,6 +3,7 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:indiclassifieds/presentation/authentication/RegisterUserDetailsScreen.dart';
 import 'package:indiclassifieds/presentation/views/AdvertisementScreen.dart';
 import 'package:indiclassifieds/presentation/views/PlansScreen.dart';
 import 'package:indiclassifieds/presentation/PostAdds/CommunityAdScreen.dart';
@@ -73,6 +74,11 @@ final GoRouter appRouter = GoRouter(
         final mobile = state.uri.queryParameters['mobile'] ?? "";
         return buildSlideTransitionPage(Otpscreen(mobile: mobile), state);
       },
+    ),
+    GoRoute(
+      path: '/register',
+      pageBuilder: (context, state) =>
+          buildSlideTransitionPage(RegisterUserDetailsScreen(), state),
     ),
     GoRoute(
       path: '/search_screen',

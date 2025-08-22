@@ -64,4 +64,5 @@ class APIEndpointUrls {
   static const String post_co_working_ad = '${apiUrl}add-co-working-to-listings';
   static const String create_payment_order = '${apiUrl}create-payment-order';
   static const String verify_payment_order = '${apiUrl}verify-payment';
+  static const String register_user_details = '${apiUrl}register-user-details';
 }

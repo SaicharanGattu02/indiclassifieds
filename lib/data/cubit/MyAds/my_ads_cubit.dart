@@ -14,7 +14,6 @@ class MyAdsCubit extends Cubit<MyAdsStates> {
   bool _hasNextPage = true;
   bool _isLoadingMore = false;
 
-  /// Initial fetch (reset to page 1)
   Future<void> getMyAds(String type) async {
     emit(MyAdsLoading());
     _currentPage = 1;
@@ -23,11 +22,9 @@ class MyAdsCubit extends Cubit<MyAdsStates> {
         type,
         _currentPage, // 👈 pass page number
       );
-
       if (response != null && response.success == true) {
         myAdsModel = response;
         _hasNextPage = response.settings?.nextPage ?? false;
-
         emit(MyAdsLoaded(myAdsModel, _hasNextPage));
       } else {
         emit(MyAdsFailure(response?.message ?? "Failed to load ads"));
@@ -40,12 +37,9 @@ class MyAdsCubit extends Cubit<MyAdsStates> {
   /// Load more ads (pagination)
   Future<void> getMoreMyAds(String type) async {
     if (_isLoadingMore || !_hasNextPage) return;
-
     _isLoadingMore = true;
     _currentPage++;
-
     emit(MyAdsLoadingMore(myAdsModel, _hasNextPage));
-
     try {
       final newData = await myAdsRepo.getMyAds(
         type,

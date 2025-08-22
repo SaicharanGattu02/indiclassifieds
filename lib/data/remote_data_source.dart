@@ -77,6 +77,7 @@ abstract class RemoteDataSource {
   Future<AdSuccessModel?> updateListingAd(int id);
   Future<getListingAdModel?> getListingAd(String id);
   Future<AdSuccessModel?> removeImageOnListingAd(int id);
+  Future<AdSuccessModel?> register(Map<String, dynamic> data);
 }
 
 class RemoteDataSourceImpl implements RemoteDataSource {
@@ -112,6 +113,21 @@ class RemoteDataSourceImpl implements RemoteDataSource {
       }
     }
     return FormData.fromMap(formMap);
+  }
+
+  @override
+  Future<AdSuccessModel?> register(Map<String, dynamic> data) async {
+    try {
+      Response response = await ApiClient.put(
+        "${APIEndpointUrls.register_user_details}",
+        data: data,
+      );
+      AppLogger.log('register:${response.data}');
+      return AdSuccessModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('register :: $e');
+      return null;
+    }
   }
 
   @override
@@ -245,6 +261,7 @@ class RemoteDataSourceImpl implements RemoteDataSource {
       return null;
     }
   }
+
   @override
   Future<MarkAsListingModel?> deleteListingAd(int id) async {
     try {
@@ -258,6 +275,7 @@ class RemoteDataSourceImpl implements RemoteDataSource {
       return null;
     }
   }
+
   @override
   Future<AdSuccessModel?> updateListingAd(int id) async {
     try {
@@ -285,6 +303,7 @@ class RemoteDataSourceImpl implements RemoteDataSource {
       return null;
     }
   }
+
   @override
   Future<getListingAdModel?> getListingAd(String id) async {
     try {
@@ -422,7 +441,6 @@ class RemoteDataSourceImpl implements RemoteDataSource {
       return null;
     }
   }
-
 
   @override
   Future<SendOtpModel?> sendMobileOTP(Map<String, dynamic> data) async {

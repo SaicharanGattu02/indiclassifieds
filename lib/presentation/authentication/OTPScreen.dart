@@ -266,14 +266,18 @@ class _OtpscreenState extends State<Otpscreen> {
                       BlocConsumer<LogInwithMobileCubit, LogInWithMobileState>(
                         listener: (context, state) async {
                           if (state is verifyMobileSuccess) {
-                            final tokens = state.verifyOtpModel;
+                            final data = state.verifyOtpModel;
                             await AuthService.saveTokens(
-                              tokens.accessToken ?? "",
-                              tokens.user?.name ?? "",
-                              tokens.user?.email ?? "",
-                              tokens.user?.mobile ?? "",
+                              data.accessToken ?? "",
+                              data.user?.name ?? "",
+                              data.user?.email ?? "",
+                              data.user?.mobile ?? "",
                             );
-                            context.pushReplacement('/dashboard');
+                            if(data.newUser==true){
+                              context.pushReplacement('/register');
+                            }else{
+                              context.pushReplacement('/dashboard');
+                            }
                           } else if (state is OtpVerifyFailure) {
                             CustomSnackBar1.show(context, state.error);
                           }

@@ -24,6 +24,8 @@ import 'package:indiclassifieds/data/cubit/Products/products_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Products/products_repository.dart';
 import 'package:indiclassifieds/data/cubit/Profile/profile_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Profile/profile_repo.dart';
+import 'package:indiclassifieds/data/cubit/Register/register_cubit.dart';
+import 'package:indiclassifieds/data/cubit/Register/register_repo.dart';
 import 'package:indiclassifieds/data/cubit/UpdateProfile/update_profile_cubit.dart';
 import 'package:indiclassifieds/data/cubit/UserActivePlans/user_active_plans_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Wishlist/wishlist_cubit.dart';
@@ -75,6 +77,11 @@ class StateInjector {
     ),
     RepositoryProvider<LogInWithMobileRepository>(
       create: (context) => LogInMobileRepositoryImpl(
+        remoteDataSource: context.read<RemoteDataSource>(),
+      ),
+    ),
+    RepositoryProvider<RegisterRepo>(
+      create: (context) => RegisterRepoImpl(
         remoteDataSource: context.read<RemoteDataSource>(),
       ),
     ),
@@ -210,6 +217,10 @@ class StateInjector {
     BlocProvider<LogInwithMobileCubit>(
       create: (context) =>
           LogInwithMobileCubit(context.read<LogInWithMobileRepository>()),
+    ),
+    BlocProvider<RegisterCubit>(
+      create: (context) =>
+          RegisterCubit(context.read<RegisterRepo>()),
     ),
     BlocProvider<BannerCubit>(
       create: (context) => BannerCubit(context.read<BannersRepository>()),
