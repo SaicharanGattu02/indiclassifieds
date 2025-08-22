@@ -74,7 +74,7 @@ abstract class RemoteDataSource {
   Future<AdSuccessModel?> verifyPayment(Map<String, dynamic> data);
   Future<MarkAsListingModel?> markAsSold(int id);
   Future<MarkAsListingModel?> deleteListingAd(int id);
-  Future<AdSuccessModel?> updateListingAd(int id);
+  Future<AdSuccessModel?> updateListingAd(String id,Map<String,dynamic> data);
   Future<getListingAdModel?> getListingAd(String id);
   Future<AdSuccessModel?> removeImageOnListingAd(int id);
   Future<AdSuccessModel?> register(Map<String, dynamic> data);
@@ -277,10 +277,11 @@ class RemoteDataSourceImpl implements RemoteDataSource {
   }
 
   @override
-  Future<AdSuccessModel?> updateListingAd(int id) async {
+  Future<AdSuccessModel?> updateListingAd(String id,Map<String,dynamic> data) async {
+    final formdata = await buildFormData(data);
     try {
-      Response response = await ApiClient.delete(
-        "${APIEndpointUrls.update_listing_ad}/${id}",
+      Response response = await ApiClient.put(
+        "${APIEndpointUrls.update_listing_ad}/${id}",data: formdata
       );
       AppLogger.log('mark As update:${response.data}');
       return AdSuccessModel.fromJson(response.data);

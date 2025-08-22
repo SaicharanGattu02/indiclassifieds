@@ -34,10 +34,10 @@ class MarkAsListingCubit extends Cubit<MarkAsListingState> {
     }
   }
 
-  Future<void> markAsUpdate(int id) async {
+  Future<void> markAsUpdate(String id,Map<String,dynamic> data) async {
     emit(MarkAsListingLoading());
     try {
-      final response = await myAdsRepo.markAsUpdate(id);
+      final response = await myAdsRepo.markAsUpdate(id,data);
       if (response != null && response.success == true) {
         emit(MarkAsListingUpdateSuccess(response));
       } else {

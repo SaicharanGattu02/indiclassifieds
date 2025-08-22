@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import '../data/cubit/MyAds/MarkAsListing/mark_as_listing_cubit.dart';
 import 'ImageUtils.dart';
 import 'package:flutter/material.dart';
 
@@ -116,3 +118,238 @@ class ImagePickerHelper {
   }
 }
 
+
+class CommonImagePicker extends StatefulWidget {
+  final List<File> images;
+  final List<ImageData> existingImages;
+  final int maxImages;
+  final bool showError;
+  final Color textColor;
+  final String title;
+  final Function(List<File>) onImagesChanged;
+  final Function(List<ImageData>)? onExistingImagesChanged;
+  final String? editId;
+
+  const CommonImagePicker({
+    super.key,
+    required this.images,
+    required this.existingImages,
+    required this.maxImages,
+    required this.textColor,
+    required this.title,
+    required this.showError,
+    required this.onImagesChanged,
+    this.onExistingImagesChanged,
+    this.editId,
+  });
+
+  @override
+  State<CommonImagePicker> createState() => _CommonImagePickerState();
+}
+
+class _CommonImagePickerState extends State<CommonImagePicker> {
+  void _pickImage() {
+    ImagePickerHelper.showImagePickerBottomSheet(
+      context: context,
+      images: widget.images,
+      maxImages: widget.maxImages,
+      onImageSelected: (image) {
+        final updated = [...widget.images, image];
+        widget.onImagesChanged(updated);
+      },
+    );
+  }
+
+  void _removeLocalImage(int index) {
+    final updated = [...widget.images]..removeAt(index);
+    widget.onImagesChanged(updated);
+  }
+
+  void _removeExistingImage(int index, String id) {
+    context.read<MarkAsListingCubit>().removeImageOnListingAd(id);
+
+    final updated = [...widget.existingImages]..removeAt(index);
+    widget.onExistingImagesChanged?.call(updated);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(widget.title,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: widget.textColor,
+            )),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            border: Border.all(color: const Color(0xFFE5E7EB)),
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0x0D000000),
+                offset: const Offset(0, 1),
+                blurRadius: 2,
+              ),
+            ],
+          ),
+          child: (widget.images.isEmpty && widget.existingImages.isEmpty)
+              ? InkWell(
+            onTap: _pickImage,
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.photo_camera,
+                      color: widget.textColor.withOpacity(0.6), size: 40),
+                  const SizedBox(height: 8),
+                  Text(
+                    '+ Add Photos (${widget.maxImages})',
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 14,
+                      color: widget.textColor.withOpacity(0.6),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+              : GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate:
+            const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 4,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+              childAspectRatio: 1.8,
+            ),
+            itemCount: widget.images.length + widget.existingImages.length <
+                widget.maxImages
+                ? widget.images.length + widget.existingImages.length + 1
+                : widget.images.length + widget.existingImages.length,
+            itemBuilder: (context, index) {
+
+              if (index < widget.existingImages.length) {
+                final image = widget.existingImages[index];
+                return Stack(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(
+                        image.url,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: double.infinity,
+                      ),
+                    ),
+                    Positioned(
+                      top: 4,
+                      right: 4,
+                      child: GestureDetector(
+                        onTap: () => _removeExistingImage(index, image.id),
+                        child: Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withOpacity(0.7),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.close,
+                              color: Colors.white, size: 16),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }
+
+              final localIndex = index - widget.existingImages.length;
+              if (localIndex < widget.images.length) {
+                return Stack(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.file(
+                        widget.images[localIndex],
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: double.infinity,
+                      ),
+                    ),
+                    Positioned(
+                      top: 4,
+                      right: 4,
+                      child: GestureDetector(
+                        onTap: () => _removeLocalImage(localIndex),
+                        child: Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withOpacity(0.7),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.close,
+                              color: Colors.white, size: 16),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }
+
+              return InkWell(
+                onTap: _pickImage,
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: const Color(0xFFE5E7EB)),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.add_photo_alternate,
+                          color: widget.textColor.withOpacity(0.6),
+                          size: 24),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Add Photo',
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 12,
+                          color: widget.textColor.withOpacity(0.6),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        if (widget.showError && widget.images.isEmpty) ...[
+          const SizedBox(height: 5),
+          const Text(
+            'Please upload at least one image',
+            style: TextStyle(
+              fontFamily: 'roboto_serif',
+              fontSize: 12,
+              color: Colors.red,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class ImageData {
+  final int id;
+  final String url;
+
+  ImageData({required this.id, required this.url});
+}

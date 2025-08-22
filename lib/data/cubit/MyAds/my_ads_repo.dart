@@ -9,7 +9,7 @@ abstract class MyAdsRepo {
   Future<MyAdsModel?> getMyAds(String type,int page);
   Future<MarkAsListingModel?> markAsSold(int id);
   Future<MarkAsListingModel?> markAsDelete(int id);
-  Future<AdSuccessModel?> markAsUpdate(int id);
+  Future<AdSuccessModel?> markAsUpdate(String id,Map<String,dynamic> data);
   Future<getListingAdModel?> markAsgetListingAD(String id);
   Future<AdSuccessModel?> removeImageOnListingAD(int id);
 }
@@ -33,8 +33,8 @@ class MyAdsRepoImpl implements MyAdsRepo {
     return await remoteDataSource.deleteListingAd(id);
   }
   @override
-  Future<AdSuccessModel?> markAsUpdate(int id) async {
-    return await remoteDataSource.updateListingAd(id);
+  Future<AdSuccessModel?> markAsUpdate(String id,Map<String,dynamic> data) async {
+    return await remoteDataSource.updateListingAd(id,data);
   }
 
   @override
