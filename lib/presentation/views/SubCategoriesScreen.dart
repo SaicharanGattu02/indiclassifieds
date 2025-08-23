@@ -47,7 +47,7 @@ class _SubCategoriesScreenState extends State<SubCategoriesScreen> {
       body: BlocBuilder<SubCategoryCubit, SubCategoryStates>(
         builder: (context, state) {
           if (state is SubCategoryLoading) {
-            return Center(child:DottedProgressWithLogo());
+            return Center(child: DottedProgressWithLogo());
           } else if (state is SubCategoryLoaded) {
             final subcategories = state.subCategoryModel.subcategories;
             return CustomScrollView(
@@ -70,7 +70,6 @@ class _SubCategoriesScreenState extends State<SubCategoriesScreen> {
                 //     ),
                 //   ),
                 // ),
-
                 const SliverToBoxAdapter(child: SizedBox(height: 16)),
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -79,7 +78,9 @@ class _SubCategoriesScreenState extends State<SubCategoriesScreen> {
                       final item = subcategories?[index];
                       return InkWell(
                         onTap: () {
-                          context.push("/products_list?subCategoryname=${item?.name??""}&sub_categoryId=${item?.subCategoryId??""}");
+                          context.push(
+                            "/products_list?subCategoryname=${item?.name ?? ""}&sub_categoryId=${item?.subCategoryId ?? ""}",
+                          );
                         },
                         borderRadius: BorderRadius.circular(12),
                         child: Container(

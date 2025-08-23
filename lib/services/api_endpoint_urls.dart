@@ -1,5 +1,6 @@
 class APIEndpointUrls {
   static const String baseUrl = 'http://192.168.80.107:8081/';
+  static const String socket_url = 'http://192.168.80.107:8081';
   static const String apiUrl = 'api/app/';
 
   /// Authentiocation Urls
@@ -64,4 +65,5 @@ class APIEndpointUrls {
   static const String create_payment_order = '${apiUrl}create-payment-order';
   static const String verify_payment_order = '${apiUrl}verify-payment';
   static const String register_user_details = '${apiUrl}register-user-details';
+  static const String get_all_users_by_chat = '${apiUrl}get-all-users-by-chat';
 }

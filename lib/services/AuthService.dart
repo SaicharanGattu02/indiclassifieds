@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
+import 'package:indiclassifieds/utils/AppLogger.dart';
 import '../services/api_endpoint_urls.dart';
 import '../services/ApiClient.dart';
 import '../utils/constants.dart';
@@ -117,20 +118,17 @@ class AuthService {
       );
 
       if (response.statusCode == 200) {
-        final tokenData = response.data["data"];
-        final newAccessToken = tokenData["accessToken"];
-        final newRefreshToken = tokenData["refreshToken"];
-        final expiryTime = tokenData["accessTokenExpiry"];
+        final data = response.data as Map<String, dynamic>;
+        final newAccessToken = data["accessToken"];
+        final newRefreshToken = data["refreshToken"];
+        final expiryTime = data["accessTokenExpiry"];
 
-        if (newAccessToken == null ||
-            newRefreshToken == null ||
-            expiryTime == null) {
-          debugPrint("❌ Missing token data in response: $tokenData");
+        if (newAccessToken == null || newRefreshToken == null || expiryTime == null) {
+          debugPrint("❌ Missing token data in response: $data");
           return false;
         }
-
         await updateTokens(newAccessToken, newRefreshToken, expiryTime);
-        debugPrint("✅ Token refreshed and saved successfully newAccessToken:$newAccessToken,refreshToken:$newRefreshToken,expiryTime:$expiryTime");
+        debugPrint("✅ Token refreshed successfully");
         return true;
       } else {
         debugPrint("❌ Refresh token failed: ${response.statusCode}");

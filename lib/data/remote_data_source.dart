@@ -6,6 +6,7 @@ import '../model/AdSuccessModel.dart';
 import '../model/AdvertisementDetailsModel.dart';
 import '../model/AdvertisementModel.dart';
 import '../model/BannersModel.dart';
+import '../model/ChatUsersModel.dart';
 import '../model/CreatePaymentModel.dart';
 import '../model/MarkAsListingModel.dart';
 import '../model/MyAdsModel.dart';
@@ -74,10 +75,11 @@ abstract class RemoteDataSource {
   Future<AdSuccessModel?> verifyPayment(Map<String, dynamic> data);
   Future<MarkAsListingModel?> markAsSold(int id);
   Future<MarkAsListingModel?> deleteListingAd(int id);
-  Future<AdSuccessModel?> updateListingAd(String id,Map<String,dynamic> data);
+  Future<AdSuccessModel?> updateListingAd(String id, Map<String, dynamic> data);
   Future<getListingAdModel?> getListingAd(String id);
   Future<AdSuccessModel?> removeImageOnListingAd(int id);
   Future<AdSuccessModel?> register(Map<String, dynamic> data);
+  Future<ChatUsersModel?> getChatUsers();
 }
 
 class RemoteDataSourceImpl implements RemoteDataSource {
@@ -113,6 +115,20 @@ class RemoteDataSourceImpl implements RemoteDataSource {
       }
     }
     return FormData.fromMap(formMap);
+  }
+
+  @override
+  Future<ChatUsersModel?> getChatUsers() async {
+    try {
+      Response response = await ApiClient.get(
+        "${APIEndpointUrls.get_all_users_by_chat}",
+      );
+      AppLogger.log('getChatUsers:${response.data}');
+      return ChatUsersModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('getChatUsers :: $e');
+      return null;
+    }
   }
 
   @override
@@ -277,14 +293,18 @@ class RemoteDataSourceImpl implements RemoteDataSource {
   }
 
   @override
-  Future<AdSuccessModel?> updateListingAd(String id,Map<String,dynamic> data) async {
+  Future<AdSuccessModel?> updateListingAd(
+    String id,
+    Map<String, dynamic> data,
+  ) async {
     final formdata = await buildFormData(data);
     formdata.fields.forEach((field) {
       print('${field.key}: ${field.value}');
     });
     try {
       Response response = await ApiClient.put(
-        "${APIEndpointUrls.update_listing_ad}/${id}",data: formdata
+        "${APIEndpointUrls.update_listing_ad}/${id}",
+        data: formdata,
       );
       AppLogger.log('mark As update:${response.data}');
       return AdSuccessModel.fromJson(response.data);

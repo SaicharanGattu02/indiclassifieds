@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:indiclassifieds/services/ApiClient.dart';
+import 'package:indiclassifieds/services/SocketService.dart';
 import 'package:indiclassifieds/state_injector.dart';
 import 'package:indiclassifieds/theme/AppTheme.dart';
 
@@ -10,6 +11,7 @@ import 'data/cubit/theme_cubit.dart';
 void main() {
   ApiClient.setupInterceptors();
   WidgetsFlutterBinding.ensureInitialized();
+  SocketService.connect("42"); // pass the logged-in user id
   runApp(
     MultiRepositoryProvider(
       providers: StateInjector.repositoryProviders,

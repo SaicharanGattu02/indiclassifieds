@@ -11,6 +11,7 @@ import '../../data/cubit/UserActivePlans/user_active_plans_cubit.dart';
 import '../../theme/ThemeHelper.dart';
 import 'AddsScreen.dart';
 import 'FavouritesScreen.dart';
+import 'UserListScreen.dart';
 
 class Dashboard extends StatefulWidget {
   final int initialTab;
@@ -69,7 +70,7 @@ class _DashboardState extends State<Dashboard> {
           children: [
             HomeScreen(),
             AdsScreen(),
-            WishlistListScreen(),
+            UserListScreen(),
             ProfileScreen(),
           ],
         ),

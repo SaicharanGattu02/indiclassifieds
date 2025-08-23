@@ -21,6 +21,7 @@ class ApiClient {
   static const List<String> _unauthenticatedEndpoints = [
     '/api/app/send-otp',
     '/api/app/verify-otp',
+    '/api/app/refresh-token-for-user',
   ];
 
   static void setupInterceptors() {
@@ -54,6 +55,8 @@ class ApiClient {
             );
           }
         }
+
+
 
         final accessToken = await AuthService.getAccessToken();
         debugPrint('Token retrieved for request: $accessToken');
