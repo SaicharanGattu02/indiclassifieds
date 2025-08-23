@@ -38,11 +38,12 @@ class PrivateChatCubit extends Cubit<PrivateChatState> {
     // Remove any previous handlers (important with a shared socket)
     _socket.off('receive_private_message', _onReceiveMessage);
     _socket.off('typing', _onPeerTyping);
-    _socket.off('peer_typing', _onPeerTyping);
+    _socket.off('user_typing', _onUserTyping); // Adding listener for 'user_typing'
     _socket.off('connect');
 
     // Add listeners
     _socket.on('receive_private_message', _onReceiveMessage);
+    _socket.on('user_typing', _onUserTyping);  // Listen for user_typing event
     // Some servers emit 'typing', others 'peer_typing' — listen to both
     _socket.on('typing', _onPeerTyping);
 
@@ -99,30 +100,75 @@ class PrivateChatCubit extends Cubit<PrivateChatState> {
     return <String, dynamic>{};
   }
 
+  // ---- Helper Methods for Duplicate Check ----
+  bool _sameContent(Messages a, Messages b) {
+    final aMsg = a.message ?? '';
+    final bMsg = b.message ?? '';
+    final aImg = a.imageUrl ?? '';
+    final bImg = b.imageUrl ?? '';
+    final aType = (a.type ?? '');
+    final bType = (b.type ?? '');
+    final aSender = a.senderId?.toString() ?? '';
+    final bSender = b.senderId?.toString() ?? '';
+    final aReceiver = a.receiverId?.toString() ?? '';
+    final bReceiver = b.receiverId?.toString() ?? '';
+
+    return aType == bType &&
+        aMsg == bMsg &&
+        aImg == bImg &&
+        aSender == bSender &&
+        aReceiver == bReceiver;
+  }
+
+  bool _closeInTime(DateTime a, DateTime b, {Duration tolerance = const Duration(seconds: 5)}) {
+    return (a.difference(b).abs() <= tolerance);
+  }
+
+  void _replaceTempWithServer(Messages serverMsg) {
+    // Find a temp message (id < 0) with same content and close timestamps
+    final serverCreated = DateTime.tryParse(serverMsg.createdAt ?? '') ?? DateTime.now();
+    final idx = state.messages.indexWhere((m) {
+      if ((m.id ?? 0) >= 0) return false; // only temp
+      if (!_sameContent(m, serverMsg)) return false;
+      final mCreated = DateTime.tryParse(m.createdAt ?? '') ?? DateTime.now();
+      return _closeInTime(mCreated, serverCreated);
+    });
+
+    if (idx != -1) {
+      final updated = [...state.messages];
+      updated[idx] = serverMsg; // replace temp with server copy
+      emit(state.copyWith(messages: updated));
+    } else {
+      // No temp found — proceed to append if not already present by id
+      final existsById = state.messages.any((m) => m.id != null && m.id == serverMsg.id);
+      if (!existsById) {
+        emit(state.copyWith(messages: [...state.messages, serverMsg]));
+      }
+    }
+  }
+
+  // Typing event handler
+  void _onUserTyping(dynamic data) {
+    try {
+      final map = (data is Map) ? Map<String, dynamic>.from(data) : {};
+      final senderId = map['senderId']?.toString();
+      if (senderId != null && senderId != currentUserId) {
+        // This is not the current user typing, so show the typing indicator
+        emit(state.copyWith(isPeerTyping: true));
+      }
+    } catch (e) {
+      AppLogger.info("[socket] error in onUserTyping: $e");
+    }
+  }
   // ---- Listeners ----
   void _onReceiveMessage(dynamic data) {
     try {
-      AppLogger.info('[socket] receive_private_message payload: $data');
-
+      AppLogger.info("[socket] receive_private_message payload: $data");
       final map = _toStringKeyMap(data);
       final msg = _mapSocketToMessages(map);
 
-      final exists = state.messages.any((m) {
-        final mid = m.id;
-        final msgid = msg.id;
-        if (mid != null && msgid != null) return mid == msgid;
-        final s1 = m.senderId?.toString() ?? '';
-        final s2 = msg.senderId?.toString() ?? '';
-        final mm1 = m.message ?? '';
-        final mm2 = msg.message ?? '';
-        final c1 = m.createdAt ?? '';
-        final c2 = msg.createdAt ?? '';
-        return s1 == s2 && mm1 == mm2 && c1 == c2;
-      });
-
-      if (!exists) {
-        emit(state.copyWith(messages: [...state.messages, msg]));
-      }
+      // Prefer replacing the temp optimistic message with the server message
+      _replaceTempWithServer(msg);
     } catch (e, st) {
       AppLogger.info('[socket] malformed receive_private_message: $e\n$st');
     }
@@ -169,7 +215,7 @@ class PrivateChatCubit extends Cubit<PrivateChatState> {
     emit(state.copyWith(messages: [...state.messages, local]));
 
     final payload = {
-      'room': _room, // helps servers route without recomputing
+      'room': _room,
       'senderId': currentUserId,
       'receiverId': receiverId,
       'message': message,
@@ -208,9 +254,10 @@ class PrivateChatCubit extends Cubit<PrivateChatState> {
     _typingDebounce?.cancel();
     _socket.off('receive_private_message', _onReceiveMessage);
     _socket.off('typing', _onPeerTyping);
-    _socket.off('peer_typing', _onPeerTyping);
+    _socket.off('user_typing', _onUserTyping);  // Remove listener on close
     _socket.off('connect');
     return super.close();
   }
 }
+
 

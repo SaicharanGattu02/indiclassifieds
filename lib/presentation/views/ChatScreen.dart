@@ -151,6 +151,7 @@ class _ChatScreenState extends State<ChatScreen> {
                               final key = (m.id ?? m.createdAt.hashCode).toString();
                               if (seen.add(key)) all.add(m);
                             }
+
                             for (final m in liveState.messages) {
                               final key = (m.id ?? m.createdAt.hashCode).toString();
                               if (seen.add(key)) all.add(m);
@@ -189,12 +190,29 @@ class _ChatScreenState extends State<ChatScreen> {
                     ),
                   ),
                 ),
-                _buildInputArea(newContext), // Use newContext
+                _buildInputArea(newContext),
               ],
             ),
           ),
         );
       },
+    );
+  }
+
+  Widget _buildTypingIndicator(BuildContext context) {
+    final textColor = ThemeHelper.textColor(context);
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Row(
+          children: [
+            SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+            SizedBox(width: 8),
+            Text('Typing...', style: TextStyle(color: textColor)),
+          ],
+        ),
+      ),
     );
   }
 
@@ -240,23 +258,6 @@ class _ChatScreenState extends State<ChatScreen> {
               Text(msg.formattedTime, style: timeText),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTypingIndicator(BuildContext context) {
-    final textColor = ThemeHelper.textColor(context);
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Padding(
-        padding: const EdgeInsets.all(8),
-        child: Row(
-          children: const [
-            SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
-            SizedBox(width: 8),
-            Text('Typing...'),
-          ],
         ),
       ),
     );
