@@ -455,7 +455,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                         TextButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            context.push('/products_list');
+                          },
                           child: Text(
                             "See All",
                             style: AppTextStyles.bodyMedium(textColor).copyWith(
@@ -469,9 +471,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                     SizedBox(height: 8),
-                    BlocBuilder<ProductsCubit1, ProductsStates1>(
+                    BlocBuilder<ProductsCubit, ProductsStates>(
                       builder: (context, productState) {
-                        if (productState is Products1Loaded) {
+                        if (productState is ProductsLoaded) {
                           final products = productState.productsModel.products ?? [];
                           return CustomScrollView(
                             shrinkWrap: true,

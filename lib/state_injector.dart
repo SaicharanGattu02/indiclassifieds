@@ -375,7 +375,7 @@ class StateInjector {
         bannersCubit: context.read<BannerCubit>(),
         newCategoriesCubit: context.read<NewCategoriesCubit>(),
         categoryCubit: context.read<CategoriesCubit>(),
-        productsCubit: context.read<ProductsCubit1>(),
+        productsCubit: context.read<ProductsCubit>(),
       ),
     ),
   ];

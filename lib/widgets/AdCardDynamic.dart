@@ -267,7 +267,7 @@ class AdCardDynamic extends StatelessWidget {
               if ((ad.status ?? '').toLowerCase() == "approved") ...[
                 if (ad.sold == true)
                   const Text(
-                    "Already Sold",
+                    "Sold Out",
                     style: TextStyle(color: Colors.red),
                   )
                 else

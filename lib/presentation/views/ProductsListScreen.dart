@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:indiclassifieds/Components/CustomSnackBar.dart';
 import 'package:indiclassifieds/data/cubit/Products/products_cubit.dart';
 import 'package:indiclassifieds/utils/AppLogger.dart';
@@ -68,7 +69,12 @@ class _ProductsListScreenState extends State<ProductsListScreen> {
           style: AppTextStyles.headlineSmall(textColor),
         ),
         actions: [
-          Icon(Icons.tune, color: textColor),
+          GestureDetector(
+            onTap: () {
+              context.push('/filter');
+            },
+            child: Icon(Icons.tune, color: textColor),
+          ),
           const SizedBox(width: 16),
         ],
       ),
@@ -87,7 +93,7 @@ class _ProductsListScreenState extends State<ProductsListScreen> {
         child: BlocBuilder<ProductsCubit, ProductsStates>(
           builder: (context, state) {
             if (state is ProductsLoading) {
-              return Center(child:DottedProgressWithLogo());
+              return Center(child: DottedProgressWithLogo());
             } else if (state is ProductsFailure) {
               return Center(child: Text(state.error));
             } else if (state is ProductsLoaded ||

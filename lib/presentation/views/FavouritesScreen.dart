@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:indiclassifieds/data/cubit/Wishlist/wishlist_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Wishlist/wishlist_states.dart';
 
@@ -64,7 +65,9 @@ class _WishlistListScreenState extends State<WishlistListScreen> {
           style: AppTextStyles.headlineSmall(textColor),
         ),
         actions: [
-          Icon(Icons.tune, color: textColor),
+          GestureDetector(onTap: (){
+    context.push('/filter');
+    },child: Icon(Icons.tune, color: textColor)),
           const SizedBox(width: 16),
         ],
       ),

@@ -18,7 +18,7 @@ class DashboardCubit extends Cubit<DashBoardState> {
   final BannerCubit bannersCubit;
   final CategoriesCubit categoryCubit;
   final NewCategoriesCubit newCategoriesCubit;
-  final ProductsCubit1 productsCubit;
+  final ProductsCubit productsCubit;
 
   DashboardCubit({
     required this.bannersCubit,
@@ -66,7 +66,7 @@ class DashboardCubit extends Cubit<DashBoardState> {
       try {
         await productsCubit.getProducts();
         final state = productsCubit.state;
-        if (state is Products1Loaded) {
+        if (state is ProductsLoaded) {
           subcategoryProductsModel = state.productsModel;
         } else if (state is ProductsFailure) {}
       } catch (e) {}
