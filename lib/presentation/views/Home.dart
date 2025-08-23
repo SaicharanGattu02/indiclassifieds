@@ -30,6 +30,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int currentIndex = 0;
+
   @override
   void initState() {
     super.initState();
@@ -456,6 +457,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         TextButton(
                           onPressed: () {
+
                             context.push('/products_list');
                           },
                           child: Text(
@@ -505,17 +507,22 @@ class _HomeScreenState extends State<HomeScreen> {
                                       price: "₹${_formatINR(p.price)}",
                                       location: p.location ?? "",
                                       imageUrl: p.image,
-                                      isLiked: p.isFavorited ?? false, // ✅ will rebuild now
+                                      isLiked: p.isFavorited ?? false,
                                       onLikeToggle: () {
                                         if (p.id != null) {
                                           context.read<AddToWishlistCubit>().addToWishlist(p.id!);
                                         }
                                       },
-                                      onTap: () {
-                                        context.push(
+                                      onTap: () async {
+                                        final shouldRefresh = await context.push<bool>(
                                           "/products_details?listingId=${p.id}&subcategory_id=${p.subCategory?.id}",
                                         );
+                                        if (shouldRefresh == true) {
+                                          context.read<DashboardCubit>().fetchDashboard();
+                                        }
                                       },
+
+
                                       borderColor: borderColor,
                                     ),
                                   );

@@ -33,6 +33,7 @@ import '../presentation/authentication/OTPScreen.dart';
 import '../presentation/views/ChatScreen.dart';
 import '../presentation/views/DetailsScreen.dart';
 import '../presentation/views/EditProfile.dart';
+import '../presentation/views/FavouritesScreen.dart';
 import '../presentation/views/FilterScreen.dart';
 import '../presentation/views/NotificationScreen.dart';
 import '../presentation/views/CategoryScreen.dart';
@@ -109,6 +110,11 @@ final GoRouter appRouter = GoRouter(
       path: '/register',
       pageBuilder: (context, state) =>
           buildSlideTransitionPage(RegisterUserDetailsScreen(), state),
+    ),
+    GoRoute(
+      path: '/wish_list',
+      pageBuilder: (context, state) =>
+          buildSlideTransitionPage(WishlistListScreen(), state),
     ),
     GoRoute(
       path: '/search_screen',

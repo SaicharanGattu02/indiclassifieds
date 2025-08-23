@@ -27,11 +27,7 @@ class _WishlistListScreenState extends State<WishlistListScreen> {
   @override
   void initState() {
     super.initState();
-
-    // Initial load
     context.read<WishlistCubit>().getWishlist();
-
-    // Pagination on scroll
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
           _scrollController.position.maxScrollExtent - 200) {

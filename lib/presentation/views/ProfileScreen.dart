@@ -141,7 +141,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   //     context.push("/advertisements");
                   //   },
                   // ),
-                  _settingsTile(
+                  _settingsTile(onTap: (){
+                    context.push('/wish_list');
+                  },
                     Icons.favorite,
                     Colors.red.shade100,
                     'Wishlist',
@@ -347,33 +349,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _statTile(String value, String label, Color color) {
-    return Column(
-      children: [
-        Text(value, style: AppTextStyles.headlineMedium(color)),
-        Text(label, style: AppTextStyles.bodySmall(color)),
-      ],
-    );
-  }
-
-  Widget _achievementTile(
-    IconData icon,
-    Color iconColor,
-    String label,
-    Color color,
-  ) {
-    return Column(
-      children: [
-        CircleAvatar(
-          radius: 20,
-          backgroundColor: iconColor.withOpacity(0.2),
-          child: Icon(icon, color: iconColor),
-        ),
-        const SizedBox(height: 4),
-        Text(label, style: AppTextStyles.labelMedium(color)),
-      ],
-    );
-  }
 
   Widget _settingsTile(
     IconData icon,
