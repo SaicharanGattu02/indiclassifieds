@@ -154,12 +154,14 @@ class PrivateChatCubit extends Cubit<PrivateChatState> {
       final senderId = map['senderId']?.toString();
       if (senderId != null && senderId != currentUserId) {
         // This is not the current user typing, so show the typing indicator
+        AppLogger.info('[socket] User $senderId is typing');
         emit(state.copyWith(isPeerTyping: true));
       }
     } catch (e) {
       AppLogger.info("[socket] error in onUserTyping: $e");
     }
   }
+
   // ---- Listeners ----
   void _onReceiveMessage(dynamic data) {
     try {
@@ -229,25 +231,28 @@ class PrivateChatCubit extends Cubit<PrivateChatState> {
   }
 
   void startTyping() {
-    _sendTyping(true);
+    AppLogger.info('[socket] Start typing...');
+    _sendTyping();
     _typingDebounce?.cancel();
     _typingDebounce = Timer(const Duration(seconds: 2), () {
-      _sendTyping(false);
+      _sendTyping();
     });
   }
 
   void stopTyping() {
+    AppLogger.info('[socket] Stop typing...');
     _typingDebounce?.cancel();
-    _sendTyping(false);
+    _sendTyping();
   }
 
-  void _sendTyping(bool isTyping) {
+  void _sendTyping() {
+    AppLogger.info('[socket] Sending typing status');
     _socket.emit('typing', {
-      'room': _room,
+      'receiverId': receiverId,
       'senderId': currentUserId,
-      'isTyping': isTyping,
     });
   }
+
 
   @override
   Future<void> close() {
