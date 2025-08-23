@@ -12,11 +12,22 @@ class ChatMessagesLoading extends ChatMessagesStates {}
 
 class ChatMessagesLoaded extends ChatMessagesStates {
   final ChatMessagesModel chatMessages;
+  final bool hasNextPage;
 
-  ChatMessagesLoaded(this.chatMessages);
+  ChatMessagesLoaded(this.chatMessages, this.hasNextPage);
 
   @override
-  List<Object?> get props => [chatMessages];
+  List<Object?> get props => [chatMessages, hasNextPage];
+}
+
+class ChatMessagesLoadingMore extends ChatMessagesStates {
+  final ChatMessagesModel chatMessages;
+  final bool hasNextPage;
+
+  ChatMessagesLoadingMore(this.chatMessages, this.hasNextPage);
+
+  @override
+  List<Object?> get props => [chatMessages, hasNextPage];
 }
 
 class ChatMessagesFailure extends ChatMessagesStates {
@@ -27,3 +38,4 @@ class ChatMessagesFailure extends ChatMessagesStates {
   @override
   List<Object?> get props => [error];
 }
+

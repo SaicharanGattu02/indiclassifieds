@@ -28,7 +28,7 @@ class PrivateChatCubit extends Cubit<PrivateChatState> {
   Timer? _typingDebounce;
 
   PrivateChatCubit(this.currentUserId, this.receiverId)
-      : super(const PrivateChatState()) {
+    : super(const PrivateChatState()) {
     _socket = SocketService.connect(currentUserId); // shared instance
     _room = _getPrivateRoomName(currentUserId, receiverId);
     _init();
@@ -38,12 +38,15 @@ class PrivateChatCubit extends Cubit<PrivateChatState> {
     // Remove any previous handlers (important with a shared socket)
     _socket.off('receive_private_message', _onReceiveMessage);
     _socket.off('typing', _onPeerTyping);
-    _socket.off('user_typing', _onUserTyping); // Adding listener for 'user_typing'
+    _socket.off(
+      'user_typing',
+      _onUserTyping,
+    ); // Adding listener for 'user_typing'
     _socket.off('connect');
 
     // Add listeners
     _socket.on('receive_private_message', _onReceiveMessage);
-    _socket.on('user_typing', _onUserTyping);  // Listen for user_typing event
+    _socket.on('user_typing', _onUserTyping); // Listen for user_typing event
     // Some servers emit 'typing', others 'peer_typing' — listen to both
     _socket.on('typing', _onPeerTyping);
 
@@ -68,8 +71,10 @@ class PrivateChatCubit extends Cubit<PrivateChatState> {
       'userId1': currentUserId,
       'userId2': receiverId,
     });
-    AppLogger.info('[socket] join_private -> room: $_room '
-        '(u1=$currentUserId, u2=$receiverId)');
+    AppLogger.info(
+      '[socket] join_private -> room: $_room '
+      '(u1=$currentUserId, u2=$receiverId)',
+    );
   }
 
   // Map a generic socket map to your Messages model
@@ -81,7 +86,8 @@ class PrivateChatCubit extends Cubit<PrivateChatState> {
       type: map['type']?.toString(),
       message: map['message']?.toString(),
       imageUrl: (map['image_url'] ?? map['imageUrl'])?.toString(),
-      createdAt: (map['createdAt'] ?? map['created_at'])?.toString() ??
+      createdAt:
+          (map['createdAt'] ?? map['created_at'])?.toString() ??
           DateTime.now().toIso8601String(),
       updatedAt: (map['updatedAt'] ?? map['updated_at'])?.toString(),
     );
@@ -120,13 +126,18 @@ class PrivateChatCubit extends Cubit<PrivateChatState> {
         aReceiver == bReceiver;
   }
 
-  bool _closeInTime(DateTime a, DateTime b, {Duration tolerance = const Duration(seconds: 5)}) {
+  bool _closeInTime(
+    DateTime a,
+    DateTime b, {
+    Duration tolerance = const Duration(seconds: 5),
+  }) {
     return (a.difference(b).abs() <= tolerance);
   }
 
   void _replaceTempWithServer(Messages serverMsg) {
     // Find a temp message (id < 0) with same content and close timestamps
-    final serverCreated = DateTime.tryParse(serverMsg.createdAt ?? '') ?? DateTime.now();
+    final serverCreated =
+        DateTime.tryParse(serverMsg.createdAt ?? '') ?? DateTime.now();
     final idx = state.messages.indexWhere((m) {
       if ((m.id ?? 0) >= 0) return false; // only temp
       if (!_sameContent(m, serverMsg)) return false;
@@ -140,7 +151,9 @@ class PrivateChatCubit extends Cubit<PrivateChatState> {
       emit(state.copyWith(messages: updated));
     } else {
       // No temp found — proceed to append if not already present by id
-      final existsById = state.messages.any((m) => m.id != null && m.id == serverMsg.id);
+      final existsById = state.messages.any(
+        (m) => m.id != null && m.id == serverMsg.id,
+      );
       if (!existsById) {
         emit(state.copyWith(messages: [...state.messages, serverMsg]));
       }
@@ -234,7 +247,7 @@ class PrivateChatCubit extends Cubit<PrivateChatState> {
     AppLogger.info('[socket] Start typing...');
     _sendTyping();
     _typingDebounce?.cancel();
-    _typingDebounce = Timer(const Duration(seconds: 2), () {
+    _typingDebounce = Timer(const Duration(milliseconds: 500), () {
       _sendTyping();
     });
   }
@@ -253,16 +266,13 @@ class PrivateChatCubit extends Cubit<PrivateChatState> {
     });
   }
 
-
   @override
   Future<void> close() {
     _typingDebounce?.cancel();
     _socket.off('receive_private_message', _onReceiveMessage);
     _socket.off('typing', _onPeerTyping);
-    _socket.off('user_typing', _onUserTyping);  // Remove listener on close
+    _socket.off('user_typing', _onUserTyping); // Remove listener on close
     _socket.off('connect');
     return super.close();
   }
 }
-
-
