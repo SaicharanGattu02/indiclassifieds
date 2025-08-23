@@ -6,6 +6,7 @@ import '../model/AdSuccessModel.dart';
 import '../model/AdvertisementDetailsModel.dart';
 import '../model/AdvertisementModel.dart';
 import '../model/BannersModel.dart';
+import '../model/ChatMessagesModel.dart';
 import '../model/ChatUsersModel.dart';
 import '../model/CreatePaymentModel.dart';
 import '../model/MarkAsListingModel.dart';
@@ -80,6 +81,7 @@ abstract class RemoteDataSource {
   Future<AdSuccessModel?> removeImageOnListingAd(int id);
   Future<AdSuccessModel?> register(Map<String, dynamic> data);
   Future<ChatUsersModel?> getChatUsers();
+  Future<ChatMessagesModel?> getChatMessages(String user_id);
 }
 
 class RemoteDataSourceImpl implements RemoteDataSource {
@@ -115,6 +117,20 @@ class RemoteDataSourceImpl implements RemoteDataSource {
       }
     }
     return FormData.fromMap(formMap);
+  }
+
+  @override
+  Future<ChatMessagesModel?> getChatMessages(String user_id) async {
+    try {
+      Response response = await ApiClient.get(
+        "${APIEndpointUrls.get_my_friend_messages}/$user_id",
+      );
+      AppLogger.log('getChatMessages:${response.data}');
+      return ChatMessagesModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('getChatMessages :: $e');
+      return null;
+    }
   }
 
   @override

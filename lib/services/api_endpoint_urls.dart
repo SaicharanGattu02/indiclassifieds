@@ -66,4 +66,5 @@ class APIEndpointUrls {
   static const String verify_payment_order = '${apiUrl}verify-payment';
   static const String register_user_details = '${apiUrl}register-user-details';
   static const String get_all_users_by_chat = '${apiUrl}get-all-users-by-chat';
+  static const String get_my_friend_messages = '${apiUrl}get-my-friend-messages';
 }

@@ -2,17 +2,18 @@ import 'dart:ui';
 import 'package:flutter/animation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:indiclassifieds/presentation/authentication/RegisterUserDetailsScreen.dart';
 import 'package:indiclassifieds/presentation/views/AdvertisementScreen.dart';
 import 'package:indiclassifieds/presentation/views/PlansScreen.dart';
 import 'package:indiclassifieds/presentation/PostAdds/CommunityAdScreen.dart';
 import 'package:indiclassifieds/presentation/PostAdds/EducationalAd.dart';
-
 import 'package:indiclassifieds/presentation/views/ProductDetailsScreen.dart';
 import 'package:indiclassifieds/presentation/views/SearchScreen.dart';
 import 'package:indiclassifieds/presentation/views/SplashScreen.dart';
 import 'package:indiclassifieds/presentation/views/SubCategoriesScreen.dart';
+import '../data/cubit/Chat/private_chat_cubit.dart';
 import '../model/CategoryModel.dart';
 import '../presentation/PostAdds/AstrologyAd.dart';
 import '../presentation/PostAdds/BikeAd.dart';
@@ -29,6 +30,7 @@ import '../presentation/PostAdds/PropertiesAdScreen.dart';
 import 'package:indiclassifieds/presentation/views/ProductsListScreen.dart';
 import '../presentation/authentication/LoginScreen.dart';
 import '../presentation/authentication/OTPScreen.dart';
+import '../presentation/views/ChatScreen.dart';
 import '../presentation/views/DetailsScreen.dart';
 import '../presentation/views/EditProfile.dart';
 import '../presentation/views/FilterScreen.dart';
@@ -39,6 +41,7 @@ import '../presentation/views/ProfileScreen.dart';
 import '../presentation/views/SelectSubCategory.dart';
 import '../presentation/views/SuccessScreen.dart';
 import '../presentation/views/dashboard.dart';
+import '../services/AuthService.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
@@ -47,6 +50,33 @@ final GoRouter appRouter = GoRouter(
       path: '/',
       pageBuilder: (context, state) =>
           buildSlideTransitionPage(Splashscreen(), state),
+    ),
+    GoRoute(
+      path: '/chat',
+      builder: (context, state) {
+        final receiverId = state.uri.queryParameters['receiverId']!;
+        final receiverName = state.uri.queryParameters['receiverName'] ?? '';
+
+        return FutureBuilder<String?>(
+          future: AuthService.getId(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            }
+            final currentUserId = snapshot.data ?? "";
+            return BlocProvider(
+              create: (_) => PrivateChatCubit(currentUserId, receiverId),
+              child: ChatScreen(
+                currentUserId: currentUserId,
+                receiverId: receiverId,
+                receiverName: receiverName,
+              ),
+            );
+          },
+        );
+      },
     ),
     GoRoute(
       path: '/dashboard',
@@ -191,13 +221,13 @@ final GoRouter appRouter = GoRouter(
         final subCatId = state.uri.queryParameters['subCatId'] ?? "";
         final editId = state.uri.queryParameters['editId'] ?? "";
 
-
         return buildSlideTransitionPage(
           PropertiesAdScreen(
             catId: categoryId,
             CatName: categoryName,
             subCatId: subCatId,
-            SubCatName: SubCategoryName,editId: editId,
+            SubCatName: SubCategoryName,
+            editId: editId,
           ),
           state,
         );
@@ -253,7 +283,8 @@ final GoRouter appRouter = GoRouter(
             catId: categoryId,
             CatName: categoryName,
             subCatId: subCatId,
-            SubCatName: SubCategoryName,editId: editId,
+            SubCatName: SubCategoryName,
+            editId: editId,
           ),
           state,
         );
@@ -332,7 +363,8 @@ final GoRouter appRouter = GoRouter(
             catId: categoryId,
             CatName: categoryName,
             subCatId: subCatId,
-            SubCatName: SubCategoryName,editId: editId,
+            SubCatName: SubCategoryName,
+            editId: editId,
           ),
           state,
         );
@@ -352,7 +384,8 @@ final GoRouter appRouter = GoRouter(
             catId: categoryId,
             CatName: categoryName,
             subCatId: subCatId,
-            SubCatName: SubCategoryName,editId: editId,
+            SubCatName: SubCategoryName,
+            editId: editId,
           ),
           state,
         );
@@ -371,7 +404,8 @@ final GoRouter appRouter = GoRouter(
             catId: categoryId,
             CatName: categoryName,
             subCatId: subCatId,
-            SubCatName: SubCategoryName,editId: editId,
+            SubCatName: SubCategoryName,
+            editId: editId,
           ),
           state,
         );
@@ -433,7 +467,8 @@ final GoRouter appRouter = GoRouter(
             catId: categoryId,
             CatName: categoryName,
             subCatId: subCatId,
-            SubCatName: SubCategoryName,editId: editId,
+            SubCatName: SubCategoryName,
+            editId: editId,
           ),
           state,
         );
@@ -452,7 +487,8 @@ final GoRouter appRouter = GoRouter(
             catId: categoryId,
             CatName: categoryName,
             subCatId: subCatId,
-            SubCatName: SubCategoryName,editId: editId,
+            SubCatName: SubCategoryName,
+            editId: editId,
           ),
           state,
         );

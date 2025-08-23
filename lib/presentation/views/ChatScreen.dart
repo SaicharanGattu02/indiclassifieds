@@ -2,11 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:dio/dio.dart';
-import '../../data/cubit/OnlineUsers/online_users_cubit.dart';
-import '../../data/cubit/chat/private_chat_cubit.dart';
-import '../../model/message.dart';
+import 'package:indiclassifieds/data/cubit/ChatMessages/ChatMessagesCubit.dart';
+import 'package:intl/intl.dart';
+import '../../data/cubit/Chat/private_chat_cubit.dart';
+import '../../data/cubit/ChatMessages/ChatMessagesStates.dart';
+import '../../model/ChatMessagesModel.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
+
+extension MessagesX on Messages {
+  DateTime get createdAtDate {
+    final raw = createdAt?.toString() ?? '';
+    return DateTime.tryParse(raw) ?? DateTime.now();
+  }
+
+  String get formattedTime {
+    return DateFormat('hh:mm a').format(createdAtDate);
+  }
+
+  bool get isImage => (type ?? '') == 'image';
+  bool get isText => (type ?? '') == 'text';
+}
 
 class ChatScreen extends StatefulWidget {
   final String currentUserId;
@@ -29,6 +45,17 @@ class _ChatScreenState extends State<ChatScreen> {
   final _scrollController = ScrollController();
 
   @override
+  void initState() {
+    super.initState();
+    try {
+      context.read<ChatMessagesCubit>().fetchMessages(widget.receiverId);
+      debugPrint('ChatMessagesCubit accessed successfully in initState');
+    } catch (e) {
+      debugPrint('Error accessing ChatMessagesCubit in initState: $e');
+    }
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
     _scrollController.dispose();
@@ -38,25 +65,22 @@ class _ChatScreenState extends State<ChatScreen> {
   void _scrollToBottom() {
     if (!_scrollController.hasClients) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      try {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeOut,
-        );
-      } catch (_) {}
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOut,
+      );
     });
   }
 
-  // Bubble & input colors derived from theme
   Color _meBubble(BuildContext context) {
     final dark = ThemeHelper.isDarkMode(context);
-    return dark ? const Color(0xFF234476) /* deep desaturated blue */ : Colors.blue[100]!;
+    return dark ? const Color(0xFF234476) : Colors.blue[100]!;
   }
 
   Color _otherBubble(BuildContext context) {
     final dark = ThemeHelper.isDarkMode(context);
-    return dark ? const Color(0xFF2A2A2A) /* dark card-ish */ : Colors.grey[200]!;
+    return dark ? const Color(0xFF2A2A2A) : Colors.grey[200]!;
   }
 
   Color _inputFill(BuildContext context) {
@@ -69,89 +93,117 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bg = ThemeHelper.backgroundColor(context);
-    final textColor = ThemeHelper.textColor(context);
+    return Builder(
+      builder: (BuildContext newContext) {
+        final bg = ThemeHelper.backgroundColor(newContext);
+        final textColor = ThemeHelper.textColor(newContext);
 
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (_) => PrivateChatCubit(widget.currentUserId, widget.receiverId),
-        ),
-        BlocProvider(create: (_) => OnlineUsersCubit()),
-      ],
-      child: Scaffold(
-        backgroundColor: bg,
-        appBar: AppBar(
+        return Scaffold(
           backgroundColor: bg,
-          elevation: 0,
-          surfaceTintColor: Colors.transparent,
-          title: Row(
-            children: [
-              Text(
-                widget.receiverName,
-                style: AppTextStyles.titleLarge(textColor).copyWith(fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(width: 8),
-              BlocBuilder<OnlineUsersCubit, OnlineUsersState>(
-                builder: (context, state) {
-                  final isOnline = state.onlineUsers.contains(widget.receiverId);
-                  return Icon(
-                    Icons.circle,
-                    color: isOnline ? Colors.green : Colors.grey,
-                    size: 12,
-                  );
-                },
-              ),
-            ],
-          ),
-          iconTheme: IconThemeData(color: textColor),
-        ),
-        body: Column(
-          children: [
-            Expanded(
-              child: BlocConsumer<PrivateChatCubit, PrivateChatState>(
-                listener: (context, state) => _scrollToBottom(),
-                builder: (context, state) {
-                  final items = [
-                    ...state.messages,
-                    if (state.isPeerTyping)
-                      Message(
-                        id: '_typing_',
-                        senderId: widget.receiverId,
-                        receiverId: widget.currentUserId,
-                        message: '',
-                        type: 'typing',
-                        createdAt: DateTime.now(),
-                      ),
-                  ];
-
-                  return ListView.builder(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    itemCount: items.length,
-                    itemBuilder: (context, index) {
-                      final msg = items[index];
-                      if (msg.type == 'typing') {
-                        return _buildTypingIndicator(context);
-                      }
-                      final isMe = msg.senderId == widget.currentUserId;
-                      return _buildMessageBubble(context, msg, isMe);
-                    },
-                  );
-                },
-              ),
+          appBar: AppBar(
+            backgroundColor: bg,
+            elevation: 0,
+            surfaceTintColor: Colors.transparent,
+            title: Row(
+              children: [
+                Text(
+                  widget.receiverName,
+                  style: AppTextStyles.titleLarge(textColor)
+                      .copyWith(fontWeight: FontWeight.w600),
+                ),
+              ],
             ),
-            _buildInputArea(context),
-          ],
-        ),
-      ),
+            iconTheme: IconThemeData(color: textColor),
+          ),
+          body: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Column(
+              children: [
+                Expanded(
+                  child: MultiBlocListener(
+                    listeners: [
+                      BlocListener<PrivateChatCubit, PrivateChatState>(
+                        listenWhen: (p, c) =>
+                        p.messages.length != c.messages.length ||
+                            p.isPeerTyping != c.isPeerTyping,
+                        listener: (ctx, state) => _scrollToBottom(),
+                      ),
+                      BlocListener<ChatMessagesCubit, ChatMessagesStates>(
+                        listener: (ctx, state) => _scrollToBottom(),
+                      ),
+                    ],
+                    child: BlocBuilder<ChatMessagesCubit, ChatMessagesStates>(
+                      builder: (context, historyState) {
+                        final history = <Messages>[];
+                        if (historyState is ChatMessagesLoaded) {
+                          final list =
+                              historyState.chatMessages.messages ?? const <Messages>[];
+                          history.addAll(list);
+                          history.sort((a, b) => a.createdAtDate.compareTo(b.createdAtDate));
+                        }
+
+                        return BlocBuilder<PrivateChatCubit, PrivateChatState>(
+                          builder: (context, liveState) {
+                            final all = <Messages>[];
+                            final seen = <String>{};
+
+                            for (final m in history) {
+                              final key = (m.id ?? m.createdAt.hashCode).toString();
+                              if (seen.add(key)) all.add(m);
+                            }
+                            for (final m in liveState.messages) {
+                              final key = (m.id ?? m.createdAt.hashCode).toString();
+                              if (seen.add(key)) all.add(m);
+                            }
+
+                            if (liveState.isPeerTyping) {
+                              all.add(Messages(
+                                id: -1,
+                                senderId: int.tryParse(widget.receiverId),
+                                receiverId: int.tryParse(widget.currentUserId),
+                                type: 'typing',
+                                message: '',
+                                createdAt: DateTime.now().toIso8601String(),
+                              ));
+                            }
+
+                            all.sort((a, b) => a.createdAtDate.compareTo(b.createdAtDate));
+
+                            return ListView.builder(
+                              controller: _scrollController,
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              itemCount: all.length,
+                              itemBuilder: (context, index) {
+                                final msg = all[index];
+                                if (msg.type == 'typing') {
+                                  return _buildTypingIndicator(context);
+                                }
+                                final isMe =
+                                    (msg.senderId?.toString() ?? '') == widget.currentUserId;
+                                return _buildMessageBubble(context, msg, isMe);
+                              },
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                _buildInputArea(newContext), // Use newContext
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildMessageBubble(BuildContext context, Message msg, bool isMe) {
+  Widget _buildMessageBubble(BuildContext context, Messages msg, bool isMe) {
     final bubbleColor = isMe ? _meBubble(context) : _otherBubble(context);
     final bodyText = AppTextStyles.bodyMedium(ThemeHelper.textColor(context));
-    final timeText = AppTextStyles.labelSmall(ThemeHelper.textColor(context).withOpacity(.6));
+    final timeText = AppTextStyles.labelSmall(
+      ThemeHelper.textColor(context).withOpacity(.6),
+    );
 
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
@@ -172,9 +224,9 @@ class _ChatScreenState extends State<ChatScreen> {
           child: Column(
             crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
             children: [
-              if (msg.type == 'text')
-                Text(msg.message, style: bodyText.copyWith(fontSize: 16)),
-              if (msg.type == 'image' && msg.imageUrl != null)
+              if ((msg.type ?? 'text') == 'text')
+                Text((msg.message ?? ''), style: bodyText.copyWith(fontSize: 16)),
+              if ((msg.type ?? '') == 'image' && (msg.imageUrl ?? '').isNotEmpty)
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
                   child: Image.network(
@@ -200,14 +252,10 @@ class _ChatScreenState extends State<ChatScreen> {
       child: Padding(
         padding: const EdgeInsets.all(8),
         child: Row(
-          children: [
-            const SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-            const SizedBox(width: 8),
-            Text('Typing...', style: AppTextStyles.bodySmall(textColor)),
+          children: const [
+            SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+            SizedBox(width: 8),
+            Text('Typing...'),
           ],
         ),
       ),
@@ -242,15 +290,18 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                   filled: true,
                   fillColor: fill,
-                  contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 ),
                 onChanged: (text) {
-                  final cubit = context.read<PrivateChatCubit>();
-                  if (text.isNotEmpty) {
-                    cubit.startTyping();
-                  } else {
-                    cubit.stopTyping();
+                  try {
+                    final cubit = context.read<PrivateChatCubit>();
+                    if (text.isNotEmpty) {
+                      cubit.startTyping();
+                    } else {
+                      cubit.stopTyping();
+                    }
+                  } catch (e) {
+                    debugPrint('Error accessing PrivateChatCubit in onChanged: $e');
                   }
                 },
                 onSubmitted: (_) => _sendText(context),
@@ -269,9 +320,13 @@ class _ChatScreenState extends State<ChatScreen> {
   void _sendText(BuildContext context) {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
-    context.read<PrivateChatCubit>().sendMessage(text);
-    _controller.clear();
-    context.read<PrivateChatCubit>().stopTyping();
+    try {
+      context.read<PrivateChatCubit>().sendMessage(text);
+      _controller.clear();
+      context.read<PrivateChatCubit>().stopTyping();
+    } catch (e) {
+      debugPrint('Error accessing PrivateChatCubit in _sendText: $e');
+    }
   }
 
   Future<void> _pickAndUploadImage(BuildContext context) async {
@@ -292,8 +347,7 @@ class _ChatScreenState extends State<ChatScreen> {
       final imageUrl = res.data['image_url'] ?? res.data['url'];
 
       if (imageUrl is String && imageUrl.isNotEmpty) {
-        context.read<PrivateChatCubit>()
-            .sendMessage('', type: 'image', imageUrl: imageUrl);
+        context.read<PrivateChatCubit>().sendMessage('', type: 'image', imageUrl: imageUrl);
       } else {
         debugPrint('Upload response missing image_url/url');
       }
@@ -302,4 +356,3 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 }
-

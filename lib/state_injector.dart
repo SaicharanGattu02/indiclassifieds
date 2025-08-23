@@ -7,6 +7,8 @@ import 'package:indiclassifieds/data/cubit/Banners/banner_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Banners/banner_repository.dart';
 import 'package:indiclassifieds/data/cubit/Categories/categories_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Categories/categories_repository.dart';
+import 'package:indiclassifieds/data/cubit/ChatMessages/ChatMessagesCubit.dart';
+import 'package:indiclassifieds/data/cubit/ChatMessages/ChatMessagesRepository.dart';
 import 'package:indiclassifieds/data/cubit/ChatUsers/ChatUsersCubit.dart';
 import 'package:indiclassifieds/data/cubit/ChatUsers/ChatUsersRepo.dart';
 import 'package:indiclassifieds/data/cubit/City/city_cubit.dart';
@@ -216,6 +218,12 @@ class StateInjector {
         remoteDataSource: context.read<RemoteDataSource>(),
       ),
     ),
+    RepositoryProvider<ChatMessagesRepository>(
+      create: (context) => ChatMessagesRepositoryImpl(
+        remoteDataSource: context.read<RemoteDataSource>(),
+      ),
+    ),
+
   ];
 
   static final blocProviders = <BlocProvider>[
@@ -352,6 +360,10 @@ class StateInjector {
     ),
     BlocProvider<ChatUsersCubit>(
       create: (context) => ChatUsersCubit(context.read<ChatUsersRepo>()),
+    ),
+
+    BlocProvider<ChatMessagesCubit>(
+      create: (context) => ChatMessagesCubit(context.read<ChatMessagesRepository>()),
     ),
 
     BlocProvider<DashboardCubit>(

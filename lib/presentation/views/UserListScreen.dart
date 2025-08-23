@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:indiclassifieds/services/AuthService.dart';
+import '../../data/cubit/Chat/private_chat_cubit.dart';
 import '../../data/cubit/ChatUsers/ChatUsersCubit.dart';
 import '../../data/cubit/ChatUsers/ChatUsersStates.dart';
 import '../../theme/AppTextStyles.dart';
@@ -16,7 +19,7 @@ class UserListScreen extends StatefulWidget {
 }
 
 class _UserListScreenState extends State<UserListScreen> {
-  final String currentUserId = "me_001";
+  String? userId;
   final TextEditingController _search = TextEditingController();
   String _query = '';
 
@@ -25,6 +28,11 @@ class _UserListScreenState extends State<UserListScreen> {
     super.initState();
     // Fetch chat users dynamically from cubit
     context.read<ChatUsersCubit>().fetchChatUsers();
+    getUserId();
+  }
+
+  Future<void> getUserId() async {
+    userId = await AuthService.getId();
   }
 
   @override
@@ -61,10 +69,9 @@ class _UserListScreenState extends State<UserListScreen> {
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
             child: Container(
               decoration: BoxDecoration(
-                color: Theme.of(context)
-                    .colorScheme
-                    .surfaceVariant
-                    .withOpacity(.6),
+                color: Theme.of(
+                  context,
+                ).colorScheme.surfaceVariant.withOpacity(.6),
                 borderRadius: BorderRadius.circular(14),
               ),
               child: TextField(
@@ -97,7 +104,7 @@ class _UserListScreenState extends State<UserListScreen> {
                   return Center(child: Text(state.error));
                 } else if (state is ChatUsersLoaded) {
                   // Extract dynamic data from model
-                  final users = state.chatUsersModel.chats ?? [];
+                  final users = state.chatUsersModel.data ?? [];
                   // final onlineIds = state.chatUsersModel.onlineIds ?? {};
                   // final meta = state.chatUsersModel.meta ?? {};
 
@@ -105,10 +112,12 @@ class _UserListScreenState extends State<UserListScreen> {
                   final filtered = _query.trim().isEmpty
                       ? users
                       : users
-                      .where((u) => (u.name ?? '')
-                      .toLowerCase()
-                      .contains(_query.toLowerCase()))
-                      .toList();
+                            .where(
+                              (u) => (u.name ?? '').toLowerCase().contains(
+                                _query.toLowerCase(),
+                              ),
+                            )
+                            .toList();
 
                   if (filtered.isEmpty) {
                     return const Center(child: Text('No users found'));
@@ -126,28 +135,11 @@ class _UserListScreenState extends State<UserListScreen> {
                         final user = filtered[i];
                         final id = user.userId ?? 0;
                         final name = user.name ?? '';
-                        // final m = meta[id];
-
-                        // final last = m?.lastMessage ?? 'Say hello 👋';
-                        // final time = m?.time ??
-                        //     DateTime.now().subtract(const Duration(days: 1));
-                        // final unread = m?.unread ?? 0;
-                        // final isOnline = onlineIds.contains(id);
-
                         return _ChatCard(
                           id: id,
                           name: name,
                           onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => ChatScreen(
-                                  currentUserId: currentUserId,
-                                  receiverId: id.toString(),
-                                  receiverName: name,
-                                ),
-                              ),
-                            );
+                            context.push('/chat?receiverId=$id&receiverName=$name');
                           },
                           card: card,
                           textColor: textColor,
@@ -165,7 +157,6 @@ class _UserListScreenState extends State<UserListScreen> {
     );
   }
 }
-
 
 class _ChatCard extends StatelessWidget {
   const _ChatCard({
@@ -301,4 +292,3 @@ class _ChatCard extends StatelessWidget {
     );
   }
 }
-
