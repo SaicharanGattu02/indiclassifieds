@@ -29,7 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
     context.read<DashboardCubit>().fetchDashboard();
     super.initState();
   }
-
+  ProductsCubit get _cubit => context.read<ProductsCubit>();
   @override
   Widget build(BuildContext context) {
     final textColor = ThemeHelper.textColor(context);
@@ -489,9 +489,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               onLikeToggle: () {
                                 if (p?.id != null) {
                                   final newVal = !(p?.isFavorited ?? false);
-                                  context
-                                      .read<ProductsCubit>()
-                                      .updateWishlistStatus(p?.id ?? 0, newVal);
+                                  print("hii::$newVal");
+                                  _cubit.updateWishlistStatus(p?.id??0, newVal);
+                                  // context.read<ProductsCubit>().updateWishlistStatus(p?.id ?? 0, newVal);
                                 }
                               },
                               onTap: () {

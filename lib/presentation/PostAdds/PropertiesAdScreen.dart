@@ -117,8 +117,10 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
           furnishingStatus = commonAdData.data?.listing?.furnishingStatus ?? '';
           projectStatus = commonAdData.data?.listing?.projectStatus ?? '';
           listedBy = commonAdData.data?.listing?.listedBy ?? '';
-          floorNoController.text = commonAdData.data?.listing?.floorNo.toString() ?? '';
-          roomNoController.text = commonAdData.data?.listing?.roomNo.toString() ?? '';
+          floorNoController.text =
+              commonAdData.data?.listing?.floorNo.toString() ?? '';
+          roomNoController.text =
+              commonAdData.data?.listing?.roomNo.toString() ?? '';
           if (commonAdData.data?.listing?.stateId != null) {
             selectedStateId = commonAdData.data?.listing?.stateId;
             stateController.text = commonAdData.data?.listing?.stateName ?? '';

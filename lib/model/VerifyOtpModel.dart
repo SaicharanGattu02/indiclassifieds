@@ -1,9 +1,12 @@
+import 'dart:convert';
+
 class VerifyOtpModel {
   bool? success;
   String? message;
   String? accessToken;
   String? refreshToken;
   int? refreshTokenExpiry;
+  int? accessTokenExpiry;
   bool? newUser;
   User? user;
 
@@ -13,15 +16,28 @@ class VerifyOtpModel {
     this.accessToken,
     this.refreshToken,
     this.refreshTokenExpiry,
+    this.accessTokenExpiry,
     this.newUser,
     this.user,
   });
+
+  /// Factory method to handle both String and Map inputs
+  factory VerifyOtpModel.fromResponse(dynamic data) {
+    if (data is String) {
+      return VerifyOtpModel.fromJson(jsonDecode(data));
+    } else if (data is Map<String, dynamic>) {
+      return VerifyOtpModel.fromJson(data);
+    } else {
+      throw Exception("❌ Invalid response type: ${data.runtimeType}");
+    }
+  }
 
   VerifyOtpModel.fromJson(Map<String, dynamic> json) {
     success = json['success'];
     message = json['message'];
     accessToken = json['accessToken'];
     refreshToken = json['refreshToken'];
+    accessTokenExpiry = json['accessTokenExpiry'];
     refreshTokenExpiry = json['refreshTokenExpiry'];
     newUser = json['new_user'];
     user = json['user'] != null ? User.fromJson(json['user']) : null;
@@ -33,6 +49,7 @@ class VerifyOtpModel {
     data['message'] = message;
     data['accessToken'] = accessToken;
     data['refreshToken'] = refreshToken;
+    data['accessTokenExpiry'] = accessTokenExpiry;
     data['refreshTokenExpiry'] = refreshTokenExpiry;
     data['new_user'] = newUser;
     if (user != null) {

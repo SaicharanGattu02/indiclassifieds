@@ -24,105 +24,96 @@ class ApiClient {
   ];
 
   static void setupInterceptors() {
-    try {
-      _dio.interceptors.clear();
-      _dio.interceptors.add(
-        LogInterceptor(
-          request: kDebugMode,
-          requestHeader: kDebugMode,
-          requestBody: kDebugMode,
-          responseHeader: kDebugMode,
-          responseBody: kDebugMode,
-          error: true,
-        ),
-      );
-      _dio.interceptors.add(
-        InterceptorsWrapper(
-          onRequest: (options, handler) async {
-            final isUnauthenticated = _unauthenticatedEndpoints.any(
-              (endpoint) => options.uri.path.startsWith(endpoint),
+    _dio.interceptors.add(InterceptorsWrapper(
+      onRequest: (options, handler) async {
+        debugPrint('Interceptor triggered for: ${options.uri}');
+
+        // Check if the request is for an unauthenticated endpoint
+        final isUnauthenticated = _unauthenticatedEndpoints.any(
+              (endpoint) => options.uri.path.startsWith(endpoint), // Use startsWith instead of endsWith
+        );
+
+        if (isUnauthenticated) {
+          debugPrint('Unauthenticated endpoint, skipping token check: ${options.uri}');
+          return handler.next(options); // Skip token check and proceed
+        }
+
+        final isExpired = await AuthService.isTokenExpired();
+        if (isExpired) {
+          debugPrint('Token is expired, attempting to refresh...');
+          final refreshed = await _refreshToken();
+          if (!refreshed) {
+            debugPrint('❌ Token refresh failed, redirecting to login...');
+            await AuthService.logout();
+            return handler.reject(
+              DioException(
+                requestOptions: options,
+                error: 'Token refresh failed, please log in again',
+                type: DioExceptionType.cancel,
+              ),
             );
+          }
+        }
 
-            if (isUnauthenticated) {
-              return handler.next(options);
-            }
-            // Check token expiration
-            // final isExpired = await AuthService.isTokenExpired();
-            // if (isExpired) {
-            //   await AuthService.logout();
-            //   return handler.reject(
-            //     DioException(
-            //       requestOptions: options,
-            //       error: 'Token expired, please log in again',
-            //       type: DioExceptionType.cancel,
-            //     ),
-            //   );
-            // }
-            // Get access token from storage
-            final accessToken = await AuthService.getAccessToken();
-            if (accessToken == null || accessToken.isEmpty) {
-              await AuthService.logout();
-              return handler.reject(
-                DioException(
-                  requestOptions: options,
-                  error: 'No access token, please log in again',
-                  type: DioExceptionType.cancel,
-                ),
-              );
-            } else {
-              options.headers['Authorization'] = 'Bearer $accessToken';
-            }
-
-            return handler.next(options);
-          },
-
-          onResponse: (response, handler) async {
-            // Check if response data signals token expired
-            if (response.data is Map<String, dynamic>) {
-              final data = response.data as Map<String, dynamic>;
-              if (data['status'] == false &&
-                  data['message'] == 'Token is expired') {
-                await AuthService.logout();
-                return handler.reject(
-                  DioException(
-                    requestOptions: response.requestOptions,
-                    error: 'Token expired',
-                    response: response,
-                    type: DioExceptionType.badResponse,
-                  ),
-                );
-              }
-            }
-
-            _handleNavigation(response.statusCode, navigatorKey);
-            return handler.next(response);
-          },
-
-          onError: (DioException e, handler) async {
-            final isUnauthenticated = _unauthenticatedEndpoints.any(
+        final accessToken = await AuthService.getAccessToken();
+        debugPrint('Token retrieved for request: $accessToken');
+        if (accessToken != null) {
+          options.headers["Authorization"] = "Bearer $accessToken";
+        } else {
+          debugPrint('❌ No access token available, redirecting to login...');
+          await AuthService.logout();
+          return handler.reject(
+            DioException(
+              requestOptions: options,
+              error: 'No access token available, please log in again',
+              type: DioExceptionType.cancel,
+            ),
+          );
+        }
+        return handler.next(options);
+      },
+      onResponse: (response, handler) {
+        return handler.next(response);
+      },
+      onError: (DioException e, handler) async {
+        final isUnauthenticated = _unauthenticatedEndpoints.any(
               (endpoint) => e.requestOptions.uri.path.endsWith(endpoint),
-            );
+        );
 
-            if (isUnauthenticated) {
-              return handler.next(e);
-            }
+        if (isUnauthenticated) {
+          debugPrint('Unauthenticated endpoint error, skipping logout: ${e.requestOptions.uri}');
+          return handler.next(e); // Skip logout for unauthenticated endpoints
+        }
 
-            if (e.response?.statusCode == 401) {
-              await AuthService.logout();
-              return handler.reject(
-                DioException(
-                  requestOptions: e.requestOptions,
-                  error: 'Unauthorized, please log in again',
-                  type: DioExceptionType.badResponse,
-                  response: e.response,
-                ),
-              );
-            }
-            return handler.next(e);
-          },
-        ),
-      );
-    } catch (e, stackTrace) {}
+        if (e.response?.statusCode == 401) {
+          debugPrint('❌ Unauthorized: Token invalid or user not found, redirecting to login...');
+          await AuthService.logout();
+          return handler.reject(
+            DioException(
+              requestOptions: e.requestOptions,
+              error: 'Unauthorized, please log in again',
+              type: DioExceptionType.badResponse,
+              response: e.response,
+            ),
+          );
+        }
+        return handler.next(e); // Pass other errors to the next interceptor
+      },
+    ));
+  }
+
+  static Future<bool> _refreshToken() async {
+    try {
+      final newToken = await AuthService.refreshToken();
+      if (newToken) {
+        debugPrint("✅ Token refreshed successfully");
+        return true;
+      }
+      debugPrint("❌ Token refresh returned false");
+    } catch (e) {
+      debugPrint("❌ Token refresh failed: $e");
+    }
+    return false;
   }
 
   static Future<Response> get(

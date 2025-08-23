@@ -436,7 +436,6 @@ class _OtpscreenState extends State<Otpscreen> {
 
                                       const SizedBox(height: 18),
 
-                                      // 3) Gradient button (clipped & transparent button)
                                       BlocConsumer<
                                         LogInwithMobileCubit,
                                         LogInWithMobileState
@@ -449,6 +448,10 @@ class _OtpscreenState extends State<Otpscreen> {
                                               data.user?.name ?? "",
                                               data.user?.email ?? "",
                                               data.user?.mobile ?? "",
+                                              data.user?.id ?? 0,
+                                                data.refreshToken??"",
+                                                data.accessTokenExpiry??0,
+
                                             );
                                             if (data.newUser == true) {
                                               context.pushReplacement(
@@ -479,7 +482,6 @@ class _OtpscreenState extends State<Otpscreen> {
                                                   BorderRadius.circular(14),
                                               child: Stack(
                                                 children: [
-                                                  // gradient background
                                                   Positioned.fill(
                                                     child: DecoratedBox(
                                                       decoration: BoxDecoration(

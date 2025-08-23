@@ -23,7 +23,6 @@ class DetailsScreen extends StatefulWidget {
 class _DetailsScreenState extends State<DetailsScreen> {
   @override
   Widget build(BuildContext context) {
-    final isDark = ThemeHelper.isDarkMode(context);
     final bgColor = ThemeHelper.backgroundColor(context);
     final textColor = ThemeHelper.textColor(context);
 

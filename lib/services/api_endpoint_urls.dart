@@ -4,7 +4,7 @@ class APIEndpointUrls {
 
   /// Authentiocation Urls
   static const String register = '${apiUrl}Register';
-  static const String refreshtoken = '${apiUrl}login';
+  static const String refreshtoken = '${apiUrl}refresh-token-for-user';
   static const String send_login_otp = '${apiUrl}send-otp';
   static const String resend_login_otp = '${apiUrl}resend-login-otp';
   static const String verify_login_otp = '${apiUrl}verify-otp';
@@ -13,7 +13,6 @@ class APIEndpointUrls {
   static const String update_user_details_by_user =
       '${apiUrl}update-user-details-by-user';
 
-  /// User Urls
 
   /// get Apis
   static const String get_category = '${apiUrl}get-all-categories';
