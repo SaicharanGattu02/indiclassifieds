@@ -70,6 +70,7 @@ import 'data/cubit/LogInWithMobile/login_with_mobile_repository.dart';
 import 'data/cubit/MyAds/GetMarkAsListing/get_listing_ad_cubit.dart';
 import 'data/cubit/Payment/payment_repository.dart';
 import 'data/cubit/PostAdvertisement/post_advertisement_cubit.dart';
+import 'data/cubit/Products/Product_cubit1.dart';
 import 'data/cubit/States/states_cubit.dart';
 import 'data/cubit/States/states_repository.dart';
 import 'data/remote_data_source.dart';
@@ -365,13 +366,16 @@ class StateInjector {
     BlocProvider<ChatMessagesCubit>(
       create: (context) => ChatMessagesCubit(context.read<ChatMessagesRepository>()),
     ),
+    BlocProvider<ProductsCubit1>(
+      create: (context) => ProductsCubit1(context.read<ProductsRepo>()),
+    ),
 
     BlocProvider<DashboardCubit>(
       create: (context) => DashboardCubit(
         bannersCubit: context.read<BannerCubit>(),
         newCategoriesCubit: context.read<NewCategoriesCubit>(),
         categoryCubit: context.read<CategoriesCubit>(),
-        productsCubit: context.read<ProductsCubit>(),
+        productsCubit: context.read<ProductsCubit1>(),
       ),
     ),
   ];

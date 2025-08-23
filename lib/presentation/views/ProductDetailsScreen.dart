@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:indiclassifieds/Components/CutomAppBar.dart';
 import 'package:indiclassifieds/data/cubit/Products/products_cubit.dart';
 import 'package:indiclassifieds/model/WishlistModel.dart';
 import 'package:intl/intl.dart';
 
 import '../../data/cubit/ProductDetails/product_details_cubit.dart';
 import '../../data/cubit/ProductDetails/product_details_states.dart';
+import '../../data/cubit/Products/Product_cubit1.dart';
 import '../../model/ProductDetailsModel.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
@@ -13,7 +16,6 @@ import '../../widgets/CommonLoader.dart';
 import '../../widgets/SimilarProductsSection.dart';
 
 extension DetailsX on Details {
-  /// Merged, display-ready map from toJson(), removing technical keys/nulls.
   Map<String, dynamic> merged() {
     final map = Map<String, dynamic>.from(toJson());
     const hide = {'id', 'listing_id', 'created_at', 'updated_at'};
@@ -27,7 +29,11 @@ extension DetailsX on Details {
 class ProductDetailsScreen extends StatefulWidget {
   final int listingId;
   final int subcategory_id;
-  const ProductDetailsScreen({super.key, required this.listingId, required this.subcategory_id});
+  const ProductDetailsScreen({
+    super.key,
+    required this.listingId,
+    required this.subcategory_id,
+  });
 
   @override
   State<ProductDetailsScreen> createState() => _ProductDetailsScreenState();
@@ -42,7 +48,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     super.initState();
     context.read<ProductDetailsCubit>().getProductDetails(widget.listingId);
     context.read<ProductsCubit>().getProducts(
-      subCategoryId: widget.subcategory_id.toString()
+      subCategoryId: widget.subcategory_id.toString(),
     );
   }
 
@@ -59,32 +65,18 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
     return Scaffold(
       backgroundColor: bgColor,
-      appBar: AppBar(
-        backgroundColor: bgColor,
-        elevation: 0,
-        leading: BackButton(color: textColor),
-        centerTitle: true,
-        title: Text(
-          "Details",
-          style: AppTextStyles.headlineSmall(
-            textColor,
-          ).copyWith(fontWeight: FontWeight.w600),
-        ),
-      ),
+      appBar: CustomAppBar1(title: 'Details', actions: []),
       bottomNavigationBar: _BottomCtaBar(
         onContact: () {
-          /* TODO: dial/message */
         },
         onChat: () {
-          /* TODO: open chat */
         },
       ),
       body: BlocBuilder<ProductDetailsCubit, ProductDetailsStates>(
         builder: (context, state) {
           if (state is ProductDetailsLoading ||
               state is ProductDetailsInitially) {
-            // return const _Skeleton();
-            return Center(child:DottedProgressWithLogo());
+            return Center(child: DottedProgressWithLogo());
           }
           if (state is ProductDetailsFailure) {
             return _ErrorView(
@@ -94,7 +86,6 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   .getProductDetails(widget.listingId),
             );
           }
-
           final model = (state as ProductDetailsLoaded).productDetailsModel;
           final data = model.data!;
           final listing = data.listing!;
@@ -108,7 +99,6 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
           return CustomScrollView(
             slivers: [
-              // ===== Hero Gallery =====
               SliverToBoxAdapter(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -139,7 +129,6 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 ),
               ),
 
-              // ===== Price + Title =====
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -321,6 +310,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     subCategoryId: listing.subCategoryId!.toString(),
                     excludeId: listing.id,
                     onTap: (prod) {
+                      context.pushReplacement(
+                        "/products_details?listingId=${listing.id}&subcategory_id=${listing.subCategoryId}",
+                      );
                     },
                   ),
                 ),
@@ -333,7 +325,6 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     );
   }
 
-  // ===== Specifications (dynamic map) =====
   Widget buildSpecifications(Details d) {
     final map = d.merged(); // from extension
     if (map.isEmpty)

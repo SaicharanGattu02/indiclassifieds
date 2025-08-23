@@ -7,7 +7,13 @@ import 'package:indiclassifieds/data/cubit/Dashboard/DashboardCubit.dart';
 import 'package:indiclassifieds/data/cubit/Dashboard/DashboardState.dart';
 import 'package:indiclassifieds/theme/app_colors.dart';
 import 'package:intl/intl.dart';
+import '../../Components/CustomSnackBar.dart';
+import '../../data/cubit/AddToWishlist/addToWishlistCubit.dart';
+import '../../data/cubit/AddToWishlist/addToWishlistStates.dart';
+import '../../data/cubit/Products/Product_cubit1.dart';
 import '../../data/cubit/Products/products_cubit.dart';
+import '../../data/cubit/Products/products_state1.dart';
+import '../../data/cubit/Products/products_states.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../utils/media_query_helper.dart';
@@ -26,10 +32,14 @@ class _HomeScreenState extends State<HomeScreen> {
   int currentIndex = 0;
   @override
   void initState() {
-    context.read<DashboardCubit>().fetchDashboard();
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<DashboardCubit>().fetchDashboard();
+      }
+    });
   }
-  ProductsCubit get _cubit => context.read<ProductsCubit>();
+
   @override
   Widget build(BuildContext context) {
     final textColor = ThemeHelper.textColor(context);
@@ -459,52 +469,64 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                     SizedBox(height: 8),
-                    CustomScrollView(
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-                      slivers: [
-                        SliverGrid(
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                mainAxisSpacing: 12,
-                                crossAxisSpacing: 12,
-                                childAspectRatio: 0.95,
+                    BlocBuilder<ProductsCubit1, ProductsStates1>(
+                      builder: (context, productState) {
+                        if (productState is Products1Loaded) {
+                          final products = productState.productsModel.products ?? [];
+                          return CustomScrollView(
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            slivers: [
+                              SliverGrid(
+                                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  mainAxisSpacing: 12,
+                                  crossAxisSpacing: 12,
+                                  childAspectRatio: 0.95,
+                                ),
+                                delegate: SliverChildBuilderDelegate((context, index) {
+                                  final p = products[index];
+
+                                  return BlocListener<AddToWishlistCubit, AddToWishlistStates>(
+                                    listener: (context, state) {
+                                      if (state is AddToWishlistLoaded) {
+                                        context.read<ProductsCubit>().updateWishlistStatus(
+                                          state.product_id,
+                                          state.addToWishlistModel.liked ?? false,
+                                        );
+                                      } else if (state is AddToWishlistFailure) {
+                                        CustomSnackBar1.show(context, state.error);
+                                      }
+                                    },
+                                    child: SimilarProductCard(
+                                      title: p.title ?? "—",
+                                      price: "₹${_formatINR(p.price)}",
+                                      location: p.location ?? "",
+                                      imageUrl: p.image,
+                                      isLiked: p.isFavorited ?? false, // ✅ will rebuild now
+                                      onLikeToggle: () {
+                                        if (p.id != null) {
+                                          context.read<AddToWishlistCubit>().addToWishlist(p.id!);
+                                        }
+                                      },
+                                      onTap: () {
+                                        context.push(
+                                          "/products_details?listingId=${p.id}&subcategory_id=${p.subCategory?.id}",
+                                        );
+                                      },
+                                      borderColor: borderColor,
+                                    ),
+                                  );
+                                }, childCount: products.length),
                               ),
-                          delegate: SliverChildBuilderDelegate((
-                            context,
-                            index,
-                          ) {
-                            final p = products_data?.products?[index];
-                            final title = (p?.title ?? "—").trim();
-                            final price = "₹${_formatINR(p?.price)}";
-                            final location = (p?.location ?? "").trim();
-                            final img = p?.image;
-                            return SimilarProductCard(
-                              title: title,
-                              price: price,
-                              location: location,
-                              imageUrl: img,
-                              isLiked: p?.isFavorited ?? false,
-                              onLikeToggle: () {
-                                if (p?.id != null) {
-                                  final newVal = !(p?.isFavorited ?? false);
-                                  print("hii::$newVal");
-                                  _cubit.updateWishlistStatus(p?.id??0, newVal);
-                                  // context.read<ProductsCubit>().updateWishlistStatus(p?.id ?? 0, newVal);
-                                }
-                              },
-                              onTap: () {
-                                context.pushReplacement(
-                                  "/products_details?listingId=${p?.id}&subcategory_id=${p?.subCategory}",
-                                );
-                              },
-                              borderColor: borderColor,
-                            );
-                          }, childCount: 4),
-                        ),
-                      ],
+                            ],
+                          );
+                        }
+
+                        return Center(child: CircularProgressIndicator());
+                      },
                     ),
+
                   ],
                 ),
               ),
@@ -517,9 +539,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
-  // ===== Utility formatting =====
-
   String _formatINR(String? price) {
     final val = double.tryParse(price ?? "");
     if (val == null) return "0";

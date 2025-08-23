@@ -165,7 +165,6 @@ final GoRouter appRouter = GoRouter(
         final listingIdStr = state.uri.queryParameters['listingId'];
         final subcategory_idstr = state.uri.queryParameters['subcategory_id'];
 
-        // safely parse to int
         final listingId = int.tryParse(listingIdStr ?? '') ?? 0;
         final subcategory_id = int.tryParse(subcategory_idstr ?? '') ?? 0;
 

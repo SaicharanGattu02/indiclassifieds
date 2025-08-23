@@ -1,12 +1,13 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:indiclassifieds/data/cubit/Products/products_repository.dart';
+import 'package:indiclassifieds/data/cubit/Products/products_state1.dart';
 import 'package:indiclassifieds/data/cubit/Products/products_states.dart';
 
 import '../../../model/SubcategoryProductsModel.dart';
 
-class ProductsCubit extends Cubit<ProductsStates> {
+class ProductsCubit1 extends Cubit<ProductsStates1> {
   final ProductsRepo productsRepo;
-  ProductsCubit(this.productsRepo) : super(ProductsInitially());
+  ProductsCubit1(this.productsRepo) : super(Products1Initially());
 
   SubcategoryProductsModel productsModel = SubcategoryProductsModel();
 
@@ -25,7 +26,7 @@ class ProductsCubit extends Cubit<ProductsStates> {
     String? maxPrice,
 
   }) async {
-    emit(ProductsLoading());
+    emit(Products1Loading());
     _currentPage = 1;
     try {
       final response = await productsRepo.getProducts(
@@ -44,12 +45,12 @@ class ProductsCubit extends Cubit<ProductsStates> {
         productsModel = response;
         _hasNextPage = response.settings?.nextPage ?? false;
 
-        emit(ProductsLoaded(productsModel, _hasNextPage));
+        emit(Products1Loaded(productsModel, _hasNextPage));
       } else {
-        emit(ProductsFailure(response?.message ?? "Failed to load products"));
+        emit(Products1Failure(response?.message ?? "Failed to load products"));
       }
     } catch (e) {
-      emit(ProductsFailure(e.toString()));
+      emit(Products1Failure(e.toString()));
     }
   }
 
@@ -60,7 +61,7 @@ class ProductsCubit extends Cubit<ProductsStates> {
     _isLoadingMore = true;
     _currentPage++;
 
-    emit(ProductsLoadingMore(productsModel, _hasNextPage));
+    emit(Products1LoadingMore(productsModel, _hasNextPage));
 
     try {
       final newData = await productsRepo.getProducts(
@@ -81,7 +82,7 @@ class ProductsCubit extends Cubit<ProductsStates> {
 
         _hasNextPage = newData.settings?.nextPage ?? false;
 
-        emit(ProductsLoaded(productsModel, _hasNextPage));
+        emit(Products1Loaded(productsModel, _hasNextPage));
       }
     } catch (e) {
       print("Products pagination error: $e");
@@ -99,7 +100,7 @@ class ProductsCubit extends Cubit<ProductsStates> {
       return p;
     }).toList();
     productsModel = productsModel.copyWith(products: updatedProducts);
-    emit(ProductsLoaded(productsModel, _hasNextPage));
+    emit(Products1Loaded(productsModel, _hasNextPage));
   }
 }
 

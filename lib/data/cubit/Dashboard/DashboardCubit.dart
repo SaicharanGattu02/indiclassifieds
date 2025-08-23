@@ -10,13 +10,15 @@ import 'package:indiclassifieds/model/SubcategoryProductsModel.dart';
 import '../../../model/CategoryModel.dart';
 import '../Banners/banner_cubit.dart';
 import '../Categories/categories_states.dart';
+import '../Products/Product_cubit1.dart';
+import '../Products/products_state1.dart';
 import 'DashboardState.dart';
 
 class DashboardCubit extends Cubit<DashBoardState> {
   final BannerCubit bannersCubit;
   final CategoriesCubit categoryCubit;
   final NewCategoriesCubit newCategoriesCubit;
-  final ProductsCubit productsCubit;
+  final ProductsCubit1 productsCubit;
 
   DashboardCubit({
     required this.bannersCubit,
@@ -64,7 +66,7 @@ class DashboardCubit extends Cubit<DashBoardState> {
       try {
         await productsCubit.getProducts();
         final state = productsCubit.state;
-        if (state is ProductsLoaded) {
+        if (state is Products1Loaded) {
           subcategoryProductsModel = state.productsModel;
         } else if (state is ProductsFailure) {}
       } catch (e) {}
