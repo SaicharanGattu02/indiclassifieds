@@ -49,7 +49,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   void initState() {
     super.initState();
     context.read<ProductDetailsCubit>().getProductDetails(widget.listingId);
-    context.read<ProductsCubit>().getProducts(
+    context.read<ProductsCubit1>().getProducts(
       subCategoryId: widget.subcategory_id.toString(),
     );
   }

@@ -442,7 +442,7 @@ class _FilterScreenState extends State<FilterScreen> {
                     Expanded(
                       child: SizedBox(
                         height: 42,
-                        child: TextField(
+                        child: TextField(cursorColor: textColor,
                           controller: stateSearchController,
                           style: AppTextStyles.bodyMedium(textColor),
                           decoration: InputDecoration(
@@ -452,7 +452,6 @@ class _FilterScreenState extends State<FilterScreen> {
                             ),
                             prefixIcon: Icon(Icons.search, color: textColor),
                             filled: true,
-                            fillColor: Colors.grey.shade100,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide.none,
@@ -550,6 +549,7 @@ class _FilterScreenState extends State<FilterScreen> {
                 : (state as SelectCityLoadingMore).selectCityModel;
 
             final cities = citiesList.data ?? [];
+            final textColor=ThemeHelper.textColor(context);
 
             return Column(
               children: [
@@ -569,11 +569,10 @@ class _FilterScreenState extends State<FilterScreen> {
                             decoration: InputDecoration(
                               hintText: "Search city...",
                               hintStyle: AppTextStyles.bodyMedium(
-                                textColor.withOpacity(0.6),
+                                textColor,
                               ),
                               prefixIcon: Icon(Icons.search, color: textColor),
                               filled: true,
-                              fillColor: Colors.grey.shade100,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 borderSide: BorderSide.none,

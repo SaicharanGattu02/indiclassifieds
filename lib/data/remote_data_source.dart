@@ -20,6 +20,7 @@ import '../model/SelectStatesModel.dart';
 import '../model/SendOtpModel.dart';
 import '../model/SubCategoryModel.dart';
 import '../model/SubcategoryProductsModel.dart';
+import '../model/TransectionHistoryModel.dart';
 import '../model/UserActivePlansModel.dart';
 import '../model/VerifyOtpModel.dart';
 import '../model/WishlistModel.dart';
@@ -82,6 +83,7 @@ abstract class RemoteDataSource {
   Future<AdSuccessModel?> register(Map<String, dynamic> data);
   Future<ChatUsersModel?> getChatUsers(String query);
   Future<ChatMessagesModel?> getChatMessages(String user_id, int page);
+  Future<TransectionHistoryModel?> getTransections();
 }
 
 class RemoteDataSourceImpl implements RemoteDataSource {
@@ -172,6 +174,19 @@ class RemoteDataSourceImpl implements RemoteDataSource {
       return UserActivePlansModel.fromJson(response.data);
     } catch (e) {
       AppLogger.error('getUserActivePlans :: $e');
+      return null;
+    }
+  }
+  @override
+  Future<TransectionHistoryModel?> getTransections() async {
+    try {
+      Response response = await ApiClient.get(
+        "${APIEndpointUrls.get_transection_history}",
+      );
+      AppLogger.log('getTransections :${response.data}');
+      return TransectionHistoryModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('getTransections :: $e');
       return null;
     }
   }
