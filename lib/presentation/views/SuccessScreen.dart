@@ -39,7 +39,7 @@ class _SuccessScreenState extends State<SuccessScreen> {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                  color: ThemeHelper.textColor(context), // ✅ Themed text color
+                  color: ThemeHelper.textColor(context),
                 ),
               ),
             ],
@@ -48,7 +48,7 @@ class _SuccessScreenState extends State<SuccessScreen> {
       ),
       bottomNavigationBar: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
           child: CustomAppButton1(
             text: "Done",
             onPlusTap: () {
