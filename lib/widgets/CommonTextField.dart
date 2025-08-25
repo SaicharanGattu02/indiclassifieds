@@ -147,10 +147,11 @@ class _CommonTextField1State extends State<CommonTextField1> {
           ),
         ),
         SizedBox(height: 10),
-        TextFormField(readOnly:  widget.isRead ?? false,
+        TextFormField(
+          readOnly:  widget.isRead ?? false,
           inputFormatters: widget.inputFormatters,
           onTap: widget.onTap,
-          style: AppTextStyles.bodyMedium(widget.color),
+          style: AppTextStyles.bodyMedium(textColor),
           controller: widget.controller,
           keyboardType: widget.keyboardType,
           obscureText: widget.obscureText,
@@ -181,7 +182,7 @@ class _CommonTextField1State extends State<CommonTextField1> {
           },
           decoration: InputDecoration(
             hintText: widget.hint,
-            hintStyle: TextStyle(color: textColor.withOpacity(0.6)),
+            hintStyle: TextStyle(color: textColor),
             prefixIcon: widget.prefixIcon,
             suffixIcon: widget.suffixIcon,
           ),

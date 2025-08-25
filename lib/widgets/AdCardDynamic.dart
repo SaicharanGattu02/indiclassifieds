@@ -8,6 +8,7 @@ import '../data/cubit/MyAds/MarkAsListing/mark_as_listing_state.dart';
 import '../data/cubit/MyAds/my_ads_cubit.dart';
 import '../model/MyAdsModel.dart';
 import '../theme/AppTextStyles.dart';
+import '../theme/ThemeHelper.dart';
 import 'ActionButton.dart';
 
 class AdCardDynamic extends StatelessWidget {
@@ -158,18 +159,17 @@ class AdCardDynamic extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-
                   if ((ad.status ?? '').toLowerCase() == "pending" ||
                       (ad.status ?? '').toLowerCase() == "approved") ...[
-                  ActionButton(
-                    icon: Icons.edit_outlined,
-                    label: 'Edit',
-                    onTap: () {
-                      context.push(
-                        '/${ad.category?.path??""}?catId=${ad.categoryId}&CatName=${ad.category?.name}&subCatId=${ad.subCategoryId}&SubCatName=${ad.subCategory?.name ?? ""}&editId=${ad.id}',
-                      );
-                    },
-                  ),
+                    ActionButton(
+                      icon: Icons.edit_outlined,
+                      label: 'Edit',
+                      onTap: () {
+                        context.push(
+                          '/${ad.category?.path ?? ""}?catId=${ad.categoryId}&CatName=${ad.category?.name}&subCatId=${ad.subCategoryId}&SubCatName=${ad.subCategory?.name ?? ""}&editId=${ad.id}',
+                        );
+                      },
+                    ),
                   ],
                   if ((ad.status ?? '').toLowerCase() == "pending") ...[
                     ActionButton(
@@ -180,26 +180,30 @@ class AdCardDynamic extends StatelessWidget {
                         showDialog(
                           context: context,
                           builder: (context) {
+                            final isDark = ThemeHelper.isDarkMode(context);
+
                             return AlertDialog(
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                               ),
                               elevation: 8,
-                              backgroundColor: Colors.white,
-                              title: const Text(
+                              backgroundColor: ThemeHelper.cardColor(context),
+                              title: Text(
                                 'Confirm Deletion',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 20,
                                   fontFamily: 'Inter',
-                                  color: Colors.black87,
+                                  color: ThemeHelper.textColor(context),
                                 ),
                               ),
-                              content: const Text(
+                              content: Text(
                                 'Are you sure you want to delete this item? This action cannot be undone.',
                                 style: TextStyle(
                                   fontSize: 16,
-                                  color: Colors.black54,
+                                  color: isDark
+                                      ? Colors.grey[300]
+                                      : Colors.black54,
                                   fontFamily: 'Inter',
                                 ),
                               ),
@@ -209,9 +213,7 @@ class AdCardDynamic extends StatelessWidget {
                                     Expanded(
                                       child: CustomAppButton(
                                         text: 'Cancel',
-                                        onPlusTap: () {
-                                          context.pop();
-                                        },
+                                        onPlusTap: () => context.pop(),
                                       ),
                                     ),
                                     const SizedBox(width: 10),
@@ -241,7 +243,9 @@ class AdCardDynamic extends StatelessWidget {
                                               return CustomAppButton1(
                                                 onPlusTap: () {
                                                   context
-                                                      .read<MarkAsListingCubit>()
+                                                      .read<
+                                                        MarkAsListingCubit
+                                                      >()
                                                       .markAsDelete(ad.id ?? 0);
                                                 },
                                                 text: 'Delete',
@@ -256,7 +260,6 @@ class AdCardDynamic extends StatelessWidget {
                                 ),
                               ],
                             );
-                            ;
                           },
                         );
                       },
@@ -268,7 +271,6 @@ class AdCardDynamic extends StatelessWidget {
                   //   label: 'Promote',
                   //   onTap: () {},
                   // ),
-
                   if ((ad.status ?? '').toLowerCase() == "approved") ...[
                     if (ad.sold == true)
                       const Text(
@@ -283,26 +285,28 @@ class AdCardDynamic extends StatelessWidget {
                           showDialog(
                             context: context,
                             builder: (context) {
+                              final isDark = ThemeHelper.isDarkMode(context);
                               return AlertDialog(
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(16),
                                 ),
-                                elevation: 8,
-                                backgroundColor: Colors.white,
-                                title: const Text(
+                                backgroundColor: ThemeHelper.cardColor(context),
+                                title: Text(
                                   'Confirm Mark as Sold',
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 20,
                                     fontFamily: 'Inter',
-                                    color: Colors.black87,
+                                    color: ThemeHelper.textColor(context),
                                   ),
                                 ),
-                                content: const Text(
+                                content: Text(
                                   'Are you sure you want to mark this item as sold? This action cannot be undone.',
                                   style: TextStyle(
                                     fontSize: 16,
-                                    color: Colors.black54,
+                                    color: isDark
+                                        ? Colors.grey[300]
+                                        : Colors.black54,
                                     fontFamily: 'Inter',
                                   ),
                                 ),
@@ -312,9 +316,7 @@ class AdCardDynamic extends StatelessWidget {
                                       Expanded(
                                         child: CustomAppButton(
                                           text: 'Cancel',
-                                          onPlusTap: () {
-                                            context.pop();
-                                          },
+                                          onPlusTap: () => context.pop(),
                                         ),
                                       ),
                                       const SizedBox(width: 10),
@@ -343,7 +345,9 @@ class AdCardDynamic extends StatelessWidget {
                                                 return CustomAppButton1(
                                                   onPlusTap: () {
                                                     context
-                                                        .read<MarkAsListingCubit>()
+                                                        .read<
+                                                          MarkAsListingCubit
+                                                        >()
                                                         .markAsSold(ad.id ?? 0);
                                                   },
                                                   text: 'Mark Sold',

@@ -135,7 +135,7 @@ class _SimilarProductsSectionState extends State<SimilarProductsSection> {
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
                 scrollDirection: Axis.horizontal,
                 itemCount: items.length + (hasNextPage ? 1 : 0),
-                separatorBuilder: (_, __) => const SizedBox(width: 12),
+                separatorBuilder: (_, __) => SizedBox(width: 12),
                 itemBuilder: (_, index) {
                   if (index >= items.length) {
                     return SizedBox(

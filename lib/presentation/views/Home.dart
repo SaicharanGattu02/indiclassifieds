@@ -482,6 +482,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                 ],
                               ),
+                              SizedBox(height: 16),
                               CustomScrollView(
                                 shrinkWrap: true,
                                 physics: NeverScrollableScrollPhysics(),

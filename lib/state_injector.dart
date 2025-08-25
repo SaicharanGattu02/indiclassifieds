@@ -74,6 +74,7 @@ import 'data/cubit/MyAds/GetMarkAsListing/get_listing_ad_cubit.dart';
 import 'data/cubit/Payment/payment_repository.dart';
 import 'data/cubit/PostAdvertisement/post_advertisement_cubit.dart';
 import 'data/cubit/Products/Product_cubit1.dart';
+import 'data/cubit/Products/Product_cubit2.dart';
 import 'data/cubit/States/states_cubit.dart';
 import 'data/cubit/States/states_repository.dart';
 import 'data/remote_data_source.dart';
@@ -89,9 +90,8 @@ class StateInjector {
       ),
     ),
     RepositoryProvider<RegisterRepo>(
-      create: (context) => RegisterRepoImpl(
-        remoteDataSource: context.read<RemoteDataSource>(),
-      ),
+      create: (context) =>
+          RegisterRepoImpl(remoteDataSource: context.read<RemoteDataSource>()),
     ),
     RepositoryProvider<BannersRepository>(
       create: (context) => BannersRepositoryImpl(
@@ -218,9 +218,8 @@ class StateInjector {
       ),
     ),
     RepositoryProvider<ChatUsersRepo>(
-      create: (context) => ChatUsersRepoImpl(
-        remoteDataSource: context.read<RemoteDataSource>(),
-      ),
+      create: (context) =>
+          ChatUsersRepoImpl(remoteDataSource: context.read<RemoteDataSource>()),
     ),
     RepositoryProvider<ChatMessagesRepository>(
       create: (context) => ChatMessagesRepositoryImpl(
@@ -228,11 +227,9 @@ class StateInjector {
       ),
     ),
     RepositoryProvider<TransactionsRepository>(
-      create: (context) => TransactionsImpl(
-        remoteDataSource: context.read<RemoteDataSource>(),
-      ),
+      create: (context) =>
+          TransactionsImpl(remoteDataSource: context.read<RemoteDataSource>()),
     ),
-
   ];
 
   static final blocProviders = <BlocProvider>[
@@ -245,8 +242,7 @@ class StateInjector {
           LogInwithMobileCubit(context.read<LogInWithMobileRepository>()),
     ),
     BlocProvider<RegisterCubit>(
-      create: (context) =>
-          RegisterCubit(context.read<RegisterRepo>()),
+      create: (context) => RegisterCubit(context.read<RegisterRepo>()),
     ),
     BlocProvider<BannerCubit>(
       create: (context) => BannerCubit(context.read<BannersRepository>()),
@@ -374,13 +370,18 @@ class StateInjector {
     ),
 
     BlocProvider<ChatMessagesCubit>(
-      create: (context) => ChatMessagesCubit(context.read<ChatMessagesRepository>()),
+      create: (context) =>
+          ChatMessagesCubit(context.read<ChatMessagesRepository>()),
     ),
     BlocProvider<ProductsCubit1>(
       create: (context) => ProductsCubit1(context.read<ProductsRepo>()),
     ),
+    BlocProvider<ProductsCubit2>(
+      create: (context) => ProductsCubit2(context.read<ProductsRepo>()),
+    ),
     BlocProvider<TransactionCubit>(
-      create: (context) => TransactionCubit(context.read<TransactionsRepository>()),
+      create: (context) =>
+          TransactionCubit(context.read<TransactionsRepository>()),
     ),
 
     BlocProvider<DashboardCubit>(

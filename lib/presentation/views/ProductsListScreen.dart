@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:indiclassifieds/Components/CustomSnackBar.dart';
-import 'package:indiclassifieds/data/cubit/Products/products_cubit.dart';
-import 'package:indiclassifieds/utils/AppLogger.dart';
 import '../../data/cubit/AddToWishlist/addToWishlistCubit.dart';
 import '../../data/cubit/AddToWishlist/addToWishlistStates.dart';
-import '../../data/cubit/Products/products_states.dart';
+import '../../data/cubit/Products/Product_cubit2.dart';
+import '../../data/cubit/Products/products_state2.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../widgets/CommonLoader.dart';
@@ -31,15 +30,13 @@ class _ProductsListScreenState extends State<ProductsListScreen> {
   @override
   void initState() {
     super.initState();
-    // Initial load
-    context.read<ProductsCubit>().getProducts(
+    context.read<ProductsCubit2>().getProducts(
       subCategoryId: widget.subCategoryId,
     );
-    // Pagination on scroll
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
           _scrollController.position.maxScrollExtent - 200) {
-        context.read<ProductsCubit>().getMoreProducts(widget.subCategoryId);
+        context.read<ProductsCubit2>().getMoreProducts(widget.subCategoryId);
       }
     });
   }
@@ -84,7 +81,7 @@ class _ProductsListScreenState extends State<ProductsListScreen> {
         listener: (context, state) {
           if (state is AddToWishlistLoaded) {
             // API returned success → update ProductsCubit
-            context.read<ProductsCubit>().updateWishlistStatus(
+            context.read<ProductsCubit2>().updateWishlistStatus(
               state.product_id,
               state.addToWishlistModel.liked ?? false,
             );
@@ -92,14 +89,14 @@ class _ProductsListScreenState extends State<ProductsListScreen> {
             CustomSnackBar1.show(context, state.error);
           }
         },
-        child: BlocBuilder<ProductsCubit, ProductsStates>(
+        child: BlocBuilder<ProductsCubit2, ProductsStates2>(
           builder: (context, state) {
-            if (state is ProductsLoading) {
+            if (state is Products2Loading) {
               return Center(child: DottedProgressWithLogo());
-            } else if (state is ProductsFailure) {
+            } else if (state is Products2Failure) {
               return Center(child: Text(state.error));
-            } else if (state is ProductsLoaded ||
-                state is ProductsLoadingMore) {
+            } else if (state is Products2Loaded ||
+                state is Products2LoadingMore) {
               final productsModel = (state as dynamic).productsModel;
               final products = productsModel.products ?? [];
               final hasNextPage = (state as dynamic).hasNextPage;

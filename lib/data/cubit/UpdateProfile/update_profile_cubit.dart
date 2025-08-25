@@ -13,7 +13,7 @@ class UpdateProfileCubit extends Cubit<UpdateProfileStates> {
       if (response != null && response.success == true) {
         emit(UpdateProfileSuccess(response));
       } else {
-        emit(UpdateProfileFailure(response?.message ?? ""));
+        emit(UpdateProfileFailure("${response?.message ?? ""}.${response?.error ?? ""}"));
       }
     } catch (e) {
       emit(UpdateProfileFailure(e.toString()));

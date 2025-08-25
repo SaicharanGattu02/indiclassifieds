@@ -15,6 +15,7 @@ import '../../data/cubit/States/states_repository.dart';
 import '../../data/cubit/UpdateProfile/update_profile_cubit.dart';
 import '../../data/cubit/UpdateProfile/update_profile_states.dart';
 import '../../data/remote_data_source.dart';
+import '../../theme/ThemeHelper.dart';
 import '../../utils/ImageUtils.dart';
 import '../../utils/color_constants.dart';
 import '../../widgets/CommonTextField.dart';
@@ -78,11 +79,11 @@ class _EditProfileState extends State<EditProfile> {
 
   Future<void> _pickImage() async {
     showModalBottomSheet(
+      backgroundColor: ThemeHelper.backgroundColor(context),
       context: context,
-      shape: const RoundedRectangleBorder(
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      backgroundColor: Colors.white,
       builder: (BuildContext context) {
         return SafeArea(
           child: Column(
@@ -90,7 +91,7 @@ class _EditProfileState extends State<EditProfile> {
             children: [
               ListTile(
                 leading: Icon(Icons.photo_library, color: primarycolor),
-                title: const Text("Choose from Gallery"),
+                title: Text("Choose from Gallery"),
                 onTap: () {
                   Navigator.pop(context);
                   _pickImageFromGallery();
@@ -98,7 +99,7 @@ class _EditProfileState extends State<EditProfile> {
               ),
               ListTile(
                 leading: Icon(Icons.camera_alt, color: primarycolor),
-                title: const Text("Take a Photo"),
+                title: Text("Take a Photo"),
                 onTap: () {
                   Navigator.pop(context);
                   _pickImageFromCamera();
@@ -142,7 +143,6 @@ class _EditProfileState extends State<EditProfile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF2F4FD),
       appBar: CustomAppBar1(title: "Edit Profile", actions: []),
       body: isLoading
           ? const Center(child: DottedProgressWithLogo())
