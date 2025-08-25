@@ -80,11 +80,29 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         valueListenable: mobileNotifier,
         builder: (context, mobile, _) {
           return _BottomCtaBar(
-            onContact: () {
+            onContact: () async {
+              final mobile = mobileNotifier.value;
               if (mobile != null && mobile.isNotEmpty) {
                 AppLauncher.call(mobile);
               } else {
-               CustomSnackBar1.show(context, "Mobile number not available");
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (_) =>
+                      const Center(child: CircularProgressIndicator()),
+                );
+
+                await Future.delayed(const Duration(seconds: 2));
+
+                if (context.mounted)
+                  Navigator.of(context).pop(); // close dialog
+
+                final updatedMobile = mobileNotifier.value;
+                if (updatedMobile != null && updatedMobile.isNotEmpty) {
+                  AppLauncher.call(updatedMobile);
+                } else {
+                  CustomSnackBar1.show(context, "Mobile number not available");
+                }
               }
             },
             onChat: () {
@@ -95,7 +113,6 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           );
         },
       ),
-
       body: BlocBuilder<ProductDetailsCubit, ProductDetailsStates>(
         builder: (context, state) {
           if (state is ProductDetailsLoading ||
@@ -124,7 +141,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           receiverId = data.postedBy?.id.toString() ?? "";
           receiverName = data.postedBy?.name ?? "";
           receiverImage = data.postedBy?.image ?? "";
-          mobileNotifier.value = listing.mobileNumber??"";
+          mobileNotifier.value = listing.mobileNumber ?? "";
           AppLogger.info("✅ mobileNotifier.value: ${mobileNotifier.value}");
 
           return CustomScrollView(
