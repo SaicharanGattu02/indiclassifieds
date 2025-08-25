@@ -6,6 +6,7 @@ import '../data/cubit/States/states_cubit.dart';
 import '../data/cubit/States/states_state.dart';
 import '../theme/AppTextStyles.dart';
 import '../theme/ThemeHelper.dart';
+import '../utils/media_query_helper.dart';
 
 class SelectStateBottomSheet extends StatefulWidget {
   const SelectStateBottomSheet({Key? key}) : super(key: key);
@@ -112,12 +113,28 @@ class _SelectStateBottomSheetState extends State<SelectStateBottomSheet> {
 
                     if (states.isEmpty) {
                       return Center(
-                        child: Text(
-                          "No states found",
-                          style: AppTextStyles.bodyMedium(textColor),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Image.asset(
+                              'assets/nodata/no_data.png',
+                              width: SizeConfig.screenWidth * 0.22,
+                              height: SizeConfig.screenHeight * 0.12,
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              "No states found",
+                              style: AppTextStyles.bodyMedium(
+                                ThemeHelper.textColor(context),
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
                         ),
                       );
                     }
+
 
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 18.0),

@@ -11,6 +11,7 @@ import '../../data/cubit/AddToWishlist/addToWishlistStates.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../utils/AppLogger.dart';
+import '../../utils/media_query_helper.dart';
 import '../../widgets/CommonLoader.dart';
 import '../../widgets/ProductCard.dart';
 
@@ -61,14 +62,17 @@ class _WishlistListScreenState extends State<WishlistListScreen> {
           style: AppTextStyles.headlineSmall(textColor),
         ),
         actions: [
-          GestureDetector(onTap: (){
-    context.push('/filter');
-    },child: Icon(Icons.tune, color: textColor)),
+          GestureDetector(
+            onTap: () {
+              context.push('/filter');
+            },
+            child: Icon(Icons.tune, color: textColor),
+          ),
           const SizedBox(width: 16),
         ],
       ),
 
-      body:  BlocListener<AddToWishlistCubit, AddToWishlistStates>(
+      body: BlocListener<AddToWishlistCubit, AddToWishlistStates>(
         listener: (context, state) {
           if (state is AddToWishlistLoaded) {
             // API returned success → update ProductsCubit
@@ -83,16 +87,34 @@ class _WishlistListScreenState extends State<WishlistListScreen> {
         child: BlocBuilder<WishlistCubit, WishlistStates>(
           builder: (context, state) {
             if (state is WishlistLoading) {
-              return Center(child:DottedProgressWithLogo());
+              return Center(child: DottedProgressWithLogo());
             } else if (state is WishlistFailure) {
               return Center(child: Text(state.error));
-            } else if (state is WishlistLoaded || state is WishlistLoadingMore) {
+            } else if (state is WishlistLoaded ||
+                state is WishlistLoadingMore) {
               final wishlistModel = (state as dynamic).wishlistModel;
               final products = wishlistModel.productslist ?? [];
               final hasNextPage = (state as dynamic).hasNextPage;
 
               if (products.isEmpty) {
-                return Center(child: Text("No data"));
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        'assets/nodata/no_data.png',
+                        width: SizeConfig.screenWidth * 0.22,
+                        height: SizeConfig.screenHeight * 0.12,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'No Favorites Found!',
+                        style: AppTextStyles.headlineSmall(textColor),
+                      ),
+                    ],
+                  ),
+                );
               }
 
               return CustomScrollView(
@@ -122,9 +144,9 @@ class _WishlistListScreenState extends State<WishlistListScreen> {
                             productsList: product,
                             onWishlistToggle: () {
                               if (product.id != null) {
-                                context.read<AddToWishlistCubit>().addToWishlist(
-                                  product.id!,
-                                );
+                                context
+                                    .read<AddToWishlistCubit>()
+                                    .addToWishlist(product.id!);
                               }
                             },
                           ),

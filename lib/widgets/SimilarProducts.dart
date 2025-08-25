@@ -7,6 +7,7 @@ import '../data/cubit/Products/products_state1.dart';
 import '../model/SubcategoryProductsModel.dart';
 import '../theme/AppTextStyles.dart';
 import '../theme/ThemeHelper.dart';
+import '../utils/media_query_helper.dart';
 import 'SimilarProductCard.dart';
 
 class SimilarProductsSection extends StatefulWidget {
@@ -111,64 +112,70 @@ class _SimilarProductsSectionState extends State<SimilarProductsSection> {
             .toList();
 
         if (items.isEmpty) {
-          return Center(
-            child: Text(
-              "No similar items yet",
-              style: AppTextStyles.bodyMedium(textColor),
-            ),
-          );
+          return SizedBox.shrink();
         }
 
-        return ListView.separated(
-          controller: _scrollCtrl,
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-          scrollDirection: Axis.horizontal,
-          itemCount: items.length + (hasNextPage ? 1 : 0),
-          separatorBuilder: (_, __) => const SizedBox(width: 12),
-          itemBuilder: (_, index) {
-            if (index >= items.length) {
-              // trailing loader cell for pagination
-              return SizedBox(
-                width: 180,
-                child: Center(
-                  child: SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: textColor.withOpacity(.8),
+
+        return Column(crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Similar Items",
+              style: AppTextStyles.headlineSmall(
+                textColor,
+              ).copyWith(fontWeight: FontWeight.w700),
+            ),
+            ListView.separated(
+              controller: _scrollCtrl,
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+              scrollDirection: Axis.horizontal,
+              itemCount: items.length + (hasNextPage ? 1 : 0),
+              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              itemBuilder: (_, index) {
+                if (index >= items.length) {
+                  // trailing loader cell for pagination
+                  return SizedBox(
+                    width: 180,
+                    child: Center(
+                      child: SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: textColor.withOpacity(.8),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              );
-            }
-
-            final p = items[index];
-            final title = (p.title ?? "—").trim();
-            final price = "₹${_formatINR(p.price)}";
-            final location = (p.location ?? "").trim();
-            final img = p.image;
-
-            return SimilarProductCard(
-              title: title,
-              price: price,
-              location: location,
-              imageUrl: img,
-              isLiked: p.isFavorited ?? false,
-              onLikeToggle: () {
-                if (p.id != null) {
-                  final newVal = !(p.isFavorited ?? false);
-                  _cubit.updateWishlistStatus(p.id!, newVal);
+                  );
                 }
-              },
-              onTap: () {
-                context.pushReplacement(
-                  "/products_details?listingId=${p.id}&subcategory_id=${p.subCategory}",
+
+                final p = items[index];
+                final title = (p.title ?? "—").trim();
+                final price = "₹${_formatINR(p.price)}";
+                final location = (p.location ?? "").trim();
+                final img = p.image;
+
+                return SimilarProductCard(
+                  title: title,
+                  price: price,
+                  location: location,
+                  imageUrl: img,
+                  isLiked: p.isFavorited ?? false,
+                  onLikeToggle: () {
+                    if (p.id != null) {
+                      final newVal = !(p.isFavorited ?? false);
+                      _cubit.updateWishlistStatus(p.id!, newVal);
+                    }
+                  },
+                  onTap: () {
+                    context.pushReplacement(
+                      "/products_details?listingId=${p.id}&subcategory_id=${p.subCategory}",
+                    );
+                  },
+                  borderColor: borderColor,
                 );
               },
-              borderColor: borderColor,
-            );
-          },
+            ),
+          ],
         );
       },
     );

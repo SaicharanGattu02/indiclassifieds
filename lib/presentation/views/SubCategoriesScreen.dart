@@ -52,9 +52,6 @@ class _SubCategoriesScreenState extends State<SubCategoriesScreen> {
             final subcategories = state.subCategoryModel.subcategories;
             return CustomScrollView(
               slivers: [
-                // ----- Top Spacing -----
-                // const SliverToBoxAdapter(child: SizedBox(height: 16)),
-
                 // // ----- Banner -----
                 // SliverToBoxAdapter(
                 //   child: Padding(

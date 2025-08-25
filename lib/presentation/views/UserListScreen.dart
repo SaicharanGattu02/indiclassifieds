@@ -111,7 +111,6 @@ class _UserListScreenState extends State<UserListScreen> with SingleTickerProvid
       ),
       body: Column(
         children: [
-          // Search Bar with Animation
           FadeTransition(
             opacity: _fadeAnimation,
             child: Padding(
@@ -130,7 +129,7 @@ class _UserListScreenState extends State<UserListScreen> with SingleTickerProvid
                 ),
                 child:TextField(
                   controller: _search,
-                  onChanged: _onSearchChanged,                   // ← debounced
+                  onChanged: _onSearchChanged,
                   style: AppTextStyles.bodyMedium(textColor),
                   decoration: InputDecoration(
                     hintText: 'Search by name…',
@@ -139,7 +138,7 @@ class _UserListScreenState extends State<UserListScreen> with SingleTickerProvid
                     suffixIcon: _query.isNotEmpty
                         ? IconButton(
                       icon: Icon(Icons.clear, color: textColor.withOpacity(0.8)),
-                      onPressed: _clearSearch,            // ← debounced clear
+                      onPressed: _clearSearch,
                     )
                         : null,
                     border: InputBorder.none,

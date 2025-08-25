@@ -64,7 +64,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                     delegate: SliverChildBuilderDelegate(
                           (context, index) {
                         if (index == rows.length) {
-                          // Pagination loader
                           return hasNextPage
                               ? const Padding(
                             padding: EdgeInsets.all(16),
@@ -74,8 +73,30 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                           )
                               : const SizedBox.shrink();
                         }
-
                         final FormattedRows tx = rows[index];
+                        if (rows.isEmpty) {
+                          return Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Image.asset(
+                                  'assets/nodata/no_data.png',
+                                  width: MediaQuery.of(context).size.width * 0.22,
+                                  height: MediaQuery.of(context).size.height * 0.12,
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  'No Transactions Found!',
+                                  style: TextStyle(
+                                    color: ThemeHelper.textColor(context),
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
                         final bool isSuccess =
                             (tx.paymentStatus ?? "").toLowerCase() == "success";
 

@@ -77,7 +77,7 @@ class _FilterScreenState extends State<FilterScreen> {
   @override
   Widget build(BuildContext context) {
     final textColor = ThemeHelper.textColor(context);
-    final  backgroundColor= ThemeHelper.backgroundColor(context);
+    final backgroundColor = ThemeHelper.backgroundColor(context);
     return Scaffold(
       appBar: CustomAppBar1(title: "Filters", actions: []),
       body: Stack(
@@ -136,9 +136,7 @@ class _FilterScreenState extends State<FilterScreen> {
             start: SizeConfig.screenWidth * 0.4,
             end: 0,
             child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-              ),
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
               margin: EdgeInsetsDirectional.only(
                 start: 5,
                 top: 10,
@@ -166,9 +164,25 @@ class _FilterScreenState extends State<FilterScreen> {
                             case 4:
                               if (selectedStateId.value == null) {
                                 return Center(
-                                  child: Text(
-                                    "Please select a state first",
-                                    style: AppTextStyles.bodyMedium(textColor),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Image.asset(
+                                        'assets/nodata/no_data.png',
+                                        width: SizeConfig.screenWidth * 0.22,
+                                        height: SizeConfig.screenHeight * 0.12,
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        "Please select a state first",
+                                        style: AppTextStyles.bodyMedium(
+                                          ThemeHelper.textColor(context),
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
                                   ),
                                 );
                               }
@@ -257,7 +271,7 @@ class _FilterScreenState extends State<FilterScreen> {
           return const Center(child: DottedProgressWithLogo());
         } else if (state is CategoriesLoaded) {
           final categories = state.categoryModel.categoriesList;
-          final textColor=ThemeHelper.textColor(context);
+          final textColor = ThemeHelper.textColor(context);
           if (categories == null || categories.isEmpty) {
             return const Center(child: Text("No Categories Found"));
           }
@@ -288,7 +302,7 @@ class _FilterScreenState extends State<FilterScreen> {
                         fontSize: 14,
                         fontFamily: 'Inter',
                         fontWeight: FontWeight.w500,
-                        color: isSelected ? Colors.blue :textColor,
+                        color: isSelected ? Colors.blue : textColor,
                       ),
                     ),
                   );
@@ -317,7 +331,7 @@ class _FilterScreenState extends State<FilterScreen> {
     return ValueListenableBuilder<RangeValues>(
       valueListenable: selectedRange,
       builder: (context, range, _) {
-        final textColor=ThemeHelper.textColor(context);
+        final textColor = ThemeHelper.textColor(context);
         return SingleChildScrollView(
           child: Column(
             children: [
@@ -344,12 +358,14 @@ class _FilterScreenState extends State<FilterScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: TextField(style: TextStyle(color: textColor),
+                    child: TextField(
+                      style: TextStyle(color: textColor),
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       keyboardType: TextInputType.number,
                       controller: minPriceController,
                       decoration: InputDecoration(
-                        hintText: "Min",hintStyle: TextStyle(color: textColor),
+                        hintText: "Min",
+                        hintStyle: TextStyle(color: textColor),
                         border: OutlineInputBorder(),
                       ),
                       onChanged: (val) {
@@ -363,12 +379,14 @@ class _FilterScreenState extends State<FilterScreen> {
                   ),
                   SizedBox(width: 10),
                   Expanded(
-                    child: TextField(style: TextStyle(color: textColor),
+                    child: TextField(
+                      style: TextStyle(color: textColor),
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       keyboardType: TextInputType.number,
                       controller: maxPriceController,
                       decoration: InputDecoration(
-                        hintText: "Max",hintStyle: TextStyle(color: textColor),
+                        hintText: "Max",
+                        hintStyle: TextStyle(color: textColor),
                         border: OutlineInputBorder(),
                       ),
                       onChanged: (val) {
@@ -398,7 +416,6 @@ class _FilterScreenState extends State<FilterScreen> {
     return ValueListenableBuilder<String?>(
       valueListenable: selectedSort,
       builder: (context, sort, _) {
-
         return ListView(
           children: sortOptions.map((option) {
             final isSelected = sort == option["value"];
@@ -429,7 +446,7 @@ class _FilterScreenState extends State<FilterScreen> {
           );
         } else if (state is SelectStatesLoaded) {
           final states = state.selectStatesModel.data ?? [];
-          final textColor=ThemeHelper.textColor(context);
+          final textColor = ThemeHelper.textColor(context);
           return Column(
             children: [
               Padding(
@@ -442,14 +459,13 @@ class _FilterScreenState extends State<FilterScreen> {
                     Expanded(
                       child: SizedBox(
                         height: 42,
-                        child: TextField(cursorColor: textColor,
+                        child: TextField(
+                          cursorColor: textColor,
                           controller: stateSearchController,
                           style: AppTextStyles.bodyMedium(textColor),
                           decoration: InputDecoration(
                             hintText: "Search state...",
-                            hintStyle: AppTextStyles.bodyMedium(
-                              textColor,
-                            ),
+                            hintStyle: AppTextStyles.bodyMedium(textColor),
                             prefixIcon: Icon(Icons.search, color: textColor),
                             filled: true,
                             border: OutlineInputBorder(
@@ -484,9 +500,24 @@ class _FilterScreenState extends State<FilterScreen> {
               ),
               if (states.isEmpty)
                 Center(
-                  child: Text(
-                    "No states found",
-                    style: AppTextStyles.bodyMedium(textColor),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        'assets/nodata/no_data.png',
+                        width: SizeConfig.screenWidth * 0.22,
+                        height: SizeConfig.screenHeight * 0.12,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        "No states found",
+                        style: AppTextStyles.bodyMedium(
+                          ThemeHelper.textColor(context),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
                 )
               else
@@ -549,7 +580,7 @@ class _FilterScreenState extends State<FilterScreen> {
                 : (state as SelectCityLoadingMore).selectCityModel;
 
             final cities = citiesList.data ?? [];
-            final textColor=ThemeHelper.textColor(context);
+            final textColor = ThemeHelper.textColor(context);
 
             return Column(
               children: [
@@ -568,9 +599,7 @@ class _FilterScreenState extends State<FilterScreen> {
                             style: AppTextStyles.bodyMedium(textColor),
                             decoration: InputDecoration(
                               hintText: "Search city...",
-                              hintStyle: AppTextStyles.bodyMedium(
-                                textColor,
-                              ),
+                              hintStyle: AppTextStyles.bodyMedium(textColor),
                               prefixIcon: Icon(Icons.search, color: textColor),
                               filled: true,
                               border: OutlineInputBorder(
@@ -609,9 +638,24 @@ class _FilterScreenState extends State<FilterScreen> {
                 ),
                 if (cities.isEmpty)
                   Center(
-                    child: Text(
-                      "No cities found",
-                      style: AppTextStyles.bodyMedium(textColor),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Image.asset(
+                          'assets/nodata/no_data.png',
+                          width: SizeConfig.screenWidth * 0.22,
+                          height: SizeConfig.screenHeight * 0.12,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          "No cities found",
+                          style: AppTextStyles.bodyMedium(
+                            ThemeHelper.textColor(context),
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
                     ),
                   )
                 else

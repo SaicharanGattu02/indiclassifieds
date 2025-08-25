@@ -337,17 +337,17 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               // const SliverToBoxAdapter(child: SizedBox(height: 24)),
 
               // ===== Similar Items (demo) =====
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(
-                    "Similar Items",
-                    style: AppTextStyles.headlineSmall(
-                      textColor,
-                    ).copyWith(fontWeight: FontWeight.w700),
-                  ),
-                ),
-              ),
+              // SliverToBoxAdapter(
+              //   child: Padding(
+              //     padding: const EdgeInsets.symmetric(horizontal: 16),
+              //     child: Text(
+              //       "Similar Items",
+              //       style: AppTextStyles.headlineSmall(
+              //         textColor,
+              //       ).copyWith(fontWeight: FontWeight.w700),
+              //     ),
+              //   ),
+              // ),
               SliverToBoxAdapter(
                 child: SizedBox(
                   height: 250,

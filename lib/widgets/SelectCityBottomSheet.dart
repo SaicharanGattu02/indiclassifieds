@@ -6,6 +6,7 @@ import '../data/cubit/City/city_cubit.dart';
 import '../data/cubit/City/city_state.dart';
 import '../theme/AppTextStyles.dart';
 import '../theme/ThemeHelper.dart';
+import '../utils/media_query_helper.dart';
 
 // ---- BottomSheet for Cities ----
 class SelectCityBottomSheet extends StatefulWidget {
@@ -99,7 +100,6 @@ class _SelectCityBottomSheetState extends State<SelectCityBottomSheet> {
 
           const SizedBox(height: 10),
 
-          // ---- List of Cities ----
           Expanded(
             child: BlocBuilder<SelectCityCubit, SelectCity>(
               builder: (context, state) {
@@ -121,13 +121,27 @@ class _SelectCityBottomSheetState extends State<SelectCityBottomSheet> {
 
                   if (cities.isEmpty) {
                     return Center(
-                      child: Text(
-                        "No cities found",
-                        style: AppTextStyles.bodyMedium(textColor),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            'assets/nodata/no_data.png',
+                            width: SizeConfig.screenWidth * 0.22,
+                            height: SizeConfig.screenHeight * 0.12,
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            "No cities found",
+                            style: AppTextStyles.bodyMedium(
+                              ThemeHelper.textColor(context),
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
                       ),
                     );
                   }
-
                   return NotificationListener<ScrollNotification>(
                     onNotification: (scrollInfo) {
                       if (scrollInfo.metrics.pixels >=

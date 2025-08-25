@@ -102,6 +102,30 @@ class _ProductsListScreenState extends State<ProductsListScreen> {
               final products = productsModel.products ?? [];
               final hasNextPage = (state as dynamic).hasNextPage;
 
+              if (products.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        'assets/nodata/no_data.png',
+                        width: MediaQuery.of(context).size.width * 0.25,
+                        height: MediaQuery.of(context).size.height * 0.15,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'No Products Found!',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                          color: ThemeHelper.textColor(context),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
               return CustomScrollView(
                 controller: _scrollController,
                 slivers: [
