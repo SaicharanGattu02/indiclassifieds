@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:indiclassifieds/Components/CustomAppButton.dart';
+import 'package:indiclassifieds/Components/CustomSnackBar.dart';
 import 'package:indiclassifieds/Components/CutomAppBar.dart';
 import 'package:indiclassifieds/data/cubit/Products/products_cubit.dart';
 import 'package:indiclassifieds/model/WishlistModel.dart';
+import 'package:indiclassifieds/utils/AppLogger.dart';
 import 'package:intl/intl.dart';
 
 import '../../data/cubit/ProductDetails/product_details_cubit.dart';
@@ -13,6 +15,7 @@ import '../../data/cubit/Products/Product_cubit1.dart';
 import '../../model/ProductDetailsModel.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
+import '../../utils/AppLauncher.dart';
 import '../../widgets/CommonLoader.dart';
 import '../../widgets/SimilarProducts.dart';
 import '../../widgets/SimilarProductsSection.dart';
@@ -44,6 +47,7 @@ class ProductDetailsScreen extends StatefulWidget {
 class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   final _pgCtrl = PageController();
   int _page = 0;
+  final ValueNotifier<String?> mobileNotifier = ValueNotifier<String?>(null);
 
   @override
   void initState() {
@@ -72,14 +76,26 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     return Scaffold(
       backgroundColor: bgColor,
       appBar: CustomAppBar1(title: 'Details', actions: []),
-      bottomNavigationBar: _BottomCtaBar(
-        onContact: () {},
-        onChat: () {
-          context.push(
-            '/chat?receiverId=$receiverId&receiverName=$receiverName&receiverImage=$receiverImage',
+      bottomNavigationBar: ValueListenableBuilder<String?>(
+        valueListenable: mobileNotifier,
+        builder: (context, mobile, _) {
+          return _BottomCtaBar(
+            onContact: () {
+              if (mobile != null && mobile.isNotEmpty) {
+                AppLauncher.call(mobile);
+              } else {
+               CustomSnackBar1.show(context, "Mobile number not available");
+              }
+            },
+            onChat: () {
+              context.push(
+                '/chat?receiverId=$receiverId&receiverName=$receiverName&receiverImage=$receiverImage',
+              );
+            },
           );
         },
       ),
+
       body: BlocBuilder<ProductDetailsCubit, ProductDetailsStates>(
         builder: (context, state) {
           if (state is ProductDetailsLoading ||
@@ -108,6 +124,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           receiverId = data.postedBy?.id.toString() ?? "";
           receiverName = data.postedBy?.name ?? "";
           receiverImage = data.postedBy?.image ?? "";
+          mobileNotifier.value = listing.mobileNumber??"";
+          AppLogger.info("✅ mobileNotifier.value: ${mobileNotifier.value}");
 
           return CustomScrollView(
             slivers: [
