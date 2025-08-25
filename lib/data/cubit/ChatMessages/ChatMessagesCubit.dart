@@ -15,67 +15,88 @@ class ChatMessagesCubit extends Cubit<ChatMessagesStates> {
   bool _hasNextPage = true;
   bool _isLoadingMore = false;
 
-  // Fetch initial chat messages
+  // Fetch initial chat messages (make newest-first for reverse:true lists)
   Future<void> fetchMessages(String userId) async {
     emit(ChatMessagesLoading());
     _currentPage = 1;
     try {
-      final response = await chatMessagesRepository.getChatMessages(userId, _currentPage);
-      if (response != null && response.success == true) {
-        chatMessagesModel = response;
-        _hasNextPage = response.settings?.nextPage ?? false;
-        debugPrint('fetchMessages: Page $_currentPage, hasNextPage=$_hasNextPage, messages=${response.data?.messages?.length}');
+      final res = await chatMessagesRepository.getChatMessages(
+        userId,
+        _currentPage,
+      );
+      if (res != null && res.success == true) {
+        final pageAsc = res.data?.messages ?? const <Messages>[];
+        final newestFirst = List<Messages>.from(
+          pageAsc.reversed,
+        ); // ← flip page
+
+        chatMessagesModel = ChatMessagesModel(
+          success: res.success,
+          message: res.message,
+          data: Data(friend: res.data?.friend, messages: newestFirst),
+          settings: res.settings,
+        );
+
+        _hasNextPage = res.settings?.nextPage ?? false;
         emit(ChatMessagesLoaded(chatMessagesModel, _hasNextPage));
       } else {
-        emit(ChatMessagesFailure(response?.message ?? "Failed to load chat messages"));
+        emit(
+          ChatMessagesFailure(res?.message ?? "Failed to load chat messages"),
+        );
       }
     } catch (e) {
-      debugPrint('fetchMessages error: $e');
       emit(ChatMessagesFailure(e.toString()));
     }
   }
 
-  // Fetch more chat messages (pagination)
+  // Load older messages: APPEND (at end) because list is newest-first
   Future<void> getMoreMessages(String userId) async {
-    if (_isLoadingMore || !_hasNextPage) {
-      debugPrint('getMoreMessages skipped: _isLoadingMore=$_isLoadingMore, _hasNextPage=$_hasNextPage');
-      return;
-    }
+    if (_isLoadingMore || !_hasNextPage) return;
 
     _isLoadingMore = true;
     _currentPage++;
-    debugPrint('getMoreMessages: Fetching page $_currentPage');
     emit(ChatMessagesLoadingMore(chatMessagesModel, _hasNextPage));
 
     try {
-      final newData = await chatMessagesRepository.getChatMessages(userId, _currentPage);
-      if (newData != null && newData.data?.messages?.isNotEmpty == true) {
-        final existingMessages = chatMessagesModel.data?.messages ?? [];
-        final newMessages = newData.data!.messages!;
-        // Prepend new messages (older messages) to the start of the list
-        final combinedData = [...newMessages, ...existingMessages]
-          ..sort((a, b) => a.createdAtDate.compareTo(b.createdAtDate));
+      final newData = await chatMessagesRepository.getChatMessages(
+        userId,
+        _currentPage,
+      );
+      final pageAsc = newData?.data?.messages ?? const <Messages>[];
+
+      if (newData != null && pageAsc.isNotEmpty) {
+        final existing = List<Messages>.from(
+          chatMessagesModel.data?.messages ?? const <Messages>[],
+        );
+        final olderDesc = List<Messages>.from(pageAsc.reversed); // ← flip page
+        existing.addAll(olderDesc); // ← append to end (top visually)
+
+        // simple de-dupe by (id or timestamp)
+        final seen = <String>{};
+        final deduped = <Messages>[];
+        for (final m in existing) {
+          final key =
+              '${m.id ?? 'null'}-${m.createdAtDate.millisecondsSinceEpoch}';
+          if (seen.add(key)) deduped.add(m);
+        }
 
         chatMessagesModel = ChatMessagesModel(
           success: newData.success,
           message: newData.message,
           data: Data(
-            friend: newData.data?.friend,
-            messages: combinedData,
+            friend: chatMessagesModel.data?.friend ?? newData.data?.friend,
+            messages: deduped,
           ),
           settings: newData.settings,
         );
 
         _hasNextPage = newData.settings?.nextPage ?? false;
-        debugPrint('getMoreMessages: Page $_currentPage loaded, hasNextPage=$_hasNextPage, new messages=${newMessages.length}');
         emit(ChatMessagesLoaded(chatMessagesModel, _hasNextPage));
       } else {
         _hasNextPage = false;
-        debugPrint('getMoreMessages: No more messages, hasNextPage=$_hasNextPage');
         emit(ChatMessagesLoaded(chatMessagesModel, _hasNextPage));
       }
     } catch (e) {
-      debugPrint('getMoreMessages error: $e');
       emit(ChatMessagesFailure(e.toString()));
     } finally {
       _isLoadingMore = false;

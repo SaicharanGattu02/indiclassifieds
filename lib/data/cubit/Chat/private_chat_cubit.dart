@@ -46,10 +46,7 @@ class PrivateChatCubit extends Cubit<PrivateChatState> {
 
     // Add listeners
     _socket.on('receive_private_message', _onReceiveMessage);
-    _socket.on('user_typing', _onUserTyping); // Listen for user_typing event
-    // Some servers emit 'typing', others 'peer_typing' — listen to both
-    _socket.on('typing', _onPeerTyping);
-
+    _socket.on('user_typing', _onUserTyping);
     _socket.on('connect', (_) {
       AppLogger.info('[socket] connected: ${_socket.id}');
       _joinRoom();
@@ -247,8 +244,8 @@ class PrivateChatCubit extends Cubit<PrivateChatState> {
     AppLogger.info('[socket] Start typing...');
     _sendTyping();
     _typingDebounce?.cancel();
-    _typingDebounce = Timer(const Duration(milliseconds: 500), () {
-      _sendTyping();
+    _typingDebounce = Timer(const Duration(milliseconds: 1000), () {
+      _socket.off('typing', _onPeerTyping);
     });
   }
 

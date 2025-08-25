@@ -59,17 +59,14 @@ class _ChatScreenState extends State<ChatScreen> {
 
     // Detect when the user scrolls near the top to load more messages
     _scrollController.addListener(() {
-      if (_scrollController.position.pixels <=
-              _scrollController.position.minScrollExtent + 100 &&
-          !_isLoadingMore &&
-          _hasMoreMessages) {
-        debugPrint('Triggering getMoreMessages');
-        setState(() {
-          _isLoadingMore = true;
-        });
+      final pos = _scrollController.position;
+      // near top (older side) for reverse:true
+      if (pos.pixels >= pos.maxScrollExtent - 100 && !_isLoadingMore && _hasMoreMessages) {
+        setState(() => _isLoadingMore = true);
         context.read<ChatMessagesCubit>().getMoreMessages(widget.receiverId);
       }
     });
+
   }
 
   @override
@@ -80,14 +77,14 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _scrollToBottom() {
-    if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
-    }
+    if (!_scrollController.hasClients) return;
+    _scrollController.animateTo(
+      _scrollController.position.minScrollExtent, // bottom with reverse:true
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeOut,
+    );
   }
+
 
   Color _meBubble(BuildContext context) {
     final dark = ThemeHelper.isDarkMode(context);
@@ -180,93 +177,75 @@ class _ChatScreenState extends State<ChatScreen> {
                         },
                       ),
                     ],
-                    child: BlocBuilder<ChatMessagesCubit, ChatMessagesStates>(
-                      builder: (context, historyState) {
-                        final history = <Messages>[];
-                        if (historyState is ChatMessagesLoaded) {
-                          final list =
-                              historyState.chatMessages.data?.messages ?? [];
-                          history.addAll(list);
-                          history.sort(
-                            (a, b) => a.createdAtDate.compareTo(b.createdAtDate),
-                          );
-                        } else if (historyState is ChatMessagesLoadingMore) {
-                          final list =
-                              historyState.chatMessages.data?.messages ?? [];
-                          history.addAll(list);
-                          history.sort(
-                            (a, b) =>
-                                a.createdAtDate.compareTo(b.createdAtDate),
-                          );
-                        }
+                      child: BlocBuilder<ChatMessagesCubit, ChatMessagesStates>(
+                        builder: (context, historyState) {
+                          final history = <Messages>[];
 
-                        return BlocBuilder<PrivateChatCubit, PrivateChatState>(
-                          builder: (context, liveState) {
-                            final all = <Messages>[];
-                            final seen = <String>{};
+                          // ⬇️ use data as-is; don't re-sort ascending
+                          if (historyState is ChatMessagesLoaded) {
+                            history.addAll(historyState.chatMessages.data?.messages ?? const []);
+                          } else if (historyState is ChatMessagesLoadingMore) {
+                            history.addAll(historyState.chatMessages.data?.messages ?? const []);
+                          }
 
-                            for (final m in history) {
-                              final key = (m.id ?? m.createdAt.hashCode)
-                                  .toString();
-                              if (seen.add(key)) all.add(m);
-                            }
+                          return BlocBuilder<PrivateChatCubit, PrivateChatState>(
+                            builder: (context, liveState) {
+                              final all = <Messages>[];
+                              final seen = <String>{};
 
-                            for (final m in liveState.messages) {
-                              final key = (m.id ?? m.createdAt.hashCode)
-                                  .toString();
-                              if (seen.add(key)) all.add(m);
-                            }
+                              void addMsg(Messages m) {
+                                final key = (m.id?.toString() ?? m.createdAt.toString());
+                                if (seen.add(key)) all.add(m);
+                              }
 
-                            if (liveState.isPeerTyping) {
-                              all.add(
-                                Messages(
-                                  id: -1,
-                                  senderId: int.tryParse(widget.receiverId),
-                                  receiverId: int.tryParse(
-                                    widget.currentUserId,
+                              // history (from API/cubit)
+                              for (final m in history) {
+                                addMsg(m);
+                              }
+                              // live socket messages
+                              for (final m in liveState.messages) {
+                                addMsg(m);
+                              }
+
+                              // ephemeral typing bubble
+                              if (liveState.isPeerTyping) {
+                                addMsg(
+                                  Messages(
+                                    id: -1,
+                                    senderId: int.tryParse(widget.receiverId),
+                                    receiverId: int.tryParse(widget.currentUserId),
+                                    type: 'typing',
+                                    message: '',
+                                    createdAt: DateTime.now().toIso8601String(),
                                   ),
-                                  type: 'typing',
-                                  message: '',
-                                  createdAt: DateTime.now().toIso8601String(),
-                                ),
+                                );
+                              }
+
+                              // ✅ keep NEWEST → OLDEST (DESC) for reverse:true
+                              all.sort((a, b) => b.createdAtDate.compareTo(a.createdAtDate));
+
+                              return ListView.builder(
+                                controller: _scrollController,
+                                reverse: true, // newest at bottom
+                                itemCount: all.length + (_hasMoreMessages && _isLoadingMore ? 1 : 0),
+                                itemBuilder: (context, index) {
+                                  // loader at "top" (end of list when reverse:true)
+                                  if (_hasMoreMessages && _isLoadingMore && index == all.length) {
+                                    return const Padding(
+                                      padding: EdgeInsets.symmetric(vertical: 10),
+                                      child: Center(child: CircularProgressIndicator()),
+                                    );
+                                  }
+
+                                  final msg = all[index];
+                                  final isMe = (msg.senderId?.toString() ?? '') == widget.currentUserId;
+                                  return _buildMessageBubble(context, msg, isMe);
+                                },
                               );
-                            }
-
-                            all.sort(
-                              (a, b) =>
-                                  a.createdAtDate.compareTo(b.createdAtDate),
-                            );
-
-                            return ListView.builder(
-                              controller: _scrollController,
-                              itemCount:
-                                  all.length +
-                                  (_hasMoreMessages && _isLoadingMore ? 1 : 0),
-                              reverse: true,
-                              itemBuilder: (context, index) {
-                                // Show loader at the top (last index in reversed list)
-                                if (_hasMoreMessages &&
-                                    _isLoadingMore &&
-                                    index == all.length) {
-                                  return const Padding(
-                                    padding: EdgeInsets.symmetric(vertical: 10),
-                                    child: Center(
-                                      child: CircularProgressIndicator(),
-                                    ),
-                                  );
-                                }
-
-                                final msg = all[index];
-                                final isMe =
-                                    (msg.senderId?.toString() ?? '') ==
-                                    widget.currentUserId;
-                                return _buildMessageBubble(context, msg, isMe);
-                              },
-                            );
-                          },
-                        );
-                      },
-                    ),
+                            },
+                          );
+                        },
+                      )
                   ),
                 ),
                 _buildInputArea(context),
