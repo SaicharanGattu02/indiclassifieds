@@ -433,7 +433,7 @@ class _JobsAdState extends State<JobsAd> {
                               isLoading: state is JobsAdLoading ||
                                   updateState is MarkAsListingUpdateLoading,
                               text: 'Submit Ad',
-                              onPlusTap: isEligible
+                              onPlusTap: !isEligible
                                   ? () {
                                 if (_formKey.currentState?.validate() ?? false) {
                                   final Map<String, dynamic> data = {

@@ -1,88 +1,77 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:indiclassifieds/data/cubit/Wishlist/wishlist_repository.dart';
-import 'package:indiclassifieds/data/cubit/Wishlist/wishlist_states.dart';
+import 'package:indiclassifieds/data/cubit/Transections/transactions_repository.dart';
+import 'package:indiclassifieds/data/cubit/Transections/transactions_states.dart';
+import 'package:indiclassifieds/model/TransectionHistoryModel.dart';
 
-import '../../../model/SubcategoryProductsModel.dart';
-import '../../../model/WishlistModel.dart';
 
-class WishlistCubit extends Cubit<WishlistStates> {
-  final WishlistRepository wishlistRepository;
-  WishlistCubit(this.wishlistRepository) : super(WishlistInitially());
+class TransactionCubit extends Cubit<TransactionsStates> {
+  final TransactionsRepository transactionRepository;
+  TransactionCubit(this.transactionRepository) : super(TransactionsInitially());
 
-  WishlistModel wishlistModel = WishlistModel();
+  TransectionHistoryModel transectionHistoryModel = TransectionHistoryModel();
 
   int _currentPage = 1;
   bool _hasNextPage = true;
   bool _isLoadingMore = false;
 
-  /// Initial fetch (reset to page 1)
-  Future<void> getWishlist() async {
-    emit(WishlistLoading());
+
+  Future<void> getTransactions() async {
+    emit(TransactionsLoading());
     _currentPage = 1;
 
     try {
-      final response = await wishlistRepository.getWishlist(
-        _currentPage, // 👈 pass page number
-      );
+      final response = await transactionRepository.getTransactions(_currentPage);
 
       if (response != null && response.success == true) {
-        wishlistModel = response;
+        transectionHistoryModel = response;
         _hasNextPage = response.settings?.nextPage ?? false;
 
-        emit(WishlistLoaded(wishlistModel, _hasNextPage));
+        emit(TransactionsLoaded(transectionHistoryModel, _hasNextPage));
       } else {
-        emit(WishlistFailure(response?.message ?? "Failed to load wishlist"));
+        emit(TransactionsFailure(response?.message ?? "Failed to load transactions"));
       }
     } catch (e) {
-      emit(WishlistFailure(e.toString()));
+      emit(TransactionsFailure(e.toString()));
     }
   }
 
-  /// Load more wishlist items (pagination)
-  Future<void> getMoreWishlist() async {
+
+  Future<void> getMoreTransactions() async {
     if (_isLoadingMore || !_hasNextPage) return;
 
     _isLoadingMore = true;
     _currentPage++;
 
-    emit(WishlistLoadingMore(wishlistModel, _hasNextPage));
+    emit(TransactionsLoadingMore(transectionHistoryModel, _hasNextPage));
 
     try {
-      final newData = await wishlistRepository.getWishlist(
-        _currentPage, // 👈 pass next page
-      );
+      final newData = await transactionRepository.getTransactions(_currentPage);
 
-      if (newData != null && newData.productslist?.isNotEmpty == true) {
-        final combinedData = List<ProductsList>.from(
-          wishlistModel.productslist ?? [],
-        )..addAll(newData.productslist!);
+      if (newData != null && newData.data?.formattedRows?.isNotEmpty == true) {
+        // merge old + new rows
+        final combinedRows = List<FormattedRows>.from(
+          transectionHistoryModel.data?.formattedRows ?? [],
+        )..addAll(newData.data!.formattedRows!);
 
-        wishlistModel = WishlistModel(
+        transectionHistoryModel = TransectionHistoryModel(
           success: newData.success,
           message: newData.message,
-          productslist: combinedData,
+          data: Data(
+            totalPayments: newData.data?.totalPayments,
+            totalSuccess: newData.data?.totalSuccess,
+            formattedRows: combinedRows,
+          ),
           settings: newData.settings,
         );
 
         _hasNextPage = newData.settings?.nextPage ?? false;
 
-        emit(WishlistLoaded(wishlistModel, _hasNextPage));
+        emit(TransactionsLoaded(transectionHistoryModel, _hasNextPage));
       }
     } catch (e) {
-      print("Wishlist pagination error: $e");
+      print("Transaction pagination error: $e");
     } finally {
       _isLoadingMore = false;
     }
-  }
-
-  void updateWishlistStatus(int productId, bool isLiked) {
-    // 👉 unfavorited → remove it from the list
-    final updatedProducts = wishlistModel.productslist
-        ?.where((p) => p.id != productId)
-        .toList();
-
-    wishlistModel = wishlistModel.copyWith(productslist: updatedProducts);
-
-    emit(WishlistLoaded(wishlistModel, _hasNextPage));
   }
 }

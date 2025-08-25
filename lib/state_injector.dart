@@ -30,6 +30,8 @@ import 'package:indiclassifieds/data/cubit/Profile/profile_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Profile/profile_repo.dart';
 import 'package:indiclassifieds/data/cubit/Register/register_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Register/register_repo.dart';
+import 'package:indiclassifieds/data/cubit/Transections/transactions_cubit.dart';
+import 'package:indiclassifieds/data/cubit/Transections/transactions_repository.dart';
 import 'package:indiclassifieds/data/cubit/UpdateProfile/update_profile_cubit.dart';
 import 'package:indiclassifieds/data/cubit/UserActivePlans/user_active_plans_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Wishlist/wishlist_cubit.dart';
@@ -225,6 +227,11 @@ class StateInjector {
         remoteDataSource: context.read<RemoteDataSource>(),
       ),
     ),
+    RepositoryProvider<TransactionsRepository>(
+      create: (context) => TransactionsImpl(
+        remoteDataSource: context.read<RemoteDataSource>(),
+      ),
+    ),
 
   ];
 
@@ -371,6 +378,9 @@ class StateInjector {
     ),
     BlocProvider<ProductsCubit1>(
       create: (context) => ProductsCubit1(context.read<ProductsRepo>()),
+    ),
+    BlocProvider<TransactionCubit>(
+      create: (context) => TransactionCubit(context.read<TransactionsRepository>()),
     ),
 
     BlocProvider<DashboardCubit>(

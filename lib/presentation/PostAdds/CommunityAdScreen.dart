@@ -396,7 +396,7 @@ class _CommunityAdScreenState extends State<CommunityAdScreen> {
                                 state is CommunityAdLoading ||
                                 updateState is MarkAsListingUpdateLoading,
                             text: 'Submit Ad',
-                            onPlusTap: isEligible
+                            onPlusTap: !isEligible
                                 ? () {
                                     if (_formKey.currentState?.validate() ??
                                         false) {

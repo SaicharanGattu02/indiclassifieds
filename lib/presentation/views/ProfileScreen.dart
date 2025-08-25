@@ -39,7 +39,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final isSystem = mode == AppThemeMode.system;
     final platformIsDark = MediaQuery.of(context).platformBrightness == Brightness.dark;
 
-// What the switch visually shows right now:
+
     final effectiveDark = mode == AppThemeMode.dark || (isSystem && platformIsDark);
     return Scaffold(
       backgroundColor: bgColor,
@@ -160,6 +160,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Icons.favorite,
                     Colors.red.shade100,
                     'Wishlist',
+                    isDark,
+                    textColor,
+                    trailing: Icons.arrow_forward_ios,
+                  ),
+                  _settingsTile(
+                    onTap: () {
+                      context.push('/transactions');
+                    },
+                    Icons.receipt_long,
+                    Colors.blue.shade100,
+                    'Transaction History',
                     isDark,
                     textColor,
                     trailing: Icons.arrow_forward_ios,

@@ -489,7 +489,7 @@ class _MobileAdState extends State<MobileAd> {
                                 state is MobileAdLoading ||
                                 updateState is MarkAsListingUpdateLoading,
                             text: 'Submit Ad',
-                            onPlusTap: isEligible
+                            onPlusTap: !isEligible
                                 ? () {
                                     if (_formKey.currentState?.validate() ??
                                         false) {

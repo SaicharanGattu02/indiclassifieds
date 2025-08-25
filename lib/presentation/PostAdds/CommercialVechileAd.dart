@@ -431,7 +431,7 @@ class _CommercialVehicleAdState extends State<CommercialVehicleAd> {
                               isLoading: state is CommercialVehileAdLoading ||
                                   updateState is MarkAsListingUpdateLoading,
                               text: 'Submit Ad',
-                              onPlusTap: isEligible
+                              onPlusTap: !isEligible
                                   ? () {
                                 if (_images.isEmpty &&
                                     (widget.editId == null ||

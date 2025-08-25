@@ -81,7 +81,7 @@ class ImagePickerHelper {
                   title:  Text(
                     'Choose from Gallery',
                     style: TextStyle(
-                      fontFamily: 'Poppins',
+
                       fontSize: 16,
                       color: textColor,
                       fontWeight: FontWeight.w400,
@@ -102,7 +102,6 @@ class ImagePickerHelper {
                   title:  Text(
                     'Take a Photo',
                     style: TextStyle(
-                      fontFamily: 'Poppins',
                       fontSize: 16,
                       color: textColor,
                       fontWeight: FontWeight.w400,
@@ -223,7 +222,7 @@ class _CommonImagePickerState extends State<CommonImagePicker> {
                         Text(
                           '+ Add Photos (${widget.maxImages})',
                           style: TextStyle(
-                            fontFamily: 'Poppins',
+
                             fontSize: 14,
                             color: widget.textColor.withOpacity(0.6),
                           ),
@@ -339,7 +338,7 @@ class _CommonImagePickerState extends State<CommonImagePicker> {
                             Text(
                               'Add Photo',
                               style: TextStyle(
-                                fontFamily: 'Poppins',
+
                                 fontSize: 12,
                                 color: widget.textColor.withOpacity(0.6),
                               ),

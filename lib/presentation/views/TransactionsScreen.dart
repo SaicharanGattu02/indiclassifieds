@@ -1,97 +1,163 @@
-// import 'package:flutter/material.dart';
-// import 'package:indiclassifieds/Components/CutomAppBar.dart';
-// import '../../theme/ThemeHelper.dart';
-//
-// class TransactionsScreen extends StatefulWidget {
-//   const TransactionsScreen({super.key});
-//
-//   @override
-//   State<TransactionsScreen> createState() => _TransactionsScreenState();
-// }
-//
-// class _TransactionsScreenState extends State<TransactionsScreen> {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       backgroundColor: ThemeHelper.backgroundColor(context),
-//       appBar: CustomAppBar1(title: "Transection History", actions: []),
-//       body: ListView.builder(
-//               padding: const EdgeInsets.all(12),
-//               itemCount: widget.transactions.length,
-//               itemBuilder: (context, index) {
-//                 final tx = widget.transactions[index];
-//                 final bool isSuccess = tx["payment_status"] == "success";
-//
-//                 return Card(
-//                   color: ThemeHelper.cardColor(context),
-//                   shape: RoundedRectangleBorder(
-//                     borderRadius: BorderRadius.circular(10),
-//                   ),
-//                   margin: const EdgeInsets.only(bottom: 12),
-//                   child: ListTile(
-//                     contentPadding: const EdgeInsets.all(12),
-//                     title: Text(
-//                       tx["plan_name"] ?? "Unknown Plan",
-//                       style: TextStyle(
-//                         fontWeight: FontWeight.bold,
-//                         color: ThemeHelper.textColor(context),
-//                       ),
-//                     ),
-//                     subtitle: Column(
-//                       crossAxisAlignment: CrossAxisAlignment.start,
-//                       children: [
-//                         const SizedBox(height: 6),
-//                         Text(
-//                           "Amount: \$${tx["amount_paid"]}",
-//                           style: TextStyle(
-//                             color: ThemeHelper.textColor(
-//                               context,
-//                             ).withOpacity(0.8),
-//                           ),
-//                         ),
-//                         Text(
-//                           "Paid on: ${tx["paid_on"].toString().split("T").first}",
-//                           style: TextStyle(
-//                             color: ThemeHelper.textColor(
-//                               context,
-//                             ).withOpacity(0.6),
-//                           ),
-//                         ),
-//                         if (tx["start_date"] != null && tx["end_date"] != null)
-//                           Text(
-//                             "Valid: ${tx["start_date"]} → ${tx["end_date"]}",
-//                             style: TextStyle(
-//                               color: ThemeHelper.textColor(
-//                                 context,
-//                               ).withOpacity(0.6),
-//                             ),
-//                           ),
-//                       ],
-//                     ),
-//                     trailing: Container(
-//                       padding: const EdgeInsets.symmetric(
-//                         horizontal: 10,
-//                         vertical: 6,
-//                       ),
-//                       decoration: BoxDecoration(
-//                         color: isSuccess
-//                             ? Colors.green.withOpacity(0.2)
-//                             : Colors.orange.withOpacity(0.2),
-//                         borderRadius: BorderRadius.circular(8),
-//                       ),
-//                       child: Text(
-//                         tx["payment_status"].toString().toUpperCase(),
-//                         style: TextStyle(
-//                           color: isSuccess ? Colors.green : Colors.orange,
-//                           fontWeight: FontWeight.bold,
-//                           fontSize: 12,
-//                         ),
-//                       ),
-//                     ),
-//                   ),
-//                 );
-//               },
-//             ),
-//     );
-//   }
-// }
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:indiclassifieds/Components/CutomAppBar.dart';
+import 'package:indiclassifieds/data/cubit/Transections/transactions_cubit.dart';
+import 'package:indiclassifieds/data/cubit/Transections/transactions_states.dart';
+import 'package:indiclassifieds/model/TransectionHistoryModel.dart';
+import '../../theme/ThemeHelper.dart';
+import '../../widgets/CommonLoader.dart';
+
+class TransactionsScreen extends StatefulWidget {
+  const TransactionsScreen({super.key});
+
+  @override
+  State<TransactionsScreen> createState() => _TransactionsScreenState();
+}
+
+class _TransactionsScreenState extends State<TransactionsScreen> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<TransactionCubit>().getTransactions();
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 200) {
+        context.read<TransactionCubit>().getMoreTransactions();
+      }
+    });
+  }
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: ThemeHelper.backgroundColor(context),
+      appBar: CustomAppBar1(title: "Transaction History", actions: []),
+      body: BlocBuilder<TransactionCubit, TransactionsStates>(
+        builder: (context, state) {
+          if (state is TransactionsLoading) {
+            return const Center(child: DottedProgressWithLogo());
+          } else if (state is TransactionsFailure) {
+            return Center(child: Text(state.error));
+          } else if (state is TransactionsLoaded ||
+              state is TransactionsLoadingMore) {
+            final model = (state as dynamic).transactionModel;
+            final rows = model.data?.formattedRows ?? [];
+            final hasNextPage = (state as dynamic).hasNextPage;
+
+            if (rows.isEmpty) {
+              return const Center(child: Text("No transactions found"));
+            }
+
+            return CustomScrollView(
+              controller: _scrollController,
+              slivers: [
+                SliverPadding(
+                  padding: const EdgeInsets.all(12),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                        if (index == rows.length) {
+                          // Pagination loader
+                          return hasNextPage
+                              ? const Padding(
+                            padding: EdgeInsets.all(16),
+                            child: Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          )
+                              : const SizedBox.shrink();
+                        }
+
+                        final FormattedRows tx = rows[index];
+                        final bool isSuccess =
+                            (tx.paymentStatus ?? "").toLowerCase() == "success";
+
+                        return Card(
+                          color: ThemeHelper.cardColor(context),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          margin: const EdgeInsets.only(bottom: 12),
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.all(12),
+                            title: Text(
+                              tx.planName ?? "Unknown Plan",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: ThemeHelper.textColor(context),
+                              ),
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 6),
+                                Text(
+                                  "Amount: \₹${tx.amountPaid ?? 0}",
+                                  style: TextStyle(fontWeight: FontWeight.w700,
+                                    color: ThemeHelper.textColor(context)
+                                        .withOpacity(0.8),
+                                  ),
+                                ),
+                                if (tx.paidOn != null)
+                                  Text(
+                                    "Paid on: ${tx.paidOn!.split("T").first}",
+                                    style: TextStyle(
+                                      color: ThemeHelper.textColor(context)
+                                          .withOpacity(0.6),
+                                    ),
+                                  ),
+                                if (tx.startDate != null && tx.endDate != null)
+                                  Text(
+                                    "Valid: ${tx.startDate} → ${tx.endDate}",
+                                    style: TextStyle(
+                                      color: ThemeHelper.textColor(context)
+                                          .withOpacity(0.6),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            trailing: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isSuccess
+                                    ? Colors.green.withOpacity(0.2)
+                                    : Colors.orange.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                (tx.paymentStatus ?? "").toUpperCase(),
+                                style: TextStyle(
+                                  color:
+                                  isSuccess ? Colors.green : Colors.orange,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                      childCount: rows.length + 1,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          }
+
+          return const SizedBox();
+        },
+      ),
+    );
+  }
+}

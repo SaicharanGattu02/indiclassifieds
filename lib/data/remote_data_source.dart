@@ -83,7 +83,7 @@ abstract class RemoteDataSource {
   Future<AdSuccessModel?> register(Map<String, dynamic> data);
   Future<ChatUsersModel?> getChatUsers(String query);
   Future<ChatMessagesModel?> getChatMessages(String user_id, int page);
-  Future<TransectionHistoryModel?> getTransections();
+  Future<TransectionHistoryModel?> getTransections(int page);
 }
 
 class RemoteDataSourceImpl implements RemoteDataSource {
@@ -178,7 +178,7 @@ class RemoteDataSourceImpl implements RemoteDataSource {
     }
   }
   @override
-  Future<TransectionHistoryModel?> getTransections() async {
+  Future<TransectionHistoryModel?> getTransections(int page) async {
     try {
       Response response = await ApiClient.get(
         "${APIEndpointUrls.get_transection_history}",

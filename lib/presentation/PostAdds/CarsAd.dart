@@ -483,7 +483,7 @@ class _CarsAdState extends State<CarsAd> {
                                   updateState is MarkAsListingUpdateLoading,
                               text: 'Submit Ad',
                               onPlusTap: () {
-                                if (isEligible) {
+                                if (!isEligible) {
                                   if (_formKey.currentState?.validate() ?? false) {
                                     final Map<String, dynamic> data = {
                                       "title": titleController.text,

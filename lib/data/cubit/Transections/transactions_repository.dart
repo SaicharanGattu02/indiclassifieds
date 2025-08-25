@@ -2,24 +2,20 @@ import 'package:indiclassifieds/data/remote_data_source.dart';
 import 'package:indiclassifieds/model/AddToWishlistModel.dart';
 import 'package:indiclassifieds/model/SubcategoryProductsModel.dart';
 
+import '../../../model/TransectionHistoryModel.dart';
 import '../../../model/WishlistModel.dart';
 
-abstract class WishlistRepository {
-  Future<WishlistModel?> getWishlist(int page);
-  Future<AddToWishlistModel?> addToWishlist(int product_id);
+abstract class TransactionsRepository {
+  Future<TransectionHistoryModel?> getTransactions(int page);
+
 }
 
-class WishlistRepositoryImpl implements WishlistRepository {
+class TransactionsImpl implements TransactionsRepository {
   RemoteDataSource remoteDataSource;
-  WishlistRepositoryImpl({required this.remoteDataSource});
+  TransactionsImpl({required this.remoteDataSource});
 
   @override
-  Future<WishlistModel?> getWishlist(int page) async {
-    return await remoteDataSource.getWishlistProducts(page);
-  }
-
-  @override
-  Future<AddToWishlistModel?> addToWishlist(int product_id) async {
-    return await remoteDataSource.addToWishlist(product_id);
+  Future<TransectionHistoryModel?> getTransactions(int page) async {
+    return await remoteDataSource.getTransections(page);
   }
 }

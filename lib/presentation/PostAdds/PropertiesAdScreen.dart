@@ -608,7 +608,7 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
                             state is PropertyAdLoading ||
                             updateState is MarkAsListingUpdateLoading,
                         text: 'Submit Ad',
-                        onPlusTap: isEligible
+                        onPlusTap: !isEligible
                             ? () {
                                 if (_formKey.currentState?.validate() ??
                                     false) {

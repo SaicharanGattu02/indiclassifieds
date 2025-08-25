@@ -151,213 +151,220 @@ class AdCardDynamic extends StatelessWidget {
               ),
             ],
           ),
-          const Divider(height: 24, thickness: 0.5),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+          Column(
             children: [
-          if ((ad.status ?? '').toLowerCase() == "pending") ...[
-              ActionButton(
-                icon: Icons.edit_outlined,
-                label: 'Edit',
-                onTap: () {
-                  context.push(
-                    '/${ad.category?.path??""}?catId=${ad.categoryId}&CatName=${ad.category?.name}&subCatId=${ad.subCategoryId}&SubCatName=${ad.subCategory?.name ?? ""}&editId=${ad.id}',
-                  );
-                },
-              ),
-              ],
-              if ((ad.status ?? '').toLowerCase() == "pending") ...[
-                ActionButton(
-                  icon: Icons.delete_outline,
-                  label: 'Delete',
-                  textColor: Colors.grey.shade600,
-                  onTap: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          elevation: 8,
-                          backgroundColor: Colors.white,
-                          title: const Text(
-                            'Confirm Deletion',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
-                              fontFamily: 'Inter',
-                              color: Colors.black87,
-                            ),
-                          ),
-                          content: const Text(
-                            'Are you sure you want to delete this item? This action cannot be undone.',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.black54,
-                              fontFamily: 'Inter',
-                            ),
-                          ),
-                          actions: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: CustomAppButton(
-                                    text: 'Cancel',
-                                    onPlusTap: () {
-                                      context.pop();
-                                    },
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child:
-                                      BlocConsumer<
-                                        MarkAsListingCubit,
-                                        MarkAsListingState
-                                      >(
-                                        listener:
-                                            (context, deleteExpenseState) {
-                                              if (deleteExpenseState
-                                                  is MarkAsListingDeleted) {
-                                                context
-                                                    .read<MyAdsCubit>()
-                                                    .getMyAds("pending");
-                                                context.pop();
-                                              } else if (deleteExpenseState
-                                                  is MarkAsListingFailure) {
-                                                CustomSnackBar1.show(
-                                                  context,
-                                                  deleteExpenseState.error,
-                                                );
-                                              }
-                                            },
-                                        builder: (context, deleteExpenseState) {
-                                          return CustomAppButton1(
-                                            onPlusTap: () {
-                                              context
-                                                  .read<MarkAsListingCubit>()
-                                                  .markAsDelete(ad.id ?? 0);
-                                            },
-                                            text: 'Delete',
-                                            isLoading:
-                                                deleteExpenseState
-                                                    is MarkAsListingLoading,
-                                          );
-                                        },
-                                      ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        );
-                        ;
-                      },
-                    );
-                  },
-                ),
-              ],
+              const Divider(height: 24, thickness: 0.5),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
 
-              // ActionButton(
-              //   icon: Icons.campaign_outlined,
-              //   label: 'Promote',
-              //   onTap: () {},
-              // ),
-
-              if ((ad.status ?? '').toLowerCase() == "approved") ...[
-                if (ad.sold == true)
-                  const Text(
-                    "Sold Out",
-                    style: TextStyle(color: Colors.red),
-                  )
-                else
+                  if ((ad.status ?? '').toLowerCase() == "pending" ||
+                      (ad.status ?? '').toLowerCase() == "approved") ...[
                   ActionButton(
-                    icon: Icons.sell_outlined,
-                    label: 'Mark Sold',
+                    icon: Icons.edit_outlined,
+                    label: 'Edit',
                     onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            elevation: 8,
-                            backgroundColor: Colors.white,
-                            title: const Text(
-                              'Confirm Mark as Sold',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                                fontFamily: 'Inter',
-                                color: Colors.black87,
-                              ),
-                            ),
-                            content: const Text(
-                              'Are you sure you want to mark this item as sold? This action cannot be undone.',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.black54,
-                                fontFamily: 'Inter',
-                              ),
-                            ),
-                            actions: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: CustomAppButton(
-                                      text: 'Cancel',
-                                      onPlusTap: () {
-                                        context.pop();
-                                      },
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child:
-                                        BlocConsumer<
-                                          MarkAsListingCubit,
-                                          MarkAsListingState
-                                        >(
-                                          listener: (context, markSoldState) {
-                                            if (markSoldState
-                                                is MarkAsListingSuccess) {
-                                              context
-                                                  .read<MyAdsCubit>()
-                                                  .getMyAds("approved");
-                                              context.pop();
-                                            } else if (markSoldState
-                                                is MarkAsListingFailure) {
-                                              CustomSnackBar1.show(
-                                                context,
-                                                markSoldState.error,
-                                              );
-                                            }
-                                          },
-                                          builder: (context, markSoldState) {
-                                            return CustomAppButton1(
-                                              onPlusTap: () {
-                                                context
-                                                    .read<MarkAsListingCubit>()
-                                                    .markAsSold(ad.id ?? 0);
-                                              },
-                                              text: 'Mark Sold',
-                                              isLoading:
-                                                  markSoldState
-                                                      is MarkAsListingLoading,
-                                            );
-                                          },
-                                        ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          );
-                        },
+                      context.push(
+                        '/${ad.category?.path??""}?catId=${ad.categoryId}&CatName=${ad.category?.name}&subCatId=${ad.subCategoryId}&SubCatName=${ad.subCategory?.name ?? ""}&editId=${ad.id}',
                       );
                     },
                   ),
-              ],
+                  ],
+                  if ((ad.status ?? '').toLowerCase() == "pending") ...[
+                    ActionButton(
+                      icon: Icons.delete_outline,
+                      label: 'Delete',
+                      textColor: Colors.grey.shade600,
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              elevation: 8,
+                              backgroundColor: Colors.white,
+                              title: const Text(
+                                'Confirm Deletion',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                  fontFamily: 'Inter',
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              content: const Text(
+                                'Are you sure you want to delete this item? This action cannot be undone.',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.black54,
+                                  fontFamily: 'Inter',
+                                ),
+                              ),
+                              actions: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: CustomAppButton(
+                                        text: 'Cancel',
+                                        onPlusTap: () {
+                                          context.pop();
+                                        },
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child:
+                                          BlocConsumer<
+                                            MarkAsListingCubit,
+                                            MarkAsListingState
+                                          >(
+                                            listener:
+                                                (context, deleteExpenseState) {
+                                                  if (deleteExpenseState
+                                                      is MarkAsListingDeleted) {
+                                                    context
+                                                        .read<MyAdsCubit>()
+                                                        .getMyAds("pending");
+                                                    context.pop();
+                                                  } else if (deleteExpenseState
+                                                      is MarkAsListingFailure) {
+                                                    CustomSnackBar1.show(
+                                                      context,
+                                                      deleteExpenseState.error,
+                                                    );
+                                                  }
+                                                },
+                                            builder: (context, deleteExpenseState) {
+                                              return CustomAppButton1(
+                                                onPlusTap: () {
+                                                  context
+                                                      .read<MarkAsListingCubit>()
+                                                      .markAsDelete(ad.id ?? 0);
+                                                },
+                                                text: 'Delete',
+                                                isLoading:
+                                                    deleteExpenseState
+                                                        is MarkAsListingLoading,
+                                              );
+                                            },
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            );
+                            ;
+                          },
+                        );
+                      },
+                    ),
+                  ],
+
+                  // ActionButton(
+                  //   icon: Icons.campaign_outlined,
+                  //   label: 'Promote',
+                  //   onTap: () {},
+                  // ),
+
+                  if ((ad.status ?? '').toLowerCase() == "approved") ...[
+                    if (ad.sold == true)
+                      const Text(
+                        "Sold Out",
+                        style: TextStyle(color: Colors.red),
+                      )
+                    else
+                      ActionButton(
+                        icon: Icons.sell_outlined,
+                        label: 'Mark Sold',
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                elevation: 8,
+                                backgroundColor: Colors.white,
+                                title: const Text(
+                                  'Confirm Mark as Sold',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 20,
+                                    fontFamily: 'Inter',
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                                content: const Text(
+                                  'Are you sure you want to mark this item as sold? This action cannot be undone.',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.black54,
+                                    fontFamily: 'Inter',
+                                  ),
+                                ),
+                                actions: [
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: CustomAppButton(
+                                          text: 'Cancel',
+                                          onPlusTap: () {
+                                            context.pop();
+                                          },
+                                        ),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child:
+                                            BlocConsumer<
+                                              MarkAsListingCubit,
+                                              MarkAsListingState
+                                            >(
+                                              listener: (context, markSoldState) {
+                                                if (markSoldState
+                                                    is MarkAsListingSuccess) {
+                                                  context
+                                                      .read<MyAdsCubit>()
+                                                      .getMyAds("approved");
+                                                  context.pop();
+                                                } else if (markSoldState
+                                                    is MarkAsListingFailure) {
+                                                  CustomSnackBar1.show(
+                                                    context,
+                                                    markSoldState.error,
+                                                  );
+                                                }
+                                              },
+                                              builder: (context, markSoldState) {
+                                                return CustomAppButton1(
+                                                  onPlusTap: () {
+                                                    context
+                                                        .read<MarkAsListingCubit>()
+                                                        .markAsSold(ad.id ?? 0);
+                                                  },
+                                                  text: 'Mark Sold',
+                                                  isLoading:
+                                                      markSoldState
+                                                          is MarkAsListingLoading,
+                                                );
+                                              },
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                      ),
+                  ],
+                ],
+              ),
             ],
           ),
         ],

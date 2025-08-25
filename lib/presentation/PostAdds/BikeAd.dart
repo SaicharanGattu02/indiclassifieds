@@ -482,7 +482,7 @@ class _BikeAdState extends State<BikeAd> {
                                 state is BikesAdLoading ||
                                 updateState is MarkAsListingUpdateLoading,
                             text: 'Submit Ad',
-                            onPlusTap: isEligible
+                            onPlusTap: !isEligible
                                 ? () {
                                     if (_formKey.currentState?.validate() ??
                                         false) {

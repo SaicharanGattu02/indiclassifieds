@@ -41,6 +41,7 @@ import '../presentation/views/PostAdvertisementScreen.dart';
 import '../presentation/views/ProfileScreen.dart';
 import '../presentation/views/SelectSubCategory.dart';
 import '../presentation/views/SuccessScreen.dart';
+import '../presentation/views/TransactionsScreen.dart';
 import '../presentation/views/dashboard.dart';
 import '../services/AuthService.dart';
 
@@ -119,6 +120,11 @@ final GoRouter appRouter = GoRouter(
           buildSlideTransitionPage(WishlistListScreen(), state),
     ),
     GoRoute(
+      path: '/transactions',
+      pageBuilder: (context, state) =>
+          buildSlideTransitionPage(TransactionsScreen(), state),
+    ),
+    GoRoute(
       path: '/search_screen',
       pageBuilder: (context, state) {
         return buildSlideTransitionPage(SearchScreen(), state);
@@ -189,12 +195,12 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/successfully',
       pageBuilder: (context, state) {
-        final title = state.uri.queryParameters['title'] ?? "";
-        final subTitle = state.uri.queryParameters['subTitle'] ?? "";
+        // final title = state.uri.queryParameters['title'] ?? "";
+        // final subTitle = state.uri.queryParameters['subTitle'] ?? "";
         final nextRoute = state.uri.queryParameters['next'] ?? "";
 
         return buildSlideTransitionPage(
-          SuccessScreen(title: title, subTitle: subTitle, nextRoute: nextRoute),
+          SuccessScreen( nextRoute: nextRoute),
           state,
         );
       },

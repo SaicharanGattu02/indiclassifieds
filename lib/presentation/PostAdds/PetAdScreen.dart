@@ -479,7 +479,7 @@ class _PetAdScreenState extends State<PetAdScreen> {
                                 state is PetsAdLoading ||
                                 updateState is MarkAsListingUpdateLoading,
                             text: 'Submit Ad',
-                            onPlusTap: isEligible
+                            onPlusTap: !isEligible
                                 ? () {
                                     if (_formKey.currentState?.validate() ??
                                         false) {

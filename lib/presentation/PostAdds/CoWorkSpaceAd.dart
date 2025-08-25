@@ -539,7 +539,7 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
                                 state is CoWorkingAdLoading ||
                                 updateState is MarkAsListingUpdateLoading,
                             text: 'Submit Ad',
-                            onPlusTap: isEligible
+                            onPlusTap: !isEligible
                                 ? () => _submitAd(context)
                                 : () => context.push("/plans"),
                           );

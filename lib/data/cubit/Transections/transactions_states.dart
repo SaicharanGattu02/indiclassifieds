@@ -1,7 +1,4 @@
-import 'package:indiclassifieds/model/SubcategoryProductsModel.dart';
-
-import '../../../model/TransectionHistoryModel.dart';
-import '../../../model/WishlistModel.dart';
+import 'package:indiclassifieds/model/TransectionHistoryModel.dart';
 
 abstract class TransactionsStates {}
 
@@ -10,17 +7,17 @@ class TransactionsInitially extends TransactionsStates {}
 class TransactionsLoading extends TransactionsStates {}
 
 class TransactionsLoadingMore extends TransactionsStates {
-  final TransectionHistoryModel wishlistModel;
+  final TransectionHistoryModel transactionModel;
   final bool hasNextPage;
 
-  TransactionsLoadingMore(this.wishlistModel, this.hasNextPage);
+  TransactionsLoadingMore(this.transactionModel, this.hasNextPage);
 }
 
 class TransactionsLoaded extends TransactionsStates {
-  final TransectionHistoryModel wishlistModel;
+  final TransectionHistoryModel transactionModel;
   final bool hasNextPage;
 
-  TransactionsLoaded(this.wishlistModel, this.hasNextPage);
+  TransactionsLoaded(this.transactionModel, this.hasNextPage);
 }
 
 class TransactionsFailure extends TransactionsStates {

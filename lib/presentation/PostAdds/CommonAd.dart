@@ -417,6 +417,7 @@ class _CommonAdState extends State<CommonAd> {
                 future: AuthService.isEligibleForAd,
                 builder: (context, asyncSnapshot) {
                   final isEligible = asyncSnapshot.data ?? false;
+                  AppLogger.info("isEligible:${isEligible}");
                   return BlocConsumer<MarkAsListingCubit, MarkAsListingState>(
                     listener: (context, updateState) {
                       if (updateState is MarkAsListingSuccess ||
@@ -441,7 +442,7 @@ class _CommonAdState extends State<CommonAd> {
                                 state is CommonAdLoading ||
                                 updateState is MarkAsListingUpdateLoading,
                             text: 'Submit Ad',
-                            onPlusTap: isEligible
+                            onPlusTap: !isEligible
                                 ? () {
                                     if (_formKey.currentState?.validate() ??
                                         false) {
