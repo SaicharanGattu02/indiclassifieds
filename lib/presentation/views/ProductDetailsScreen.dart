@@ -13,6 +13,7 @@ import '../../model/ProductDetailsModel.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../widgets/CommonLoader.dart';
+import '../../widgets/SimilarProducts.dart';
 import '../../widgets/SimilarProductsSection.dart';
 
 extension DetailsX on Details {
@@ -47,7 +48,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   void initState() {
     super.initState();
     context.read<ProductDetailsCubit>().getProductDetails(widget.listingId);
-    context.read<ProductsCubit>().getProducts(
+    context.read<ProductsCubit1>().getProducts(
       subCategoryId: widget.subcategory_id.toString(),
     );
   }
@@ -151,8 +152,6 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   ),
                 ),
               ),
-
-              // ===== Item Information =====
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -553,89 +552,7 @@ class _PostedByCard extends StatelessWidget {
   }
 }
 
-class _SimilarCard extends StatelessWidget {
-  final String title;
-  final String price;
-  final String location;
-  const _SimilarCard({
-    required this.title,
-    required this.price,
-    required this.location,
-  });
 
-  @override
-  Widget build(BuildContext context) {
-    final textColor = ThemeHelper.textColor(context);
-    final cardColor = ThemeHelper.cardColor(context);
-    final borderColor = ThemeHelper.isDarkMode(context)
-        ? Colors.white12
-        : Colors.black12;
-
-    return SizedBox(
-      width: 180,
-      child: Container(
-        decoration: BoxDecoration(
-          color: cardColor,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: borderColor),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AspectRatio(
-              aspectRatio: 16 / 9,
-              child: Container(
-                color: borderColor.withOpacity(.2),
-                child: Icon(
-                  Icons.image,
-                  size: 40,
-                  color: textColor.withOpacity(.6),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 8, 10, 0),
-              child: Text(
-                title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.bodyMedium(
-                  textColor,
-                ).copyWith(fontWeight: FontWeight.w600),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 6, 10, 0),
-              child: Text(
-                price,
-                style: AppTextStyles.bodyMedium(
-                  Colors.blue,
-                ).copyWith(fontWeight: FontWeight.w700),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 6, 10, 10),
-              child: Row(
-                children: [
-                  Icon(Icons.place, size: 14, color: textColor.withOpacity(.6)),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      location,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.bodySmall(textColor.withOpacity(.7)),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 class _BottomCtaBar extends StatelessWidget {
   final VoidCallback onContact;

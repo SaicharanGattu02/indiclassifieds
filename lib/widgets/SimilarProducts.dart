@@ -2,21 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-
-import '../data/cubit/Products/products_cubit.dart';
-
-import '../data/cubit/Products/products_states.dart';
+import '../data/cubit/Products/Product_cubit1.dart';
+import '../data/cubit/Products/products_state1.dart';
 import '../model/SubcategoryProductsModel.dart';
 import '../theme/AppTextStyles.dart';
 import '../theme/ThemeHelper.dart';
 import 'SimilarProductCard.dart';
 
-class SimilarProductsSection1 extends StatefulWidget {
+class SimilarProductsSection extends StatefulWidget {
   final String subCategoryId;
   final int? excludeId;
   final void Function(Products product) onTap;
 
-  const SimilarProductsSection1({
+  const SimilarProductsSection({
     super.key,
     required this.subCategoryId,
     required this.excludeId,
@@ -24,15 +22,14 @@ class SimilarProductsSection1 extends StatefulWidget {
   });
 
   @override
-  State<SimilarProductsSection1> createState() =>
-      _SimilarProductsSection1State();
+  State<SimilarProductsSection> createState() => _SimilarProductsSectionState();
 }
 
-class _SimilarProductsSection1State extends State<SimilarProductsSection1> {
+class _SimilarProductsSectionState extends State<SimilarProductsSection> {
   final _scrollCtrl = ScrollController();
   bool _attachedListener = false;
 
-  ProductsCubit get _cubit => context.read<ProductsCubit>();
+  ProductsCubit1 get _cubit => context.read<ProductsCubit1>();
 
   @override
   void initState() {
@@ -68,18 +65,18 @@ class _SimilarProductsSection1State extends State<SimilarProductsSection1> {
         ? Colors.white12
         : Colors.black12;
 
-    return BlocBuilder<ProductsCubit, ProductsStates>(
+    return BlocBuilder<ProductsCubit1, ProductsStates1>(
       builder: (context, state) {
         SubcategoryProductsModel? model;
         bool hasNextPage = false;
-        if (state is ProductsLoaded) {
+        if (state is Products1Loaded) {
           model = state.productsModel;
           hasNextPage = state.hasNextPage;
-        } else if (state is ProductsLoadingMore) {
+        } else if (state is Products1LoadingMore) {
           model = state.productsModel;
           hasNextPage = state.hasNextPage;
         }
-        if (state is ProductsLoading || state is ProductsInitially) {
+        if (state is Products1Loading || state is Products1Initially) {
           // skeletons
           return ListView.separated(
             controller: _scrollCtrl,
@@ -91,7 +88,7 @@ class _SimilarProductsSection1State extends State<SimilarProductsSection1> {
           );
         }
 
-        if (state is ProductsFailure) {
+        if (state is Products1Failure) {
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Column(
@@ -100,8 +97,7 @@ class _SimilarProductsSection1State extends State<SimilarProductsSection1> {
                 Text(state.error, style: AppTextStyles.bodyMedium(textColor)),
                 const SizedBox(height: 8),
                 OutlinedButton.icon(
-                  onPressed: () =>
-                      _cubit.getProducts(subCategoryId: widget.subCategoryId),
+                  onPressed: () => _cubit.getProducts(subCategoryId: widget.subCategoryId),
                   icon: const Icon(Icons.refresh),
                   label: const Text("Retry"),
                 ),
