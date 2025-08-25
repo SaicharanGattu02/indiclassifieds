@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:indiclassifieds/Components/CustomAppButton.dart';
 import 'package:indiclassifieds/data/cubit/Plans/plans_cubit.dart';
 import 'package:indiclassifieds/utils/color_constants.dart';
+import 'package:indiclassifieds/widgets/CommonLoader.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import '../../Components/CustomSnackBar.dart';
 import '../../data/cubit/Packages/packages_cubit.dart';
@@ -113,7 +114,7 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
       body: BlocBuilder<PlansCubit, PlansStates>(
         builder: (context, state) {
           if (state is PlansLoading) {
-            return const _PlansLoadingView();
+            return Center(child: DottedProgressWithLogo(),);
           }
           if (state is PlansFailure) {
             return _PlansErrorView(
@@ -246,7 +247,7 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
             );
           }
           // initial
-          return const _PlansLoadingView();
+          return Center(child: DottedProgressWithLogo(),);
         },
       ),
     );
@@ -1186,30 +1187,6 @@ List<String> _deriveFeatureBullets(Plans plan) {
     if (dedup.length == 6) break;
   }
   return dedup;
-}
-
-/// —— Loading & Error Views ——
-
-class _PlansLoadingView extends StatelessWidget {
-  const _PlansLoadingView();
-
-  @override
-  Widget build(BuildContext context) {
-    final cardColor = ThemeHelper.cardColor(context);
-    return ListView.separated(
-      padding: const EdgeInsets.all(16),
-      itemCount: 3,
-      separatorBuilder: (_, __) => const SizedBox(height: 18),
-      itemBuilder: (_, __) => Container(
-        height: 220,
-        decoration: BoxDecoration(
-          color: cardColor,
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: const Center(child: CircularProgressIndicator()),
-      ),
-    );
-  }
 }
 
 class _PlansErrorView extends StatelessWidget {

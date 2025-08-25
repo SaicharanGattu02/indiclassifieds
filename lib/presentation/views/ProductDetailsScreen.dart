@@ -54,6 +54,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     );
   }
 
+  String? receiverId;
+  String? receiverName;
+  String? receiverImage;
+
   @override
   void dispose() {
     _pgCtrl.dispose();
@@ -69,10 +73,11 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
       backgroundColor: bgColor,
       appBar: CustomAppBar1(title: 'Details', actions: []),
       bottomNavigationBar: _BottomCtaBar(
-        onContact: () {
-
-        },
+        onContact: () {},
         onChat: () {
+          context.push(
+            '/chat?receiverId=$receiverId&receiverName=$receiverName&receiverImage=$receiverImage',
+          );
         },
       ),
       body: BlocBuilder<ProductDetailsCubit, ProductDetailsStates>(
@@ -99,6 +104,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           final title = listing.title ?? "—";
           final priceStr = _formatINR(listing.price);
           final location = listing.location ?? "—";
+
+          receiverId = data.postedBy?.id.toString() ?? "";
+          receiverName = data.postedBy?.name ?? "";
+          receiverImage = data.postedBy?.image ?? "";
 
           return CustomScrollView(
             slivers: [
@@ -248,8 +257,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     avatarUrl: posted?.image,
                     name: posted?.name ?? "—",
                     postedOn: posted?.postedAt ?? _shortDate(listing.createdAt),
-                    onViewProfile: () {
-                    },
+                    onViewProfile: () {},
                   ),
                 ),
               ),
@@ -555,7 +563,6 @@ class _PostedByCard extends StatelessWidget {
   }
 }
 
-
 class _BottomCtaBar extends StatelessWidget {
   final VoidCallback onContact;
   final VoidCallback onChat;
@@ -570,11 +577,14 @@ class _BottomCtaBar extends StatelessWidget {
         child: Row(
           children: [
             Expanded(
-              child:CustomAppButton1(text: "Contact Seller", onPlusTap: onContact)
+              child: CustomAppButton1(
+                text: "Contact Seller",
+                onPlusTap: onContact,
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: CustomAppButton1(text: "Chat", onPlusTap: onChat)
+              child: CustomAppButton1(text: "Chat", onPlusTap: onChat),
             ),
           ],
         ),

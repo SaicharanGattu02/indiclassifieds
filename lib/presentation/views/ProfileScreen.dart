@@ -411,6 +411,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             // No Button (Filled)
                             SizedBox(
                               width: 100,
+                              height: 45,
                               child: ElevatedButton(
                                 onPressed: () => Navigator.pop(context),
                                 style: ElevatedButton.styleFrom(
@@ -435,6 +436,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             // Yes Button (Outlined)
                             SizedBox(
                               width: 100,
+                              height: 45,
                               child: OutlinedButton(
                                 onPressed: () async {
                                   await AuthService.logout();

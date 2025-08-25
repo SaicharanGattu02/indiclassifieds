@@ -205,7 +205,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 crossAxisCount: 4,
                                 mainAxisSpacing: 12,
                                 crossAxisSpacing: 12,
-                                childAspectRatio: 0.9,
+                                childAspectRatio: 0.8,
                               ),
                           delegate: SliverChildBuilderDelegate(
                             (context, index) {
@@ -243,7 +243,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             fit: BoxFit.cover,
                                             width: SizeConfig.screenWidth * 0.2,
                                             height:
-                                                SizeConfig.screenHeight * 0.04,
+                                                SizeConfig.screenHeight * 0.05,
                                             placeholder: (context, url) =>
                                                 Center(
                                                   child: spinkits
@@ -318,7 +318,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 crossAxisCount: 4,
                                 mainAxisSpacing: 12,
                                 crossAxisSpacing: 12,
-                                childAspectRatio: 0.85,
+                                childAspectRatio: 0.8,
                               ),
                           delegate: SliverChildBuilderDelegate(
                             (context, index) {
@@ -354,7 +354,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             fit: BoxFit.cover,
                                             width: SizeConfig.screenWidth * 0.2,
                                             height:
-                                                SizeConfig.screenHeight * 0.04,
+                                                SizeConfig.screenHeight * 0.05,
                                             placeholder: (context, url) =>
                                                 Center(
                                                   child: spinkits
@@ -436,107 +436,119 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "Products",
-                          style: AppTextStyles.titleLarge(textColor).copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: Color(isDarkMode ? 0xffDDDDDD : 0xff222222),
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            context.push('/products_list');
-                          },
-                          child: Text(
-                            "See All",
-                            style: AppTextStyles.bodyMedium(textColor).copyWith(
-                              fontWeight: FontWeight.w400,
-                              color: Color(
-                                isDarkMode ? 0xffDDDDDD : 0xff222222,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
                     SizedBox(height: 8),
                     BlocBuilder<ProductsCubit, ProductsStates>(
                       builder: (context, productState) {
                         if (productState is ProductsLoaded) {
                           final products =
                               productState.productsModel.products ?? [];
-                          return CustomScrollView(
-                            shrinkWrap: true,
-                            physics: NeverScrollableScrollPhysics(),
-                            slivers: [
-                              SliverGrid(
-                                gridDelegate:
-                                    SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 2,
-                                      mainAxisSpacing: 12,
-                                      crossAxisSpacing: 12,
-                                      childAspectRatio: 0.95,
-                                    ),
-                                delegate: SliverChildBuilderDelegate((
-                                  context,
-                                  index,
-                                ) {
-                                  final p = products[index];
+                          if (products.length == 0) {
+                            return SizedBox.shrink();
+                          }
+                          return Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "Listings",
+                                    style: AppTextStyles.titleLarge(textColor)
+                                        .copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          color: Color(
+                                            isDarkMode
+                                                ? 0xffDDDDDD
+                                                : 0xff222222,
+                                          ),
+                                        ),
+                                  ),
+                                  Text(
+                                    "See All",
+                                    style: AppTextStyles.titleLarge(textColor)
+                                        .copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          color: Color(
+                                            isDarkMode
+                                                ? 0xffDDDDDD
+                                                : 0xff222222,
+                                          ),
+                                        ),
+                                  ),
+                                ],
+                              ),
+                              CustomScrollView(
+                                shrinkWrap: true,
+                                physics: NeverScrollableScrollPhysics(),
+                                slivers: [
+                                  SliverGrid(
+                                    gridDelegate:
+                                        SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: 2,
+                                          mainAxisSpacing: 12,
+                                          crossAxisSpacing: 12,
+                                          childAspectRatio: 0.95,
+                                        ),
+                                    delegate: SliverChildBuilderDelegate((
+                                      context,
+                                      index,
+                                    ) {
+                                      final p = products[index];
 
-                                  return BlocListener<
-                                    AddToWishlistCubit,
-                                    AddToWishlistStates
-                                  >(
-                                    listener: (context, state) {
-                                      if (state is AddToWishlistLoaded) {
-                                        context
-                                            .read<ProductsCubit>()
-                                            .updateWishlistStatus(
-                                              state.product_id,
-                                              state.addToWishlistModel.liked ??
-                                                  false,
+                                      return BlocListener<
+                                        AddToWishlistCubit,
+                                        AddToWishlistStates
+                                      >(
+                                        listener: (context, state) {
+                                          if (state is AddToWishlistLoaded) {
+                                            context
+                                                .read<ProductsCubit>()
+                                                .updateWishlistStatus(
+                                                  state.product_id,
+                                                  state
+                                                          .addToWishlistModel
+                                                          .liked ??
+                                                      false,
+                                                );
+                                          } else if (state
+                                              is AddToWishlistFailure) {
+                                            CustomSnackBar1.show(
+                                              context,
+                                              state.error,
                                             );
-                                      } else if (state
-                                          is AddToWishlistFailure) {
-                                        CustomSnackBar1.show(
-                                          context,
-                                          state.error,
-                                        );
-                                      }
-                                    },
-                                    child: SimilarProductCard(
-                                      title: p.title ?? "—",
-                                      price: "₹${_formatINR(p.price)}",
-                                      location: p.location ?? "",
-                                      imageUrl: p.image,
-                                      isLiked: p.isFavorited ?? false,
-                                      onLikeToggle: () {
-                                        if (p.id != null) {
-                                          context
-                                              .read<AddToWishlistCubit>()
-                                              .addToWishlist(p.id!);
-                                        }
-                                      },
-                                      onTap: () async {
-                                        final shouldRefresh = await context
-                                            .push<bool>(
-                                              "/products_details?listingId=${p.id}&subcategory_id=${p.subCategory?.id}",
-                                            );
-                                        if (shouldRefresh == true) {
-                                          context
-                                              .read<DashboardCubit>()
-                                              .fetchDashboard();
-                                        }
-                                      },
+                                          }
+                                        },
+                                        child: SimilarProductCard(
+                                          title: p.title ?? "—",
+                                          price: "₹${_formatINR(p.price)}",
+                                          location: p.location ?? "",
+                                          imageUrl: p.image,
+                                          isLiked: p.isFavorited ?? false,
+                                          onLikeToggle: () {
+                                            if (p.id != null) {
+                                              context
+                                                  .read<AddToWishlistCubit>()
+                                                  .addToWishlist(p.id!);
+                                            }
+                                          },
+                                          onTap: () async {
+                                            final shouldRefresh = await context
+                                                .push<bool>(
+                                                  "/products_details?listingId=${p.id}&subcategory_id=${p.subCategory?.id}",
+                                                );
+                                            if (shouldRefresh == true) {
+                                              context
+                                                  .read<DashboardCubit>()
+                                                  .fetchDashboard();
+                                            }
+                                          },
 
-                                      borderColor: borderColor,
-                                    ),
-                                  );
-                                }, childCount: products.length),
+                                          borderColor: borderColor,
+                                        ),
+                                      );
+                                    }, childCount: products.length),
+                                  ),
+                                ],
                               ),
                             ],
                           );

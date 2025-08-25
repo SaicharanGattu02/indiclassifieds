@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:indiclassifieds/Components/CutomAppBar.dart';
+import 'package:indiclassifieds/widgets/CommonLoader.dart';
 import '../../Components/CustomAppButton.dart';
 import '../../Components/CustomSnackBar.dart';
 import '../../Components/ShakeWidget.dart';
@@ -144,7 +145,7 @@ class _EditProfileState extends State<EditProfile> {
       backgroundColor: Color(0xFFF2F4FD),
       appBar: CustomAppBar1(title: "Edit Profile", actions: []),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: DottedProgressWithLogo())
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Form(
