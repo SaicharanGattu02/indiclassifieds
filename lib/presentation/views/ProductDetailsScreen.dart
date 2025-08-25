@@ -277,14 +277,12 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 ),
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+                    padding: EdgeInsets.fromLTRB(16, 10, 16, 0),
                     child: buildSpecifications(details),
                   ),
                 ),
                 const SliverToBoxAdapter(child: SizedBox(height: 20)),
               ],
-
-              // ===== Posted By =====
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -297,7 +295,6 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 ),
               ),
               const SliverToBoxAdapter(child: SizedBox(height: 20)),
-
               // // ===== Location =====
               // SliverToBoxAdapter(
               //   child: Padding(
