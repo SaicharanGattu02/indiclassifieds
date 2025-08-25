@@ -77,6 +77,7 @@ class _FilterScreenState extends State<FilterScreen> {
   @override
   Widget build(BuildContext context) {
     final textColor = ThemeHelper.textColor(context);
+    final  backgroundColor= ThemeHelper.backgroundColor(context);
     return Scaffold(
       appBar: CustomAppBar1(title: "Filters", actions: []),
       body: Stack(
@@ -136,10 +137,9 @@ class _FilterScreenState extends State<FilterScreen> {
             end: 0,
             child: Container(
               decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(8),
               ),
-              margin: const EdgeInsetsDirectional.only(
+              margin: EdgeInsetsDirectional.only(
                 start: 5,
                 top: 10,
                 bottom: 10,
@@ -257,6 +257,7 @@ class _FilterScreenState extends State<FilterScreen> {
           return const Center(child: DottedProgressWithLogo());
         } else if (state is CategoriesLoaded) {
           final categories = state.categoryModel.categoriesList;
+          final textColor=ThemeHelper.textColor(context);
           if (categories == null || categories.isEmpty) {
             return const Center(child: Text("No Categories Found"));
           }
@@ -287,7 +288,7 @@ class _FilterScreenState extends State<FilterScreen> {
                         fontSize: 14,
                         fontFamily: 'Inter',
                         fontWeight: FontWeight.w500,
-                        color: isSelected ? Colors.blue : Colors.black,
+                        color: isSelected ? Colors.blue :textColor,
                       ),
                     ),
                   );
@@ -316,6 +317,7 @@ class _FilterScreenState extends State<FilterScreen> {
     return ValueListenableBuilder<RangeValues>(
       valueListenable: selectedRange,
       builder: (context, range, _) {
+        final textColor=ThemeHelper.textColor(context);
         return SingleChildScrollView(
           child: Column(
             children: [
@@ -342,12 +344,12 @@ class _FilterScreenState extends State<FilterScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: TextField(
+                    child: TextField(style: TextStyle(color: textColor),
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       keyboardType: TextInputType.number,
                       controller: minPriceController,
-                      decoration: const InputDecoration(
-                        hintText: "Min",
+                      decoration: InputDecoration(
+                        hintText: "Min",hintStyle: TextStyle(color: textColor),
                         border: OutlineInputBorder(),
                       ),
                       onChanged: (val) {
@@ -359,14 +361,14 @@ class _FilterScreenState extends State<FilterScreen> {
                       },
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  SizedBox(width: 10),
                   Expanded(
-                    child: TextField(
+                    child: TextField(style: TextStyle(color: textColor),
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       keyboardType: TextInputType.number,
                       controller: maxPriceController,
-                      decoration: const InputDecoration(
-                        hintText: "Max",
+                      decoration: InputDecoration(
+                        hintText: "Max",hintStyle: TextStyle(color: textColor),
                         border: OutlineInputBorder(),
                       ),
                       onChanged: (val) {
@@ -396,6 +398,7 @@ class _FilterScreenState extends State<FilterScreen> {
     return ValueListenableBuilder<String?>(
       valueListenable: selectedSort,
       builder: (context, sort, _) {
+
         return ListView(
           children: sortOptions.map((option) {
             final isSelected = sort == option["value"];
@@ -426,7 +429,7 @@ class _FilterScreenState extends State<FilterScreen> {
           );
         } else if (state is SelectStatesLoaded) {
           final states = state.selectStatesModel.data ?? [];
-
+          final textColor=ThemeHelper.textColor(context);
           return Column(
             children: [
               Padding(
@@ -445,7 +448,7 @@ class _FilterScreenState extends State<FilterScreen> {
                           decoration: InputDecoration(
                             hintText: "Search state...",
                             hintStyle: AppTextStyles.bodyMedium(
-                              textColor.withOpacity(0.6),
+                              textColor,
                             ),
                             prefixIcon: Icon(Icons.search, color: textColor),
                             filled: true,

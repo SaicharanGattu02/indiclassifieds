@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import '../data/cubit/MyAds/MarkAsListing/mark_as_listing_cubit.dart';
+import '../theme/ThemeHelper.dart';
 import 'ImageUtils.dart';
 import 'package:flutter/material.dart';
 
@@ -34,7 +35,6 @@ class ImagePickerHelper {
     }
     return null;
   }
-
   static Future<void> showImagePickerBottomSheet({
     required BuildContext context,
     required Function(File) onImageSelected,
@@ -46,8 +46,9 @@ class ImagePickerHelper {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: ThemeHelper.backgroundColor(context),
       builder: (BuildContext context) {
+        final textColor =  ThemeHelper.textColor(context);
         return SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -77,12 +78,12 @@ class ImagePickerHelper {
                 ),
                 ListTile(
                   leading: Icon(Icons.photo_library, color: Colors.blue),
-                  title: const Text(
+                  title:  Text(
                     'Choose from Gallery',
                     style: TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 16,
-                      color: Colors.black87,
+                      color: textColor,
                       fontWeight: FontWeight.w400,
                     ),
                   ),
@@ -98,12 +99,12 @@ class ImagePickerHelper {
                 ),
                 ListTile(
                   leading: Icon(Icons.camera_alt, color: Colors.blue),
-                  title: const Text(
+                  title:  Text(
                     'Take a Photo',
                     style: TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 16,
-                      color: Colors.black87,
+                      color: textColor,
                       fontWeight: FontWeight.w400,
                     ),
                   ),
@@ -203,7 +204,6 @@ class _CommonImagePickerState extends State<CommonImagePicker> {
               BoxShadow(
                 color: const Color(0x0D000000),
                 offset: const Offset(0, 1),
-                blurRadius: 2,
               ),
             ],
           ),

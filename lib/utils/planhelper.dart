@@ -1,4 +1,3 @@
-// utils.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,9 +13,9 @@ void showPlanBottomSheet({
   required BuildContext context,
   required TextEditingController controller,
   required Function(Plans) onSelectPlan,
-  String? title = 'Select Plan', // Optional title for the bottom sheet
+  String? title = 'Select Plan',
 }) {
-  showModalBottomSheet(
+  showModalBottomSheet(backgroundColor: ThemeHelper.backgroundColor(context),
     context: context,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
@@ -24,9 +23,7 @@ void showPlanBottomSheet({
     builder: (context) {
       return BlocBuilder<UserActivePlanCubit, UserActivePlanStates>(
         builder: (context, state) {
-          // Get the current theme colors from ThemeHelper
           final textColor = ThemeHelper.textColor(context);
-          final backgroundColor = ThemeHelper.backgroundColor(context);
           final cardColor = ThemeHelper.cardColor(context);
 
           if (state is UserActivePlanLoading) {
@@ -56,7 +53,7 @@ void showPlanBottomSheet({
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (title != null) // Display title if provided
+                  if (title != null)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 16.0),
                       child: Text(
@@ -70,7 +67,6 @@ void showPlanBottomSheet({
                       itemBuilder: (context, index) {
                         final plan = plans[index];
                         return Card(
-                          elevation: 5,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
