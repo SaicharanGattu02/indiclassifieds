@@ -9,6 +9,9 @@ import '../model/UserActivePlansModel.dart';
 import '../theme/AppTextStyles.dart';
 import '../theme/ThemeHelper.dart';
 
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
 void showPlanBottomSheet({
   required BuildContext context,
   required TextEditingController controller,
@@ -16,149 +19,299 @@ void showPlanBottomSheet({
   String? title = 'Select Plan',
 }) {
   showModalBottomSheet(
-    backgroundColor: ThemeHelper.backgroundColor(context),
     context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
     ),
     builder: (context) {
-      return BlocBuilder<UserActivePlanCubit, UserActivePlanStates>(
-        builder: (context, state) {
-          final textColor = ThemeHelper.textColor(context);
-          final cardColor = ThemeHelper.cardColor(context);
-
-          if (state is UserActivePlanLoading) {
-            return Center(child: CircularProgressIndicator());
-          }
-
-          if (state is UserActivePlanFailure) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.error, color: Colors.red, size: 40),
-                  SizedBox(height: 10),
-                  Text(
-                    'Error loading plans',
-                    style: AppTextStyles.bodyLarge(textColor),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          if (state is UserActivePlanLoaded) {
-            final plans = state.userActivePlansModel.plans ?? [];
-            if (plans.length == 0) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    spacing: 20,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Oops!",
-                        style: TextStyle(
-                            color: textColor,
-                          fontSize: 22,
-                          fontWeight: FontWeight.w800
-                        ),
-                      ),
-                      Text(
-                        "You don't have Plans. Please Subscribe for Plan.",
-                        style: TextStyle(
-                          color: textColor
-                        ),
-                      ),
-                      CustomAppButton1(text: "Subscribe",width: 250, onPlusTap: () {
-                        context.pop();
-                        context.push("/plans");
-                      }),
-                    ],
-                  ),
+      return DraggableScrollableSheet(
+        initialChildSize: 0.9,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (_, scrollController) {
+          return Container(
+            decoration: BoxDecoration(
+              color: ThemeHelper.backgroundColor(context),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 20,
+                  spreadRadius: 5,
                 ),
-              );
-            }
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (title != null)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 16.0),
-                      child: Text(
-                        title,
-                        style: AppTextStyles.headlineMedium(textColor),
-                      ),
-                    ),
-                  Expanded(
-                    child: ListView.separated(
-                      itemCount: plans.length,
-                      itemBuilder: (context, index) {
-                        final plan = plans[index];
-                        return Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          margin: EdgeInsets.only(bottom: 12),
-                          color: cardColor,
-                          child: ListTile(
-                            contentPadding: EdgeInsets.all(16),
-                            title: Text(
-                              plan.planName ?? 'No name',
-                              style: AppTextStyles.titleLarge(textColor),
-                            ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  plan.packageName ?? 'No package',
-                                  style: AppTextStyles.bodyMedium(textColor),
-                                ),
-                                SizedBox(height: 4),
-                                Text(
-                                  'Start Date: ${plan.startDate}',
-                                  style: AppTextStyles.bodySmall(textColor),
-                                ),
-                                Text(
-                                  'End Date: ${plan.endDate}',
-                                  style: AppTextStyles.bodySmall(textColor),
-                                ),
-                              ],
-                            ),
-                            onTap: () {
-                              controller.text =
-                                  plan.planName ??
-                                  ''; // Set the selected plan name in the text field
-                              onSelectPlan(
-                                plan,
-                              ); // Callback function when a plan is selected
-                              Navigator.pop(context); // Close the bottom sheet
-                            },
-                          ),
-                        );
-                      },
-                      separatorBuilder: (context, index) => Divider(
-                        thickness: 1.5,
-                        color: textColor.withOpacity(0.2),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
+              ],
+            ),
+            child: BlocBuilder<UserActivePlanCubit, UserActivePlanStates>(
+              builder: (context, state) {
+                final textColor = ThemeHelper.textColor(context);
+                final cardColor = ThemeHelper.cardColor(context);
 
-          return Center(
-            child: Text(
-              'No plans available',
-              style: AppTextStyles.bodyMedium(textColor),
+                if (state is UserActivePlanLoading) {
+                  return Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(textColor),
+                    ),
+                  );
+                }
+
+                if (state is UserActivePlanFailure) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          color: Colors.redAccent,
+                          size: 60,
+                        ),
+                        SizedBox(height: 16),
+                        Text(
+                          'Oops! Something went wrong',
+                          style: AppTextStyles.headlineMedium(
+                            textColor,
+                          ).copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'Unable to load plans. Please try again.',
+                          style: AppTextStyles.bodyMedium(textColor),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: 20),
+                        _buildRetryButton(context, textColor),
+                      ],
+                    ),
+                  );
+                }
+
+                if (state is UserActivePlanLoaded) {
+                  final plans = state.userActivePlansModel.plans ?? [];
+                  if (plans.isEmpty) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.hourglass_empty,
+                              size: 80,
+                              color: textColor.withOpacity(0.6),
+                            ),
+                            SizedBox(height: 16),
+                            Text(
+                              'No Plans Yet!',
+                              style: AppTextStyles.headlineLarge(
+                                textColor,
+                              ).copyWith(fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              'Subscribe to a plan to get started and unlock amazing features!',
+                              style: AppTextStyles.bodyMedium(textColor),
+                              textAlign: TextAlign.center,
+                            ),
+                            SizedBox(height: 24),
+                            _buildSubscribeButton(context, textColor),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (title != null)
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              bottom: 16.0,
+                              left: 8.0,
+                            ),
+                            child: Text(
+                              title,
+                              style: AppTextStyles.headlineSmall(textColor)
+                                  .copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 0.5,
+                                  ),
+                            ),
+                          ),
+                        Expanded(
+                          child: ListView.separated(
+                            controller: scrollController,
+                            itemCount: plans.length,
+                            itemBuilder: (context, index) {
+                              final plan = plans[index];
+                              return _buildPlanCard(
+                                context,
+                                plan,
+                                textColor,
+                                cardColor,
+                                controller,
+                                onSelectPlan,
+                              );
+                            },
+                            separatorBuilder: (context, index) =>
+                                SizedBox(height: 12),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                return Center(
+                  child: Text(
+                    'No plans available',
+                    style: AppTextStyles.bodyLarge(
+                      textColor,
+                    ).copyWith(fontWeight: FontWeight.w600),
+                  ),
+                );
+              },
             ),
           );
         },
       );
     },
+  );
+}
+
+Widget _buildPlanCard(
+  BuildContext context,
+  Plans plan,
+  Color textColor,
+  Color cardColor,
+  TextEditingController controller,
+  Function(Plans) onSelectPlan,
+) {
+  return Card(
+    elevation: 5,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    child: Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: LinearGradient(
+          colors: [
+            cardColor,
+            ThemeHelper.isDarkMode(context)
+                ? cardColor.withOpacity(0.8)
+                : cardColor.withOpacity(0.95),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: ListTile(
+        contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        title: Text(
+          plan.planName ?? 'No name',
+          style: AppTextStyles.titleLarge(
+            textColor,
+          ).copyWith(fontWeight: FontWeight.bold),
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: 8),
+            Text(
+              plan.packageName ?? 'No package',
+              style: AppTextStyles.bodyMedium(
+                textColor,
+              ).copyWith(fontWeight: FontWeight.w500),
+            ),
+            SizedBox(height: 6),
+            Row(
+              children: [
+                Icon(
+                  Icons.calendar_today,
+                  size: 14,
+                  color: textColor.withOpacity(0.7),
+                ),
+                SizedBox(width: 6),
+                Text(
+                  'Remaining Ads: ${plan.remaining.toString()}',
+                  style: AppTextStyles.bodySmall(textColor),
+                ),
+              ],
+            ),
+            SizedBox(height: 4),
+            Row(
+              children: [
+                Icon(
+                  Icons.event_busy,
+                  size: 14,
+                  color: textColor.withOpacity(0.7),
+                ),
+                SizedBox(width: 6),
+                Text(
+                  'Expire Date of Subscription: ${plan.endDate}',
+                  style: AppTextStyles.bodySmall(textColor),
+                ),
+              ],
+            ),
+          ],
+        ),
+        trailing: Icon(
+          Icons.arrow_forward_ios,
+          size: 16,
+          color: textColor.withOpacity(0.6),
+        ),
+        onTap: () {
+          controller.text = plan.planName ?? '';
+          onSelectPlan(plan);
+          Navigator.pop(context);
+        },
+      ),
+    ),
+  );
+}
+
+Widget _buildSubscribeButton(BuildContext context, Color textColor) {
+  return ElevatedButton(
+    onPressed: () {
+      context.pop();
+      context.push("/plans");
+    },
+    style: ElevatedButton.styleFrom(
+      foregroundColor: textColor,
+      backgroundColor: ThemeHelper.isDarkMode(context)
+          ? Colors.blueAccent.withOpacity(0.9)
+          : Colors.blueAccent,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+      elevation: 3,
+    ),
+    child: Text(
+      'Subscribe Now',
+      style: AppTextStyles.titleMedium(
+        Colors.white,
+      ).copyWith(fontWeight: FontWeight.bold),
+    ),
+  );
+}
+
+Widget _buildRetryButton(BuildContext context, Color textColor) {
+  return ElevatedButton(
+    onPressed: () {
+      context.read<UserActivePlanCubit>().getUserActivePlansData();
+    },
+    style: ElevatedButton.styleFrom(
+      foregroundColor: textColor,
+      backgroundColor: Colors.redAccent.withOpacity(0.9),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+      elevation: 3,
+    ),
+    child: Text(
+      'Retry',
+      style: AppTextStyles.titleMedium(
+        Colors.white,
+      ).copyWith(fontWeight: FontWeight.bold),
+    ),
   );
 }

@@ -53,12 +53,13 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) {
     AppLogger.log(
-      "✅ Payment successful: ${response.paymentId} ${response.signature}",
+      "✅ Payment successful: ${response.paymentId} ${response.signature} ${response.orderId}",
     );
     Map<String, dynamic> data = {
       "razorpay_order_id": response.orderId,
       "razorpay_payment_id": response.paymentId,
       "razorpay_signature": response.signature,
+
     };
     context.read<PaymentCubit>().verifyPayment(data);
   }

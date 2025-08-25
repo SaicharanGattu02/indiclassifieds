@@ -57,6 +57,7 @@ dependencies:
   razorpay_flutter: ^1.4.0
   socket_io_client: ^3.1.2
   scrollable_positioned_list: ^0.3.8
+  photo_view: ^0.15.0
 
 
 

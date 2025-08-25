@@ -9,6 +9,7 @@ import 'package:indiclassifieds/theme/app_colors.dart';
 
 import '../../data/cubit/UserActivePlans/user_active_plans_cubit.dart';
 import '../../data/cubit/theme_cubit.dart';
+import '../../services/SocketService.dart';
 import '../../theme/ThemeHelper.dart';
 import 'AddsScreen.dart';
 import 'FavouritesScreen.dart';
@@ -42,6 +43,8 @@ class _DashboardState extends State<Dashboard> {
       AuthService.setPlanStatus(plan.goToPlansPage.toString() ?? "");
       AuthService.setFreePlanStatus(plan.isFree.toString() ?? "");
     }
+    final userId = await  AuthService.getId();
+    SocketService.connect(userId??"");
   }
 
   void onItemTapped(int index) {

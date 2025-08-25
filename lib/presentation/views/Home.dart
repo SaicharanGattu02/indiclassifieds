@@ -463,17 +463,22 @@ class _HomeScreenState extends State<HomeScreen> {
                                           ),
                                         ),
                                   ),
-                                  Text(
-                                    "See All",
-                                    style: AppTextStyles.titleLarge(textColor)
-                                        .copyWith(
-                                          fontWeight: FontWeight.w600,
-                                          color: Color(
-                                            isDarkMode
-                                                ? 0xffDDDDDD
-                                                : 0xff222222,
+                                  TextButton(
+                                    onPressed: () {
+                                      context.push("/products_list");
+                                    },
+                                    child: Text(
+                                      "See All",
+                                      style: AppTextStyles.titleSmall(textColor)
+                                          .copyWith(
+                                            fontWeight: FontWeight.w600,
+                                            color: Color(
+                                              isDarkMode
+                                                  ? 0xffDDDDDD
+                                                  : 0xff222222,
+                                            ),
                                           ),
-                                        ),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -557,6 +562,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         return Center(child: CircularProgressIndicator());
                       },
                     ),
+                    SizedBox(height: 18),
                   ],
                 ),
               ),

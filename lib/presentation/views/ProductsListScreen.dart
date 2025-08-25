@@ -65,7 +65,9 @@ class _ProductsListScreenState extends State<ProductsListScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          widget.subCategoryname,
+          widget.subCategoryname.isNotEmpty
+              ? widget.subCategoryname
+              : "Products List",
           style: AppTextStyles.headlineSmall(textColor),
         ),
         actions: [

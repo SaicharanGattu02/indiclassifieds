@@ -12,8 +12,6 @@ import 'data/cubit/theme_cubit.dart';
 Future<void> main() async {
   ApiClient.setupInterceptors();
   WidgetsFlutterBinding.ensureInitialized();
-  final userId = await  AuthService.getId();
-  SocketService.connect(userId??""); // pass the logged-in user id
   runApp(
     MultiRepositoryProvider(
       providers: StateInjector.repositoryProviders,

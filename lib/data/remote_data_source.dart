@@ -177,6 +177,7 @@ class RemoteDataSourceImpl implements RemoteDataSource {
       return null;
     }
   }
+
   @override
   Future<TransectionHistoryModel?> getTransections(int page) async {
     try {
@@ -830,11 +831,10 @@ class RemoteDataSourceImpl implements RemoteDataSource {
 
   @override
   Future<AdSuccessModel?> verifyPayment(Map<String, dynamic> data) async {
-    final formData = await buildFormData(data);
     try {
       Response res = await ApiClient.post(
         "${APIEndpointUrls.verify_payment_order}",
-        data: formData,
+        data: data,
       );
       AppLogger.log('verify Payment ::${res.data}');
       return AdSuccessModel.fromJson(res.data);

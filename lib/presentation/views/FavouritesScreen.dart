@@ -62,13 +62,13 @@ class _WishlistListScreenState extends State<WishlistListScreen> {
           style: AppTextStyles.headlineSmall(textColor),
         ),
         actions: [
-          GestureDetector(
-            onTap: () {
-              context.push('/filter');
-            },
-            child: Icon(Icons.tune, color: textColor),
-          ),
-          const SizedBox(width: 16),
+          // GestureDetector(
+          //   onTap: () {
+          //     context.push('/filter');
+          //   },
+          //   child: Icon(Icons.tune, color: textColor),
+          // ),
+          // const SizedBox(width: 16),
         ],
       ),
 

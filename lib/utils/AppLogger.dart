@@ -17,8 +17,8 @@ class AppLogger {
 
   /// Info log (debug only)
   static void info(String message) {
-    if (kDebugMode) {
+    // if (kDebugMode) {
       debugPrint("✅ INFO: $message"); // no recursive call
-    }
+    // }
   }
 }

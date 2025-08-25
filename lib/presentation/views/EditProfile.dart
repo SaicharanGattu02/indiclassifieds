@@ -57,8 +57,8 @@ class _EditProfileState extends State<EditProfile> {
           _emailController.text = data?.email ?? "";
           _phoneController.text = data?.mobile?.toString() ?? "";
           stateController.text = data?.state_name?.toString() ?? "";
-          selectedStateId=  data?.state_id ?? 0;
-          selectedCityId =  data?.city_id ?? 0;
+          selectedStateId = data?.state_id ?? 0;
+          selectedCityId = data?.city_id ?? 0;
           cityController.text = data?.city_name?.toString() ?? "";
           _phoneController.text = data?.mobile?.toString() ?? "";
           imagePath = data?.image ?? "";
@@ -324,14 +324,26 @@ class _EditProfileState extends State<EditProfile> {
                   text: isLoading ? "Updating..." : "Submit",
                   onPlusTap: () {
                     if (_formKey.currentState!.validate() && !isLoading) {
+                      String? imageToSend;
+
+                      if (_image != null && _image!.path.isNotEmpty) {
+                        imageToSend = _image!.path;
+                      } else if (imagePath != null) {
+                        imageToSend = imagePath;
+                      } else {
+                        imageToSend =
+                            ""; // or leave it null if your API expects no field
+                      }
+
                       final data = {
                         "name": _nameController.text.trim(),
                         "email": _emailController.text.trim(),
                         "phone": _phoneController.text.trim(),
-                        "image": _image?.path ?? imagePath,
+                        "image": imageToSend,
                         "state_id": selectedStateId,
                         "city_id": selectedCityId,
                       };
+
                       context.read<UpdateProfileCubit>().updateProfileDetails(
                         data,
                       );

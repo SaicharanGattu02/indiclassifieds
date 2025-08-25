@@ -27,9 +27,8 @@ class PrivateChatCubit extends Cubit<PrivateChatState> {
   late final String _room;
   Timer? _typingDebounce;
 
-  Timer? _peerTypingClearTimer;   // clears peer typing after a quiet period
-  Timer? _myTypingThrottle;       // throttles how often we emit 'typing'
-
+  Timer? _peerTypingClearTimer; // clears peer typing after a quiet period
+  Timer? _myTypingThrottle; // throttles how often we emit 'typing'
 
   PrivateChatCubit(this.currentUserId, this.receiverId)
     : super(const PrivateChatState()) {
@@ -47,7 +46,7 @@ class PrivateChatCubit extends Cubit<PrivateChatState> {
     // Add listeners
     _socket.on('receive_private_message', _onReceiveMessage);
     _socket.on('user_typing', _onUserTyping); // ← only this for typing status
-    _socket.on('connect', (_) {
+    _socket.on('connection', (_) {
       AppLogger.info('[socket] connected: ${_socket.id}');
       _joinRoom();
     });
@@ -59,12 +58,10 @@ class PrivateChatCubit extends Cubit<PrivateChatState> {
     }
   }
 
-
   void _joinRoom() {
     // Send whatever your server expects. Common patterns:
     // 1) join with a room name
     _socket.emit('join_private', {
-      'room': _room,
       'userId1': currentUserId,
       'userId2': receiverId,
     });
@@ -161,9 +158,9 @@ class PrivateChatCubit extends Cubit<PrivateChatState> {
     try {
       final map = (data is Map) ? Map<String, dynamic>.from(data) : {};
       final senderId = map['senderId']?.toString();
-      final room      = map['room']?.toString();
-      final sameRoom  = room == _room;
-      final fromPeer  = senderId != null && senderId != currentUserId;
+      final room = map['room']?.toString();
+      final sameRoom = room == _room;
+      final fromPeer = senderId != null && senderId != currentUserId;
 
       if (!sameRoom || !fromPeer) return;
 
@@ -179,7 +176,6 @@ class PrivateChatCubit extends Cubit<PrivateChatState> {
       AppLogger.info("[socket] error in _onUserTyping: $e");
     }
   }
-
 
   // ---- Listeners ----
   void _onReceiveMessage(dynamic data) {
@@ -253,7 +249,10 @@ class PrivateChatCubit extends Cubit<PrivateChatState> {
     // throttle to avoid spamming the server
     if (_myTypingThrottle?.isActive == true) return;
     _emitTyping(); // no payload boolean needed if server doesn't use it
-    _myTypingThrottle = Timer(const Duration(seconds: 2), () {}); // reopen window
+    _myTypingThrottle = Timer(
+      const Duration(seconds: 2),
+      () {},
+    ); // reopen window
   }
 
   void stopTyping() {
@@ -272,7 +271,6 @@ class PrivateChatCubit extends Cubit<PrivateChatState> {
     AppLogger.info('[socket] typing -> $payload');
     _socket.emit('typing', payload);
   }
-
 
   @override
   Future<void> close() {

@@ -25,84 +25,92 @@ class ApiClient {
   ];
 
   static void setupInterceptors() {
-    _dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (options, handler) async {
-        debugPrint('Interceptor triggered for: ${options.uri}');
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          debugPrint('Interceptor triggered for: ${options.uri}');
 
-        // Check if the request is for an unauthenticated endpoint
-        final isUnauthenticated = _unauthenticatedEndpoints.any(
-              (endpoint) => options.uri.path.startsWith(endpoint), // Use startsWith instead of endsWith
-        );
+          // Check if the request is for an unauthenticated endpoint
+          final isUnauthenticated = _unauthenticatedEndpoints.any(
+            (endpoint) => options.uri.path.startsWith(
+              endpoint,
+            ), // Use startsWith instead of endsWith
+          );
 
-        if (isUnauthenticated) {
-          debugPrint('Unauthenticated endpoint, skipping token check: ${options.uri}');
-          return handler.next(options); // Skip token check and proceed
-        }
+          if (isUnauthenticated) {
+            debugPrint(
+              'Unauthenticated endpoint, skipping token check: ${options.uri}',
+            );
+            return handler.next(options); // Skip token check and proceed
+          }
 
-        final isExpired = await AuthService.isTokenExpired();
-        if (isExpired) {
-          debugPrint('Token is expired, attempting to refresh...');
-          final refreshed = await _refreshToken();
-          if (!refreshed) {
-            debugPrint('❌ Token refresh failed, redirecting to login...');
+          final isExpired = await AuthService.isTokenExpired();
+          if (isExpired) {
+            debugPrint('Token is expired, attempting to refresh...');
+            final refreshed = await _refreshToken();
+            if (!refreshed) {
+              debugPrint('❌ Token refresh failed, redirecting to login...');
+              await AuthService.logout();
+              return handler.reject(
+                DioException(
+                  requestOptions: options,
+                  error: 'Token refresh failed, please log in again',
+                  type: DioExceptionType.cancel,
+                ),
+              );
+            }
+          }
+
+          final accessToken = await AuthService.getAccessToken();
+          debugPrint('Token retrieved for request: $accessToken');
+          if (accessToken != null) {
+            options.headers["Authorization"] = "Bearer $accessToken";
+          } else {
+            debugPrint('❌ No access token available, redirecting to login...');
             await AuthService.logout();
             return handler.reject(
               DioException(
                 requestOptions: options,
-                error: 'Token refresh failed, please log in again',
+                error: 'No access token available, please log in again',
                 type: DioExceptionType.cancel,
               ),
             );
           }
-        }
-
-
-
-        final accessToken = await AuthService.getAccessToken();
-        debugPrint('Token retrieved for request: $accessToken');
-        if (accessToken != null) {
-          options.headers["Authorization"] = "Bearer $accessToken";
-        } else {
-          debugPrint('❌ No access token available, redirecting to login...');
-          await AuthService.logout();
-          return handler.reject(
-            DioException(
-              requestOptions: options,
-              error: 'No access token available, please log in again',
-              type: DioExceptionType.cancel,
-            ),
+          return handler.next(options);
+        },
+        onResponse: (response, handler) {
+          return handler.next(response);
+        },
+        onError: (DioException e, handler) async {
+          final isUnauthenticated = _unauthenticatedEndpoints.any(
+            (endpoint) => e.requestOptions.uri.path.endsWith(endpoint),
           );
-        }
-        return handler.next(options);
-      },
-      onResponse: (response, handler) {
-        return handler.next(response);
-      },
-      onError: (DioException e, handler) async {
-        final isUnauthenticated = _unauthenticatedEndpoints.any(
-              (endpoint) => e.requestOptions.uri.path.endsWith(endpoint),
-        );
 
-        if (isUnauthenticated) {
-          debugPrint('Unauthenticated endpoint error, skipping logout: ${e.requestOptions.uri}');
-          return handler.next(e); // Skip logout for unauthenticated endpoints
-        }
+          if (isUnauthenticated) {
+            debugPrint(
+              'Unauthenticated endpoint error, skipping logout: ${e.requestOptions.uri}',
+            );
+            return handler.next(e); // Skip logout for unauthenticated endpoints
+          }
 
-        if (e.response?.statusCode == 401) {
-          debugPrint('❌ Unauthorized: Token invalid or user not found, redirecting to login...');
-          await AuthService.logout();
-          return handler.reject(
-            DioException(
-              requestOptions: e.requestOptions,
-              error: 'Unauthorized, please log in again',
-              type: DioExceptionType.badResponse,
-              response: e.response,
-            ),
-          );
-        }
-        return handler.next(e); // Pass other errors to the next interceptor
-      },
-    ));
+          if (e.response?.statusCode == 401) {
+            debugPrint(
+              '❌ Unauthorized: Token invalid or user not found, redirecting to login...',
+            );
+            await AuthService.logout();
+            return handler.reject(
+              DioException(
+                requestOptions: e.requestOptions,
+                error: 'Unauthorized, please log in again',
+                type: DioExceptionType.badResponse,
+                response: e.response,
+              ),
+            );
+          }
+          return handler.next(e); // Pass other errors to the next interceptor
+        },
+      ),
+    );
   }
 
   static Future<bool> _refreshToken() async {

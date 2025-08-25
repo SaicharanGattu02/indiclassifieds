@@ -1,9 +1,9 @@
 class APIEndpointUrls {
-  static const String baseUrl = 'http://192.168.80.107:8081/';
-  static const String socket_url = 'http://192.168.80.107:8081';
+  // static const String baseUrl = 'http://192.168.80.107:8081/';
+  // static const String socket_url = 'http://192.168.80.107:8081';
 
-  // static const String baseUrl = 'https://ind.ozrit.live/';
-  // static const String socket_url = 'https://ind.ozrit.live';
+  static const String baseUrl = 'https://ind.ozrit.live/';
+  static const String socket_url = 'https://ind.ozrit.live';
   static const String apiUrl = 'api/app/';
 
   /// Authentiocation Urls
@@ -74,5 +74,6 @@ class APIEndpointUrls {
   static const String get_all_users_by_chat = '${apiUrl}get-all-users-by-chat';
   static const String get_my_friend_messages =
       '${apiUrl}get-my-friend-messages';
-  static const String get_transection_history = '${apiUrl}get-payments-transactions';
+  static const String get_transection_history =
+      '${apiUrl}get-payments-transactions';
 }

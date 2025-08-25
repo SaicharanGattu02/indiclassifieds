@@ -7,16 +7,13 @@ class SocketService {
 
   static IO.Socket connect(String userId) {
     if (_socket == null) {
-      _socket = IO.io(
-        APIEndpointUrls.socket_url,
-        <String, dynamic>{
-          'transports': ['websocket','polling'],
-          'autoConnect': false,
-          'query': {
-            'userId': userId,   // 👈 passed here
-          },
+      _socket = IO.io(APIEndpointUrls.socket_url, <String, dynamic>{
+        'transports': ['websocket', 'polling'],
+        'autoConnect': true,
+        'query': {
+          'userId': userId, // 👈 passed here
         },
-      );
+      });
 
       _socket!.connect();
 
@@ -33,7 +30,3 @@ class SocketService {
     _socket = null;
   }
 }
-
-
-
-

@@ -24,7 +24,7 @@ class PaymentCubit extends Cubit<PaymentStates> {
     emit(PaymentLoading());
     try {
       final response = await paymentRepository.verifyPayment(data);
-      if (response != null) {
+      if (response != null && response.success==true) {
         emit(PaymentVerified(response));
       } else {
         emit(PaymentFailure(response?.message ?? ""));
