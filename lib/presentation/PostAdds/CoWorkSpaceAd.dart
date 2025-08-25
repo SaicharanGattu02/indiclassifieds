@@ -21,6 +21,7 @@ import '../../data/cubit/UserActivePlans/user_active_plans_cubit.dart';
 import '../../data/remote_data_source.dart';
 import '../../services/AuthService.dart';
 import '../../theme/ThemeHelper.dart';
+import '../../utils/AppLogger.dart';
 import '../../utils/ImagePickerHelper.dart';
 import '../../utils/planhelper.dart';
 import '../../widgets/CommonLoader.dart';
@@ -88,12 +89,10 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
     super.dispose();
   }
 
-
   int? selectedStateId;
   int? selectedCityId;
 
   String? seatTypeOffered;
-
 
   List<File> _images = [];
   final int _maxImages = 6;
@@ -109,8 +108,8 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
     final id = widget.editId.replaceAll('"', '').trim();
     if (id != null && id.isNotEmpty) {
       context.read<GetListingAdCubit>().getListingAd(widget.editId).then((
-          commonAdData,
-          ) {
+        commonAdData,
+      ) {
         if (commonAdData != null) {
           descriptionController.text =
               commonAdData.data?.listing?.description ?? '';
@@ -118,10 +117,12 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
           priceController.text = commonAdData.data?.listing?.price ?? '';
           nameController.text = commonAdData.data?.listing?.fullName ?? '';
           phoneController.text = commonAdData.data?.listing?.mobileNumber ?? '';
-          areaSizeController.text = commonAdData.data?.listing?.areaSize?? '';
-          deskCapacityController.text = commonAdData.data?.listing?.deskCapacity.toString()?? '';
-          availableSeatsController.text = commonAdData.data?.listing?.availableSeats.toString()?? '';
-          seatTypeOffered= commonAdData.data?.listing?.seatType??'';
+          areaSizeController.text = commonAdData.data?.listing?.areaSize ?? '';
+          deskCapacityController.text =
+              commonAdData.data?.listing?.deskCapacity.toString() ?? '';
+          availableSeatsController.text =
+              commonAdData.data?.listing?.availableSeats.toString() ?? '';
+          seatTypeOffered = commonAdData.data?.listing?.seatType ?? '';
           if (commonAdData.data?.listing?.stateId != null) {
             selectedStateId = commonAdData.data?.listing?.stateId;
             stateController.text = commonAdData.data?.listing?.stateName ?? '';
@@ -147,11 +148,9 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
   }
 
   void _submitAd(BuildContext context) {
-
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     bool hasError = false;
-
 
     if (_images.isEmpty) {
       setState(() => _showimagesError = true);
@@ -175,9 +174,7 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
     }
 
     if (hasError) return;
-    final editId = widget.editId
-        .replaceAll('"', '')
-        .trim();
+    final editId = widget.editId.replaceAll('"', '').trim();
     final Map<String, dynamic> data = {
       "title": titleController.text.trim(),
       "description": descriptionController.text.trim(),
@@ -200,14 +197,11 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
       data["package_id"] = packageId;
     }
 
-
     if (_images.isNotEmpty) {
       data["images"] = _images.map((file) => file.path).toList();
     }
     if (editId.isNotEmpty) {
-      context
-          .read<MarkAsListingCubit>()
-          .markAsUpdate(editId, data);
+      context.read<MarkAsListingCubit>().markAsUpdate(editId, data);
     } else {
       context.read<CoWorkingAdCubit>().postCoWorkingAd(data);
     }
@@ -217,313 +211,348 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
   Widget build(BuildContext context) {
     final textColor = ThemeHelper.textColor(context);
 
-    return Scaffold(
-      appBar: CustomAppBar1(
-        title: (widget.editId.replaceAll('"', '').trim().isNotEmpty ?? false)
-            ? "Edit ${widget.CatName}"
-            : widget.CatName,
-        actions: [],
-      ),
-      body: isLoading
-          ? Center(child: DottedProgressWithLogo())
-          :  SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CommonTextField1(
-                lable: 'Add Title',
-                hint: 'Enter Title',
-                controller: titleController,
-                color: textColor,
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Required title' : null,
-              ),
+    return FutureBuilder(
+      future: AuthService.isEligibleForFree,
+      builder: (context, asyncSnapshot) {
+        final isEligibleForFree = asyncSnapshot.data ?? false;
+        AppLogger.info("isEligibleForFree:${isEligibleForFree}");
+        return Scaffold(
+          appBar: CustomAppBar1(
+            title:
+                (widget.editId.replaceAll('"', '').trim().isNotEmpty ?? false)
+                ? "Edit ${widget.CatName}"
+                : widget.CatName,
+            actions: [],
+          ),
+          body: isLoading
+              ? Center(child: DottedProgressWithLogo())
+              : SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CommonTextField1(
+                          lable: 'Add Title',
+                          hint: 'Enter Title',
+                          controller: titleController,
+                          color: textColor,
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Required title'
+                              : null,
+                        ),
 
-              CommonTextField1(
-                lable: 'Description',
-                hint: 'Enter up to 500 words',
-                controller: descriptionController,
-                color: textColor,
-                maxLines: 5,
-                validator: (v) => (v == null || v.trim().isEmpty)
-                    ? 'Description required'
-                    : null,
-              ),
+                        CommonTextField1(
+                          lable: 'Description',
+                          hint: 'Enter up to 500 words',
+                          controller: descriptionController,
+                          color: textColor,
+                          maxLines: 5,
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Description required'
+                              : null,
+                        ),
 
-              CommonTextField1(
-                lable: 'Area Size',
-                hint: 'Enter area (sq. ft.)',
-                controller: areaSizeController,
-                color: textColor,
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                validator: (v) => (v == null || v.trim().isEmpty)
-                    ? 'Area size required'
-                    : null,
-              ),
+                        CommonTextField1(
+                          lable: 'Area Size',
+                          hint: 'Enter area (sq. ft.)',
+                          controller: areaSizeController,
+                          color: textColor,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Area size required'
+                              : null,
+                        ),
 
-              CommonTextField1(
-                lable: 'Available Seats',
-                hint: 'Enter number',
-                controller: availableSeatsController,
-                color: textColor,
-                keyboardType: TextInputType.number,
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Seats required' : null,
-              ),
+                        CommonTextField1(
+                          lable: 'Available Seats',
+                          hint: 'Enter number',
+                          controller: availableSeatsController,
+                          color: textColor,
+                          keyboardType: TextInputType.number,
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Seats required'
+                              : null,
+                        ),
 
-              CommonTextField1(
-                lable: 'Room/  Desk capacity',
-                hint: 'Example 8  or 4 ',
-                controller: deskCapacityController,
-                color: textColor,
-                keyboardType: TextInputType.number,
-                validator: (v) => (v == null || v.trim().isEmpty)
-                    ? 'Desk capacity required'
-                    : null,
-              ),
+                        CommonTextField1(
+                          lable: 'Room/  Desk capacity',
+                          hint: 'Example 8  or 4 ',
+                          controller: deskCapacityController,
+                          color: textColor,
+                          keyboardType: TextInputType.number,
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Desk capacity required'
+                              : null,
+                        ),
 
-              CommonTextField1(
-                lable: 'Price',
-                hint: 'Enter price',
-                controller: priceController,
-                color: textColor,
-                keyboardType: TextInputType.number,
-                prefixIcon: Icon(
-                  Icons.currency_rupee,
-                  color: textColor,
-                  size: 16,
-                ),
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Price required' : null,
-              ),
+                        CommonTextField1(
+                          lable: 'Price',
+                          hint: 'Enter price',
+                          controller: priceController,
+                          color: textColor,
+                          keyboardType: TextInputType.number,
+                          prefixIcon: Icon(
+                            Icons.currency_rupee,
+                            color: textColor,
+                            size: 16,
+                          ),
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Price required'
+                              : null,
+                        ),
 
-               SizedBox(height: 12),
-              CommonImagePicker(
-                title: "Upload Product Images",
-                images: _images,
-                existingImages: _imageDataList,
-                maxImages: _maxImages,
-                textColor: textColor,
-                showError: _showimagesError,
-                editId: widget.editId,
-                onImagesChanged: (newList) {
-                  setState(() => _images = newList);
-                },
-                onExistingImagesChanged: (newList) {
-                  setState(() => _imageDataList = newList);
-                },
-              ),
+                        SizedBox(height: 12),
+                        CommonImagePicker(
+                          title: "Upload Product Images",
+                          images: _images,
+                          existingImages: _imageDataList,
+                          maxImages: _maxImages,
+                          textColor: textColor,
+                          showError: _showimagesError,
+                          editId: widget.editId,
+                          onImagesChanged: (newList) {
+                            setState(() => _images = newList);
+                          },
+                          onExistingImagesChanged: (newList) {
+                            setState(() => _imageDataList = newList);
+                          },
+                        ),
 
-              const SizedBox(height: 12),
+                        const SizedBox(height: 12),
 
-              ChipSelector(initialValue:seatTypeOffered ,
-                title: "Seat Type Offered",
-                options: [
-                  {"label": "Hot Desk", "value": "hot desk"},
-                  {"label": "Dedicated Desk", "value": "dedicated desk"},
-                  {"label": "Private Cabin", "value": "private cabin"},
-                  {"label": "Meeting Room", "value": "meeting room"},
-                  {"label": "Others", "value": "others"},
-                ],
-                onSelected: (val) => setState(() => seatTypeOffered = val),
-              ),
+                        ChipSelector(
+                          initialValue: seatTypeOffered,
+                          title: "Seat Type Offered",
+                          options: [
+                            {"label": "Hot Desk", "value": "hot desk"},
+                            {
+                              "label": "Dedicated Desk",
+                              "value": "dedicated desk",
+                            },
+                            {
+                              "label": "Private Cabin",
+                              "value": "private cabin",
+                            },
+                            {"label": "Meeting Room", "value": "meeting room"},
+                            {"label": "Others", "value": "others"},
+                          ],
+                          onSelected: (val) =>
+                              setState(() => seatTypeOffered = val),
+                        ),
 
-              _sectionTitle('Contact Information', textColor),
-              CommonTextField1(
-                lable: 'Name',
-                hint: 'Enter name',
-                controller: nameController,
-                color: textColor,
-                prefixIcon: Icon(Icons.person, color: textColor, size: 16),
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Name required' : null,
-              ),
-              CommonTextField1(
-                lable: 'Phone Number',
-                hint: 'Enter phone number',
-                controller: phoneController,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(10),
-                ],
-                color: textColor,
-                keyboardType: TextInputType.phone,
-                prefixIcon: Icon(Icons.call, color: textColor, size: 16),
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Phone required' : null,
-              ),
+                        _sectionTitle('Contact Information', textColor),
+                        CommonTextField1(
+                          lable: 'Name',
+                          hint: 'Enter name',
+                          controller: nameController,
+                          color: textColor,
+                          prefixIcon: Icon(
+                            Icons.person,
+                            color: textColor,
+                            size: 16,
+                          ),
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Name required'
+                              : null,
+                        ),
+                        CommonTextField1(
+                          lable: 'Phone Number',
+                          hint: 'Enter phone number',
+                          controller: phoneController,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            LengthLimitingTextInputFormatter(10),
+                          ],
+                          color: textColor,
+                          keyboardType: TextInputType.phone,
+                          prefixIcon: Icon(
+                            Icons.call,
+                            color: textColor,
+                            size: 16,
+                          ),
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Phone required'
+                              : null,
+                        ),
 
-              GestureDetector(
-                onTap: () async {
-                  final selectedState = await showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    backgroundColor: Colors.transparent,
-                    builder: (context) {
-                      return BlocProvider(
-                        create: (_) => SelectStatesCubit(
-                          SelectStatesImpl(
-                            remoteDataSource: RemoteDataSourceImpl(),
+                        GestureDetector(
+                          onTap: () async {
+                            final selectedState = await showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              builder: (context) {
+                                return BlocProvider(
+                                  create: (_) => SelectStatesCubit(
+                                    SelectStatesImpl(
+                                      remoteDataSource: RemoteDataSourceImpl(),
+                                    ),
+                                  ),
+                                  child: const SelectStateBottomSheet(),
+                                );
+                              },
+                            );
+
+                            if (selectedState != null) {
+                              stateController.text = selectedState.name ?? "";
+                              selectedStateId = selectedState.id ?? 0;
+                              setState(() {});
+                            }
+                          },
+                          child: AbsorbPointer(
+                            child: CommonTextField1(
+                              lable: 'State',
+                              hint: 'Select State',
+                              controller: stateController,
+                              color: textColor,
+                              isRead: true,
+                              prefixIcon: Icon(
+                                Icons.location_city_outlined,
+                                color: textColor,
+                                size: 16,
+                              ),
+                              // validator: (v) =>
+                              // (v == null || v.trim().isEmpty) ? 'State required' : null,
+                            ),
                           ),
                         ),
-                        child: const SelectStateBottomSheet(),
+                        if (_showStateError) _stateErrorWidget(),
+
+                        GestureDetector(
+                          onTap: () async {
+                            final selectedCity = await showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              builder: (context) {
+                                return SelectCityBottomSheet(
+                                  stateId: selectedStateId ?? 0,
+                                );
+                              },
+                            );
+                            if (selectedCity != null) {
+                              cityController.text = selectedCity.name ?? "";
+                              selectedCityId = selectedCity.id ?? 0;
+                              setState(() {});
+                            }
+                          },
+                          child: AbsorbPointer(
+                            child: CommonTextField1(
+                              lable: 'City',
+                              hint: 'Select City',
+                              controller: cityController,
+                              color: textColor,
+                              isRead: true,
+                              prefixIcon: Icon(
+                                Icons.location_city_outlined,
+                                color: textColor,
+                                size: 16,
+                              ),
+                              // validator: (v) =>
+                              // (v == null || v.trim().isEmpty) ? 'City required' : null,
+                            ),
+                          ),
+                        ),
+                        if (_showCityError) _cityErrorWidget(),
+                        CommonTextField1(
+                          lable: 'Address',
+                          hint: 'Enter Location',
+                          controller: locationController,
+                          color: textColor,
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Required location'
+                              : null,
+                        ),
+                        if (widget.editId == null ||
+                            widget.editId.replaceAll('"', '').trim().isEmpty &&
+                                !isEligibleForFree) ...[
+                          CommonTextField1(
+                            lable: 'Plan',
+                            isRead: true,
+                            hint: 'Select Plan',
+                            controller: planController,
+                            color: textColor,
+                            validator: (v) => (v == null || v.trim().isEmpty)
+                                ? 'Plan is Required'
+                                : null,
+                            onTap: () {
+                              context
+                                  .read<UserActivePlanCubit>()
+                                  .getUserActivePlansData();
+                              showPlanBottomSheet(
+                                context: context,
+                                controller: planController,
+                                onSelectPlan: (selectedPlan) {
+                                  print(
+                                    'Selected plan: ${selectedPlan.planName}',
+                                  );
+                                  planId = selectedPlan.planId;
+                                  packageId = selectedPlan.packageId;
+                                },
+                                title: 'Choose Your Plan',
+                              );
+                            },
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+
+          bottomNavigationBar: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+              child: FutureBuilder<bool>(
+                future: AuthService.isEligibleForAd,
+                builder: (context, asyncSnapshot) {
+                  if (asyncSnapshot.connectionState ==
+                      ConnectionState.waiting) {
+                    return const SizedBox();
+                  }
+                  final isEligible = asyncSnapshot.data ?? false;
+                  return BlocConsumer<MarkAsListingCubit, MarkAsListingState>(
+                    listener: (context, updateState) {
+                      if (updateState is MarkAsListingSuccess ||
+                          updateState is MarkAsListingUpdateSuccess) {
+                        context.pushReplacement("/successfully");
+                      } else if (updateState is MarkAsListingFailure) {
+                        CustomSnackBar1.show(context, updateState.error);
+                      }
+                    },
+                    builder: (context, updateState) {
+                      return BlocConsumer<CoWorkingAdCubit, CoWorkingAdStates>(
+                        listener: (context, state) {
+                          if (state is CoWorkingAdSuccess) {
+                            context.pushReplacement("/successfully");
+                          } else if (state is CoWorkingAdFailure) {
+                            CustomSnackBar1.show(context, state.error);
+                          }
+                        },
+                        builder: (context, state) {
+                          return CustomAppButton1(
+                            isLoading:
+                                state is CoWorkingAdLoading ||
+                                updateState is MarkAsListingUpdateLoading,
+                            text: 'Submit Ad',
+                            onPlusTap: isEligible
+                                ? () => _submitAd(context)
+                                : () => context.push("/plans"),
+                          );
+                        },
                       );
                     },
                   );
-
-                  if (selectedState != null) {
-                    stateController.text = selectedState.name ?? "";
-                    selectedStateId = selectedState.id ?? 0;
-                    setState(() {});
-                  }
                 },
-                child: AbsorbPointer(
-                  child: CommonTextField1(
-                    lable: 'State',
-                    hint: 'Select State',
-                    controller: stateController,
-                    color: textColor,
-                    isRead: true,
-                    prefixIcon: Icon(
-                      Icons.location_city_outlined,
-                      color: textColor,
-                      size: 16,
-                    ),
-                    // validator: (v) =>
-                    // (v == null || v.trim().isEmpty) ? 'State required' : null,
-                  ),
-                ),
               ),
-              if (_showStateError) _stateErrorWidget(),
-
-              GestureDetector(
-                onTap: () async {
-                  final selectedCity = await showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    backgroundColor: Colors.transparent,
-                    builder: (context) {
-                      return SelectCityBottomSheet(
-                        stateId: selectedStateId ?? 0,
-                      );
-                    },
-                  );
-                  if (selectedCity != null) {
-                    cityController.text = selectedCity.name ?? "";
-                    selectedCityId = selectedCity.id ?? 0;
-                    setState(() {});
-                  }
-                },
-                child: AbsorbPointer(
-                  child: CommonTextField1(
-                    lable: 'City',
-                    hint: 'Select City',
-                    controller: cityController,
-                    color: textColor,
-                    isRead: true,
-                    prefixIcon: Icon(
-                      Icons.location_city_outlined,
-                      color: textColor,
-                      size: 16,
-                    ),
-                    // validator: (v) =>
-                    // (v == null || v.trim().isEmpty) ? 'City required' : null,
-                  ),
-                ),
-              ),
-              if (_showCityError) _cityErrorWidget(),
-              CommonTextField1(
-                lable: 'Address',
-                hint: 'Enter Location',
-                controller: locationController,
-                color: textColor,
-                validator: (v) => (v == null || v.trim().isEmpty)
-                    ? 'Required location'
-                    : null,
-              ),
-              if (widget.editId == null ||
-                  widget.editId.replaceAll('"', '').trim().isEmpty) ...[
-                CommonTextField1(
-                  lable: 'Plan',
-                  isRead: true,
-                  hint: 'Select Plan',
-                  controller: planController,
-                  color: textColor,
-                  validator: (v) => (v == null || v.trim().isEmpty)
-                      ? 'Plan is Required'
-                      : null,
-                  onTap: () {
-                    context
-                        .read<UserActivePlanCubit>()
-                        .getUserActivePlansData();
-                    showPlanBottomSheet(
-                      context: context,
-                      controller: planController,
-                      onSelectPlan: (selectedPlan) {
-                        print('Selected plan: ${selectedPlan.planName}');
-                        planId = selectedPlan.planId;
-                        packageId = selectedPlan.packageId;
-                      },
-                      title: 'Choose Your Plan',
-                    );
-                  },
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-
-        bottomNavigationBar: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-            child: FutureBuilder<bool>(
-              future: AuthService.isEligibleForAd,
-              builder: (context, asyncSnapshot) {
-                if (asyncSnapshot.connectionState == ConnectionState.waiting) {
-                  return const SizedBox();
-                }
-                final isEligible = asyncSnapshot.data ?? false;
-                return BlocConsumer<MarkAsListingCubit, MarkAsListingState>(
-                  listener: (context, updateState) {
-                    if (updateState is MarkAsListingSuccess ||
-                        updateState is MarkAsListingUpdateSuccess) {
-                      context.pushReplacement("/successfully");
-                    } else if (updateState is MarkAsListingFailure) {
-                      CustomSnackBar1.show(context, updateState.error);
-                    }
-                  },
-                  builder: (context, updateState) {
-                    return BlocConsumer<CoWorkingAdCubit, CoWorkingAdStates>(
-                      listener: (context, state) {
-                        if (state is CoWorkingAdSuccess) {
-                          context.pushReplacement("/successfully");
-                        } else if (state is CoWorkingAdFailure) {
-                          CustomSnackBar1.show(context, state.error);
-                        }
-                      },
-                      builder: (context, state) {
-                        return CustomAppButton1(
-                          isLoading: state is CoWorkingAdLoading ||
-                              updateState is MarkAsListingUpdateLoading,
-                          text: 'Submit Ad',
-                          onPlusTap: isEligible
-                              ? () => _submitAd(context)
-                              : () => context.push("/plans"),
-                        );
-                      },
-                    );
-                  },
-                );
-              },
             ),
           ),
-        )
-
+        );
+      },
     );
   }
 
@@ -538,7 +567,6 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
       ),
     );
   }
-
 
   Widget _stateErrorWidget() {
     return Padding(

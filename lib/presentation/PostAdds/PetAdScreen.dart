@@ -20,6 +20,7 @@ import '../../data/remote_data_source.dart';
 import '../../services/AuthService.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
+import '../../utils/AppLogger.dart';
 import '../../utils/ImagePickerHelper.dart';
 import '../../utils/ImageUtils.dart';
 import '../../utils/color_constants.dart';
@@ -81,8 +82,8 @@ class _PetAdScreenState extends State<PetAdScreen> {
     final id = widget.editId.replaceAll('"', '').trim();
     if (id != null && id.isNotEmpty) {
       context.read<GetListingAdCubit>().getListingAd(widget.editId).then((
-          commonAdData,
-          ) {
+        commonAdData,
+      ) {
         if (commonAdData != null) {
           descriptionController.text =
               commonAdData.data?.listing?.description ?? '';
@@ -122,391 +123,420 @@ class _PetAdScreenState extends State<PetAdScreen> {
   final int _maxImages = 6;
   final ImagePicker _picker = ImagePicker();
 
-
   @override
   Widget build(BuildContext context) {
     final textColor = ThemeHelper.textColor(context);
-    return Scaffold(
-      appBar: CustomAppBar1(
-        title: (widget.editId.replaceAll('"', '').trim().isNotEmpty ?? false)
-            ? "Edit ${widget.CatName}"
-            : widget.CatName,
-        actions: [],
-      ),
-      body: isLoading
-          ? Center(child: DottedProgressWithLogo())
-          :  SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CommonTextField1(
-                lable: ' Add Title',
-                hint: 'Enter Title',
-                controller: titleController,
-                color: textColor,
-                validator: (v) =>
-                (v == null || v.trim().isEmpty) ? 'Required title' : null,
-              ),
+    return FutureBuilder(
+      future: AuthService.isEligibleForFree,
+      builder: (context, asyncSnapshot) {
+        final isEligibleForFree = asyncSnapshot.data ?? false;
+        AppLogger.info("isEligibleForFree:${isEligibleForFree}");
+        return Scaffold(
+          appBar: CustomAppBar1(
+            title:
+                (widget.editId.replaceAll('"', '').trim().isNotEmpty ?? false)
+                ? "Edit ${widget.CatName}"
+                : widget.CatName,
+            actions: [],
+          ),
+          body: isLoading
+              ? Center(child: DottedProgressWithLogo())
+              : SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CommonTextField1(
+                          lable: ' Add Title',
+                          hint: 'Enter Title',
+                          controller: titleController,
+                          color: textColor,
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Required title'
+                              : null,
+                        ),
 
-              CommonTextField1(
-                isRead: true,
-                lable: 'Brand',
-                controller: brandController,
-                color: textColor,
-              ),
+                        CommonTextField1(
+                          isRead: true,
+                          lable: 'Brand',
+                          controller: brandController,
+                          color: textColor,
+                        ),
 
-              CommonTextField1(
-                lable: 'Pet Type/ Bread',
-                hint: 'Enter Pet Type/ Bread',
-                controller: breedController,
-                color: textColor,
-                validator: (v) => (v == null || v.trim().isEmpty)
-                    ? 'Pet Type/ Bread is required'
-                    : null,
-              ),
-              CommonTextField1(
-                lable: 'Age ',
-                hint: 'Enter Age ',
-                controller: ageController,
-                color: textColor,
-                keyboardType: TextInputType.phone,
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Age is required' : null,
-              ),
+                        CommonTextField1(
+                          lable: 'Pet Type/ Bread',
+                          hint: 'Enter Pet Type/ Bread',
+                          controller: breedController,
+                          color: textColor,
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Pet Type/ Bread is required'
+                              : null,
+                        ),
+                        CommonTextField1(
+                          lable: 'Age ',
+                          hint: 'Enter Age ',
+                          controller: ageController,
+                          color: textColor,
+                          keyboardType: TextInputType.phone,
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Age is required'
+                              : null,
+                        ),
 
-              CommonTextField1(
-                lable: 'Description',
-                hint: 'Enter  Upto  500 words',
-                controller: descriptionController,
-                color: textColor,
-                maxLines: 5,
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Description required';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 12),
-              _sectionTitle("Select Gender", textColor),
-              RadioListTile<String>(
-                title: Text("Male"),
-                value: "male",
-                groupValue: _selectedGender,
-                activeColor: Theme.of(context).primaryColor,
-                onChanged: (val) {
-                  setState(() => _selectedGender = val ?? "male");
-                },
-              ),
-              RadioListTile<String>(
-                title: const Text("Female"),
-                value: "female",
-                groupValue: _selectedGender,
-                activeColor: Theme.of(context).primaryColor,
-                onChanged: (val) {
-                  setState(() => _selectedGender = val ?? "female");
-                },
-              ),
+                        CommonTextField1(
+                          lable: 'Description',
+                          hint: 'Enter  Upto  500 words',
+                          controller: descriptionController,
+                          color: textColor,
+                          maxLines: 5,
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Description required';
+                            }
+                            return null;
+                          },
+                        ),
+                        SizedBox(height: 12),
+                        _sectionTitle("Select Gender", textColor),
+                        RadioListTile<String>(
+                          title: Text("Male"),
+                          value: "male",
+                          groupValue: _selectedGender,
+                          activeColor: Theme.of(context).primaryColor,
+                          onChanged: (val) {
+                            setState(() => _selectedGender = val ?? "male");
+                          },
+                        ),
+                        RadioListTile<String>(
+                          title: const Text("Female"),
+                          value: "female",
+                          groupValue: _selectedGender,
+                          activeColor: Theme.of(context).primaryColor,
+                          onChanged: (val) {
+                            setState(() => _selectedGender = val ?? "female");
+                          },
+                        ),
 
-              CommonTextField1(
-                lable: 'Price',
-                hint: 'Enter price',
-                controller: priceController,
-                color: textColor,
-                keyboardType: TextInputType.number,
-                prefixIcon: Icon(
-                  Icons.currency_rupee,
-                  color: textColor,
-                  size: 16,
-                ),
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Price required' : null,
-              ),
+                        CommonTextField1(
+                          lable: 'Price',
+                          hint: 'Enter price',
+                          controller: priceController,
+                          color: textColor,
+                          keyboardType: TextInputType.number,
+                          prefixIcon: Icon(
+                            Icons.currency_rupee,
+                            color: textColor,
+                            size: 16,
+                          ),
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Price required'
+                              : null,
+                        ),
 
-              GestureDetector(
-                onTap: () async {
-                  final selectedState = await showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    backgroundColor: Colors.transparent,
-                    builder: (context) {
-                      return BlocProvider(
-                        create: (_) => SelectStatesCubit(
-                          SelectStatesImpl(
-                            remoteDataSource: RemoteDataSourceImpl(),
+                        GestureDetector(
+                          onTap: () async {
+                            final selectedState = await showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              builder: (context) {
+                                return BlocProvider(
+                                  create: (_) => SelectStatesCubit(
+                                    SelectStatesImpl(
+                                      remoteDataSource: RemoteDataSourceImpl(),
+                                    ),
+                                  ),
+                                  child: const SelectStateBottomSheet(),
+                                );
+                              },
+                            );
+
+                            if (selectedState != null) {
+                              stateController.text = selectedState.name ?? "";
+                              selectedStateId = selectedState.id ?? "";
+                              setState(() {});
+                            }
+                          },
+                          child: AbsorbPointer(
+                            // 👈 stops inner TextField from eating taps
+                            child: CommonTextField1(
+                              lable: 'State',
+                              hint: 'Select State',
+                              controller: stateController,
+                              color: textColor,
+                              keyboardType: TextInputType.text,
+                              isRead: true,
+                              prefixIcon: Icon(
+                                Icons.location_city_outlined,
+                                color: textColor,
+                                size: 16,
+                              ),
+                              validator: (v) => (v == null || v.trim().isEmpty)
+                                  ? 'State required'
+                                  : null,
+                            ),
                           ),
                         ),
-                        child: const SelectStateBottomSheet(),
-                      );
-                    },
-                  );
+                        if (_showStateError) ...[
+                          Padding(
+                            padding: const EdgeInsets.only(top: 5),
+                            child: ShakeWidget(
+                              key: Key("state"),
+                              duration: const Duration(milliseconds: 700),
+                              child: const Text(
+                                'Please Select State',
+                                style: TextStyle(
+                                  fontFamily: 'roboto_serif',
+                                  fontSize: 12,
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                        GestureDetector(
+                          onTap: () async {
+                            final selectedCity = await showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              builder: (context) {
+                                return SelectCityBottomSheet(
+                                  stateId: selectedStateId ?? 0,
+                                );
+                              },
+                            );
 
-                  if (selectedState != null) {
-                    stateController.text = selectedState.name ?? "";
-                    selectedStateId = selectedState.id ?? "";
-                    setState(() {});
-                  }
-                },
-                child: AbsorbPointer(
-                  // 👈 stops inner TextField from eating taps
-                  child: CommonTextField1(
-                    lable: 'State',
-                    hint: 'Select State',
-                    controller: stateController,
-                    color: textColor,
-                    keyboardType: TextInputType.text,
-                    isRead: true,
-                    prefixIcon: Icon(
-                      Icons.location_city_outlined,
-                      color: textColor,
-                      size: 16,
-                    ),
-                    validator: (v) => (v == null || v.trim().isEmpty)
-                        ? 'State required'
-                        : null,
-                  ),
-                ),
-              ),
-              if (_showStateError) ...[
-                Padding(
-                  padding: const EdgeInsets.only(top: 5),
-                  child: ShakeWidget(
-                    key: Key("state"),
-                    duration: const Duration(milliseconds: 700),
-                    child: const Text(
-                      'Please Select State',
-                      style: TextStyle(
-                        fontFamily: 'roboto_serif',
-                        fontSize: 12,
-                        color: Colors.red,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-              GestureDetector(
-                onTap: () async {
-                  final selectedCity = await showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    backgroundColor: Colors.transparent,
-                    builder: (context) {
-                      return SelectCityBottomSheet(
-                        stateId: selectedStateId ?? 0,
-                      );
-                    },
-                  );
-
-                  if (selectedCity != null) {
-                    cityController.text = selectedCity.name ?? "";
-                    selectedCityId = selectedCity.id ?? "";
-                    setState(() {});
-                  }
-                },
-                child: AbsorbPointer(
-                  child: CommonTextField1(
-                    lable: 'City',
-                    hint: 'Select City',
-                    controller: cityController,
-                    color: textColor,
-                    keyboardType: TextInputType.text,
-                    isRead: true,
-                    prefixIcon: Icon(
-                      Icons.location_city_outlined,
-                      color: textColor,
-                      size: 16,
-                    ),
-                    validator: (v) => (v == null || v.trim().isEmpty)
-                        ? 'City required'
-                        : null,
-                  ),
-                ),
-              ),
-              if (_showCityError) ...[
-                Padding(
-                  padding: const EdgeInsets.only(top: 5),
-                  child: ShakeWidget(
-                    key: Key(
-                      "dropdown_city_error_${DateTime.now().millisecondsSinceEpoch}",
-                    ),
-                    duration: const Duration(milliseconds: 700),
-                    child: const Text(
-                      'Please Select City',
-                      style: TextStyle(
-                        fontFamily: 'roboto_serif',
-                        fontSize: 12,
-                        color: Colors.red,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-
-              SizedBox(height: 12),
-              CommonImagePicker(
-                title: "Upload Product Images",
-                images: _images,
-                existingImages: _imageDataList,
-                maxImages: _maxImages,
-                textColor: textColor,
-                showError: _showimagesError,
-                editId: widget.editId,
-                onImagesChanged: (newList) {
-                  setState(() => _images = newList);
-                },
-                onExistingImagesChanged: (newList) {
-                  setState(() => _imageDataList = newList);
-                },
-              ),
-              SizedBox(height: 12),
-              CommonTextField1(
-                lable: 'Name',
-                hint: 'Enter name',
-                controller: nameController,
-                color: textColor,
-                prefixIcon: Icon(Icons.person, color: textColor, size: 16),
-              ),
-              CommonTextField1(
-                lable: 'Phone Number',
-                hint: 'Enter phone number',
-                controller: phoneController,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(10),
-                ],
-                color: textColor,
-                keyboardType: TextInputType.phone,
-                prefixIcon: Icon(Icons.call, color: textColor, size: 16),
-              ),
-              CommonTextField1(
-                lable: 'Address',
-                hint: 'Enter Address',
-                controller: locationController,
-                color: textColor,
-              ),
-              if (widget.editId == null ||
-                  widget.editId.replaceAll('"', '').trim().isEmpty) ...[
-                CommonTextField1(
-                  lable: 'Plan',
-                  isRead: true,
-                  hint: 'Select Plan',
-                  controller: planController,
-                  color: textColor,
-                  validator: (v) => (v == null || v.trim().isEmpty)
-                      ? 'Plan is Required'
-                      : null,
-                  onTap: () {
-                    context
-                        .read<UserActivePlanCubit>()
-                        .getUserActivePlansData();
-                    showPlanBottomSheet(
-                      context: context,
-                      controller: planController,
-                      onSelectPlan: (selectedPlan) {
-                        print('Selected plan: ${selectedPlan.planName}');
-                        planId = selectedPlan.planId;
-                        packageId = selectedPlan.packageId;
-                      },
-                      title: 'Choose Your Plan',
-                    );
-                  },
-                ),
-              ],            ],
-          ),
-        ),
-      ),
-        bottomNavigationBar: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-            child: FutureBuilder<bool>(
-              future: AuthService.isEligibleForAd,
-              builder: (context, asyncSnapshot) {
-                if (asyncSnapshot.connectionState == ConnectionState.waiting) {
-                  return const SizedBox();
-                }
-
-                final isEligible = asyncSnapshot.data ?? false;
-                final editId = widget.editId.replaceAll('"', '').trim();
-
-                return BlocConsumer<MarkAsListingCubit, MarkAsListingState>(
-                  listener: (context, updateState) {
-                    if (updateState is MarkAsListingSuccess ||
-                        updateState is MarkAsListingUpdateSuccess) {
-                      context.pushReplacement("/successfully");
-                    } else if (updateState is MarkAsListingFailure) {
-                      CustomSnackBar1.show(context, updateState.error);
-                    }
-                  },
-                  builder: (context, updateState) {
-                    return BlocConsumer<PetsAdCubit, PetsAdStates>(
-                      listener: (context, state) {
-                        if (state is PetsAdSuccess) {
-                          context.pushReplacement("/successfully");
-                        } else if (state is PetsAdFailure) {
-                          CustomSnackBar1.show(context, state.error);
-                        }
-                      },
-                      builder: (context, state) {
-                        return CustomAppButton1(
-                          isLoading: state is PetsAdLoading ||
-                              updateState is MarkAsListingUpdateLoading,
-                          text: 'Submit Ad',
-                          onPlusTap: isEligible
-                              ? () {
-                            if (_formKey.currentState?.validate() ?? false) {
-                              final Map<String, dynamic> data = {
-                                "title": titleController.text,
-                                "brand": brandController.text,
-                                "description": descriptionController.text,
-                                "sub_category_id": widget.subCatId,
-                                "category_id": widget.catId,
-                                "location": locationController.text,
-                                "mobile_number": phoneController.text,
-                                "price": priceController.text,
-                                "full_name": nameController.text,
-                                "state_id": selectedStateId,
-                                "city_id": selectedCityId,
-                                "pet_type": breedController.text,
-                                "age": ageController.text,
-                                "gender": _selectedGender,
-                              };
-
-                              if (editId.isEmpty) {
-                                data["plan_id"] = planId;
-                                data["package_id"] = packageId;
-                              }
-
-                              if (_images.isNotEmpty) {
-                                data["images"] =
-                                    _images.map((file) => file.path).toList();
-                              }
-
-                              if (editId.isNotEmpty) {
-                                context
-                                    .read<MarkAsListingCubit>()
-                                    .markAsUpdate(editId, data);
-                              } else {
-                                context.read<PetsAdCubit>().postPetsAd(data);
-                              }
+                            if (selectedCity != null) {
+                              cityController.text = selectedCity.name ?? "";
+                              selectedCityId = selectedCity.id ?? "";
+                              setState(() {});
                             }
-                          }
-                              : () {
-                            context.push("/plans");
                           },
-                        );
-                      },
-                    );
-                  },
-                );
-              },
+                          child: AbsorbPointer(
+                            child: CommonTextField1(
+                              lable: 'City',
+                              hint: 'Select City',
+                              controller: cityController,
+                              color: textColor,
+                              keyboardType: TextInputType.text,
+                              isRead: true,
+                              prefixIcon: Icon(
+                                Icons.location_city_outlined,
+                                color: textColor,
+                                size: 16,
+                              ),
+                              validator: (v) => (v == null || v.trim().isEmpty)
+                                  ? 'City required'
+                                  : null,
+                            ),
+                          ),
+                        ),
+                        if (_showCityError) ...[
+                          Padding(
+                            padding: const EdgeInsets.only(top: 5),
+                            child: ShakeWidget(
+                              key: Key(
+                                "dropdown_city_error_${DateTime.now().millisecondsSinceEpoch}",
+                              ),
+                              duration: const Duration(milliseconds: 700),
+                              child: const Text(
+                                'Please Select City',
+                                style: TextStyle(
+                                  fontFamily: 'roboto_serif',
+                                  fontSize: 12,
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+
+                        SizedBox(height: 12),
+                        CommonImagePicker(
+                          title: "Upload Product Images",
+                          images: _images,
+                          existingImages: _imageDataList,
+                          maxImages: _maxImages,
+                          textColor: textColor,
+                          showError: _showimagesError,
+                          editId: widget.editId,
+                          onImagesChanged: (newList) {
+                            setState(() => _images = newList);
+                          },
+                          onExistingImagesChanged: (newList) {
+                            setState(() => _imageDataList = newList);
+                          },
+                        ),
+                        SizedBox(height: 12),
+                        CommonTextField1(
+                          lable: 'Name',
+                          hint: 'Enter name',
+                          controller: nameController,
+                          color: textColor,
+                          prefixIcon: Icon(
+                            Icons.person,
+                            color: textColor,
+                            size: 16,
+                          ),
+                        ),
+                        CommonTextField1(
+                          lable: 'Phone Number',
+                          hint: 'Enter phone number',
+                          controller: phoneController,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            LengthLimitingTextInputFormatter(10),
+                          ],
+                          color: textColor,
+                          keyboardType: TextInputType.phone,
+                          prefixIcon: Icon(
+                            Icons.call,
+                            color: textColor,
+                            size: 16,
+                          ),
+                        ),
+                        CommonTextField1(
+                          lable: 'Address',
+                          hint: 'Enter Address',
+                          controller: locationController,
+                          color: textColor,
+                        ),
+                        if (widget.editId == null ||
+                            widget.editId.replaceAll('"', '').trim().isEmpty &&
+                                !isEligibleForFree) ...[
+                          CommonTextField1(
+                            lable: 'Plan',
+                            isRead: true,
+                            hint: 'Select Plan',
+                            controller: planController,
+                            color: textColor,
+                            validator: (v) => (v == null || v.trim().isEmpty)
+                                ? 'Plan is Required'
+                                : null,
+                            onTap: () {
+                              context
+                                  .read<UserActivePlanCubit>()
+                                  .getUserActivePlansData();
+                              showPlanBottomSheet(
+                                context: context,
+                                controller: planController,
+                                onSelectPlan: (selectedPlan) {
+                                  print(
+                                    'Selected plan: ${selectedPlan.planName}',
+                                  );
+                                  planId = selectedPlan.planId;
+                                  packageId = selectedPlan.packageId;
+                                },
+                                title: 'Choose Your Plan',
+                              );
+                            },
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+          bottomNavigationBar: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+              child: FutureBuilder<bool>(
+                future: AuthService.isEligibleForAd,
+                builder: (context, asyncSnapshot) {
+                  if (asyncSnapshot.connectionState ==
+                      ConnectionState.waiting) {
+                    return const SizedBox();
+                  }
+
+                  final isEligible = asyncSnapshot.data ?? false;
+                  final editId = widget.editId.replaceAll('"', '').trim();
+
+                  return BlocConsumer<MarkAsListingCubit, MarkAsListingState>(
+                    listener: (context, updateState) {
+                      if (updateState is MarkAsListingSuccess ||
+                          updateState is MarkAsListingUpdateSuccess) {
+                        context.pushReplacement("/successfully");
+                      } else if (updateState is MarkAsListingFailure) {
+                        CustomSnackBar1.show(context, updateState.error);
+                      }
+                    },
+                    builder: (context, updateState) {
+                      return BlocConsumer<PetsAdCubit, PetsAdStates>(
+                        listener: (context, state) {
+                          if (state is PetsAdSuccess) {
+                            context.pushReplacement("/successfully");
+                          } else if (state is PetsAdFailure) {
+                            CustomSnackBar1.show(context, state.error);
+                          }
+                        },
+                        builder: (context, state) {
+                          return CustomAppButton1(
+                            isLoading:
+                                state is PetsAdLoading ||
+                                updateState is MarkAsListingUpdateLoading,
+                            text: 'Submit Ad',
+                            onPlusTap: isEligible
+                                ? () {
+                                    if (_formKey.currentState?.validate() ??
+                                        false) {
+                                      final Map<String, dynamic> data = {
+                                        "title": titleController.text,
+                                        "brand": brandController.text,
+                                        "description":
+                                            descriptionController.text,
+                                        "sub_category_id": widget.subCatId,
+                                        "category_id": widget.catId,
+                                        "location": locationController.text,
+                                        "mobile_number": phoneController.text,
+                                        "price": priceController.text,
+                                        "full_name": nameController.text,
+                                        "state_id": selectedStateId,
+                                        "city_id": selectedCityId,
+                                        "pet_type": breedController.text,
+                                        "age": ageController.text,
+                                        "gender": _selectedGender,
+                                      };
+
+                                      if (editId.isEmpty) {
+                                        data["plan_id"] = planId;
+                                        data["package_id"] = packageId;
+                                      }
+
+                                      if (_images.isNotEmpty) {
+                                        data["images"] = _images
+                                            .map((file) => file.path)
+                                            .toList();
+                                      }
+
+                                      if (editId.isNotEmpty) {
+                                        context
+                                            .read<MarkAsListingCubit>()
+                                            .markAsUpdate(editId, data);
+                                      } else {
+                                        context.read<PetsAdCubit>().postPetsAd(
+                                          data,
+                                        );
+                                      }
+                                    }
+                                  }
+                                : () {
+                                    context.push("/plans");
+                                  },
+                          );
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ),
-        )
+        );
+      },
     );
   }
 

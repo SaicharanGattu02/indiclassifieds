@@ -551,7 +551,7 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       header,
-                      const Divider(height: 1),
+                      const Divider(height: 1,thickness: 0.5,),
                       const SizedBox(height: 16),
                       _SkeletonPackageTile(color: cardColor),
                       const SizedBox(height: 12),
@@ -568,7 +568,7 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       header,
-                      const Divider(height: 1),
+                      const Divider(height: 1,thickness: 0.5,),
                       const SizedBox(height: 24),
                       Icon(
                         Icons.error_outline,
@@ -932,9 +932,9 @@ class _PackageTile extends StatelessWidget {
                     alignment: Alignment.center,
                     child: Text(
                       badgeText,
-                      style: const TextStyle(
+                      style:  TextStyle(
                         fontWeight: FontWeight.w800,
-                        color: Colors.white,
+                        color: textColor,
                         fontSize: 20,
                       ),
                     ),
@@ -946,9 +946,8 @@ class _PackageTile extends StatelessWidget {
                       width: 22,
                       height: 22,
                       decoration: BoxDecoration(
-                        color: isSelected ? primarycolor : Colors.white,
+                        color: isSelected ? primarycolor : Colors.transparent,
                         borderRadius: BorderRadius.circular(11),
-                        border: Border.all(color: Colors.black12),
                       ),
                       alignment: Alignment.center,
                       child: isSelected

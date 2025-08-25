@@ -581,7 +581,6 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
               if (asyncSnapshot.connectionState == ConnectionState.waiting) {
                 return const SizedBox();
               }
-
               final isEligible = asyncSnapshot.data ?? false;
               final editId = widget.editId.replaceAll('"', '').trim();
 

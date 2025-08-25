@@ -47,12 +47,20 @@ class AuthService {
 
   static Future<bool> get isEligibleForAd async {
     final status = await getPlanStatus();
-    return status == "false";
+    if(status == "false"){
+      return false;
+    }else{
+      return true;
+    }
   }
 
   static Future<bool> get isEligibleForFree async {
     final status = await getFreePlanStatus();
-    return status == "false";
+    if(status == "false"){
+      return false;
+    }else{
+      return true;
+    }
   }
 
   static Future<String?> getRefreshToken() async =>

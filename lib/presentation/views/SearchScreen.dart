@@ -45,19 +45,15 @@ class _SearchScreenState extends State<SearchScreen> {
   void dispose() {
     _scrollController.dispose();
     searchController.dispose();
-    if (_debounce?.isActive ?? false)
-      _debounce?.cancel();
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
     super.dispose();
   }
-
 
   void _onSearchChanged(String query) {
     if (_debounce?.isActive ?? false) _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), () {
       // Call API with the debounced query
-      context.read<ProductsCubit>().getProducts(
-        search: query,
-      );
+      context.read<ProductsCubit>().getProducts(search: query);
     });
   }
 
@@ -77,9 +73,12 @@ class _SearchScreenState extends State<SearchScreen> {
         ),
         title: Text("Listings", style: AppTextStyles.headlineSmall(textColor)),
         actions: [
-          GestureDetector(onTap: (){
-            context.push('/filter');
-          },child: Icon(Icons.tune, color: textColor)),
+          GestureDetector(
+            onTap: () {
+              context.push('/filter');
+            },
+            child: Icon(Icons.tune, color: textColor),
+          ),
           const SizedBox(width: 16),
         ],
       ),
@@ -98,7 +97,10 @@ class _SearchScreenState extends State<SearchScreen> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0,vertical: 8),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 8,
+              ),
               child: TextFormField(
                 controller: searchController,
                 style: AppTextStyles.bodyLarge(textColor),
@@ -113,7 +115,7 @@ class _SearchScreenState extends State<SearchScreen> {
               child: BlocBuilder<ProductsCubit, ProductsStates>(
                 builder: (context, state) {
                   if (state is ProductsLoading) {
-                    return Center(child:DottedProgressWithLogo());
+                    return Center(child: DottedProgressWithLogo());
                   } else if (state is ProductsFailure) {
                     return Center(child: Text(state.error));
                   } else if (state is ProductsLoaded ||

@@ -1,6 +1,7 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:indiclassifieds/Components/CustomAppButton.dart';
 
 import '../data/cubit/UserActivePlans/user_active_plans_cubit.dart';
 import '../data/cubit/UserActivePlans/user_active_plans_states.dart';
@@ -8,14 +9,14 @@ import '../model/UserActivePlansModel.dart';
 import '../theme/AppTextStyles.dart';
 import '../theme/ThemeHelper.dart';
 
-
 void showPlanBottomSheet({
   required BuildContext context,
   required TextEditingController controller,
   required Function(Plans) onSelectPlan,
   String? title = 'Select Plan',
 }) {
-  showModalBottomSheet(backgroundColor: ThemeHelper.backgroundColor(context),
+  showModalBottomSheet(
+    backgroundColor: ThemeHelper.backgroundColor(context),
     context: context,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
@@ -48,6 +49,37 @@ void showPlanBottomSheet({
 
           if (state is UserActivePlanLoaded) {
             final plans = state.userActivePlansModel.plans ?? [];
+            if (plans.length == 0) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    spacing: 20,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Oops!",
+                        style: TextStyle(
+                            color: textColor,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800
+                        ),
+                      ),
+                      Text(
+                        "You don't have Plans. Please Subscribe for Plan.",
+                        style: TextStyle(
+                          color: textColor
+                        ),
+                      ),
+                      CustomAppButton1(text: "Subscribe",width: 250, onPlusTap: () {
+                        context.pop();
+                        context.push("/plans");
+                      }),
+                    ],
+                  ),
+                ),
+              );
+            }
             return Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -97,14 +129,21 @@ void showPlanBottomSheet({
                               ],
                             ),
                             onTap: () {
-                              controller.text = plan.planName ?? ''; // Set the selected plan name in the text field
-                              onSelectPlan(plan); // Callback function when a plan is selected
+                              controller.text =
+                                  plan.planName ??
+                                  ''; // Set the selected plan name in the text field
+                              onSelectPlan(
+                                plan,
+                              ); // Callback function when a plan is selected
                               Navigator.pop(context); // Close the bottom sheet
                             },
                           ),
                         );
                       },
-                      separatorBuilder: (context, index) => Divider(thickness: 1.5, color: textColor.withOpacity(0.2)),
+                      separatorBuilder: (context, index) => Divider(
+                        thickness: 1.5,
+                        color: textColor.withOpacity(0.2),
+                      ),
                     ),
                   ),
                 ],
@@ -112,10 +151,14 @@ void showPlanBottomSheet({
             );
           }
 
-          return Center(child: Text('No plans available', style: AppTextStyles.bodyMedium(textColor)));
+          return Center(
+            child: Text(
+              'No plans available',
+              style: AppTextStyles.bodyMedium(textColor),
+            ),
+          );
         },
       );
     },
   );
 }
-

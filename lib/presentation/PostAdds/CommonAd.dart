@@ -488,7 +488,6 @@ class _CommonAdState extends State<CommonAd> {
                                           );
                                         }
                                       }
-
                                       if (isValid) {
                                         final Map<String, dynamic> data = {
                                           "title": titleController.text,
