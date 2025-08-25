@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import 'package:indiclassifieds/Components/CustomAppButton.dart';
 import 'package:indiclassifieds/Components/CutomAppBar.dart';
 import 'package:indiclassifieds/utils/media_query_helper.dart';
-
 import '../../data/cubit/Categories/categories_cubit.dart';
 import '../../data/cubit/Categories/categories_states.dart';
 import '../../data/cubit/City/city_cubit.dart';
@@ -78,7 +77,6 @@ class _FilterScreenState extends State<FilterScreen> {
   @override
   Widget build(BuildContext context) {
     final textColor = ThemeHelper.textColor(context);
-
     return Scaffold(
       appBar: CustomAppBar1(title: "Filters", actions: []),
       body: Stack(
@@ -91,32 +89,42 @@ class _FilterScreenState extends State<FilterScreen> {
             child: ValueListenableBuilder<int>(
               valueListenable: currentSelectedFilterIndex,
               builder: (context, selectedIndex, _) {
-                return Column(
-                  children: [
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: lblFilterTypesList.length,
-                        itemBuilder: (context, index) {
-                          return ListTile(
-                            onTap: () {
-                              currentSelectedFilterIndex.value = index;
+                return ValueListenableBuilder<int?>(
+                  valueListenable: selectedStateId,
+                  builder: (context, stateId, __) {
+                    final filters = lblFilterTypesList.where((item) {
+                      if (item == "City" && stateId == null) return false;
+                      return true;
+                    }).toList();
+
+                    return Column(
+                      children: [
+                        Expanded(
+                          child: ListView.builder(
+                            itemCount: filters.length,
+                            itemBuilder: (context, index) {
+                              return ListTile(
+                                onTap: () {
+                                  currentSelectedFilterIndex.value = index;
+                                },
+                                selected: selectedIndex == index,
+                                selectedTileColor: Theme.of(
+                                  context,
+                                ).colorScheme.secondary.withOpacity(0.2),
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadiusDirectional.only(
+                                    topStart: Radius.circular(10),
+                                    bottomStart: Radius.circular(10),
+                                  ),
+                                ),
+                                title: Text(filters[index]),
+                              );
                             },
-                            selected: selectedIndex == index,
-                            selectedTileColor: Theme.of(
-                              context,
-                            ).colorScheme.secondary.withOpacity(0.2),
-                            shape: const RoundedRectangleBorder(
-                              borderRadius: BorderRadiusDirectional.only(
-                                topStart: Radius.circular(10),
-                                bottomStart: Radius.circular(10),
-                              ),
-                            ),
-                            title: Text(lblFilterTypesList[index]),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 );
               },
             ),
@@ -196,6 +204,9 @@ class _FilterScreenState extends State<FilterScreen> {
                     minPriceController.clear();
                     maxPriceController.clear();
                     selectedRange.value = RangeValues(minPrice, maxPrice);
+                    if (currentSelectedFilterIndex.value == 4) {
+                      currentSelectedFilterIndex.value = 0;
+                    }
                     context.read<ProductsCubit>().getProducts();
                   },
                 ),
@@ -416,101 +427,98 @@ class _FilterScreenState extends State<FilterScreen> {
         } else if (state is SelectStatesLoaded) {
           final states = state.selectStatesModel.data ?? [];
 
-          if (states.isEmpty) {
-            return Center(
-              child: Text(
-                "No states found",
-                style: AppTextStyles.bodyMedium(textColor),
-              ),
-            );
-          }
-
-          return ValueListenableBuilder<int?>(
-            valueListenable: selectedStateId,
-            builder: (context, stateId, _) {
-              return Column(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: SizedBox(
-                            height: 42,
-                            child: TextField(
-                              controller: stateSearchController,
-                              style: AppTextStyles.bodyMedium(textColor),
-                              decoration: InputDecoration(
-                                hintText: "Search state...",
-                                hintStyle: AppTextStyles.bodyMedium(
-                                  textColor.withOpacity(0.6),
-                                ),
-                                prefixIcon: Icon(
-                                  Icons.search,
-                                  color: textColor,
-                                ),
-                                filled: true,
-                                fillColor: Colors.grey.shade100,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide.none,
-                                ),
-                              ),
-                              onChanged: (value) {
-                                if (_debounce?.isActive ?? false)
-                                  _debounce!.cancel();
-                                _debounce = Timer(
-                                  const Duration(milliseconds: 500),
-                                  () {
-                                    context
-                                        .read<SelectStatesCubit>()
-                                        .getSelectStates(value);
-                                  },
-                                );
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 20,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: 42,
+                        child: TextField(
+                          controller: stateSearchController,
+                          style: AppTextStyles.bodyMedium(textColor),
+                          decoration: InputDecoration(
+                            hintText: "Search state...",
+                            hintStyle: AppTextStyles.bodyMedium(
+                              textColor.withOpacity(0.6),
+                            ),
+                            prefixIcon: Icon(Icons.search, color: textColor),
+                            filled: true,
+                            fillColor: Colors.grey.shade100,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                          onChanged: (value) {
+                            if (_debounce?.isActive ?? false)
+                              _debounce!.cancel();
+                            _debounce = Timer(
+                              const Duration(milliseconds: 500),
+                              () {
+                                context
+                                    .read<SelectStatesCubit>()
+                                    .getSelectStates(value);
                               },
-                            ),
-                          ),
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.close),
-                          onPressed: () {
-                            stateSearchController.clear();
-                            context.read<SelectStatesCubit>().getSelectStates(
-                              "",
                             );
                           },
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: states.length,
-                      itemBuilder: (context, index) {
-                        final s = states[index];
-                        final isSelected = stateId == s.id;
-                        return CheckboxListTile(
-                          value: isSelected,
-                          onChanged: (val) {
-                            selectedStateId.value = val == true ? s.id : null;
-                            context.read<SelectCityCubit>().getSelectCity(
-                              selectedStateId.value ?? 0,
-                              "",
-                            );
-                          },
-                          title: Text(
-                            s.name ?? "Unknown",
-                            style: AppTextStyles.bodyMedium(
-                              isSelected ? Colors.blue : textColor,
-                            ),
-                          ),
-                        );
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () {
+                        stateSearchController.clear();
+                        context.read<SelectStatesCubit>().getSelectStates("");
                       },
                     ),
+                  ],
+                ),
+              ),
+              if (states.isEmpty)
+                Center(
+                  child: Text(
+                    "No states found",
+                    style: AppTextStyles.bodyMedium(textColor),
                   ),
-                ],
-              );
-            },
+                )
+              else
+                Expanded(
+                  child: ValueListenableBuilder<int?>(
+                    valueListenable: selectedStateId,
+                    builder: (context, stateId, _) {
+                      return ListView.builder(
+                        itemCount: states.length,
+                        itemBuilder: (context, index) {
+                          final s = states[index];
+                          final isSelected = stateId == s.id;
+                          return CheckboxListTile(
+                            value: isSelected,
+                            onChanged: (val) {
+                              selectedStateId.value = val == true ? s.id : null;
+                              context.read<SelectCityCubit>().getSelectCity(
+                                selectedStateId.value ?? 0,
+                                "",
+                              );
+                            },
+                            title: Text(
+                              s.name ?? "Unknown",
+                              style: AppTextStyles.bodyMedium(
+                                isSelected ? Colors.blue : textColor,
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+            ],
           );
         }
 
@@ -540,138 +548,133 @@ class _FilterScreenState extends State<FilterScreen> {
 
             final cities = citiesList.data ?? [];
 
-            if (cities.isEmpty) {
-              return Center(
-                child: Text(
-                  "No cities found",
-                  style: AppTextStyles.bodyMedium(textColor),
-                ),
-              );
-            }
-
-            return ValueListenableBuilder<int?>(
-              valueListenable: selectedCityId,
-              builder: (context, cityId, _) {
-                return NotificationListener<ScrollNotification>(
-                  onNotification: (scrollInfo) {
-                    if (scrollInfo.metrics.pixels >=
-                            scrollInfo.metrics.maxScrollExtent * 0.9 &&
-                        state is SelectCityLoaded &&
-                        state.hasNextPage) {
-                      context.read<SelectCityCubit>().getMoreCities(
-                        selectedStateId.value ?? 0,
-                        cityController.text,
-                      );
-                    }
-                    return false;
-                  },
-                  child: Column(
+            return Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 20,
+                  ),
+                  child: Row(
                     children: [
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 20,
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: SizedBox(
-                                height: 42,
-                                child: TextField(
-                                  controller: stateSearchController,
-                                  style: AppTextStyles.bodyMedium(textColor),
-                                  decoration: InputDecoration(
-                                    hintText: "Search state...",
-                                    hintStyle: AppTextStyles.bodyMedium(
-                                      textColor.withOpacity(0.6),
-                                    ),
-                                    prefixIcon: Icon(
-                                      Icons.search,
-                                      color: textColor,
-                                    ),
-                                    filled: true,
-                                    fillColor: Colors.grey.shade100,
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide.none,
-                                    ),
-                                  ),
-                                  onChanged: (value) {
-                                    if (_debounce?.isActive ?? false)
-                                      _debounce!.cancel();
-                                    _debounce = Timer(
-                                      const Duration(milliseconds: 500),
-                                      () {
-                                        context
-                                            .read<SelectCityCubit>()
-                                            .getSelectCity(
-                                              selectedStateId.value ?? 0,
-                                              value,
-                                            );
-                                      },
-                                    );
-                                  },
-                                ),
+                      Expanded(
+                        child: SizedBox(
+                          height: 42,
+                          child: TextField(
+                            controller: cityController,
+                            style: AppTextStyles.bodyMedium(textColor),
+                            decoration: InputDecoration(
+                              hintText: "Search city...",
+                              hintStyle: AppTextStyles.bodyMedium(
+                                textColor.withOpacity(0.6),
+                              ),
+                              prefixIcon: Icon(Icons.search, color: textColor),
+                              filled: true,
+                              fillColor: Colors.grey.shade100,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
                               ),
                             ),
-                            IconButton(
-                              icon: Icon(Icons.close),
-                              onPressed: () {
-                                stateSearchController.clear();
-                                context.read<SelectCityCubit>().getSelectCity(
-                                  selectedStateId.value ?? 0,
-                                  "",
-                                );
-                              },
-                            ),
-                          ],
+                            onChanged: (value) {
+                              if (_debounce?.isActive ?? false)
+                                _debounce!.cancel();
+                              _debounce = Timer(
+                                const Duration(milliseconds: 500),
+                                () {
+                                  context.read<SelectCityCubit>().getSelectCity(
+                                    selectedStateId.value ?? 0,
+                                    value,
+                                  );
+                                },
+                              );
+                            },
+                          ),
                         ),
                       ),
-                      Expanded(
-                        child: ListView.builder(
-                          itemCount:
-                              cities.length +
-                              (state is SelectCityLoadingMore ? 1 : 0),
-                          itemBuilder: (context, index) {
-                            if (index == cities.length &&
-                                state is SelectCityLoadingMore) {
-                              return const Padding(
-                                padding: EdgeInsets.all(16.0),
-                                child: Center(
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 0.8,
-                                  ),
-                                ),
-                              );
-                            }
-
-                            final c = cities[index];
-                            final isSelected = cityId == c.id;
-
-                            return CheckboxListTile(
-                              value: isSelected,
-                              onChanged: (val) {
-                                selectedCityId.value = val == true
-                                    ? c.id
-                                    : null;
-                              },
-                              title: Text(
-                                c.name ?? "",
-                                style: AppTextStyles.bodyMedium(
-                                  isSelected ? Colors.blue : textColor,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () {
+                          cityController.clear();
+                          context.read<SelectCityCubit>().getSelectCity(
+                            selectedStateId.value ?? 0,
+                            "",
+                          );
+                        },
                       ),
                     ],
                   ),
-                );
-              },
+                ),
+                if (cities.isEmpty)
+                  Center(
+                    child: Text(
+                      "No cities found",
+                      style: AppTextStyles.bodyMedium(textColor),
+                    ),
+                  )
+                else
+                  Expanded(
+                    child: ValueListenableBuilder<int?>(
+                      valueListenable: selectedCityId,
+                      builder: (context, cityId, _) {
+                        return NotificationListener<ScrollNotification>(
+                          onNotification: (scrollInfo) {
+                            if (scrollInfo.metrics.pixels >=
+                                    scrollInfo.metrics.maxScrollExtent * 0.9 &&
+                                state is SelectCityLoaded &&
+                                state.hasNextPage) {
+                              context.read<SelectCityCubit>().getMoreCities(
+                                selectedStateId.value ?? 0,
+                                cityController.text,
+                              );
+                            }
+                            return false;
+                          },
+                          child: ListView.builder(
+                            itemCount:
+                                cities.length +
+                                (state is SelectCityLoadingMore ? 1 : 0),
+                            itemBuilder: (context, index) {
+                              if (index == cities.length &&
+                                  state is SelectCityLoadingMore) {
+                                return const Padding(
+                                  padding: EdgeInsets.all(16.0),
+                                  child: Center(
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 0.8,
+                                    ),
+                                  ),
+                                );
+                              }
+
+                              final c = cities[index];
+                              final isSelected = cityId == c.id;
+
+                              return CheckboxListTile(
+                                value: isSelected,
+                                onChanged: (val) {
+                                  selectedCityId.value = val == true
+                                      ? c.id
+                                      : null;
+                                },
+                                title: Text(
+                                  c.name ?? "Unknown",
+                                  style: AppTextStyles.bodyMedium(
+                                    isSelected ? Colors.blue : textColor,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+              ],
             );
           }
-          return Center(child: Text("No Data"));
+
+          return const Center(child: Text("No Data"));
         },
       ),
     );

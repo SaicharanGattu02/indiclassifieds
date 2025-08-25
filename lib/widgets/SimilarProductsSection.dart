@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-
 import '../data/cubit/Products/products_cubit.dart';
-
 import '../data/cubit/Products/products_states.dart';
 import '../model/SubcategoryProductsModel.dart';
 import '../theme/AppTextStyles.dart';
