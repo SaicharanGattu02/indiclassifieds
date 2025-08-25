@@ -45,6 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final textColor = ThemeHelper.textColor(context);
     final isDarkMode = ThemeHelper.isDarkMode(context);
+    final cardColor = ThemeHelper.cardColor(context);
     final borderColor = ThemeHelper.isDarkMode(context)
         ? Colors.white12
         : Colors.black12;
@@ -101,7 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
             final products_data = state.subcategoryProductsModel;
             return SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+                padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -115,22 +116,13 @@ class _HomeScreenState extends State<HomeScreen> {
                           vertical: 12,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 5,
-                              offset: Offset(0, 2),
-                            ),
-                          ],
+                          color: cardColor,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: borderColor),
                         ),
                         child: Row(
                           children: [
-                            Icon(
-                              Icons.search,
-                              color: Color(0xff6B72820),
-                            ), // Prefix Icon
+                            Icon(Icons.search, color: textColor), // Prefix Icon
                             SizedBox(width: 8),
                             Text(
                               'Search products, brands, .....',
@@ -457,7 +449,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         TextButton(
                           onPressed: () {
-
                             context.push('/products_list');
                           },
                           child: Text(
@@ -476,30 +467,45 @@ class _HomeScreenState extends State<HomeScreen> {
                     BlocBuilder<ProductsCubit, ProductsStates>(
                       builder: (context, productState) {
                         if (productState is ProductsLoaded) {
-                          final products = productState.productsModel.products ?? [];
+                          final products =
+                              productState.productsModel.products ?? [];
                           return CustomScrollView(
                             shrinkWrap: true,
                             physics: NeverScrollableScrollPhysics(),
                             slivers: [
                               SliverGrid(
-                                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                  mainAxisSpacing: 12,
-                                  crossAxisSpacing: 12,
-                                  childAspectRatio: 0.95,
-                                ),
-                                delegate: SliverChildBuilderDelegate((context, index) {
+                                gridDelegate:
+                                    SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 2,
+                                      mainAxisSpacing: 12,
+                                      crossAxisSpacing: 12,
+                                      childAspectRatio: 0.95,
+                                    ),
+                                delegate: SliverChildBuilderDelegate((
+                                  context,
+                                  index,
+                                ) {
                                   final p = products[index];
 
-                                  return BlocListener<AddToWishlistCubit, AddToWishlistStates>(
+                                  return BlocListener<
+                                    AddToWishlistCubit,
+                                    AddToWishlistStates
+                                  >(
                                     listener: (context, state) {
                                       if (state is AddToWishlistLoaded) {
-                                        context.read<ProductsCubit>().updateWishlistStatus(
-                                          state.product_id,
-                                          state.addToWishlistModel.liked ?? false,
+                                        context
+                                            .read<ProductsCubit>()
+                                            .updateWishlistStatus(
+                                              state.product_id,
+                                              state.addToWishlistModel.liked ??
+                                                  false,
+                                            );
+                                      } else if (state
+                                          is AddToWishlistFailure) {
+                                        CustomSnackBar1.show(
+                                          context,
+                                          state.error,
                                         );
-                                      } else if (state is AddToWishlistFailure) {
-                                        CustomSnackBar1.show(context, state.error);
                                       }
                                     },
                                     child: SimilarProductCard(
@@ -510,18 +516,22 @@ class _HomeScreenState extends State<HomeScreen> {
                                       isLiked: p.isFavorited ?? false,
                                       onLikeToggle: () {
                                         if (p.id != null) {
-                                          context.read<AddToWishlistCubit>().addToWishlist(p.id!);
+                                          context
+                                              .read<AddToWishlistCubit>()
+                                              .addToWishlist(p.id!);
                                         }
                                       },
                                       onTap: () async {
-                                        final shouldRefresh = await context.push<bool>(
-                                          "/products_details?listingId=${p.id}&subcategory_id=${p.subCategory?.id}",
-                                        );
+                                        final shouldRefresh = await context
+                                            .push<bool>(
+                                              "/products_details?listingId=${p.id}&subcategory_id=${p.subCategory?.id}",
+                                            );
                                         if (shouldRefresh == true) {
-                                          context.read<DashboardCubit>().fetchDashboard();
+                                          context
+                                              .read<DashboardCubit>()
+                                              .fetchDashboard();
                                         }
                                       },
-
 
                                       borderColor: borderColor,
                                     ),
@@ -535,7 +545,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         return Center(child: CircularProgressIndicator());
                       },
                     ),
-
                   ],
                 ),
               ),
@@ -548,6 +557,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
   String _formatINR(String? price) {
     final val = double.tryParse(price ?? "");
     if (val == null) return "0";

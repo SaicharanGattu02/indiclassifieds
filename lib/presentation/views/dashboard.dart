@@ -8,6 +8,7 @@ import 'package:indiclassifieds/services/AuthService.dart';
 import 'package:indiclassifieds/theme/app_colors.dart';
 
 import '../../data/cubit/UserActivePlans/user_active_plans_cubit.dart';
+import '../../data/cubit/theme_cubit.dart';
 import '../../theme/ThemeHelper.dart';
 import 'AddsScreen.dart';
 import 'FavouritesScreen.dart';
@@ -39,6 +40,7 @@ class _DashboardState extends State<Dashboard> {
         .getUserActivePlansData();
     if (plan != null) {
       AuthService.setPlanStatus(plan.goToPlansPage.toString() ?? "");
+      AuthService.setFreePlanStatus(plan.isFree.toString() ?? "");
     }
   }
 
@@ -51,71 +53,69 @@ class _DashboardState extends State<Dashboard> {
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = ThemeHelper.isDarkMode(context);
-    return WillPopScope(
-      onWillPop: () async {
-        SystemNavigator.pop();
-        return false;
-      },
-      child: Scaffold(
-        body: PageView(
-          controller: pageController,
-          onPageChanged: (value) {
-            HapticFeedback.lightImpact();
-            setState(() {
-              _selectedIndex = value;
-            });
-          },
-          physics: const NeverScrollableScrollPhysics(),
-          children: [
-            HomeScreen(),
-            AdsScreen(),
-            UserListScreen(),
-            ProfileScreen(),
-          ],
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        floatingActionButton: Container(
-          width: 50,
-          height: 50,
-          margin: EdgeInsets.only(top: 40),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.blue.withOpacity(0.4),
-                blurRadius: 5,
-                offset: Offset(0, 6),
-              ),
-            ],
-          ),
-          child: FloatingActionButton(
-            backgroundColor: AppColors.primary,
-            onPressed: () {
-              context.push("/category");
-            },
-            child: Icon(Icons.add, size: 32, color: Colors.white),
-          ),
-        ),
-        bottomNavigationBar: SafeArea(
-          child: Container(
-            height: 65,
-            decoration: BoxDecoration(
-              color: Color(isDarkMode ? 0xff0D0D0D : 0xffffffff),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildNavItem(Icons.home, "Home", 0),
-                _buildNavItem(Icons.archive, "My Ads", 1),
-                SizedBox(width: 40), // space for Sell FAB
-                _buildNavItem(Icons.chat, "Chat", 2),
-                _buildNavItem(Icons.person, "Profile", 3),
+    return BlocBuilder<ThemeCubit, AppThemeMode>(
+      builder: (context, mode) {
+        final cardColor = ThemeHelper.cardColor(context);
+        return WillPopScope(
+          onWillPop: () async { SystemNavigator.pop(); return false; },
+          child: Scaffold(
+            resizeToAvoidBottomInset: false,
+            body: PageView(
+              controller: pageController,
+              onPageChanged: (value) {
+                HapticFeedback.lightImpact();
+                setState(() => _selectedIndex = value);
+              },
+              physics: const NeverScrollableScrollPhysics(),
+              children: const [
+                HomeScreen(),
+                AdsScreen(),
+                UserListScreen(),
+                ProfileScreen(),
               ],
             ),
+            floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+            floatingActionButton: MediaQuery.removeViewInsets(
+              context: context,
+              removeBottom: true,
+              child: Container(
+                width: 50, height: 50, margin: const EdgeInsets.only(top: 40),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.blue.withOpacity(0.4),
+                      blurRadius: 5, offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: FloatingActionButton(
+                  backgroundColor: AppColors.primary,
+                  onPressed: () => context.push("/category"),
+                  child: const Icon(Icons.add, size: 32, color: Colors.white),
+                ),
+              ),
+            ),
+            bottomNavigationBar: SafeArea(
+              child: AnimatedContainer( // smooth color transition
+                duration: const Duration(milliseconds: 200),
+                height: 65,
+                color: cardColor,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildNavItem(Icons.home, "Home", 0),
+                    _buildNavItem(Icons.archive, "My Ads", 1),
+                    const SizedBox(width: 40), // space for FAB
+                    _buildNavItem(Icons.chat, "Chat", 2),
+                    _buildNavItem(Icons.person, "Profile", 3),
+                  ],
+                ),
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 

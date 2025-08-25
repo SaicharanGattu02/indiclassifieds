@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:indiclassifieds/services/AuthService.dart';
@@ -22,15 +24,21 @@ class UserListScreen extends StatefulWidget {
 class _UserListScreenState extends State<UserListScreen> with SingleTickerProviderStateMixin {
   String? userId;
   final TextEditingController _search = TextEditingController();
-  String _query = '';
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
+
+  // --- at the top of your State class ---
+  Timer? _searchDebounce;
+  static const _searchDelay = Duration(milliseconds: 350);
+  String _lastFiredQuery = '';   // avoids redundant fetches
+  String _query = '';
+
 
   @override
   void initState() {
     super.initState();
     // Fetch chat users
-    context.read<ChatUsersCubit>().fetchChatUsers();
+    context.read<ChatUsersCubit>().fetchChatUsers("");
     getUserId();
 
     // Initialize animation controller
@@ -53,9 +61,32 @@ class _UserListScreenState extends State<UserListScreen> with SingleTickerProvid
   @override
   void dispose() {
     _search.dispose();
+    _searchDebounce?.cancel();
     _animationController.dispose();
     super.dispose();
   }
+
+  void _onSearchChanged(String v) {
+    setState(() => _query = v);
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(_searchDelay, () {
+      if (!mounted) return;
+      final q = _query.trim();
+      if (q == _lastFiredQuery) return; // no-op if same as last fired
+      _lastFiredQuery = q;
+      context.read<ChatUsersCubit>().fetchChatUsers(q);
+    });
+  }
+
+  void _clearSearch() {
+    _searchDebounce?.cancel();
+    setState(() {
+      _query = '';
+    });
+    _lastFiredQuery = '';
+    context.read<ChatUsersCubit>().fetchChatUsers('');
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -76,13 +107,6 @@ class _UserListScreenState extends State<UserListScreen> with SingleTickerProvid
           ),
         ),
         actions: [
-          IconButton(
-            tooltip: 'New chat',
-            onPressed: () {
-              // Add navigation or logic for new chat
-            },
-            icon: Icon(Icons.chat_bubble_outline, color: textColor),
-          ),
         ],
       ),
       body: Column(
@@ -104,24 +128,18 @@ class _UserListScreenState extends State<UserListScreen> with SingleTickerProvid
                     ),
                   ],
                 ),
-                child: TextField(
+                child:TextField(
                   controller: _search,
-                  onChanged: (v) => setState(() => _query = v),
+                  onChanged: _onSearchChanged,                   // ← debounced
                   style: AppTextStyles.bodyMedium(textColor),
                   decoration: InputDecoration(
                     hintText: 'Search by name…',
                     hintStyle: AppTextStyles.bodyMedium(textColor.withOpacity(0.6)),
-                    prefixIcon: Icon(
-                      Icons.search,
-                      color: textColor.withOpacity(0.8),
-                    ),
+                    prefixIcon: Icon(Icons.search, color: textColor.withOpacity(0.8)),
                     suffixIcon: _query.isNotEmpty
                         ? IconButton(
                       icon: Icon(Icons.clear, color: textColor.withOpacity(0.8)),
-                      onPressed: () {
-                        _search.clear();
-                        setState(() => _query = '');
-                      },
+                      onPressed: _clearSearch,            // ← debounced clear
                     )
                         : null,
                     border: InputBorder.none,
@@ -158,7 +176,7 @@ class _UserListScreenState extends State<UserListScreen> with SingleTickerProvid
                   }
 
                   return RefreshIndicator(
-                    onRefresh: () async => context.read<ChatUsersCubit>().fetchChatUsers(),
+                    onRefresh: () async => context.read<ChatUsersCubit>().fetchChatUsers(""),
                     color: textColor,
                     backgroundColor: card,
                     child: ListView.separated(
@@ -170,15 +188,13 @@ class _UserListScreenState extends State<UserListScreen> with SingleTickerProvid
                         final user = filtered[i];
                         final id = user.userId ?? 0;
                         final name = user.name ?? '';
+                        final imageUrl = user.profileImage ?? '';
                         return _ChatCard(
                           id: id,
                           name: name,
-                          // last: user.lastMessage ?? '', // Uncomment if available in model
-                          // time: user.lastMessageTime ?? DateTime.now(), // Uncomment if available
-                          // unread: user.unreadCount ?? 0, // Uncomment if available
-                          // isOnline: state.chatUsersModel.onlineIds?.contains(id) ?? false,
+                          imageUrl: imageUrl, // ← pass it
                           onTap: () {
-                            context.push('/chat?receiverId=$id&receiverName=$name');
+                            context.push('/chat?receiverId=$id&receiverName=$name&receiverImage=${user.profileImage}');
                           },
                           card: card,
                           textColor: textColor,
@@ -230,7 +246,7 @@ class _UserListScreenState extends State<UserListScreen> with SingleTickerProvid
           ),
           const SizedBox(height: 16),
           ElevatedButton(
-            onPressed: () => context.read<ChatUsersCubit>().fetchChatUsers(),
+            onPressed: () => context.read<ChatUsersCubit>().fetchChatUsers(""),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.blue,
               shape: RoundedRectangleBorder(
@@ -252,10 +268,7 @@ class _ChatCard extends StatelessWidget {
   const _ChatCard({
     required this.id,
     required this.name,
-    // required this.last,
-    // required this.time,
-    // required this.unread,
-    // required this.isOnline,
+    required this.imageUrl,
     required this.onTap,
     required this.card,
     required this.textColor,
@@ -264,25 +277,68 @@ class _ChatCard extends StatelessWidget {
 
   final int id;
   final String name;
-  // final String last;
-  // final DateTime time;
-  // final int unread;
-  // final bool isOnline;
+  final String imageUrl;        // ← new
   final VoidCallback onTap;
   final Color card;
   final Color textColor;
   final int animationDelay;
 
-  String _formatTime(DateTime t) {
-    final now = DateTime.now();
-    final isToday = t.year == now.year && t.month == now.month && t.day == now.day;
-    if (isToday) {
-      final h = t.hour.toString().padLeft(2, '0');
-      final m = t.minute.toString().padLeft(2, '0');
-      return '$h:$m';
-    }
-    return '${t.day}/${t.month}/${t.year.toString().substring(2)}';
+  bool get _hasImage =>
+      imageUrl.trim().isNotEmpty &&
+          Uri.tryParse(imageUrl)?.hasAbsolutePath == true;
+
+  String _initials(String name) {
+    final parts = name.trim().split(RegExp(r'\s+')).where((e) => e.isNotEmpty).toList();
+    if (parts.isEmpty) return '?';
+    if (parts.length == 1) return parts.first.characters.first.toUpperCase();
+    final a = parts[0].characters.first.toUpperCase();
+    final b = parts[1].characters.first.toUpperCase();
+    return '$a$b';
   }
+
+  Widget _initialsAvatar(double size) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          colors: [Colors.teal, Colors.blueAccent],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        _initials(name),
+        style: AppTextStyles.titleLarge(Colors.white).copyWith(
+          fontWeight: FontWeight.bold,
+          fontSize: size * 0.42,
+        ),
+      ),
+    );
+  }
+
+  Widget _avatar({double size = 48}) {
+    if (_hasImage) {
+      return ClipOval(
+        child: Image.network(
+          imageUrl,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _initialsAvatar(size),
+          // (optional) tiny placeholder while loading
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return _initialsAvatar(size);
+          },
+        ),
+      );
+    }
+    return _initialsAvatar(size);
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -301,48 +357,10 @@ class _ChatCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             child: Row(
               children: [
-                // Gradient Avatar
-                Stack(
-                  children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          colors: [Colors.teal, Colors.blueAccent],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          name.isNotEmpty ? name[0].toUpperCase() : '?',
-                          style: AppTextStyles.titleLarge(Colors.white).copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                    // Uncomment for online status
-                    // Positioned(
-                    //   right: 0,
-                    //   bottom: 0,
-                    //   child: Container(
-                    //     width: 12,
-                    //     height: 12,
-                    //     decoration: BoxDecoration(
-                    //       color: isOnline ? Colors.green : Colors.grey,
-                    //       shape: BoxShape.circle,
-                    //       border: Border.all(color: card, width: 2),
-                    //     ),
-                    //   ),
-                    // ),
-                  ],
-                ),
+                _avatar(size: 48),                 // ← image or initials
                 const SizedBox(width: 12),
 
-                // Name and Last Message
+                // Name (and future: last message/time/unread)
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -360,40 +378,13 @@ class _ChatCard extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          // Uncomment for timestamp
-                          // Text(
-                          //   _formatTime(time),
-                          //   style: AppTextStyles.labelSmall(textColor.withOpacity(0.6)),
-                          // ),
                         ],
                       ),
                       const SizedBox(height: 4),
-                      // Uncomment for last message
-                      // Text(
-                      //   last,
-                      //   maxLines: 1,
-                      //   overflow: TextOverflow.ellipsis,
-                      //   style: AppTextStyles.bodyMedium(textColor.withOpacity(0.75)),
-                      // ),
+                      // You can add last message preview/time here later
                     ],
                   ),
                 ),
-
-                // Uncomment for unread count
-                // if (unread > 0) ...[
-                //   const SizedBox(width: 10),
-                //   Container(
-                //     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                //     decoration: BoxDecoration(
-                //       color: Colors.blue,
-                //       borderRadius: BorderRadius.circular(999),
-                //     ),
-                //     child: Text(
-                //       unread.toString(),
-                //       style: AppTextStyles.labelSmall(Colors.white),
-                //     ),
-                //   ),
-                // ],
               ],
             ),
           ),
@@ -402,3 +393,4 @@ class _ChatCard extends StatelessWidget {
     );
   }
 }
+

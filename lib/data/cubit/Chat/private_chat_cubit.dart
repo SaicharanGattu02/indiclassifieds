@@ -27,6 +27,10 @@ class PrivateChatCubit extends Cubit<PrivateChatState> {
   late final String _room;
   Timer? _typingDebounce;
 
+  Timer? _peerTypingClearTimer;   // clears peer typing after a quiet period
+  Timer? _myTypingThrottle;       // throttles how often we emit 'typing'
+
+
   PrivateChatCubit(this.currentUserId, this.receiverId)
     : super(const PrivateChatState()) {
     _socket = SocketService.connect(currentUserId); // shared instance
@@ -35,30 +39,26 @@ class PrivateChatCubit extends Cubit<PrivateChatState> {
   }
 
   void _init() {
-    // Remove any previous handlers (important with a shared socket)
+    // Remove old handlers (shared socket)
     _socket.off('receive_private_message', _onReceiveMessage);
-    _socket.off('typing', _onPeerTyping);
-    _socket.off(
-      'user_typing',
-      _onUserTyping,
-    ); // Adding listener for 'user_typing'
+    _socket.off('user_typing', _onUserTyping);
     _socket.off('connect');
 
     // Add listeners
     _socket.on('receive_private_message', _onReceiveMessage);
-    _socket.on('user_typing', _onUserTyping);
+    _socket.on('user_typing', _onUserTyping); // ← only this for typing status
     _socket.on('connect', (_) {
       AppLogger.info('[socket] connected: ${_socket.id}');
       _joinRoom();
     });
 
-    // 🔑 If already connected, join immediately (otherwise connect won’t fire now)
     if (_socket.connected) {
       _joinRoom();
     } else {
       AppLogger.info('[socket] not connected yet; will join on connect');
     }
   }
+
 
   void _joinRoom() {
     // Send whatever your server expects. Common patterns:
@@ -157,20 +157,29 @@ class PrivateChatCubit extends Cubit<PrivateChatState> {
     }
   }
 
-  // Typing event handler
   void _onUserTyping(dynamic data) {
     try {
       final map = (data is Map) ? Map<String, dynamic>.from(data) : {};
       final senderId = map['senderId']?.toString();
-      if (senderId != null && senderId != currentUserId) {
-        // This is not the current user typing, so show the typing indicator
-        AppLogger.info('[socket] User $senderId is typing');
-        emit(state.copyWith(isPeerTyping: true));
-      }
+      final room      = map['room']?.toString();
+      final sameRoom  = room == _room;
+      final fromPeer  = senderId != null && senderId != currentUserId;
+
+      if (!sameRoom || !fromPeer) return;
+
+      // Mark peer as typing now
+      emit(state.copyWith(isPeerTyping: true));
+
+      // Safety: auto-clear after 3s of silence
+      _peerTypingClearTimer?.cancel();
+      _peerTypingClearTimer = Timer(const Duration(seconds: 3), () {
+        if (!isClosed) emit(state.copyWith(isPeerTyping: false));
+      });
     } catch (e) {
-      AppLogger.info("[socket] error in onUserTyping: $e");
+      AppLogger.info("[socket] error in _onUserTyping: $e");
     }
   }
+
 
   // ---- Listeners ----
   void _onReceiveMessage(dynamic data) {
@@ -241,27 +250,29 @@ class PrivateChatCubit extends Cubit<PrivateChatState> {
   }
 
   void startTyping() {
-    AppLogger.info('[socket] Start typing...');
-    _sendTyping();
-    _typingDebounce?.cancel();
-    _typingDebounce = Timer(const Duration(milliseconds: 1000), () {
-      _socket.off('typing', _onPeerTyping);
-    });
+    // throttle to avoid spamming the server
+    if (_myTypingThrottle?.isActive == true) return;
+    _emitTyping(); // no payload boolean needed if server doesn't use it
+    _myTypingThrottle = Timer(const Duration(seconds: 2), () {}); // reopen window
   }
 
   void stopTyping() {
-    AppLogger.info('[socket] Stop typing...');
-    _typingDebounce?.cancel();
-    _sendTyping();
+    // optional: emit one more 'typing' if your server treats it as a ping
+    // _emitTyping();
+    _myTypingThrottle?.cancel();
+    _myTypingThrottle = null;
   }
 
-  void _sendTyping() {
-    AppLogger.info('[socket] Sending typing status');
-    _socket.emit('typing', {
-      'receiverId': receiverId,
+  void _emitTyping() {
+    final payload = {
+      'room': _room,
       'senderId': currentUserId,
-    });
+      'receiverId': receiverId,
+    };
+    AppLogger.info('[socket] typing -> $payload');
+    _socket.emit('typing', payload);
   }
+
 
   @override
   Future<void> close() {

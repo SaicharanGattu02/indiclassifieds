@@ -57,6 +57,7 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) {
         final receiverId = state.uri.queryParameters['receiverId']!;
         final receiverName = state.uri.queryParameters['receiverName'] ?? '';
+        final receiverImage = state.uri.queryParameters['receiverImage'] ?? '';
 
         return FutureBuilder<String?>(
           future: AuthService.getId(),
@@ -73,6 +74,7 @@ final GoRouter appRouter = GoRouter(
                 currentUserId: currentUserId,
                 receiverId: receiverId,
                 receiverName: receiverName,
+                receiverImage: receiverImage,
               ),
             );
           },

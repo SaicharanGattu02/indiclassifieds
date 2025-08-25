@@ -80,7 +80,7 @@ abstract class RemoteDataSource {
   Future<getListingAdModel?> getListingAd(String id);
   Future<AdSuccessModel?> removeImageOnListingAd(int id);
   Future<AdSuccessModel?> register(Map<String, dynamic> data);
-  Future<ChatUsersModel?> getChatUsers();
+  Future<ChatUsersModel?> getChatUsers(String query);
   Future<ChatMessagesModel?> getChatMessages(String user_id, int page);
 }
 
@@ -134,10 +134,10 @@ class RemoteDataSourceImpl implements RemoteDataSource {
   }
 
   @override
-  Future<ChatUsersModel?> getChatUsers() async {
+  Future<ChatUsersModel?> getChatUsers(String query) async {
     try {
       Response response = await ApiClient.get(
-        "${APIEndpointUrls.get_all_users_by_chat}",
+        "${APIEndpointUrls.get_all_users_by_chat}?search=${query}",
       );
       AppLogger.log('getChatUsers:${response.data}');
       return ChatUsersModel.fromJson(response.data);

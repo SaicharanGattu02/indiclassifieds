@@ -1,10 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:indiclassifieds/data/cubit/Profile/profile_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Profile/profile_states.dart';
 import '../../Components/CustomAppButton.dart';
+import '../../data/cubit/theme_cubit.dart';
 import '../../services/AuthService.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
@@ -20,7 +22,6 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-
   @override
   void initState() {
     super.initState();
@@ -33,6 +34,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final bgColor = ThemeHelper.backgroundColor(context);
     final textColor = ThemeHelper.textColor(context);
     var height = MediaQuery.sizeOf(context).height;
+
+    final mode = context.watch<ThemeCubit>().state;
+    final isSystem = mode == AppThemeMode.system;
+    final platformIsDark = MediaQuery.of(context).platformBrightness == Brightness.dark;
+
+// What the switch visually shows right now:
+    final effectiveDark = mode == AppThemeMode.dark || (isSystem && platformIsDark);
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
@@ -47,8 +55,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           builder: (context, state) {
             if (state is ProfileLoading) {
               return SizedBox(
-                height: height*0.75,
-                  child: Center(child: DottedProgressWithLogo()));
+                height: height * 0.75,
+                child: Center(child: DottedProgressWithLogo()),
+              );
             } else if (state is ProfileLoaded) {
               final user_data = state.profileModel.data;
               return Column(
@@ -116,7 +125,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     onPressed: () {
                       context.push('/edit_profile_screen');
                     },
-                    child: const Text('Edit Profile',style: TextStyle(color: Colors.white),),
+                    child: const Text(
+                      'Edit Profile',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
                   const SizedBox(height: 20),
                   _settingsTile(
@@ -141,9 +153,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   //     context.push("/advertisements");
                   //   },
                   // ),
-                  _settingsTile(onTap: (){
-                    context.push('/wish_list');
-                  },
+                  _settingsTile(
+                    onTap: () {
+                      context.push('/wish_list');
+                    },
                     Icons.favorite,
                     Colors.red.shade100,
                     'Wishlist',
@@ -155,9 +168,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Icons.nightlight_round,
                     Colors.purple.shade100,
                     'Dark Theme',
-                    isDark,
-                    textColor,
-                    isSwitch: true,
+                    ThemeHelper.isDarkMode(context),
+                    ThemeHelper.textColor(context),
+                    // isSwitch: true,
+                    // switchValue: effectiveDark,
+                    onSwitchChanged: (val) {
+                      final cubit = context.read<ThemeCubit>();
+                      if (val) {
+                        cubit.setDarkTheme(); // exits System if it was set
+                      } else {
+                        cubit.setLightTheme();
+                      }
+                    },
+                    onTap: () => _openThemePicker(
+                      context,
+                    ), // optional system/light/dark sheet
+                    trailingText: isSystem ? 'System' : null,
                   ),
                   _settingsTile(
                     Icons.share,
@@ -211,6 +237,93 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
+
+  void _openThemePicker(BuildContext context) {
+    final isDark = ThemeHelper.isDarkMode(context);
+    final textColor = ThemeHelper.textColor(context);
+    final cardColor = ThemeHelper.cardColor(context);
+    final activeColor = Theme.of(context).colorScheme.primary;
+
+    showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      useSafeArea: true,
+      backgroundColor: cardColor,
+      barrierColor: Colors.black.withOpacity(isDark ? 0.6 : 0.3),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) {
+        return BlocBuilder<ThemeCubit, AppThemeMode>(
+          builder: (ctx, mode) {
+            void pick(AppThemeMode m) {
+              final cubit = ctx.read<ThemeCubit>();
+              switch (m) {
+                case AppThemeMode.system: cubit.setSystemTheme(); break;
+                case AppThemeMode.light:  cubit.setLightTheme();  break;
+                case AppThemeMode.dark:   cubit.setDarkTheme();   break;
+              }
+              HapticFeedback.selectionClick();
+              Navigator.pop(ctx);
+            }
+
+            Widget option({
+              required IconData icon,
+              required String title,
+              String? subtitle,
+              required AppThemeMode value,
+            }) {
+              final selected = mode == value;
+              return ListTile(
+                leading: Icon(
+                  icon,
+                  color: selected ? activeColor : textColor.withOpacity(0.7),
+                ),
+                title: Text(title, style: TextStyle(color: textColor)),
+                subtitle: subtitle == null
+                    ? null
+                    : Text(subtitle, style: TextStyle(color: textColor.withOpacity(0.7))),
+                trailing: selected ? Icon(Icons.check, color: activeColor) : null,
+                onTap: () => pick(value),
+              );
+            }
+
+            // Helpful subtitle for "System" to show what it currently resolves to
+            final platformIsDark = MediaQuery.of(context).platformBrightness == Brightness.dark;
+            final systemSubtitle = 'Follows device: ${platformIsDark ? 'Dark' : 'Light'}';
+
+            return SafeArea(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(height: 4),
+                  option(
+                    icon: Icons.brightness_auto_rounded,
+                    title: 'Use device theme',
+                    subtitle: systemSubtitle,
+                    value: AppThemeMode.system,
+                  ),
+                  option(
+                    icon: Icons.wb_sunny_rounded,
+                    title: 'Light',
+                    value: AppThemeMode.light,
+                  ),
+                  option(
+                    icon: Icons.nightlight_round,
+                    title: 'Dark',
+                    value: AppThemeMode.dark,
+                  ),
+                  const SizedBox(height: 8),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+
 
   void showLogoutDialog(BuildContext context) {
     showDialog(
@@ -349,37 +462,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-
   Widget _settingsTile(
-    IconData icon,
-    Color iconBg,
-    String label,
-    bool isDark,
-    Color textcolor, {
-    IconData? trailing,
-    String? trailingText,
-    bool isSwitch = false,
-    VoidCallback? onTap, // <-- add onTap
-  }) {
+      IconData icon,
+      Color iconBg,
+      String label,
+      bool isDark,
+      Color textcolor, {
+        IconData? trailing,
+        String? trailingText,
+        bool isSwitch = false,
+        VoidCallback? onTap,
+        // ✅ add these:
+        bool? switchValue,
+        ValueChanged<bool>? onSwitchChanged,
+      }) {
     return InkWell(
-      onTap: onTap, // <-- handle tap
+      onTap: onTap,
       borderRadius: BorderRadius.circular(10),
       child: Container(
         decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(10)),
           gradient: isDark
-              ? LinearGradient(
-                  colors: [
-                    Colors.black.withOpacity(0.2),
-                    Colors.black.withOpacity(0.8),
-                  ],
-                )
-              : LinearGradient(
-                  colors: [
-                    const Color(0xffF9FAFB).withOpacity(0.8),
-                    const Color(0xffFFFFFF).withOpacity(0.8),
-                  ],
-                ),
+              ? LinearGradient(colors: [
+            Colors.black.withOpacity(0.2),
+            Colors.black.withOpacity(0.8),
+          ])
+              : LinearGradient(colors: [
+            const Color(0xffF9FAFB).withOpacity(0.8),
+            const Color(0xffFFFFFF).withOpacity(0.8),
+          ]),
         ),
         padding: const EdgeInsets.all(16),
         margin: const EdgeInsets.only(bottom: 6),
@@ -396,11 +507,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             if (trailingText != null)
               Text(trailingText, style: AppTextStyles.bodySmall(textcolor)),
-            if (trailing != null) Icon(trailing, size: 16, color: Colors.grey),
-            if (isSwitch) Switch(value: false, onChanged: (val) {}),
+            if (trailing != null)
+              Icon(trailing, size: 16, color: Colors.grey),
+
+            // ✅ use the provided value & callback
+            if (isSwitch)
+              Switch(
+                value: switchValue ?? false,
+                onChanged: onSwitchChanged,
+              ),
           ],
         ),
       ),
     );
   }
+
 }

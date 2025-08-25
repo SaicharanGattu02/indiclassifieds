@@ -7,10 +7,10 @@ class ChatUsersCubit extends Cubit<ChatUsersStates> {
 
   ChatUsersCubit(this.chatUsersRepo) : super(ChatUsersInitially());
 
-  Future<void> fetchChatUsers() async {
+  Future<void> fetchChatUsers(String query) async {
     try {
       emit(ChatUsersLoading());
-      final chatUsers = await chatUsersRepo.getChatUsers();
+      final chatUsers = await chatUsersRepo.getChatUsers(query);
       if (chatUsers != null && chatUsers.success == true) {
         emit(ChatUsersLoaded(chatUsers));
       } else {

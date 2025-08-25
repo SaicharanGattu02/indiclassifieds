@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:indiclassifieds/Components/CustomAppButton.dart';
 import 'package:indiclassifieds/Components/CutomAppBar.dart';
 import 'package:indiclassifieds/data/cubit/Products/products_cubit.dart';
 import 'package:indiclassifieds/model/WishlistModel.dart';
@@ -48,7 +49,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   void initState() {
     super.initState();
     context.read<ProductDetailsCubit>().getProductDetails(widget.listingId);
-    context.read<ProductsCubit1>().getProducts(
+    context.read<ProductsCubit>().getProducts(
       subCategoryId: widget.subcategory_id.toString(),
     );
   }
@@ -69,6 +70,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
       appBar: CustomAppBar1(title: 'Details', actions: []),
       bottomNavigationBar: _BottomCtaBar(
         onContact: () {
+
         },
         onChat: () {
         },
@@ -152,6 +154,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   ),
                 ),
               ),
+
+              // ===== Item Information =====
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -245,7 +249,6 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     name: posted?.name ?? "—",
                     postedOn: posted?.postedAt ?? _shortDate(listing.createdAt),
                     onViewProfile: () {
-                      /* TODO */
                     },
                   ),
                 ),
@@ -542,16 +545,15 @@ class _PostedByCard extends StatelessWidget {
               ],
             ),
           ),
-          IconButton(
-            onPressed: onViewProfile,
-            icon: Icon(Icons.person_add_alt_1, color: textColor),
-          ),
+          // IconButton(
+          //   onPressed: onViewProfile,
+          //   icon: Icon(Icons.person_add_alt_1, color: textColor),
+          // ),
         ],
       ),
     );
   }
 }
-
 
 
 class _BottomCtaBar extends StatelessWidget {
@@ -568,37 +570,11 @@ class _BottomCtaBar extends StatelessWidget {
         child: Row(
           children: [
             Expanded(
-              child: ElevatedButton(
-                onPressed: onContact,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(28),
-                  ),
-                  backgroundColor: const Color(0xFF1866FF),
-                ),
-                child: Text(
-                  "Contact Seller",
-                  style: AppTextStyles.bodyMedium(Colors.white),
-                ),
-              ),
+              child:CustomAppButton1(text: "Contact Seller", onPlusTap: onContact)
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: ElevatedButton(
-                onPressed: onChat,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(28),
-                  ),
-                  backgroundColor: const Color(0xFF1866FF),
-                ),
-                child: Text(
-                  "Chat",
-                  style: AppTextStyles.bodyMedium(Colors.white),
-                ),
-              ),
+              child: CustomAppButton1(text: "Chat", onPlusTap: onChat)
             ),
           ],
         ),

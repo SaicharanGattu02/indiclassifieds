@@ -9,6 +9,7 @@ import '../utils/constants.dart';
 class AuthService {
   static const String _accessTokenKey = "access_token";
   static const String _plan_status = "plan_status";
+  static const String _free_plan_status = "free_plan_status";
   static const String _refreshTokenKey = "refresh_token";
   static const String _tokenExpiryKey = "token_expiry";
   static const String _userName = "user_name";
@@ -35,11 +36,22 @@ class AuthService {
   static Future<void> setPlanStatus(String status) async =>
       await _storage.write(key: _plan_status, value: status);
 
+  static Future<void> setFreePlanStatus(String status) async =>
+      await _storage.write(key: _free_plan_status, value: status);
+
+  static Future<String?> getFreePlanStatus() async =>
+      await _storage.read(key: _free_plan_status);
+
   static Future<String?> getPlanStatus() async =>
       await _storage.read(key: _plan_status);
 
   static Future<bool> get isEligibleForAd async {
     final status = await getPlanStatus();
+    return status == "false";
+  }
+
+  static Future<bool> get isEligibleForFree async {
+    final status = await getFreePlanStatus();
     return status == "false";
   }
 
@@ -69,18 +81,16 @@ class AuthService {
     return isExpired;
   }
 
-
   /// Save tokens and expiry time (at login)
   static Future<void> saveTokens(
-      String accessToken,
-      String userName,
-      String email,
-      String mobile,
-      int id,
-      String? refreshToken,
-      int expiresIn,
-
-      ) async {
+    String accessToken,
+    String userName,
+    String email,
+    String mobile,
+    int id,
+    String? refreshToken,
+    int expiresIn,
+  ) async {
     await _storage.write(key: _accessTokenKey, value: accessToken);
     await _storage.write(key: _userName, value: userName);
     await _storage.write(key: _email, value: email);
@@ -88,15 +98,17 @@ class AuthService {
     await _storage.write(key: _id, value: id.toString());
     await _storage.write(key: _refreshTokenKey, value: refreshToken ?? "");
     await _storage.write(key: _tokenExpiryKey, value: expiresIn.toString());
-    debugPrint('✅ Tokens saved on login::accessToken= $accessToken,refreshToken=$refreshToken,expiryTime=$expiresIn,userId=$id');
+    debugPrint(
+      '✅ Tokens saved on login::accessToken= $accessToken,refreshToken=$refreshToken,expiryTime=$expiresIn,userId=$id',
+    );
   }
 
   /// Update tokens only (during refresh)
   static Future<void> updateTokens(
-      String accessToken,
-      String? refreshToken,
-      int expiresIn,
-      ) async {
+    String accessToken,
+    String? refreshToken,
+    int expiresIn,
+  ) async {
     await _storage.write(key: _accessTokenKey, value: accessToken);
     await _storage.write(key: _refreshTokenKey, value: refreshToken ?? "");
     await _storage.write(key: _tokenExpiryKey, value: expiresIn.toString());
@@ -123,7 +135,9 @@ class AuthService {
         final newRefreshToken = data["refreshToken"];
         final expiryTime = data["accessTokenExpiry"];
 
-        if (newAccessToken == null || newRefreshToken == null || expiryTime == null) {
+        if (newAccessToken == null ||
+            newRefreshToken == null ||
+            expiryTime == null) {
           debugPrint("❌ Missing token data in response: $data");
           return false;
         }

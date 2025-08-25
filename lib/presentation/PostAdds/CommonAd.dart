@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:indiclassifieds/Components/CustomAppButton.dart';
 import 'package:indiclassifieds/Components/CustomSnackBar.dart';
 import 'package:indiclassifieds/Components/CutomAppBar.dart';
+import 'package:indiclassifieds/utils/AppLogger.dart';
 
 import '../../Components/ShakeWidget.dart';
 import '../../data/cubit/Ad/CommonAd/common_ad_cubit.dart';
@@ -127,664 +128,432 @@ class _CommonAdState extends State<CommonAd> {
   @override
   Widget build(BuildContext context) {
     final textColor = ThemeHelper.textColor(context);
-    return Scaffold(
-      appBar: CustomAppBar1(
-        title: (widget.editId.replaceAll('"', '').trim().isNotEmpty ?? false)
-            ? "Edit ${widget.CatName}"
-            : widget.CatName,
-        actions: [],
-      ),
-      body: isLoading
-          ? Center(child: DottedProgressWithLogo())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CommonTextField1(
-                      lable: ' Add Title',
-                      hint: 'Enter Title',
-                      controller: titleController,
-                      color: textColor,
-                      validator: (v) => (v == null || v.trim().isEmpty)
-                          ? 'Required title'
-                          : null,
-                    ),
-                    CommonTextField1(
-                      lable: 'Description',
-                      hint: 'Enter  Upto  500 words',
-                      controller: descriptionController,
-                      color: textColor,
-                      maxLines: 5,
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Description required';
-                        }
-                        return null;
-                      },
-                    ),
+    return FutureBuilder(
+      future: AuthService.isEligibleForFree,
+      builder: (context, asyncSnapshot) {
+        final isEligibleForFree = asyncSnapshot.data ?? false;
+        AppLogger.info("isEligibleForFree:${isEligibleForFree}");
+        return Scaffold(
+          appBar: CustomAppBar1(
+            title:
+                (widget.editId.replaceAll('"', '').trim().isNotEmpty ?? false)
+                ? "Edit ${widget.CatName}"
+                : widget.CatName,
+            actions: [],
+          ),
+          body: isLoading
+              ? Center(child: DottedProgressWithLogo())
+              : SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CommonTextField1(
+                          lable: ' Add Title',
+                          hint: 'Enter Title',
+                          controller: titleController,
+                          color: textColor,
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Required title'
+                              : null,
+                        ),
+                        CommonTextField1(
+                          lable: 'Description',
+                          hint: 'Enter  Upto  500 words',
+                          controller: descriptionController,
+                          color: textColor,
+                          maxLines: 5,
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Description required';
+                            }
+                            return null;
+                          },
+                        ),
 
-                    CommonTextField1(
-                      lable: 'Price',
-                      hint: 'Enter price',
-                      controller: priceController,
-                      color: textColor,
-                      keyboardType: TextInputType.number,
-                      prefixIcon: Icon(
-                        Icons.currency_rupee,
-                        color: textColor,
-                        size: 16,
-                      ),
-                      validator: (v) => (v == null || v.trim().isEmpty)
-                          ? 'Price required'
-                          : null,
-                    ),
+                        CommonTextField1(
+                          lable: 'Price',
+                          hint: 'Enter price',
+                          controller: priceController,
+                          color: textColor,
+                          keyboardType: TextInputType.number,
+                          prefixIcon: Icon(
+                            Icons.currency_rupee,
+                            color: textColor,
+                            size: 16,
+                          ),
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Price required'
+                              : null,
+                        ),
 
-                    GestureDetector(
-                      onTap: () async {
-                        final selectedState = await showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          backgroundColor: Colors.transparent,
-                          builder: (context) {
-                            return BlocProvider(
-                              create: (_) => SelectStatesCubit(
-                                SelectStatesImpl(
-                                  remoteDataSource: RemoteDataSourceImpl(),
+                        GestureDetector(
+                          onTap: () async {
+                            final selectedState = await showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              builder: (context) {
+                                return BlocProvider(
+                                  create: (_) => SelectStatesCubit(
+                                    SelectStatesImpl(
+                                      remoteDataSource: RemoteDataSourceImpl(),
+                                    ),
+                                  ),
+                                  child: const SelectStateBottomSheet(),
+                                );
+                              },
+                            );
+
+                            if (selectedState != null) {
+                              stateController.text = selectedState.name ?? "";
+                              selectedStateId = selectedState.id ?? "";
+                              setState(() {});
+                            }
+                          },
+                          child: AbsorbPointer(
+                            child: CommonTextField1(
+                              lable: 'State',
+                              hint: 'Select State',
+                              controller: stateController,
+                              color: textColor,
+                              keyboardType: TextInputType.text,
+                              isRead: true,
+                              prefixIcon: Icon(
+                                Icons.location_city_outlined,
+                                color: textColor,
+                                size: 16,
+                              ),
+                              validator: (v) => (v == null || v.trim().isEmpty)
+                                  ? 'State required'
+                                  : null,
+                            ),
+                          ),
+                        ),
+                        if (_showStateError) ...[
+                          Padding(
+                            padding: const EdgeInsets.only(top: 5),
+                            child: ShakeWidget(
+                              key: Key("state"),
+                              duration: const Duration(milliseconds: 700),
+                              child: const Text(
+                                'Please Select State',
+                                style: TextStyle(
+                                  fontFamily: 'roboto_serif',
+                                  fontSize: 12,
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
-                              child: const SelectStateBottomSheet(),
+                            ),
+                          ),
+                        ],
+                        GestureDetector(
+                          onTap: () async {
+                            final selectedCity = await showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              builder: (context) {
+                                return SelectCityBottomSheet(
+                                  stateId: selectedStateId ?? 0,
+                                );
+                              },
                             );
-                          },
-                        );
 
-                        if (selectedState != null) {
-                          stateController.text = selectedState.name ?? "";
-                          selectedStateId = selectedState.id ?? "";
-                          setState(() {});
-                        }
-                      },
-                      child: AbsorbPointer(
-                        child: CommonTextField1(
-                          lable: 'State',
-                          hint: 'Select State',
-                          controller: stateController,
+                            if (selectedCity != null) {
+                              cityController.text = selectedCity.name ?? "";
+                              selectedCityId = selectedCity.id ?? "";
+                              setState(() {});
+                            }
+                          },
+                          child: AbsorbPointer(
+                            child: CommonTextField1(
+                              lable: 'City',
+                              hint: 'Select City',
+                              controller: cityController,
+                              color: textColor,
+                              keyboardType: TextInputType.text,
+                              isRead: true,
+                              prefixIcon: Icon(
+                                Icons.location_city_outlined,
+                                color: textColor,
+                                size: 16,
+                              ),
+                              validator: (v) => (v == null || v.trim().isEmpty)
+                                  ? 'City required'
+                                  : null,
+                            ),
+                          ),
+                        ),
+                        if (_showCityError) ...[
+                          Padding(
+                            padding: const EdgeInsets.only(top: 5),
+                            child: ShakeWidget(
+                              key: Key(
+                                "dropdown_city_error_${DateTime.now().millisecondsSinceEpoch}",
+                              ),
+                              duration: const Duration(milliseconds: 700),
+                              child: const Text(
+                                'Please Select City',
+                                style: TextStyle(
+                                  fontFamily: 'roboto_serif',
+                                  fontSize: 12,
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                        SizedBox(height: 12),
+                        CommonImagePicker(
+                          title: "Upload Product Images",
+                          images: _images,
+                          existingImages: _imageDataList,
+                          maxImages: _maxImages,
+                          textColor: textColor,
+                          showError: _showimagesError,
+                          editId: widget.editId,
+                          onImagesChanged: (newList) {
+                            setState(() => _images = newList);
+                          },
+                          onExistingImagesChanged: (newList) {
+                            setState(() => _imageDataList = newList);
+                          },
+                        ),
+                        _sectionTitle('Contact Information', textColor),
+                        CommonTextField1(
+                          lable: 'Name',
+                          hint: 'Enter name',
+                          controller: nameController,
                           color: textColor,
-                          keyboardType: TextInputType.text,
-                          isRead: true,
                           prefixIcon: Icon(
-                            Icons.location_city_outlined,
+                            Icons.person,
                             color: textColor,
                             size: 16,
                           ),
                           validator: (v) => (v == null || v.trim().isEmpty)
-                              ? 'State required'
+                              ? 'Name required'
                               : null,
                         ),
-                      ),
-                    ),
-                    if (_showStateError) ...[
-                      Padding(
-                        padding: const EdgeInsets.only(top: 5),
-                        child: ShakeWidget(
-                          key: Key("state"),
-                          duration: const Duration(milliseconds: 700),
-                          child: const Text(
-                            'Please Select State',
-                            style: TextStyle(
-                              fontFamily: 'roboto_serif',
-                              fontSize: 12,
-                              color: Colors.red,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                    GestureDetector(
-                      onTap: () async {
-                        final selectedCity = await showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          backgroundColor: Colors.transparent,
-                          builder: (context) {
-                            return SelectCityBottomSheet(
-                              stateId: selectedStateId ?? 0,
-                            );
-                          },
-                        );
-
-                        if (selectedCity != null) {
-                          cityController.text = selectedCity.name ?? "";
-                          selectedCityId = selectedCity.id ?? "";
-                          setState(() {});
-                        }
-                      },
-                      child: AbsorbPointer(
-                        child: CommonTextField1(
-                          lable: 'City',
-                          hint: 'Select City',
-                          controller: cityController,
+                        CommonTextField1(
+                          lable: 'Phone Number',
+                          hint: 'Enter phone number',
+                          controller: phoneController,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            LengthLimitingTextInputFormatter(10),
+                          ],
                           color: textColor,
-                          keyboardType: TextInputType.text,
-                          isRead: true,
+                          keyboardType: TextInputType.phone,
                           prefixIcon: Icon(
-                            Icons.location_city_outlined,
+                            Icons.call,
                             color: textColor,
                             size: 16,
                           ),
                           validator: (v) => (v == null || v.trim().isEmpty)
-                              ? 'City required'
+                              ? 'Phone required'
                               : null,
                         ),
-                      ),
-                    ),
-                    if (_showCityError) ...[
-                      Padding(
-                        padding: const EdgeInsets.only(top: 5),
-                        child: ShakeWidget(
-                          key: Key(
-                            "dropdown_city_error_${DateTime.now().millisecondsSinceEpoch}",
-                          ),
-                          duration: const Duration(milliseconds: 700),
-                          child: const Text(
-                            'Please Select City',
-                            style: TextStyle(
-                              fontFamily: 'roboto_serif',
-                              fontSize: 12,
-                              color: Colors.red,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
+                        // CommonTextField1(
+                        //   lable: 'Email (Optional)',
+                        //   hint: 'Enter email',
+                        //   controller: emailController,
+                        //   color: textColor,
+                        //   prefixIcon: Icon(Icons.mail, color: textColor, size: 16),
+                        // ),
+                        CommonTextField1(
+                          lable: 'Address',
+                          hint: 'Enter Location',
+                          controller: locationController,
+                          color: textColor,
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Required location'
+                              : null,
                         ),
-                      ),
-                    ],
-                    SizedBox(height: 12),
-                    CommonImagePicker(
-                      title: "Upload Product Images",
-                      images: _images,
-                      existingImages: _imageDataList,
-                      maxImages: _maxImages,
-                      textColor: textColor,
-                      showError: _showimagesError,
-                      editId: widget.editId,
-                      onImagesChanged: (newList) {
-                        setState(() => _images = newList);
-                      },
-                      onExistingImagesChanged: (newList) {
-                        setState(() => _imageDataList = newList);
-                      },
-                    ),
-
-                    // _sectionTitle('Upload Product Images', textColor),
-                    // Container(
-                    //   padding: const EdgeInsets.symmetric(
-                    //     horizontal: 16,
-                    //     vertical: 16,
-                    //   ),
-                    //   decoration: BoxDecoration(
-                    //     border: Border.all(
-                    //       color: const Color(0xFFE5E7EB),
-                    //       width: 1,
-                    //     ),
-                    //     borderRadius: BorderRadius.circular(8),
-                    //     boxShadow: [
-                    //       BoxShadow(
-                    //         color: const Color(0x0D000000),
-                    //         offset: const Offset(0, 1),
-                    //         blurRadius: 2,
-                    //       ),
-                    //     ],
-                    //   ),
-                    //   child: (_images.isEmpty && _imageDataList.isEmpty)
-                    //       ? InkWell(
-                    //           onTap: _pickImage,
-                    //           child: Center(
-                    //             child: Column(
-                    //               mainAxisSize: MainAxisSize.min,
-                    //               children: [
-                    //                 Icon(
-                    //                   Icons.photo_camera,
-                    //                   color: textColor.withOpacity(0.6),
-                    //                   size: 40,
-                    //                 ),
-                    //                 const SizedBox(height: 8),
-                    //                 Text(
-                    //                   '+ Add Photos ($_maxImages)',
-                    //                   style: TextStyle(
-                    //                     fontFamily: 'Poppins',
-                    //                     fontSize: 14,
-                    //                     color: textColor.withOpacity(0.6),
-                    //                   ),
-                    //                 ),
-                    //               ],
-                    //             ),
-                    //           ),
-                    //         )
-                    //       : GridView.builder(
-                    //           shrinkWrap: true,
-                    //           physics: const NeverScrollableScrollPhysics(),
-                    //           gridDelegate:
-                    //               const SliverGridDelegateWithFixedCrossAxisCount(
-                    //                 crossAxisCount: 4,
-                    //                 crossAxisSpacing: 8,
-                    //                 mainAxisSpacing: 8,
-                    //                 childAspectRatio: 1.8,
-                    //               ),
-                    //           itemCount:
-                    //               _images.length + _imageDataList.length <
-                    //                   _maxImages
-                    //               ? _images.length + _imageDataList.length + 1
-                    //               : _images.length + _imageDataList.length,
-                    //           itemBuilder: (context, index) {
-                    //             if (index < _imageDataList.length) {
-                    //               final image = _imageDataList[index];
-                    //               final localIndex =
-                    //                   index - _imageDataList.length;
-                    //               return Stack(
-                    //                 children: [
-                    //                   ClipRRect(
-                    //                     borderRadius: BorderRadius.circular(8),
-                    //                     child: Image.network(
-                    //                       image.url,
-                    //                       fit: BoxFit.cover,
-                    //                       width: double.infinity,
-                    //                       height: double.infinity,
-                    //                     ),
-                    //                   ),
-                    //                   widget.editId != null
-                    //                       ? Positioned(
-                    //                           top: 4,
-                    //                           right: 4,
-                    //                           child: GestureDetector(
-                    //                             onTap: () {
-                    //                               context
-                    //                                   .read<
-                    //                                     MarkAsListingCubit
-                    //                                   >()
-                    //                                   .removeImageOnListingAd(
-                    //                                     image.id,
-                    //                                   );
-                    //                             },
-                    //                             child: Container(
-                    //                               padding: const EdgeInsets.all(
-                    //                                 2,
-                    //                               ),
-                    //                               decoration: BoxDecoration(
-                    //                                 color: Colors.red
-                    //                                     .withOpacity(0.7),
-                    //                                 shape: BoxShape.circle,
-                    //                               ),
-                    //                               child:
-                    //                                   BlocConsumer<
-                    //                                     MarkAsListingCubit,
-                    //                                     MarkAsListingState
-                    //                                   >(
-                    //                                     listener: (context, state) {
-                    //                                       if (state
-                    //                                           is MarkAsListingSuccess) {
-                    //                                         _imageDataList
-                    //                                             .removeAt(
-                    //                                               index,
-                    //                                             );
-                    //                                       } else if (state
-                    //                                           is MarkAsListingFailure) {
-                    //                                         return CustomSnackBar1.show(
-                    //                                           context,
-                    //                                           state.error,
-                    //                                         );
-                    //                                       }
-                    //                                     },
-                    //                                     builder: (context, state) {
-                    //                                       return state
-                    //                                               is MarkAsListingLoading
-                    //                                           ? Center(
-                    //                                               child: spinkits
-                    //                                                   .getSpinningLinespinkit(),
-                    //                                             )
-                    //                                           : Icon(
-                    //                                               Icons.close,
-                    //                                               color: Colors
-                    //                                                   .white,
-                    //                                               size: 16,
-                    //                                             );
-                    //                                     },
-                    //                                   ),
-                    //                             ),
-                    //                           ),
-                    //                         )
-                    //                       : Positioned(
-                    //                           top: 4,
-                    //                           right: 4,
-                    //                           child: GestureDetector(
-                    //                             onTap: () {
-                    //                               setState(() {
-                    //                                 _removeImage(localIndex);
-                    //                               });
-                    //                             },
-                    //                             child: Container(
-                    //                               padding: const EdgeInsets.all(
-                    //                                 2,
-                    //                               ),
-                    //                               decoration: BoxDecoration(
-                    //                                 color: Colors.red
-                    //                                     .withOpacity(0.7),
-                    //                                 shape: BoxShape.circle,
-                    //                               ),
-                    //                               child: Icon(
-                    //                                 Icons.close,
-                    //                                 color: Colors.white,
-                    //                                 size: 16,
-                    //                               ),
-                    //                             ),
-                    //                           ),
-                    //                         ),
-                    //                 ],
-                    //               );
-                    //             }
-                    //             final localIndex =
-                    //                 index - _imageDataList.length;
-                    //             if (localIndex < _images.length) {
-                    //               return Stack(
-                    //                 children: [
-                    //                   ClipRRect(
-                    //                     borderRadius: BorderRadius.circular(8),
-                    //                     child: Image.file(
-                    //                       _images[localIndex],
-                    //                       fit: BoxFit.cover,
-                    //                       width: double.infinity,
-                    //                       height: double.infinity,
-                    //                     ),
-                    //                   ),
-                    //                   Positioned(
-                    //                     top: 4,
-                    //                     right: 4,
-                    //                     child: GestureDetector(
-                    //                       onTap: () => _removeImage(localIndex),
-                    //                       child: Container(
-                    //                         padding: const EdgeInsets.all(2),
-                    //                         decoration: BoxDecoration(
-                    //                           color: Colors.red.withOpacity(
-                    //                             0.7,
-                    //                           ),
-                    //                           shape: BoxShape.circle,
-                    //                         ),
-                    //                         child: const Icon(
-                    //                           Icons.close,
-                    //                           color: Colors.white,
-                    //                           size: 16,
-                    //                         ),
-                    //                       ),
-                    //                     ),
-                    //                   ),
-                    //                 ],
-                    //               );
-                    //             }
-                    //             return InkWell(
-                    //               onTap: _pickImage,
-                    //               child: Container(
-                    //                 decoration: BoxDecoration(
-                    //                   border: Border.all(
-                    //                     color: const Color(0xFFE5E7EB),
-                    //                   ),
-                    //                   borderRadius: BorderRadius.circular(8),
-                    //                 ),
-                    //                 child: Column(
-                    //                   mainAxisAlignment:
-                    //                       MainAxisAlignment.center,
-                    //                   children: [
-                    //                     Icon(
-                    //                       Icons.add_photo_alternate,
-                    //                       color: textColor.withOpacity(0.6),
-                    //                       size: 24,
-                    //                     ),
-                    //                     const SizedBox(height: 4),
-                    //                     Text(
-                    //                       'Add Photo',
-                    //                       style: TextStyle(
-                    //                         fontFamily: 'Poppins',
-                    //                         fontSize: 12,
-                    //                         color: textColor.withOpacity(0.6),
-                    //                       ),
-                    //                     ),
-                    //                   ],
-                    //                 ),
-                    //               ),
-                    //             );
-                    //           },
-                    //         ),
-                    // ),
-                    // if (_showimagesError && _images.isEmpty) ...[
-                    //   Padding(
-                    //     padding: const EdgeInsets.only(top: 5),
-                    //     child: ShakeWidget(
-                    //       key: Key(
-                    //         "images_error_${DateTime.now().millisecondsSinceEpoch}",
-                    //       ),
-                    //       duration: const Duration(milliseconds: 700),
-                    //       child: const Text(
-                    //         'Please upload at least one image',
-                    //         style: TextStyle(
-                    //           fontFamily: 'roboto_serif',
-                    //           fontSize: 12,
-                    //           color: Colors.red,
-                    //           fontWeight: FontWeight.w500,
-                    //         ),
-                    //       ),
-                    //     ),
-                    //   ),
-                    // ],
-                    _sectionTitle('Contact Information', textColor),
-                    CommonTextField1(
-                      lable: 'Name',
-                      hint: 'Enter name',
-                      controller: nameController,
-                      color: textColor,
-                      prefixIcon: Icon(
-                        Icons.person,
-                        color: textColor,
-                        size: 16,
-                      ),
-                      validator: (v) => (v == null || v.trim().isEmpty)
-                          ? 'Name required'
-                          : null,
-                    ),
-                    CommonTextField1(
-                      lable: 'Phone Number',
-                      hint: 'Enter phone number',
-                      controller: phoneController,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                        LengthLimitingTextInputFormatter(10),
-                      ],
-                      color: textColor,
-                      keyboardType: TextInputType.phone,
-                      prefixIcon: Icon(Icons.call, color: textColor, size: 16),
-                      validator: (v) => (v == null || v.trim().isEmpty)
-                          ? 'Phone required'
-                          : null,
-                    ),
-                    // CommonTextField1(
-                    //   lable: 'Email (Optional)',
-                    //   hint: 'Enter email',
-                    //   controller: emailController,
-                    //   color: textColor,
-                    //   prefixIcon: Icon(Icons.mail, color: textColor, size: 16),
-                    // ),
-                    CommonTextField1(
-                      lable: 'Address',
-                      hint: 'Enter Location',
-                      controller: locationController,
-                      color: textColor,
-                      validator: (v) => (v == null || v.trim().isEmpty)
-                          ? 'Required location'
-                          : null,
-                    ),
-                    if (widget.editId == null ||
-                        widget.editId.replaceAll('"', '').trim().isEmpty) ...[
-                      CommonTextField1(
-                        lable: 'Plan',
-                        isRead: true,
-                        hint: 'Select Plan',
-                        controller: planController,
-                        color: textColor,
-                        validator: (v) => (v == null || v.trim().isEmpty)
-                            ? 'Plan is Required'
-                            : null,
-                        onTap: () {
-                          context
-                              .read<UserActivePlanCubit>()
-                              .getUserActivePlansData();
-                          showPlanBottomSheet(
-                            context: context,
+                        if (widget.editId == null ||
+                            widget.editId.replaceAll('"', '').trim().isEmpty &&
+                                !isEligibleForFree) ...[
+                          CommonTextField1(
+                            lable: 'Plan',
+                            isRead: true,
+                            hint: 'Select Plan',
                             controller: planController,
-                            onSelectPlan: (selectedPlan) {
-                              print('Selected plan: ${selectedPlan.planName}');
-                              planId = selectedPlan.planId;
-                              packageId = selectedPlan.packageId;
+                            color: textColor,
+                            validator: (v) => (v == null || v.trim().isEmpty)
+                                ? 'Plan is Required'
+                                : null,
+                            onTap: () {
+                              context
+                                  .read<UserActivePlanCubit>()
+                                  .getUserActivePlansData();
+                              showPlanBottomSheet(
+                                context: context,
+                                controller: planController,
+                                onSelectPlan: (selectedPlan) {
+                                  print(
+                                    'Selected plan: ${selectedPlan.planName}',
+                                  );
+                                  planId = selectedPlan.planId;
+                                  packageId = selectedPlan.packageId;
+                                },
+                                title:
+                                    'Choose Your Plan', // Optional title for the bottom sheet
+                              );
                             },
-                            title:
-                                'Choose Your Plan', // Optional title for the bottom sheet
-                          );
-                        },
-                      ),
-                    ],
-                  ],
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-            ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-          child: FutureBuilder(
-            future: AuthService.isEligibleForAd,
-            builder: (context, asyncSnapshot) {
-              final isEligible = asyncSnapshot.data ?? false;
-              return BlocConsumer<MarkAsListingCubit, MarkAsListingState>(
-                listener: (context, updateState) {
-                  if (updateState is MarkAsListingSuccess ||
-                      updateState is MarkAsListingUpdateSuccess) {
-                    context.pushReplacement("/successfully");
-                  } else if (updateState is MarkAsListingFailure) {
-                    CustomSnackBar1.show(context, updateState.error);
-                  }
-                },
-                builder: (context, updateState) {
-                  return BlocConsumer<CommonAdCubit, CommonAdStates>(
-                    listener: (context, state) {
-                      if (state is CommonAdSuccess) {
+          bottomNavigationBar: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+              child: FutureBuilder(
+                future: AuthService.isEligibleForAd,
+                builder: (context, asyncSnapshot) {
+                  final isEligible = asyncSnapshot.data ?? false;
+                  return BlocConsumer<MarkAsListingCubit, MarkAsListingState>(
+                    listener: (context, updateState) {
+                      if (updateState is MarkAsListingSuccess ||
+                          updateState is MarkAsListingUpdateSuccess) {
                         context.pushReplacement("/successfully");
-                      } else if (state is CommonAdFailure) {
-                        CustomSnackBar1.show(context, state.error);
+                      } else if (updateState is MarkAsListingFailure) {
+                        CustomSnackBar1.show(context, updateState.error);
                       }
                     },
-                    builder: (context, state) {
-                      return CustomAppButton1(
-                        isLoading:
-                            state is CommonAdLoading ||
-                            updateState is MarkAsListingUpdateLoading,
-                        text: 'Submit Ad',
-                        onPlusTap: isEligible
-                            ? () {
-                                if (_formKey.currentState?.validate() ??
-                                    false) {
-                                  bool isValid = true;
-
-                                  if (_images.isEmpty) {
-                                    setState(() => _showimagesError = true);
-                                    isValid = false;
-                                  } else {
-                                    setState(() => _showimagesError = false);
-                                  }
-
-                                  // State validation
-                                  if (selectedStateId == null) {
-                                    setState(() => _showStateError = true);
-                                    isValid = false;
-                                  } else {
-                                    setState(() => _showStateError = false);
-                                  }
-
-                                  if (selectedCityId == null) {
-                                    setState(() => _showCityError = true);
-                                    isValid = false;
-                                  } else {
-                                    setState(() => _showCityError = false);
-                                  }
-                                  if (widget.editId == null ||
-                                      widget.editId
-                                          .replaceAll('"', '')
-                                          .trim()
-                                          .isEmpty) {
-                                    if (planId == null || packageId == null) {
-                                      setState(() => _showPaymentError = true);
-                                      isValid = false;
-                                    } else {
-                                      setState(() => _showPaymentError = false);
-                                    }
-                                  }
-
-                                  if (isValid) {
-                                    final Map<String, dynamic> data = {
-                                      "title": titleController.text,
-                                      "description": descriptionController.text,
-                                      "sub_category_id": widget.subCatId,
-                                      "category_id": widget.catId,
-                                      "location": locationController.text,
-                                      "mobile_number": phoneController.text,
-                                      if (widget.editId == null ||
-                                          widget.editId
-                                              .replaceAll('"', '')
-                                              .trim()
-                                              .isEmpty)
-                                        "plan_id": planId,
-                                      if (widget.editId == null ||
-                                          widget.editId
-                                              .replaceAll('"', '')
-                                              .trim()
-                                              .isEmpty)
-                                        "package_id": packageId,
-                                      "price": priceController.text,
-                                      "full_name": nameController.text,
-                                      "state_id": selectedStateId,
-                                      "city_id": selectedCityId,
-                                    };
-
-                                    if (_images.isNotEmpty) {
-                                      data["images"] = _images
-                                          .map((file) => file.path)
-                                          .toList();
-                                    }
-                                    if (widget.editId
-                                            .replaceAll('"', '')
-                                            .trim()
-                                            .isNotEmpty ??
+                    builder: (context, updateState) {
+                      return BlocConsumer<CommonAdCubit, CommonAdStates>(
+                        listener: (context, state) {
+                          if (state is CommonAdSuccess) {
+                            context.pushReplacement("/successfully");
+                          } else if (state is CommonAdFailure) {
+                            CustomSnackBar1.show(context, state.error);
+                          }
+                        },
+                        builder: (context, state) {
+                          return CustomAppButton1(
+                            isLoading:
+                                state is CommonAdLoading ||
+                                updateState is MarkAsListingUpdateLoading,
+                            text: 'Submit Ad',
+                            onPlusTap: isEligible
+                                ? () {
+                                    if (_formKey.currentState?.validate() ??
                                         false) {
-                                      context
-                                          .read<MarkAsListingCubit>()
-                                          .markAsUpdate(widget.editId, data);
-                                    } else {
-                                      context
-                                          .read<CommonAdCubit>()
-                                          .postCommonAd(data);
+                                      bool isValid = true;
+
+                                      if (_images.isEmpty) {
+                                        setState(() => _showimagesError = true);
+                                        isValid = false;
+                                      } else {
+                                        setState(
+                                          () => _showimagesError = false,
+                                        );
+                                      }
+
+                                      // State validation
+                                      if (selectedStateId == null) {
+                                        setState(() => _showStateError = true);
+                                        isValid = false;
+                                      } else {
+                                        setState(() => _showStateError = false);
+                                      }
+
+                                      if (selectedCityId == null) {
+                                        setState(() => _showCityError = true);
+                                        isValid = false;
+                                      } else {
+                                        setState(() => _showCityError = false);
+                                      }
+                                      if (widget.editId == null ||
+                                          widget.editId
+                                                  .replaceAll('"', '')
+                                                  .trim()
+                                                  .isEmpty &&
+                                              !isEligibleForFree) {
+                                        if (planId == null ||
+                                            packageId == null) {
+                                          setState(
+                                            () => _showPaymentError = true,
+                                          );
+                                          isValid = false;
+                                        } else {
+                                          setState(
+                                            () => _showPaymentError = false,
+                                          );
+                                        }
+                                      }
+
+                                      if (isValid) {
+                                        final Map<String, dynamic> data = {
+                                          "title": titleController.text,
+                                          "description":
+                                              descriptionController.text,
+                                          "sub_category_id": widget.subCatId,
+                                          "category_id": widget.catId,
+                                          "location": locationController.text,
+                                          "mobile_number": phoneController.text,
+                                          if (widget.editId == null ||
+                                              widget.editId
+                                                  .replaceAll('"', '')
+                                                  .trim()
+                                                  .isEmpty)
+                                            "plan_id": planId,
+                                          if (widget.editId == null ||
+                                              widget.editId
+                                                  .replaceAll('"', '')
+                                                  .trim()
+                                                  .isEmpty)
+                                            "package_id": packageId,
+                                          "price": priceController.text,
+                                          "full_name": nameController.text,
+                                          "state_id": selectedStateId,
+                                          "city_id": selectedCityId,
+                                        };
+
+                                        if (_images.isNotEmpty) {
+                                          data["images"] = _images
+                                              .map((file) => file.path)
+                                              .toList();
+                                        }
+                                        if (widget.editId
+                                                .replaceAll('"', '')
+                                                .trim()
+                                                .isNotEmpty ??
+                                            false) {
+                                          context
+                                              .read<MarkAsListingCubit>()
+                                              .markAsUpdate(
+                                                widget.editId,
+                                                data,
+                                              );
+                                        } else {
+                                          context
+                                              .read<CommonAdCubit>()
+                                              .postCommonAd(data);
+                                        }
+                                      }
                                     }
                                   }
-                                }
-                              }
-                            : () {
-                                context.push("/plans");
-                              },
+                                : () {
+                                    context.push("/plans");
+                                  },
+                          );
+                        },
                       );
                     },
                   );
                 },
-              );
-            },
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
