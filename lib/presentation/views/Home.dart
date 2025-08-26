@@ -53,6 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
+        automaticallyImplyLeading: false,
         title: Row(
           children: [
             ClipRRect(
@@ -234,8 +235,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                         color: isDarkMode
                                             ? Color(0xff111111)
                                             : Color(
-                                          0xffF8FAFE,
-                                        ), // placeholder color
+                                                0xffF8FAFE,
+                                              ), // placeholder color
                                       ),
                                       padding: EdgeInsets.symmetric(
                                         vertical: 2,
@@ -243,7 +244,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                       child: ClipRRect(
                                         borderRadius: BorderRadius.circular(4),
                                         child: CachedNetworkImage(
-                                          imageUrl: new_categoryItem?.image ?? "",
+                                          imageUrl:
+                                              new_categoryItem?.image ?? "",
                                           fit: BoxFit.cover,
                                           placeholder: (context, url) => Center(
                                             child: spinkits

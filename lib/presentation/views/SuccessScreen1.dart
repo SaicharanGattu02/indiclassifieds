@@ -4,15 +4,15 @@ import 'package:indiclassifieds/Components/CustomAppButton.dart';
 import 'package:lottie/lottie.dart';
 import '../../theme/ThemeHelper.dart';
 
-class SuccessScreen extends StatefulWidget {
+class SuccessScreen1 extends StatefulWidget {
   final String? nextRoute;
-  const SuccessScreen({super.key, this.nextRoute});
+  const SuccessScreen1({super.key, this.nextRoute});
 
   @override
-  State<SuccessScreen> createState() => _SuccessScreenState();
+  State<SuccessScreen1> createState() => _SuccessScreenState();
 }
 
-class _SuccessScreenState extends State<SuccessScreen> {
+class _SuccessScreenState extends State<SuccessScreen1> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,7 +33,7 @@ class _SuccessScreenState extends State<SuccessScreen> {
               ),
               const SizedBox(height: 10),
               Text(
-                "Your ad has been added successfully 🎉",
+                "Your Payment Done successfully 🎉",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 18,
@@ -54,7 +54,7 @@ class _SuccessScreenState extends State<SuccessScreen> {
               if (widget.nextRoute != null && widget.nextRoute!.isNotEmpty) {
                 context.pushReplacement(widget.nextRoute!);
               } else {
-                context.pushReplacement("/dashboard");
+                Navigator.pop(context);
               }
             },
           ),

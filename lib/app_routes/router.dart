@@ -13,6 +13,7 @@ import 'package:indiclassifieds/presentation/views/ProductDetailsScreen.dart';
 import 'package:indiclassifieds/presentation/views/SearchScreen.dart';
 import 'package:indiclassifieds/presentation/views/SplashScreen.dart';
 import 'package:indiclassifieds/presentation/views/SubCategoriesScreen.dart';
+import 'package:indiclassifieds/presentation/views/SuccessScreen1.dart';
 import '../data/cubit/Chat/private_chat_cubit.dart';
 import '../model/CategoryModel.dart';
 import '../presentation/PostAdds/AstrologyAd.dart';
@@ -113,7 +114,10 @@ final GoRouter appRouter = GoRouter(
       path: '/register',
       pageBuilder: (context, state) {
         final from = state.uri.queryParameters['from'] ?? "";
-        return buildSlideTransitionPage(RegisterUserDetailsScreen(from: from,), state);
+        return buildSlideTransitionPage(
+          RegisterUserDetailsScreen(from: from),
+          state,
+        );
       },
     ),
     GoRoute(
@@ -197,12 +201,20 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/successfully',
       pageBuilder: (context, state) {
-        // final title = state.uri.queryParameters['title'] ?? "";
-        // final subTitle = state.uri.queryParameters['subTitle'] ?? "";
         final nextRoute = state.uri.queryParameters['next'] ?? "";
-
         return buildSlideTransitionPage(
           SuccessScreen(nextRoute: nextRoute),
+          state,
+        );
+      },
+    ),
+
+    GoRoute(
+      path: '/successfully1',
+      pageBuilder: (context, state) {
+        final nextRoute = state.uri.queryParameters['next'] ?? "";
+        return buildSlideTransitionPage(
+          SuccessScreen1(nextRoute: nextRoute),
           state,
         );
       },

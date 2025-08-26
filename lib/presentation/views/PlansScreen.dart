@@ -60,7 +60,6 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
       "razorpay_order_id": response.orderId,
       "razorpay_payment_id": response.paymentId,
       "razorpay_signature": response.signature,
-
     };
     context.read<PaymentCubit>().verifyPayment(data);
   }
@@ -116,7 +115,7 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
       body: BlocBuilder<PlansCubit, PlansStates>(
         builder: (context, state) {
           if (state is PlansLoading) {
-            return Center(child: DottedProgressWithLogo(),);
+            return Center(child: DottedProgressWithLogo());
           }
           if (state is PlansFailure) {
             return _PlansErrorView(
@@ -249,7 +248,7 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
             );
           }
           // initial
-          return Center(child: DottedProgressWithLogo(),);
+          return Center(child: DottedProgressWithLogo());
         },
       ),
     );
@@ -554,7 +553,7 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       header,
-                      const Divider(height: 1,thickness: 0.5,),
+                      const Divider(height: 1, thickness: 0.5),
                       const SizedBox(height: 16),
                       _SkeletonPackageTile(color: cardColor),
                       const SizedBox(height: 12),
@@ -571,7 +570,7 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       header,
-                      const Divider(height: 1,thickness: 0.5,),
+                      const Divider(height: 1, thickness: 0.5),
                       const SizedBox(height: 24),
                       Icon(
                         Icons.error_outline,
@@ -680,62 +679,70 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
                             return SafeArea(
                               child: Padding(
                                 padding: EdgeInsets.fromLTRB(16, 0, 16, 20),
-                                child: BlocConsumer<PaymentCubit, PaymentStates>(
-                                  listener: (context, state) async {
-                                    isLoadingNotifier.value =
-                                        state is PaymentLoading;
-                                    if (state is PaymentCreated) {
-                                      final payment_created_data =
-                                          state.createPaymentModel;
-                                      _openCheckout(
-                                        payment_created_data.razorpayKey ?? "",
-                                        payment_created_data.amount ?? 0,
-                                        payment_created_data.orderId ?? "",
-                                      );
-                                    } else if (state is PaymentVerified) {
-                                      context.pushReplacement(
-                                        '/successfully'
-                                        '?title=${Uri.encodeComponent("Payment is Done Successfully")}',
-                                      );
-                                      final plan = await context
-                                          .read<UserActivePlanCubit>()
-                                          .getUserActivePlansData();
-                                      if (plan != null) {
-                                        AuthService.setPlanStatus(plan.goToPlansPage.toString() ?? "");
-                                        AuthService.setFreePlanStatus(plan.isFree.toString() ?? "");
-                                      }
-                                    } else if (state is PaymentFailure) {
-                                      CustomSnackBar1.show(
-                                        context,
-                                        state.error,
-                                      );
-                                    }
-                                  },
-                                  builder: (context, state) {
-                                    return CustomAppButton1(
-                                      isLoading: state is PaymentLoading,
-                                      text: 'Submit',
-                                      onPlusTap: () {
-                                        if (selected == null) {
+                                child:
+                                    BlocConsumer<PaymentCubit, PaymentStates>(
+                                      listener: (context, state) async {
+                                        isLoadingNotifier.value =
+                                            state is PaymentLoading;
+                                        if (state is PaymentCreated) {
+                                          final payment_created_data =
+                                              state.createPaymentModel;
+                                          _openCheckout(
+                                            payment_created_data.razorpayKey ??
+                                                "",
+                                            payment_created_data.amount ?? 0,
+                                            payment_created_data.orderId ?? "",
+                                          );
+                                        } else if (state is PaymentVerified) {
+                                          context.pushReplacement(
+                                            '/successfully1',
+                                          );
+                                          final plan = await context
+                                              .read<UserActivePlanCubit>()
+                                              .getUserActivePlansData();
+                                          if (plan != null) {
+                                            AuthService.setPlanStatus(
+                                              plan.goToPlansPage.toString() ??
+                                                  "",
+                                            );
+                                            AuthService.setFreePlanStatus(
+                                              plan.isFree.toString() ?? "",
+                                            );
+                                          }
+                                        } else if (state is PaymentFailure) {
                                           CustomSnackBar1.show(
                                             context,
-                                            "Please select a pack",
+                                            state.error,
                                           );
-                                          return;
-                                        } else {
-                                          final Map<String, dynamic> data = {
-                                            "plan_id": plan_id.value,
-                                            "package_id": packageId.value,
-                                            "price": price.value,
-                                          };
-                                          context
-                                              .read<PaymentCubit>()
-                                              .createPayment(data);
                                         }
                                       },
-                                    );
-                                  },
-                                ),
+                                      builder: (context, state) {
+                                        return CustomAppButton1(
+                                          isLoading: state is PaymentLoading,
+                                          text: 'Submit',
+                                          onPlusTap: () {
+                                            if (selected == null) {
+                                              CustomSnackBar1.show(
+                                                context,
+                                                "Please select a pack",
+                                              );
+                                              return;
+                                            } else {
+                                              final Map<String, dynamic> data =
+                                                  {
+                                                    "plan_id": plan_id.value,
+                                                    "package_id":
+                                                        packageId.value,
+                                                    "price": price.value,
+                                                  };
+                                              context
+                                                  .read<PaymentCubit>()
+                                                  .createPayment(data);
+                                            }
+                                          },
+                                        );
+                                      },
+                                    ),
                               ),
                             );
                           },
@@ -942,7 +949,7 @@ class _PackageTile extends StatelessWidget {
                     alignment: Alignment.center,
                     child: Text(
                       badgeText,
-                      style:  TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w800,
                         color: textColor,
                         fontSize: 20,

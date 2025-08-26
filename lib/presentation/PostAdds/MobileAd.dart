@@ -496,7 +496,7 @@ class _MobileAdState extends State<MobileAd> {
                             text: 'Submit Ad',
                             onPlusTap: isNewUser
                                 ? () {
-                              context.push('/register?from=ad');
+                                    context.push('/register?from=ad');
                                   }
                                 : !isEligible
                                 ? () {
