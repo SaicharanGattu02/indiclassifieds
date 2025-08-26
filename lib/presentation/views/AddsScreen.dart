@@ -151,10 +151,16 @@ class _AdsScreenState extends State<AdsScreen> {
 
                 if (items.isEmpty) {
                   return Center(
-                    child: Column(mainAxisAlignment: MainAxisAlignment.center,crossAxisAlignment: CrossAxisAlignment.center,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       spacing: 12,
                       children: [
-                        Image.asset('assets/nodata/no_data.png',width: SizeConfig.screenWidth*0.22,height:  SizeConfig.screenHeight*0.12,),
+                        Image.asset(
+                          'assets/nodata/no_data.png',
+                          width: SizeConfig.screenWidth * 0.22,
+                          height: SizeConfig.screenHeight * 0.12,
+                        ),
                         Text(
                           'No ${selectedStatus.label.toLowerCase()} Found!',
                           style: AppTextStyles.headlineSmall(textColor),

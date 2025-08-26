@@ -55,10 +55,12 @@ class _HomeScreenState extends State<HomeScreen> {
         elevation: 0,
         title: Row(
           children: [
-            Image.asset(
-              'assets/images/logo.png',
-              width: SizeConfig.screenWidth * 0.16,
-              fit: BoxFit.cover,
+            ClipRRect(borderRadius: BorderRadiusGeometry.circular(4),
+              child: Image.asset(
+                'assets/images/logo.png',
+                width: SizeConfig.screenWidth * 0.16,
+                fit: BoxFit.cover,
+              ),
             ),
           ],
         ),
@@ -202,10 +204,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         SliverGrid(
                           gridDelegate:
                               SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 4,
+                                crossAxisCount: 3,
                                 mainAxisSpacing: 12,
                                 crossAxisSpacing: 12,
-                                childAspectRatio: 0.8,
+                                childAspectRatio: 1.2,
                               ),
                           delegate: SliverChildBuilderDelegate(
                             (context, index) {
@@ -220,48 +222,48 @@ class _HomeScreenState extends State<HomeScreen> {
                                   );
                                 },
                                 child: Container(
-                                  padding: EdgeInsets.fromLTRB(2, 12, 2, 2),
+                                  padding: EdgeInsets.fromLTRB(12, 12, 12, 5),
                                   decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(8),
+                                    color: isDarkMode
+                                        ? Color(0xff1F2937)
+                                        : Color(0xffF3F4F6),
+                                    borderRadius: BorderRadius.circular(12),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black26,
+                                        blurRadius: 2,
+                                        offset: Offset(0, 2),
+                                      ),
+                                    ],
                                   ),
                                   child: Column(
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
+                                      // Image container
                                       Container(
+                                        height: SizeConfig.screenHeight * 0.1,
+                                        width: SizeConfig.screenWidth * 0.35,
                                         decoration: BoxDecoration(
                                           borderRadius: BorderRadius.circular(
-                                            8,
+                                            12,
                                           ),
-                                          color: Color(0xffF8FAFE),
+                                          color: Color(0xffE5E7EB),
                                         ),
                                         child: ClipRRect(
                                           borderRadius: BorderRadius.circular(
-                                            4,
+                                            12,
                                           ),
                                           child: CachedNetworkImage(
                                             imageUrl:
                                                 new_categoryItem?.image ?? "",
                                             fit: BoxFit.cover,
-                                            width: SizeConfig.screenWidth * 0.2,
-                                            height:
-                                                SizeConfig.screenHeight * 0.05,
                                             placeholder: (context, url) =>
                                                 Center(
                                                   child: spinkits
                                                       .getSpinningLinespinkit(),
                                                 ),
                                             errorWidget:
-                                                (
-                                                  context,
-                                                  url,
-                                                  error,
-                                                ) => Container(
-                                                  decoration: BoxDecoration(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          8,
-                                                        ),
-                                                    color: Color(0xffF8FAFE),
-                                                  ),
+                                                (context, url, error) => Center(
                                                   child: Icon(
                                                     Icons.broken_image,
                                                     size: 40,
@@ -272,20 +274,20 @@ class _HomeScreenState extends State<HomeScreen> {
                                         ),
                                       ),
 
-                                      SizedBox(height: 6),
+                                      SizedBox(height: 10),
+
                                       Text(
-                                        new_categoryItem?.name ?? "Un Known",
+                                        new_categoryItem?.name ?? "Unknown",
                                         textAlign: TextAlign.center,
                                         style:
                                             AppTextStyles.titleSmall(
                                               textColor,
                                             ).copyWith(
-                                              fontWeight: FontWeight.w500,
-                                              color: Color(
-                                                isDarkMode
-                                                    ? 0xffD7E4FF
-                                                    : 0xff374151,
-                                              ),
+                                              fontWeight: FontWeight.w600,
+                                              color: isDarkMode
+                                                  ? Colors.white
+                                                  : Colors.black87,
+                                              fontSize: 16,
                                             ),
                                       ),
                                     ],
@@ -315,10 +317,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         SliverGrid(
                           gridDelegate:
                               SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 4,
+                                crossAxisCount: 3,
                                 mainAxisSpacing: 12,
                                 crossAxisSpacing: 12,
-                                childAspectRatio: 0.8,
+                                childAspectRatio: 1.2,
                               ),
                           delegate: SliverChildBuilderDelegate(
                             (context, index) {
@@ -328,51 +330,54 @@ class _HomeScreenState extends State<HomeScreen> {
                                 onTap: () {
                                   context.push(
                                     '/sub_categories',
-                                    extra: categoryItem, // pass the full object
+                                    extra: categoryItem,
                                   );
                                 },
                                 child: Container(
-                                  padding: EdgeInsets.fromLTRB(2, 12, 2, 2),
+                                  padding: EdgeInsets.all(12),
                                   decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(8),
+                                    color: isDarkMode
+                                        ? Color(0xff1F2937)
+                                        : Color(
+                                            0xffF3F4F6,
+                                          ), // modern background
+                                    borderRadius: BorderRadius.circular(12),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black26,
+                                        blurRadius: 2,
+                                        offset: Offset(0, 2),
+                                      ),
+                                    ],
                                   ),
                                   child: Column(
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Container(
+                                        height: SizeConfig.screenHeight * 0.1,
+                                        width: SizeConfig.screenWidth * 0.35,
                                         decoration: BoxDecoration(
                                           borderRadius: BorderRadius.circular(
-                                            8,
+                                            12,
                                           ),
-                                          color: Color(0xffF8FAFE),
+                                          color: Color(
+                                            0xffE5E7EB,
+                                          ), // placeholder color
                                         ),
                                         child: ClipRRect(
                                           borderRadius: BorderRadius.circular(
-                                            4,
+                                            12,
                                           ),
                                           child: CachedNetworkImage(
                                             imageUrl: categoryItem?.image ?? "",
                                             fit: BoxFit.cover,
-                                            width: SizeConfig.screenWidth * 0.2,
-                                            height:
-                                                SizeConfig.screenHeight * 0.05,
                                             placeholder: (context, url) =>
                                                 Center(
                                                   child: spinkits
                                                       .getSpinningLinespinkit(),
                                                 ),
                                             errorWidget:
-                                                (
-                                                  context,
-                                                  url,
-                                                  error,
-                                                ) => Container(
-                                                  decoration: BoxDecoration(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          8,
-                                                        ),
-                                                    color: Color(0xffF8FAFE),
-                                                  ),
+                                                (context, url, error) => Center(
                                                   child: Icon(
                                                     Icons.broken_image,
                                                     size: 40,
@@ -383,47 +388,30 @@ class _HomeScreenState extends State<HomeScreen> {
                                         ),
                                       ),
 
-                                      SizedBox(height: 6),
+                                      SizedBox(height: 10),
                                       Text(
-                                        categoryItem?.name ?? "Un Known",
+                                        categoryItem?.name ?? "Unknown",
                                         textAlign: TextAlign.center,
                                         style:
                                             AppTextStyles.titleSmall(
                                               textColor,
                                             ).copyWith(
-                                              fontWeight: FontWeight.w500,
-                                              color: Color(
-                                                isDarkMode
-                                                    ? 0xffD7E4FF
-                                                    : 0xff374151,
-                                              ),
+                                              fontWeight: FontWeight.w600,
+                                              color: isDarkMode
+                                                  ? Colors.white
+                                                  : Colors.black87,
+                                              fontSize: 16,
                                             ),
                                       ),
-                                      // SizedBox(height: 2),
+
+                                      // Optional: Count or subtext
+                                      // SizedBox(height: 4),
                                       // Text(
-                                      //   categoryItem.noOfCounts.toString()??"0",
-                                      //   textAlign: TextAlign.center,
-                                      //   style: AppTextStyles.labelSmall(textColor)
-                                      //       .copyWith(
+                                      //   categoryItem?.noOfCounts?.toString() ?? "0",
+                                      //   style: AppTextStyles.labelSmall(textColor).copyWith(
+                                      //     color: isDarkMode ? Color(0xffB5B5B5) : Color(0xff6B7280),
                                       //     fontWeight: FontWeight.w400,
-                                      //     color: Color(
-                                      //       isDarkMode ? 0xffB5B5B5 : 0xff6B7280,
-                                      //     ),
                                       //   ),
-                                      // ),
-                                      // SizedBox(height: 2),
-                                      // Text(
-                                      //   categoryItem.name??"Un Known",
-                                      //   textAlign: TextAlign.center,
-                                      //   style: AppTextStyles.labelSmall(textColor)
-                                      //       .copyWith(
-                                      //         fontWeight: FontWeight.w400,
-                                      //         color: Color(
-                                      //           isDarkMode
-                                      //               ? 0xffB5B5B5
-                                      //               : 0xff6B7280,
-                                      //         ),
-                                      //       ),
                                       // ),
                                     ],
                                   ),

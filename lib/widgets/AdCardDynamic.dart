@@ -155,12 +155,13 @@ class AdCardDynamic extends StatelessWidget {
 
           Column(
             children: [
-              const Divider(height: 24, thickness: 0.5),
+               Divider(height: 24, thickness: 0.5),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  if ((ad.status ?? '').toLowerCase() == "pending" ||
-                      (ad.status ?? '').toLowerCase() == "approved") ...[
+                  if (((ad.status ?? '').toLowerCase() == "pending" ||
+                      (ad.status ?? '').toLowerCase() == "approved") &&
+                      ad.sold != true) ...[
                     ActionButton(
                       icon: Icons.edit_outlined,
                       label: 'Edit',
