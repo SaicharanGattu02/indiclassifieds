@@ -80,7 +80,12 @@ class _AdsScreenState extends State<AdsScreen> {
 
     return Scaffold(
       backgroundColor: bgColor,
-      appBar: CustomAppBar1(title: 'My Ads', actions: []),
+      appBar: AppBar(
+        backgroundColor: bgColor,
+        elevation: 0,
+        iconTheme: IconThemeData(color: textColor),
+        title: Text('My Ads', style: AppTextStyles.headlineSmall(textColor)),
+      ),
       body: Column(
         children: [
           // Tabs

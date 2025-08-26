@@ -5,12 +5,13 @@ import 'package:indiclassifieds/Components/CustomAppButton.dart';
 import 'package:indiclassifieds/Components/CustomSnackBar.dart';
 import 'package:indiclassifieds/data/cubit/Register/register_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Register/register_states.dart';
+import 'package:indiclassifieds/services/AuthService.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 
 class RegisterUserDetailsScreen extends StatefulWidget {
-  const RegisterUserDetailsScreen({super.key});
-
+  final String from;
+  const RegisterUserDetailsScreen({super.key, required this.from});
   @override
   State<RegisterUserDetailsScreen> createState() =>
       _RegisterUserDetailsScreenState();
@@ -18,8 +19,8 @@ class RegisterUserDetailsScreen extends StatefulWidget {
 
 class _RegisterUserDetailsScreenState extends State<RegisterUserDetailsScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameCtrl = TextEditingController(text: 'test');
-  final _emailCtrl = TextEditingController(text: 'test@gmail.com');
+  final _nameCtrl = TextEditingController(text: '');
+  final _emailCtrl = TextEditingController(text: '');
   final _nameFocus = FocusNode();
   final _emailFocus = FocusNode();
 
@@ -250,7 +251,12 @@ class _RegisterUserDetailsScreenState extends State<RegisterUserDetailsScreen> {
                                 BlocConsumer<RegisterCubit, RegisterStates>(
                                   listener: (context, state) {
                                     if (state is RegisterLoaded) {
-                                      context.pushReplacement("/dashboard");
+                                      if (widget.from == "ad") {
+                                        context.pop();
+                                      } else {
+                                        context.pushReplacement("/dashboard");
+                                      }
+                                      AuthService.setUserStatus("false");
                                     } else if (state is RegisterFailure) {
                                       CustomSnackBar1.show(
                                         context,

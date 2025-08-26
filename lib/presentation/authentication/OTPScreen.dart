@@ -250,98 +250,73 @@ class _OtpscreenState extends State<Otpscreen> {
                                       ),
 
                                       const SizedBox(height: 20),
-
                                       // OTP field wrapper
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 10,
+                                      PinCodeTextField(
+                                        autoUnfocus: true,
+                                        appContext: context,
+                                        controller: _otpController,
+                                        focusNode: _otpFocusNode,
+                                        backgroundColor: Colors.transparent,
+                                        length: 6,
+                                        onChanged: _onOtpChanged,
+                                        animationType: AnimationType.fade,
+                                        hapticFeedbackTypes:
+                                            HapticFeedbackTypes.heavy,
+                                        cursorColor: isDark
+                                            ? Colors.white70
+                                            : Colors.grey[700],
+                                        keyboardType: TextInputType.number,
+                                        enableActiveFill: true,
+                                        useExternalAutoFillGroup: true,
+                                        beforeTextPaste: (text) => true,
+                                        autoFocus: true,
+                                        autoDismissKeyboard: false,
+                                        showCursor: true,
+                                        pastedTextStyle: TextStyle(
+                                          color: textColor,
+                                          fontWeight: FontWeight.w700,
+                                          fontFamily: 'Roboto',
                                         ),
-                                        decoration: BoxDecoration(
-                                          color: isDark
-                                              ? const Color(0xFF0B0F14)
-                                              : Colors.white,
+                                        pinTheme: PinTheme(
+                                          shape: PinCodeFieldShape.box,
                                           borderRadius: BorderRadius.circular(
-                                            14,
+                                            12,
                                           ),
-                                          boxShadow: [
-                                            if (!isDark)
-                                              BoxShadow(
-                                                color: Colors.black.withOpacity(
-                                                  0.05,
-                                                ),
-                                                blurRadius: 10,
-                                                offset: const Offset(0, 6),
+                                          fieldHeight: 40,
+                                          fieldWidth: 40,
+                                          fieldOuterPadding:
+                                              const EdgeInsets.symmetric(
+                                                horizontal: 4,
                                               ),
-                                          ],
+                                          activeFillColor: isDark
+                                              ? const Color(0xFF131A22)
+                                              : Colors.white,
+                                          selectedFillColor: isDark
+                                              ? const Color(0xFF131A22)
+                                              : Colors.white,
+                                          inactiveFillColor: isDark
+                                              ? const Color(0xFF0D141B)
+                                              : Colors.white,
+                                          activeColor: pinActiveBorder,
+                                          selectedColor: pinSelectedBorder,
+                                          inactiveColor: pinIdleBorder,
+                                          activeBorderWidth: 1.6,
+                                          selectedBorderWidth: 1.6,
+                                          inactiveBorderWidth: 1.1,
                                         ),
-                                        child: PinCodeTextField(
-                                          autoUnfocus: true,
-                                          appContext: context,
-                                          controller: _otpController,
-                                          focusNode: _otpFocusNode,
-                                          backgroundColor: Colors.transparent,
-                                          length: 6,
-                                          onChanged: _onOtpChanged,
-                                          animationType: AnimationType.fade,
-                                          hapticFeedbackTypes:
-                                              HapticFeedbackTypes.heavy,
-                                          cursorColor: isDark
-                                              ? Colors.white70
-                                              : Colors.grey[700],
-                                          keyboardType: TextInputType.number,
-                                          enableActiveFill: true,
-                                          useExternalAutoFillGroup: true,
-                                          beforeTextPaste: (text) => true,
-                                          autoFocus: true,
-                                          autoDismissKeyboard: false,
-                                          showCursor: true,
-                                          pastedTextStyle: TextStyle(
-                                            color: textColor,
-                                            fontWeight: FontWeight.w700,
-                                            fontFamily: 'Roboto',
-                                          ),
-                                          pinTheme: PinTheme(
-                                            shape: PinCodeFieldShape.box,
-                                            borderRadius: BorderRadius.circular(
-                                              12,
-                                            ),
-                                            fieldHeight: 40,
-                                            fieldWidth: 40,
-                                            fieldOuterPadding:
-                                                const EdgeInsets.symmetric(
-                                                  horizontal: 4,
-                                                ),
-                                            activeFillColor: isDark
-                                                ? const Color(0xFF131A22)
-                                                : Colors.white,
-                                            selectedFillColor: isDark
-                                                ? const Color(0xFF131A22)
-                                                : Colors.white,
-                                            inactiveFillColor: isDark
-                                                ? const Color(0xFF0D141B)
-                                                : Colors.white,
-                                            activeColor: pinActiveBorder,
-                                            selectedColor: pinSelectedBorder,
-                                            inactiveColor: pinIdleBorder,
-                                            activeBorderWidth: 1.6,
-                                            selectedBorderWidth: 1.6,
-                                            inactiveBorderWidth: 1.1,
-                                          ),
-                                          textStyle: TextStyle(
-                                            color: textColor,
-                                            fontSize: 17,
-                                            fontFamily: 'Inter',
-                                            fontWeight: FontWeight.w400,
-                                          ),
-                                          inputFormatters: [
-                                            FilteringTextInputFormatter
-                                                .digitsOnly,
-                                          ],
-                                          textInputAction: Platform.isAndroid
-                                              ? TextInputAction.none
-                                              : TextInputAction.done,
+                                        textStyle: TextStyle(
+                                          color: textColor,
+                                          fontSize: 17,
+                                          fontFamily: 'Inter',
+                                          fontWeight: FontWeight.w400,
                                         ),
+                                        inputFormatters: [
+                                          FilteringTextInputFormatter
+                                              .digitsOnly,
+                                        ],
+                                        textInputAction: Platform.isAndroid
+                                            ? TextInputAction.none
+                                            : TextInputAction.done,
                                       ),
 
                                       const SizedBox(height: 14),
@@ -449,13 +424,13 @@ class _OtpscreenState extends State<Otpscreen> {
                                               data.user?.email ?? "",
                                               data.user?.mobile ?? "",
                                               data.user?.id ?? 0,
-                                                data.refreshToken??"",
-                                                data.accessTokenExpiry??0,
-
+                                              data.refreshToken ?? "",
+                                              data.accessTokenExpiry ?? 0,
+                                              data.newUser ?? false,
                                             );
                                             if (data.newUser == true) {
                                               context.pushReplacement(
-                                                '/register',
+                                                '/register?from=otp',
                                               );
                                             } else {
                                               context.pushReplacement(

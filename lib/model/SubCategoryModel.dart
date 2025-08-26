@@ -2,8 +2,14 @@ class SubCategoryModel {
   bool? success;
   List<SubCategories>? subcategories;
   String? message;
+  String? sub_category_banner;
 
-  SubCategoryModel({this.success, this.subcategories, this.message});
+  SubCategoryModel({
+    this.success,
+    this.subcategories,
+    this.message,
+    this.sub_category_banner,
+  });
 
   SubCategoryModel.fromJson(Map<String, dynamic> json) {
     success = json['success'];
@@ -14,6 +20,7 @@ class SubCategoryModel {
       });
     }
     message = json['message'];
+    sub_category_banner = json['sub_category_banner'];
   }
 
   Map<String, dynamic> toJson() {
@@ -23,6 +30,7 @@ class SubCategoryModel {
       data['data'] = this.subcategories!.map((v) => v.toJson()).toList();
     }
     data['message'] = this.message;
+    data['sub_category_banner'] = this.sub_category_banner;
     return data;
   }
 }
@@ -34,7 +42,13 @@ class SubCategories {
   String? image;
   int? noOfCounts;
 
-  SubCategories({this.subCategoryId, this.name, this.image, this.noOfCounts, this.path});
+  SubCategories({
+    this.subCategoryId,
+    this.name,
+    this.image,
+    this.noOfCounts,
+    this.path,
+  });
 
   SubCategories.fromJson(Map<String, dynamic> json) {
     subCategoryId = json['sub_category_id'];

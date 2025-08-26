@@ -40,7 +40,7 @@ class _SubCategoriesScreenState extends State<SubCategoriesScreen> {
         elevation: 0,
         iconTheme: IconThemeData(color: textColor),
         title: Text(
-          widget.categoriesList?.name ?? "",
+          "${widget.categoriesList?.name ?? ""} Subcategories",
           style: AppTextStyles.headlineSmall(textColor),
         ),
       ),
@@ -52,21 +52,39 @@ class _SubCategoriesScreenState extends State<SubCategoriesScreen> {
             final subcategories = state.subCategoryModel.subcategories;
             return CustomScrollView(
               slivers: [
-                // // ----- Banner -----
-                // SliverToBoxAdapter(
-                //   child: Padding(
-                //     padding: const EdgeInsets.symmetric(horizontal: 16),
-                //     child: ClipRRect(
-                //       borderRadius: BorderRadius.circular(8),
-                //       child: Image.asset(
-                //         'assets/images/banner1.png',
-                //         fit: BoxFit.cover,
-                //         height: 150,
-                //         width: double.infinity,
-                //       ),
-                //     ),
-                //   ),
-                // ),
+                // ----- Banner -----
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: state.subCategoryModel.sub_category_banner != null
+                        ? SizedBox(
+                            height: 160,
+                            width: double.infinity,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(4),
+                              child: CachedNetworkImage(
+                                imageUrl:
+                                    state
+                                        .subCategoryModel
+                                        .sub_category_banner ??
+                                    "",
+                                fit: BoxFit.contain,
+                                placeholder: (context, url) => Center(
+                                  child: spinkits.getSpinningLinespinkit(),
+                                ),
+                                errorWidget: (context, url, error) => Center(
+                                  child: Icon(
+                                    Icons.broken_image,
+                                    size: 40,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          )
+                        : SizedBox.shrink(),
+                  ),
+                ),
                 const SliverToBoxAdapter(child: SizedBox(height: 16)),
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),

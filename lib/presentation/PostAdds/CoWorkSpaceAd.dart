@@ -469,8 +469,7 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
                               : null,
                         ),
                         if (widget.editId == null ||
-                            widget.editId.replaceAll('"', '').trim().isEmpty &&
-                                !isEligibleForFree) ...[
+                            widget.editId.replaceAll('"', '').trim().isEmpty) ...[
                           CommonTextField1(
                             lable: 'Plan',
                             isRead: true,
@@ -507,14 +506,20 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
           bottomNavigationBar: SafeArea(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-              child: FutureBuilder<bool>(
-                future: AuthService.isEligibleForAd,
+              child: FutureBuilder(
+                future: Future.wait([
+                  AuthService.isEligibleForAd,
+                  AuthService.isNewUser,
+                ]),
                 builder: (context, asyncSnapshot) {
                   if (asyncSnapshot.connectionState ==
                       ConnectionState.waiting) {
                     return const SizedBox();
                   }
-                  final isEligible = asyncSnapshot.data ?? false;
+                  final isEligible = asyncSnapshot.data?[0] ?? false;
+                  final isNewUser = asyncSnapshot.data?[1] ?? false;
+                  AppLogger.info("isEligible: ${isEligible}");
+
                   return BlocConsumer<MarkAsListingCubit, MarkAsListingState>(
                     listener: (context, updateState) {
                       if (updateState is MarkAsListingSuccess ||
@@ -539,9 +544,13 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
                                 state is CoWorkingAdLoading ||
                                 updateState is MarkAsListingUpdateLoading,
                             text: 'Submit Ad',
-                            onPlusTap: !isEligible
-                                ? () => _submitAd(context)
-                                : () => context.push("/plans"),
+                            onPlusTap: isNewUser
+                                ? () {
+                              context.push(
+                                '/register?from=ad',
+                              );
+                                  }
+                                :() => _submitAd(context),
                           );
                         },
                       );

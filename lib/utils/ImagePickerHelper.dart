@@ -238,7 +238,7 @@ class _CommonImagePickerState extends State<CommonImagePicker> {
                     crossAxisCount: 4,
                     crossAxisSpacing: 8,
                     mainAxisSpacing: 8,
-                    childAspectRatio: 1.8,
+                    childAspectRatio: 1,
                   ),
                   itemCount:
                       widget.images.length + widget.existingImages.length <

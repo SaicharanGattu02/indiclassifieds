@@ -108,10 +108,9 @@ class _ProductsListScreenState extends State<ProductsListScreen> {
                     children: [
                       Image.asset(
                         'assets/nodata/no_data.png',
-                        width: MediaQuery.of(context).size.width * 0.25,
+                        width: MediaQuery.of(context).size.width * 0.4,
                         height: MediaQuery.of(context).size.height * 0.15,
                       ),
-                      const SizedBox(height: 12),
                       Text(
                         'No Products Found!',
                         style: TextStyle(

@@ -6,11 +6,14 @@ import 'package:indiclassifieds/Components/CustomAppButton.dart';
 import '../data/cubit/UserActivePlans/user_active_plans_cubit.dart';
 import '../data/cubit/UserActivePlans/user_active_plans_states.dart';
 import '../model/UserActivePlansModel.dart';
+import '../services/AuthService.dart';
 import '../theme/AppTextStyles.dart';
 import '../theme/ThemeHelper.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'AppLogger.dart';
 
 void showPlanBottomSheet({
   required BuildContext context,
@@ -88,6 +91,119 @@ void showPlanBottomSheet({
 
                 if (state is UserActivePlanLoaded) {
                   final plans = state.userActivePlansModel.plans ?? [];
+                  final isEligibleForFree =
+                      state.userActivePlansModel.isFree ?? false;
+                  AppLogger.info("isEligibleForFree:${isEligibleForFree}");
+
+                  // If the user is eligible for a free plan and there are no plans, show the dummy free plan
+                  if (isEligibleForFree && plans.isEmpty) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 16.0),
+                              child: Text(
+                                "You have one free plan to post an Ad!",
+                                textAlign: TextAlign.center,
+                                style: AppTextStyles.headlineSmall(textColor)
+                                    .copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 0.5,
+                                    ),
+                              ),
+                            ),
+                            _buildPlanCard(
+                              context,
+                              Plans(
+                                planName: 'Free Plan',
+                                packageName: 'Basic Free Plan',
+                                remaining: 1,
+                                endDate: 'N/A',
+                              ),
+                              textColor,
+                              cardColor,
+                              controller,
+                              onSelectPlan,
+                            ),
+                            SizedBox(height: 15),
+                            Text(
+                              "Congratulations on your free plan! With this, you can post one ad. To access more features and post additional ads, consider subscribing to our premium plans.",
+                              style: AppTextStyles.bodyMedium(textColor),
+                            ),
+                            SizedBox(height: 24),
+                            _buildSubscribeButton(context, textColor),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+
+                  // Show dummy free plan card along with subscription plans
+                  if (isEligibleForFree && plans.isNotEmpty) {
+                    return Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (title != null)
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                bottom: 16.0,
+                                left: 8.0,
+                              ),
+                              child: Text(
+                                title,
+                                style: AppTextStyles.headlineSmall(textColor)
+                                    .copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 0.5,
+                                    ),
+                              ),
+                            ),
+                          _buildPlanCard(
+                            context,
+                            Plans(
+                              planName: 'Free Plan',
+                              packageName: 'Basic Free Plan',
+                              remaining: 1,
+                              endDate: 'N/A',
+                            ),
+                            textColor,
+                            cardColor,
+                            controller,
+                            onSelectPlan,
+                          ),
+                          SizedBox(height: 15),
+                          // Display subscription plans
+                          Expanded(
+                            child: ListView.separated(
+                              controller: scrollController,
+                              itemCount: plans.length,
+                              itemBuilder: (context, index) {
+                                final plan = plans[index];
+                                return _buildPlanCard(
+                                  context,
+                                  plan,
+                                  textColor,
+                                  cardColor,
+                                  controller,
+                                  onSelectPlan,
+                                );
+                              },
+                              separatorBuilder: (context, index) =>
+                                  SizedBox(height: 12),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  // If there are no plans and the user is not eligible for free, show the subscription plans message
                   if (plans.isEmpty) {
                     return Center(
                       child: Padding(
@@ -120,6 +236,7 @@ void showPlanBottomSheet({
                       ),
                     );
                   }
+
                   return Padding(
                     padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
                     child: Column(
@@ -225,35 +342,37 @@ Widget _buildPlanCard(
               ).copyWith(fontWeight: FontWeight.w500),
             ),
             SizedBox(height: 6),
-            Row(
-              children: [
-                Icon(
-                  Icons.calendar_today,
-                  size: 14,
-                  color: textColor.withOpacity(0.7),
-                ),
-                SizedBox(width: 6),
-                Text(
-                  'Remaining Ads: ${plan.remaining.toString()}',
-                  style: AppTextStyles.bodySmall(textColor),
-                ),
-              ],
-            ),
-            SizedBox(height: 4),
-            Row(
-              children: [
-                Icon(
-                  Icons.event_busy,
-                  size: 14,
-                  color: textColor.withOpacity(0.7),
-                ),
-                SizedBox(width: 6),
-                Text(
-                  'Expire Date of Subscription: ${plan.endDate}',
-                  style: AppTextStyles.bodySmall(textColor),
-                ),
-              ],
-            ),
+            if (plan.planName != "Free Plan") ...[
+              Row(
+                children: [
+                  Icon(
+                    Icons.calendar_today,
+                    size: 14,
+                    color: textColor.withOpacity(0.7),
+                  ),
+                  SizedBox(width: 6),
+                  Text(
+                    'Remaining Ads: ${plan.remaining.toString()}',
+                    style: AppTextStyles.bodySmall(textColor),
+                  ),
+                ],
+              ),
+              SizedBox(height: 4),
+              Row(
+                children: [
+                  Icon(
+                    Icons.event_busy,
+                    size: 14,
+                    color: textColor.withOpacity(0.7),
+                  ),
+                  SizedBox(width: 6),
+                  Text(
+                    'Expire Date of Subscription: ${plan.endDate}',
+                    style: AppTextStyles.bodySmall(textColor),
+                  ),
+                ],
+              ),
+            ],
           ],
         ),
         trailing: Icon(

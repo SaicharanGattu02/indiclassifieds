@@ -10,6 +10,7 @@ import '../../data/cubit/Categories/categories_cubit.dart';
 import '../../data/cubit/Categories/categories_states.dart';
 import '../../data/cubit/City/city_cubit.dart';
 import '../../data/cubit/City/city_state.dart';
+import '../../data/cubit/Products/Product_cubit2.dart';
 import '../../data/cubit/Products/products_cubit.dart';
 import '../../data/cubit/States/states_cubit.dart';
 import '../../data/cubit/States/states_state.dart';
@@ -244,7 +245,7 @@ class _FilterScreenState extends State<FilterScreen> {
                           : selectedRange.value.end.toInt().toString(),
                     };
 
-                    context.read<ProductsCubit>().getProducts(
+                    context.read<ProductsCubit2>().getProducts(
                       categoryId: filters["categoryId"],
                       sort_by: filters["sort_by"],
                       state_id: filters["state_id"],
@@ -320,12 +321,12 @@ class _FilterScreenState extends State<FilterScreen> {
 
   Widget _buildPriceWidget() {
     final priceRanges = [
-      {"label": "Rs.500 - 1000", "min": 500, "max": 1000},
-      {"label": "Rs.1001 - 1500", "min": 1001, "max": 1500},
-      {"label": "Rs.1501 - 2000", "min": 1501, "max": 2000},
-      {"label": "Rs.2001 - 2500", "min": 2001, "max": 2500},
-      {"label": "Rs.2501 - 5000", "min": 2501, "max": 5000},
-      {"label": "Above Rs.5000", "min": 5001, "max": null},
+      {"label": "Below Rs.1000", "min": 0, "max": 1000},
+      {"label": "Rs.1001 - 5000", "min": 1001, "max": 5000},
+      {"label": "Rs.5001 - 10000", "min": 5001, "max": 10000},
+      {"label": "Rs.10001 - 25000", "min": 10001, "max": 25000},
+      {"label": "Rs.25001 - 50000", "min": 25001, "max": 50000},
+      {"label": "Above Rs.50000", "min": 50001, "max": 1000000},
     ];
 
     return ValueListenableBuilder<RangeValues>(
@@ -351,7 +352,7 @@ class _FilterScreenState extends State<FilterScreen> {
                       selectedRange.value = RangeValues(minPrice, maxPrice);
                     }
                   },
-                  title: Text(r["label"] as String),
+                  title: Text(r["label"] as String,style: AppTextStyles.titleSmall(textColor),),
                 );
               }).toList(),
               const SizedBox(height: 20),

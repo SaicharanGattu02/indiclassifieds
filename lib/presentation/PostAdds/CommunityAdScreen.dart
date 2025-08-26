@@ -90,7 +90,8 @@ class _CommunityAdScreenState extends State<CommunityAdScreen> {
           priceController.text = commonAdData.data?.listing?.price ?? '';
           nameController.text = commonAdData.data?.listing?.fullName ?? '';
           phoneController.text = commonAdData.data?.listing?.mobileNumber ?? '';
-          _availablePlayerSlots.text = commonAdData.data?.listing?.playerSlots?? '';
+          _availablePlayerSlots.text =
+              commonAdData.data?.listing?.playerSlots ?? '';
           if (commonAdData.data?.listing?.stateId != null) {
             selectedStateId = commonAdData.data?.listing?.stateId;
             stateController.text = commonAdData.data?.listing?.stateName ?? '';
@@ -127,7 +128,8 @@ class _CommunityAdScreenState extends State<CommunityAdScreen> {
         AppLogger.info("isEligibleForFree:${isEligibleForFree}");
         return Scaffold(
           appBar: CustomAppBar1(
-            title: (widget.editId.replaceAll('"', '').trim().isNotEmpty ?? false)
+            title:
+                (widget.editId.replaceAll('"', '').trim().isNotEmpty ?? false)
                 ? "Edit ${widget.CatName}"
                 : widget.CatName,
             actions: [],
@@ -237,7 +239,11 @@ class _CommunityAdScreenState extends State<CommunityAdScreen> {
                           ],
                           color: textColor,
                           keyboardType: TextInputType.phone,
-                          prefixIcon: Icon(Icons.call, color: textColor, size: 16),
+                          prefixIcon: Icon(
+                            Icons.call,
+                            color: textColor,
+                            size: 16,
+                          ),
                           validator: (v) => (v == null || v.trim().isEmpty)
                               ? 'Phone required'
                               : null,
@@ -333,7 +339,7 @@ class _CommunityAdScreenState extends State<CommunityAdScreen> {
                               : null,
                         ),
                         if (widget.editId == null ||
-                            widget.editId.replaceAll('"', '').trim().isEmpty && !isEligibleForFree) ...[
+                            widget.editId.replaceAll('"', '').trim().isEmpty) ...[
                           CommonTextField1(
                             lable: 'Plan',
                             isRead: true,
@@ -351,7 +357,9 @@ class _CommunityAdScreenState extends State<CommunityAdScreen> {
                                 context: context,
                                 controller: planController,
                                 onSelectPlan: (selectedPlan) {
-                                  print('Selected plan: ${selectedPlan.planName}');
+                                  print(
+                                    'Selected plan: ${selectedPlan.planName}',
+                                  );
                                   planId = selectedPlan.planId;
                                   packageId = selectedPlan.packageId;
                                 },
@@ -367,10 +375,15 @@ class _CommunityAdScreenState extends State<CommunityAdScreen> {
           bottomNavigationBar: SafeArea(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-              child: FutureBuilder<bool>(
-                future: AuthService.isEligibleForAd,
+              child: FutureBuilder(
+                future: Future.wait([
+                  AuthService.isEligibleForAd,
+                  AuthService.isNewUser,
+                ]),
                 builder: (context, asyncSnapshot) {
-                  final isEligible = asyncSnapshot.data ?? false;
+                  final isEligible = asyncSnapshot.data?[0] ?? false;
+                  final isNewUser = asyncSnapshot.data?[1] ?? false;
+                  AppLogger.info("isEligible: ${isEligible}");
 
                   return BlocConsumer<MarkAsListingCubit, MarkAsListingState>(
                     listener: (context, updateState) {
@@ -396,8 +409,13 @@ class _CommunityAdScreenState extends State<CommunityAdScreen> {
                                 state is CommunityAdLoading ||
                                 updateState is MarkAsListingUpdateLoading,
                             text: 'Submit Ad',
-                            onPlusTap: !isEligible
+                            onPlusTap: isNewUser
                                 ? () {
+                              context.push(
+                                '/register?from=ad',
+                              );
+                                  }
+                                :  () {
                                     if (_formKey.currentState?.validate() ??
                                         false) {
                                       bool hasError = false;
@@ -410,7 +428,9 @@ class _CommunityAdScreenState extends State<CommunityAdScreen> {
                                         setState(() => _showimagesError = true);
                                         hasError = true;
                                       } else {
-                                        setState(() => _showimagesError = false);
+                                        setState(
+                                          () => _showimagesError = false,
+                                        );
                                       }
 
                                       // Validate state
@@ -433,13 +453,15 @@ class _CommunityAdScreenState extends State<CommunityAdScreen> {
 
                                       final Map<String, dynamic> data = {
                                         "title": titleController.text,
-                                        "description": descriptionController.text,
+                                        "description":
+                                            descriptionController.text,
                                         "sub_category_id": widget.subCatId,
                                         "category_id": widget.catId,
                                         "location": locationController.text,
                                         "mobile_number": phoneController.text,
                                         "email": emailController.text,
-                                        "player_slots": _availablePlayerSlots.text,
+                                        "player_slots":
+                                            _availablePlayerSlots.text,
                                         "price": priceController.text,
                                         "full_name": nameController.text,
                                         "state_id": selectedStateId,
@@ -467,9 +489,6 @@ class _CommunityAdScreenState extends State<CommunityAdScreen> {
                                             .postAstrologyAd(data);
                                       }
                                     }
-                                  }
-                                : () {
-                                    context.push("/plans");
                                   },
                           );
                         },
@@ -481,7 +500,7 @@ class _CommunityAdScreenState extends State<CommunityAdScreen> {
             ),
           ),
         );
-      }
+      },
     );
   }
 

@@ -376,7 +376,7 @@ class _EducationalAdState extends State<EducationalAd> {
                             hint: 'Select Plan',
                             controller: planController,
                             color: textColor,
-                            validator: (v) => (v == null || v.trim().isEmpty && !isEligibleForFree)
+                            validator: (v) => (v == null || v.trim().isEmpty)
                                 ? 'Plan is Required'
                                 : null,
                             onTap: () {
@@ -405,14 +405,15 @@ class _EducationalAdState extends State<EducationalAd> {
           bottomNavigationBar: SafeArea(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-              child: FutureBuilder<bool>(
-                future: AuthService.isEligibleForAd,
+              child: FutureBuilder(
+                future: Future.wait([AuthService.isNewUser]),
                 builder: (context, asyncSnapshot) {
                   if (asyncSnapshot.connectionState ==
                       ConnectionState.waiting) {
                     return const SizedBox();
                   }
-                  final isEligible = asyncSnapshot.data ?? false;
+                  final isNewUser = asyncSnapshot.data?[0] ?? false;
+                  AppLogger.info("isNewUser: ${isNewUser}");
                   final editId = widget.editId.replaceAll('"', '').trim();
 
                   return BlocConsumer<MarkAsListingCubit, MarkAsListingState>(
@@ -426,9 +427,22 @@ class _EducationalAdState extends State<EducationalAd> {
                     },
                     builder: (context, updateState) {
                       return BlocConsumer<EducationAdCubit, EducationAdStates>(
-                        listener: (context, state) {
+                        listener: (context, state) async {
                           if (state is EducationAdSuccess) {
                             context.pushReplacement("/successfully");
+                            if (isEligibleForFree) {
+                              final plan = await context
+                                  .read<UserActivePlanCubit>()
+                                  .getUserActivePlansData();
+                              if (plan != null) {
+                                AuthService.setPlanStatus(
+                                  plan.goToPlansPage.toString() ?? "",
+                                );
+                                AuthService.setFreePlanStatus(
+                                  plan.isFree.toString() ?? "",
+                                );
+                              }
+                            }
                           } else if (state is EducationAdFailure) {
                             CustomSnackBar1.show(context, state.error);
                           }
@@ -439,8 +453,11 @@ class _EducationalAdState extends State<EducationalAd> {
                                 state is EducationAdLoading ||
                                 updateState is MarkAsListingUpdateLoading,
                             text: 'Submit Ad',
-                            onPlusTap: !isEligible
+                            onPlusTap: isNewUser
                                 ? () {
+                                    context.push('/register?from=ad');
+                                  }
+                                : () {
                                     if (_formKey.currentState?.validate() ??
                                         false) {
                                       final Map<String, dynamic> data = {
@@ -481,9 +498,6 @@ class _EducationalAdState extends State<EducationalAd> {
                                             .postEducationAd(data);
                                       }
                                     }
-                                  }
-                                : () {
-                                    context.push("/plans");
                                   },
                           );
                         },

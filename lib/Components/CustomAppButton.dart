@@ -89,9 +89,7 @@ class CustomAppButton1 extends StatelessWidget implements PreferredSizeWidget {
       height: height ?? 48,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           backgroundColor: color ?? AppColors.primary,
           foregroundColor: textcolor ?? Colors.white,
           shadowColor: Colors.transparent,
@@ -101,21 +99,23 @@ class CustomAppButton1 extends StatelessWidget implements PreferredSizeWidget {
         onPressed: isLoading ? () {} : onPlusTap,
         child: isLoading
             ? const SizedBox(
-          height: 24,
-          width: 24,
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.white), // 👈 loader white
-            strokeWidth: 2,
-          ),
-        )
+                height: 24,
+                width: 24,
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    Colors.white,
+                  ), // 👈 loader white
+                  strokeWidth: 2,
+                ),
+              )
             : Text(
-          text,
-          style: TextStyle(
-            color: textcolor ?? Colors.white,
-            fontWeight: FontWeight.w600,
-            fontSize: 16,
-          ),
-        ),
+                text,
+                style: TextStyle(
+                  color: textcolor ?? Colors.white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
+              ),
       ),
     );
   }
@@ -123,4 +123,3 @@ class CustomAppButton1 extends StatelessWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize => Size.fromHeight(height ?? 48);
 }
-

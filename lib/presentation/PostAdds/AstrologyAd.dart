@@ -295,7 +295,11 @@ class _AstrologyAdState extends State<AstrologyAd> {
                           ],
                           color: textColor,
                           keyboardType: TextInputType.phone,
-                          prefixIcon: Icon(Icons.call, color: textColor, size: 16),
+                          prefixIcon: Icon(
+                            Icons.call,
+                            color: textColor,
+                            size: 16,
+                          ),
                           validator: (v) => (v == null || v.trim().isEmpty)
                               ? 'Phone required'
                               : null,
@@ -435,7 +439,10 @@ class _AstrologyAdState extends State<AstrologyAd> {
                               : null,
                         ),
                         if (widget.editId == null ||
-                            widget.editId.replaceAll('"', '').trim().isEmpty && !isEligibleForFree) ...[
+                            widget.editId
+                                .replaceAll('"', '')
+                                .trim()
+                                .isEmpty) ...[
                           CommonTextField1(
                             lable: 'Plan',
                             isRead: true,
@@ -469,9 +476,9 @@ class _AstrologyAdState extends State<AstrologyAd> {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
               child: FutureBuilder(
-                future: AuthService.isEligibleForAd,
+                future: Future.wait([AuthService.isNewUser]),
                 builder: (context, asyncSnapshot) {
-                  final isEligible = asyncSnapshot.data ?? false;
+                  final isNewUser = asyncSnapshot.data?[0] ?? false;
                   return BlocConsumer<MarkAsListingCubit, MarkAsListingState>(
                     listener: (context, updateState) {
                       if (updateState is MarkAsListingSuccess ||
@@ -496,8 +503,11 @@ class _AstrologyAdState extends State<AstrologyAd> {
                                 state is AstrologyAdLoading ||
                                 updateState is MarkAsListingUpdateLoading,
                             text: 'Submit Ad',
-                            onPlusTap: isEligible
+                            onPlusTap: isNewUser
                                 ? () {
+                                    context.push('/register?from=ad');
+                                  }
+                                : () {
                                     if (_formKey.currentState?.validate() ??
                                         false) {
                                       bool isValid = true;
@@ -522,19 +532,23 @@ class _AstrologyAdState extends State<AstrologyAd> {
                                       if (_images.isEmpty &&
                                           (widget.editId == null ||
                                               widget.editId
-                                                  .replaceAll('"', '')
-                                                  .trim()
-                                                  .isEmpty  && !isEligibleForFree)) {
+                                                      .replaceAll('"', '')
+                                                      .trim()
+                                                      .isEmpty &&
+                                                  !isEligibleForFree)) {
                                         setState(() => _showimagesError = true);
                                         isValid = false;
                                       } else {
-                                        setState(() => _showimagesError = false);
+                                        setState(
+                                          () => _showimagesError = false,
+                                        );
                                       }
 
                                       if (isValid) {
                                         final Map<String, dynamic> data = {
                                           "title": titleController.text,
-                                          "description": descriptionController.text,
+                                          "description":
+                                              descriptionController.text,
                                           "sub_category_id": widget.subCatId,
                                           "category_id": widget.catId,
                                           "location": locationController.text,
@@ -568,7 +582,10 @@ class _AstrologyAdState extends State<AstrologyAd> {
                                             .isNotEmpty) {
                                           context
                                               .read<MarkAsListingCubit>()
-                                              .markAsUpdate(widget.editId, data);
+                                              .markAsUpdate(
+                                                widget.editId,
+                                                data,
+                                              );
                                         } else {
                                           context
                                               .read<AstrologyAdCubit>()
@@ -576,9 +593,6 @@ class _AstrologyAdState extends State<AstrologyAd> {
                                         }
                                       }
                                     }
-                                  }
-                                : () {
-                                    context.push("/plans");
                                   },
                           );
                         },
@@ -590,7 +604,7 @@ class _AstrologyAdState extends State<AstrologyAd> {
             ),
           ),
         );
-      }
+      },
     );
   }
 

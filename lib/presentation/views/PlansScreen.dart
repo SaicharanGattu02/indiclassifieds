@@ -13,6 +13,7 @@ import '../../data/cubit/Packages/packages_states.dart';
 import '../../data/cubit/Payment/payment_cubit.dart';
 import '../../data/cubit/Payment/payment_states.dart';
 import '../../data/cubit/Plans/plans_states.dart';
+import '../../data/cubit/UserActivePlans/user_active_plans_cubit.dart';
 import '../../model/PlansModel.dart';
 import '../../services/AuthService.dart';
 import '../../theme/AppTextStyles.dart';
@@ -680,7 +681,7 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
                               child: Padding(
                                 padding: EdgeInsets.fromLTRB(16, 0, 16, 20),
                                 child: BlocConsumer<PaymentCubit, PaymentStates>(
-                                  listener: (context, state) {
+                                  listener: (context, state) async {
                                     isLoadingNotifier.value =
                                         state is PaymentLoading;
                                     if (state is PaymentCreated) {
@@ -696,6 +697,13 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
                                         '/successfully'
                                         '?title=${Uri.encodeComponent("Payment is Done Successfully")}',
                                       );
+                                      final plan = await context
+                                          .read<UserActivePlanCubit>()
+                                          .getUserActivePlansData();
+                                      if (plan != null) {
+                                        AuthService.setPlanStatus(plan.goToPlansPage.toString() ?? "");
+                                        AuthService.setFreePlanStatus(plan.isFree.toString() ?? "");
+                                      }
                                     } else if (state is PaymentFailure) {
                                       CustomSnackBar1.show(
                                         context,

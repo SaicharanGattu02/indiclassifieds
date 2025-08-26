@@ -129,10 +129,10 @@ class _SimilarProductsSectionState extends State<SimilarProductsSection> {
               ),
             ),
             SizedBox(
-              height: 260,
+              height: 230,
               child: ListView.separated(
                 controller: _scrollCtrl,
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                 scrollDirection: Axis.horizontal,
                 itemCount: items.length + (hasNextPage ? 1 : 0),
                 separatorBuilder: (_, __) => SizedBox(width: 12),

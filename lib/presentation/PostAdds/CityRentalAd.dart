@@ -378,10 +378,12 @@ class _CityRentalsAdState extends State<CityRentalsAd> {
           bottomNavigationBar: SafeArea(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-              child: FutureBuilder<bool>(
-                future: AuthService.isEligibleForAd,
+              child: FutureBuilder(
+                future: Future.wait([
+                  AuthService.isNewUser,
+                ]),
                 builder: (context, asyncSnapshot) {
-                  final isEligible = asyncSnapshot.data ?? false;
+                  final isNewUser = asyncSnapshot.data?[0] ?? false;
                   return BlocConsumer<MarkAsListingCubit, MarkAsListingState>(
                     listener: (context, updateState) {
                       if (updateState is MarkAsListingSuccess ||
@@ -406,8 +408,13 @@ class _CityRentalsAdState extends State<CityRentalsAd> {
                                 state is CityRentalsAdLoading ||
                                 updateState is MarkAsListingUpdateLoading,
                             text: 'Submit Ad',
-                            onPlusTap: !isEligible
+                            onPlusTap: isNewUser
                                 ? () {
+                              context.push(
+                                '/register?from=ad',
+                              );
+                            }
+                                : () {
                                     if (_formKey.currentState?.validate() ??
                                         false) {
                                       bool isValid = true;
@@ -484,9 +491,6 @@ class _CityRentalsAdState extends State<CityRentalsAd> {
                                             .postCityRentalsAd(data);
                                       }
                                     }
-                                  }
-                                : () {
-                                    context.push("/plans");
                                   },
                           );
                         },

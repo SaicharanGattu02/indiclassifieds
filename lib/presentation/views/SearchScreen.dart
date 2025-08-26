@@ -7,7 +7,9 @@ import 'package:go_router/go_router.dart';
 import '../../Components/CustomSnackBar.dart';
 import '../../data/cubit/AddToWishlist/addToWishlistCubit.dart';
 import '../../data/cubit/AddToWishlist/addToWishlistStates.dart';
+import '../../data/cubit/Products/Product_cubit2.dart';
 import '../../data/cubit/Products/products_cubit.dart';
+import '../../data/cubit/Products/products_state2.dart';
 import '../../data/cubit/Products/products_states.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
@@ -53,7 +55,7 @@ class _SearchScreenState extends State<SearchScreen> {
     if (_debounce?.isActive ?? false) _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), () {
       // Call API with the debounced query
-      context.read<ProductsCubit>().getProducts(search: query);
+      context.read<ProductsCubit2>().getProducts(search: query);
     });
   }
 
@@ -112,17 +114,40 @@ class _SearchScreenState extends State<SearchScreen> {
               ),
             ),
             Expanded(
-              child: BlocBuilder<ProductsCubit, ProductsStates>(
+              child: BlocBuilder<ProductsCubit2, ProductsStates2>(
                 builder: (context, state) {
-                  if (state is ProductsLoading) {
+                  if (state is Products2Loading) {
                     return Center(child: DottedProgressWithLogo());
-                  } else if (state is ProductsFailure) {
+                  } else if (state is Products2Failure) {
                     return Center(child: Text(state.error));
-                  } else if (state is ProductsLoaded ||
-                      state is ProductsLoadingMore) {
+                  } else if (state is Products2Loaded ||
+                      state is Products2LoadingMore) {
                     final productsModel = (state as dynamic).productsModel;
                     final products = productsModel.products ?? [];
                     final hasNextPage = (state as dynamic).hasNextPage;
+
+                    if (products.isEmpty) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.asset(
+                              'assets/nodata/no_data.png',
+                              width: MediaQuery.of(context).size.width * 0.4,
+                              height: MediaQuery.of(context).size.height * 0.15,
+                            ),
+                            Text(
+                              'No Products Found!',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
+                                color: ThemeHelper.textColor(context),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
                     return CustomScrollView(
                       controller: _scrollController,
                       slivers: [

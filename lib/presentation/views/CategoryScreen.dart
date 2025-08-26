@@ -21,8 +21,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
   @override
   void initState() {
     super.initState();
-   context.read<CategoriesCubit>().getCategories();
-
+    context.read<CategoriesCubit>().getCategories();
   }
 
   @override
@@ -56,7 +55,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
             BlocBuilder<CategoriesCubit, CategoriesStates>(
               builder: (context, state) {
                 if (state is CategoriesLoading) {
-                  return Center(child:DottedProgressWithLogo());
+                  return Center(child: DottedProgressWithLogo());
                 } else if (state is CategoriesLoaded) {
                   final categories = state.categoryModel.categoriesList;
                   return Expanded(
@@ -90,31 +89,28 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
                           child: Row(
                             children: [
-                              CircleAvatar(
-                                radius: 24,
-                                backgroundColor: Colors.blue.withOpacity(0.1),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(100),
-                                  child: CachedNetworkImage(
-                                    imageUrl: categoryItem.image ?? "",
-                                    fit: BoxFit.cover,
-                                    width: double.infinity,
-                                    placeholder: (context, url) => Center(
-                                      child: spinkits.getSpinningLinespinkit(),
-                                    ),
-                                    errorWidget: (context, url, error) =>
-                                        Container(
-                                          color: Colors.grey.shade100,
-                                          child: const Icon(
-                                            Icons.broken_image,
-                                            size: 40,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
+                              SizedBox(
+                                height: 48,
+                                width: 60,
+                                child: CachedNetworkImage(
+                                  imageUrl: categoryItem.image ?? "",
+                                  fit: BoxFit.contain,
+                                  width: double.infinity,
+                                  placeholder: (context, url) => Center(
+                                    child: spinkits.getSpinningLinespinkit(),
                                   ),
+                                  errorWidget: (context, url, error) =>
+                                      Container(
+                                        color: Colors.grey.shade100,
+                                        child: const Icon(
+                                          Icons.broken_image,
+                                          size: 40,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
                                 ),
                               ),
-                              const SizedBox(width: 12),
+                              SizedBox(height: 18),
                               Expanded(
                                 child: Text(
                                   categoryItem.name ?? "Un Known",

@@ -14,6 +14,7 @@ import '../../services/AuthService.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../theme/app_colors.dart';
+import '../../utils/AppLogger.dart';
 import '../../utils/ImagePickerHelper.dart';
 import '../../utils/planhelper.dart';
 import '../../widgets/CommonLoader.dart';
@@ -575,13 +576,13 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-          child: FutureBuilder<bool>(
-            future: AuthService.isEligibleForAd,
+          child: FutureBuilder(
+            future: Future.wait([AuthService.isNewUser]),
             builder: (context, asyncSnapshot) {
               if (asyncSnapshot.connectionState == ConnectionState.waiting) {
                 return const SizedBox();
               }
-              final isEligible = asyncSnapshot.data ?? false;
+              final isNewUser = asyncSnapshot.data?[0] ?? false;
               final editId = widget.editId.replaceAll('"', '').trim();
 
               return BlocConsumer<MarkAsListingCubit, MarkAsListingState>(
@@ -608,8 +609,11 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
                             state is PropertyAdLoading ||
                             updateState is MarkAsListingUpdateLoading,
                         text: 'Submit Ad',
-                        onPlusTap: !isEligible
+                        onPlusTap: isNewUser
                             ? () {
+                                context.push('/register?from=ad');
+                              }
+                            : () {
                                 if (_formKey.currentState?.validate() ??
                                     false) {
                                   String? propertyType;
@@ -673,9 +677,6 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
                                         .postPropertyAd(data);
                                   }
                                 }
-                              }
-                            : () {
-                                context.push("/plans");
                               },
                       );
                     },

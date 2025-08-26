@@ -31,7 +31,6 @@ class EditProfile extends StatefulWidget {
 
 class _EditProfileState extends State<EditProfile> {
   final _formKey = GlobalKey<FormState>();
-
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
@@ -322,33 +321,79 @@ class _EditProfileState extends State<EditProfile> {
                 width: double.infinity,
                 child: CustomAppButton1(
                   text: isLoading ? "Updating..." : "Submit",
-                  onPlusTap: () {
-                    if (_formKey.currentState!.validate() && !isLoading) {
-                      String? imageToSend;
+                  onPlusTap: isLoading
+                      ? null
+                      : () {
+                          // Form validation
+                          if (_formKey.currentState?.validate() ?? false) {
+                            print("Form is valid");
 
-                      if (_image != null && _image!.path.isNotEmpty) {
-                        imageToSend = _image!.path;
-                      } else if (imagePath != null) {
-                        imageToSend = imagePath;
-                      } else {
-                        imageToSend =
-                            ""; // or leave it null if your API expects no field
-                      }
+                            // Ensure name and email are not empty
+                            if (_nameController.text.trim().isEmpty) {
+                              CustomSnackBar1.show(
+                                context,
+                                "Name is required.",
+                              );
+                              return;
+                            }
 
-                      final data = {
-                        "name": _nameController.text.trim(),
-                        "email": _emailController.text.trim(),
-                        "phone": _phoneController.text.trim(),
-                        "image": imageToSend,
-                        "state_id": selectedStateId,
-                        "city_id": selectedCityId,
-                      };
+                            if (_emailController.text.trim().isEmpty) {
+                              CustomSnackBar1.show(
+                                context,
+                                "Email is required.",
+                              );
+                              return;
+                            }
 
-                      context.read<UpdateProfileCubit>().updateProfileDetails(
-                        data,
-                      );
-                    }
-                  },
+                            // Ensure state and city IDs are not null or invalid
+                            if (selectedStateId == null ||
+                                selectedStateId == 0) {
+                              CustomSnackBar1.show(
+                                context,
+                                "Please select a valid state.",
+                              );
+                              return;
+                            }
+                            if (selectedCityId == null || selectedCityId == 0) {
+                              CustomSnackBar1.show(
+                                context,
+                                "Please select a valid city.",
+                              );
+                              return;
+                            }
+                            // Collect data and make the API call
+                            String? imageToSend;
+                            if (_image != null && _image!.path.isNotEmpty) {
+                              imageToSend = _image!.path;
+                            } else if (imagePath != null) {
+                              imageToSend = imagePath;
+                            } else {
+                              imageToSend =
+                                  ""; // or leave null if no image is selected
+                            }
+
+                            final data = {
+                              "name": _nameController.text.trim(),
+                              "email": _emailController.text.trim(),
+                              "phone": _phoneController.text.trim(),
+                              "image": imageToSend,
+                              "state_id": selectedStateId, // Optional or null
+                              "city_id": selectedCityId, // Optional or null
+                            };
+
+                            // Call the update profile API
+                            context
+                                .read<UpdateProfileCubit>()
+                                .updateProfileDetails(data);
+                          } else {
+                            // If form validation fails, show an error message
+                            print("Form is invalid");
+                            CustomSnackBar1.show(
+                              context,
+                              "Please fill all the required fields correctly.",
+                            );
+                          }
+                        },
                 ),
               );
             },

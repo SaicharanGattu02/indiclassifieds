@@ -111,8 +111,10 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: '/register',
-      pageBuilder: (context, state) =>
-          buildSlideTransitionPage(RegisterUserDetailsScreen(), state),
+      pageBuilder: (context, state) {
+        final from = state.uri.queryParameters['from'] ?? "";
+        return buildSlideTransitionPage(RegisterUserDetailsScreen(from: from,), state);
+      },
     ),
     GoRoute(
       path: '/wish_list',
@@ -200,7 +202,7 @@ final GoRouter appRouter = GoRouter(
         final nextRoute = state.uri.queryParameters['next'] ?? "";
 
         return buildSlideTransitionPage(
-          SuccessScreen( nextRoute: nextRoute),
+          SuccessScreen(nextRoute: nextRoute),
           state,
         );
       },

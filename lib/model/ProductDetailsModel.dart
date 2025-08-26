@@ -78,6 +78,8 @@ class Listing {
   String? mobileNumber;
   bool? featuredStatus;
   String? status;
+  String? city_name;
+  String? state_name;
   bool? sold;
   int? stateId;
   int? cityId;
@@ -106,6 +108,8 @@ class Listing {
     this.createdAt,
     this.updatedAt,
     this.category,
+    this.city_name,
+    this.state_name,
   });
 
   Listing.fromJson(Map<String, dynamic> json) {
@@ -128,6 +132,8 @@ class Listing {
     cityId = json['city_id'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
+    city_name = json['city_name'];
+    state_name = json['state_name'];
     category = json['Category'] != null
         ? new Category.fromJson(json['Category'])
         : null;
@@ -154,6 +160,8 @@ class Listing {
     data['city_id'] = this.cityId;
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
+    data['city_name'] = this.city_name;
+    data['state_name'] = this.state_name;
     if (this.category != null) {
       data['Category'] = this.category!.toJson();
     }
@@ -272,7 +280,6 @@ class Details {
     ...extra,
   }..removeWhere((k, v) => v == null || v.toString().trim().isEmpty);
 }
-
 
 class PostedBy {
   int? id;

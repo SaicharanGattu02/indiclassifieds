@@ -407,8 +407,7 @@ class _PetAdScreenState extends State<PetAdScreen> {
                           color: textColor,
                         ),
                         if (widget.editId == null ||
-                            widget.editId.replaceAll('"', '').trim().isEmpty &&
-                                !isEligibleForFree) ...[
+                            widget.editId.replaceAll('"', '').trim().isEmpty) ...[
                           CommonTextField1(
                             lable: 'Plan',
                             isRead: true,
@@ -444,15 +443,16 @@ class _PetAdScreenState extends State<PetAdScreen> {
           bottomNavigationBar: SafeArea(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-              child: FutureBuilder<bool>(
-                future: AuthService.isEligibleForAd,
+              child: FutureBuilder(
+                future: Future.wait([
+                  AuthService.isNewUser,
+                ]),
                 builder: (context, asyncSnapshot) {
                   if (asyncSnapshot.connectionState ==
                       ConnectionState.waiting) {
                     return const SizedBox();
                   }
-
-                  final isEligible = asyncSnapshot.data ?? false;
+                  final isNewUser = asyncSnapshot.data?[0] ?? false;
                   final editId = widget.editId.replaceAll('"', '').trim();
 
                   return BlocConsumer<MarkAsListingCubit, MarkAsListingState>(
@@ -479,8 +479,11 @@ class _PetAdScreenState extends State<PetAdScreen> {
                                 state is PetsAdLoading ||
                                 updateState is MarkAsListingUpdateLoading,
                             text: 'Submit Ad',
-                            onPlusTap: !isEligible
+                            onPlusTap: isNewUser
                                 ? () {
+                              context.push('/register?from=ad');
+                                  }
+                                : () {
                                     if (_formKey.currentState?.validate() ??
                                         false) {
                                       final Map<String, dynamic> data = {
@@ -522,9 +525,6 @@ class _PetAdScreenState extends State<PetAdScreen> {
                                         );
                                       }
                                     }
-                                  }
-                                : () {
-                                    context.push("/plans");
                                   },
                           );
                         },

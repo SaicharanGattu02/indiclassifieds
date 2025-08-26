@@ -175,27 +175,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     textColor,
                     trailing: Icons.arrow_forward_ios,
                   ),
-                  _settingsTile(
-                    Icons.nightlight_round,
-                    Colors.purple.shade100,
-                    'Dark Theme',
-                    ThemeHelper.isDarkMode(context),
-                    ThemeHelper.textColor(context),
-                    // isSwitch: true,
-                    // switchValue: effectiveDark,
-                    onSwitchChanged: (val) {
-                      final cubit = context.read<ThemeCubit>();
-                      if (val) {
-                        cubit.setDarkTheme(); // exits System if it was set
-                      } else {
-                        cubit.setLightTheme();
-                      }
-                    },
-                    onTap: () => _openThemePicker(
-                      context,
-                    ), // optional system/light/dark sheet
-                    trailingText: isSystem ? 'System' : null,
-                  ),
+                  // _settingsTile(
+                  //   Icons.nightlight_round,
+                  //   Colors.purple.shade100,
+                  //   'Dark Theme',
+                  //   ThemeHelper.isDarkMode(context),
+                  //   ThemeHelper.textColor(context),
+                  //   // isSwitch: true,
+                  //   // switchValue: effectiveDark,
+                  //   onSwitchChanged: (val) {
+                  //     final cubit = context.read<ThemeCubit>();
+                  //     if (val) {
+                  //       cubit.setDarkTheme(); // exits System if it was set
+                  //     } else {
+                  //       cubit.setLightTheme();
+                  //     }
+                  //   },
+                  //   onTap: () => _openThemePicker(
+                  //     context,
+                  //   ), // optional system/light/dark sheet
+                  //   trailingText: isSystem ? 'System' : null,
+                  // ),
                   _settingsTile(
                     Icons.share,
                     Colors.orange.shade100,
@@ -272,12 +272,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               switch (m) {
                 case AppThemeMode.system: cubit.setSystemTheme(); break;
                 case AppThemeMode.light:  cubit.setLightTheme();  break;
-                case AppThemeMode.dark:   cubit.setDarkTheme();   break;
+                case AppThemeMode.dark:   cubit.setDarkTheme();  break;
               }
               HapticFeedback.selectionClick();
               Navigator.pop(ctx);
             }
-
             Widget option({
               required IconData icon,
               required String title,

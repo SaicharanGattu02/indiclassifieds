@@ -226,9 +226,9 @@ class _CommonAdState extends State<CommonAd> {
                                 color: textColor,
                                 size: 16,
                               ),
-                              validator: (v) => (v == null || v.trim().isEmpty)
-                                  ? 'State required'
-                                  : null,
+                              // validator: (v) => (v == null || v.trim().isEmpty)
+                              //     ? 'State required'
+                              //     : null,
                             ),
                           ),
                         ),
@@ -282,9 +282,9 @@ class _CommonAdState extends State<CommonAd> {
                                 color: textColor,
                                 size: 16,
                               ),
-                              validator: (v) => (v == null || v.trim().isEmpty)
-                                  ? 'City required'
-                                  : null,
+                              // validator: (v) => (v == null || v.trim().isEmpty)
+                              //     ? 'City required'
+                              //     : null,
                             ),
                           ),
                         ),
@@ -371,12 +371,11 @@ class _CommonAdState extends State<CommonAd> {
                           controller: locationController,
                           color: textColor,
                           validator: (v) => (v == null || v.trim().isEmpty)
-                              ? 'Required location'
+                              ? 'Required Location'
                               : null,
                         ),
                         if (widget.editId == null ||
-                            widget.editId.replaceAll('"', '').trim().isEmpty &&
-                                !isEligibleForFree) ...[
+                            widget.editId.replaceAll('"', '').trim().isEmpty) ...[
                           CommonTextField1(
                             lable: 'Plan',
                             isRead: true,
@@ -414,10 +413,11 @@ class _CommonAdState extends State<CommonAd> {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
               child: FutureBuilder(
-                future: AuthService.isEligibleForAd,
+                future: Future.wait([
+                  AuthService.isNewUser,
+                ]),
                 builder: (context, asyncSnapshot) {
-                  final isEligible = asyncSnapshot.data ?? false;
-                  AppLogger.info("isEligible:${isEligible}");
+                  final isNewUser = asyncSnapshot.data?[0] ?? false;
                   return BlocConsumer<MarkAsListingCubit, MarkAsListingState>(
                     listener: (context, updateState) {
                       if (updateState is MarkAsListingSuccess ||
@@ -442,8 +442,11 @@ class _CommonAdState extends State<CommonAd> {
                                 state is CommonAdLoading ||
                                 updateState is MarkAsListingUpdateLoading,
                             text: 'Submit Ad',
-                            onPlusTap: !isEligible
+                            onPlusTap: isNewUser
                                 ? () {
+                                    context.push('/register?from=ad');
+                                  }
+                                : () {
                                     if (_formKey.currentState?.validate() ??
                                         false) {
                                       bool isValid = true;
@@ -539,9 +542,6 @@ class _CommonAdState extends State<CommonAd> {
                                         }
                                       }
                                     }
-                                  }
-                                : () {
-                                    context.push("/plans");
                                   },
                           );
                         },

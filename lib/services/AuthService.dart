@@ -16,6 +16,7 @@ class AuthService {
   static const String _email = "email";
   static const String _mobile = "mobile";
   static const String _id = "id";
+  static const String _isNewUser = "isNewUser";
 
   static final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
@@ -39,26 +40,41 @@ class AuthService {
   static Future<void> setFreePlanStatus(String status) async =>
       await _storage.write(key: _free_plan_status, value: status);
 
+  static Future<void> setUserStatus(String status) async =>
+      await _storage.write(key: _isNewUser, value: status);
+
   static Future<String?> getFreePlanStatus() async =>
       await _storage.read(key: _free_plan_status);
 
   static Future<String?> getPlanStatus() async =>
       await _storage.read(key: _plan_status);
 
+  static Future<String?> getUserStatus() async =>
+      await _storage.read(key: _isNewUser);
+
   static Future<bool> get isEligibleForAd async {
     final status = await getPlanStatus();
-    if(status == "false"){
+    if (status == "false") {
       return false;
-    }else{
+    } else {
       return true;
     }
   }
 
   static Future<bool> get isEligibleForFree async {
     final status = await getFreePlanStatus();
-    if(status == "false"){
+    if (status == "false") {
       return false;
-    }else{
+    } else {
+      return true;
+    }
+  }
+
+  static Future<bool> get isNewUser async {
+    final status = await getUserStatus();
+    if (status == "false") {
+      return false;
+    } else {
       return true;
     }
   }
@@ -98,6 +114,7 @@ class AuthService {
     int id,
     String? refreshToken,
     int expiresIn,
+    bool isNewUser,
   ) async {
     await _storage.write(key: _accessTokenKey, value: accessToken);
     await _storage.write(key: _userName, value: userName);
@@ -106,6 +123,7 @@ class AuthService {
     await _storage.write(key: _id, value: id.toString());
     await _storage.write(key: _refreshTokenKey, value: refreshToken ?? "");
     await _storage.write(key: _tokenExpiryKey, value: expiresIn.toString());
+    await _storage.write(key: _isNewUser, value: isNewUser.toString());
     debugPrint(
       '✅ Tokens saved on login::accessToken= $accessToken,refreshToken=$refreshToken,expiryTime=$expiresIn,userId=$id',
     );

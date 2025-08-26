@@ -19,6 +19,7 @@ import '../../utils/AppLauncher.dart';
 import '../../widgets/CommonLoader.dart';
 import '../../widgets/SimilarProducts.dart';
 import '../../widgets/SimilarProductsSection.dart';
+import 'PhotoViewScreen.dart';
 
 extension DetailsX on Details {
   Map<String, dynamic> merged() {
@@ -136,7 +137,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
           final title = listing.title ?? "—";
           final priceStr = _formatINR(listing.price);
-          final location = listing.location ?? "—";
+          final location =
+              "${listing.location},${listing.city_name},${listing.state_name}" ??
+              "—";
 
           receiverId = data.postedBy?.id.toString() ?? "";
           receiverName = data.postedBy?.name ?? "";
@@ -160,7 +163,25 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           final url = images.isNotEmpty
                               ? images[i].image
                               : null;
-                          return _ImageHero(url: url);
+                          return GestureDetector(
+                            onTap: () {
+                              if (url != null) {
+                                // Navigate to PhotoViewScreen with the list of images and the tapped index
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => PhotoViewScreen(
+                                      images:
+                                          images, // Pass the entire list of images
+                                      initialIndex:
+                                          i, // Pass the tapped image index
+                                    ),
+                                  ),
+                                );
+                              }
+                            },
+                            child: _ImageHero(url: url),
+                          );
                         },
                       ),
                     ),
@@ -183,15 +204,15 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
+                        title,
+                        style: AppTextStyles.headlineSmall(textColor),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
                         "₹$priceStr",
                         style: AppTextStyles.headlineMedium(
                           textColor,
                         ).copyWith(fontWeight: FontWeight.w800),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        title,
-                        style: AppTextStyles.headlineSmall(textColor),
                       ),
                       const SizedBox(height: 20),
                     ],
@@ -224,13 +245,13 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       if (listing.createdAt != null)
                         _InfoChip(
                           icon: Icons.calendar_today_rounded,
-                          label: "Posted",
+                          label: "Posted At",
                           value: _shortDate(listing.createdAt),
                         ),
                       if (location.isNotEmpty)
                         _InfoChip(
                           icon: Icons.place_rounded,
-                          label: "Location",
+                          label: "",
                           value: location,
                         ),
                     ],
@@ -347,7 +368,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               // ),
               SliverToBoxAdapter(
                 child: SizedBox(
-                  height: 250,
+                  height: 280,
                   child: SimilarProductsSection(
                     subCategoryId: listing.subCategoryId!.toString(),
                     excludeId: listing.id,
@@ -517,7 +538,14 @@ class _InfoChip extends StatelessWidget {
               textColor,
             ).copyWith(fontWeight: FontWeight.w600),
           ),
-          Text(value, style: AppTextStyles.bodySmall(textColor)),
+          Expanded(
+            child: Text(
+              value,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.bodySmall(textColor),
+            ),
+          ),
         ],
       ),
     );

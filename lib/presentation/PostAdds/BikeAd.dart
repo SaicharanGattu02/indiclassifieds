@@ -410,8 +410,7 @@ class _BikeAdState extends State<BikeAd> {
                           color: textColor,
                         ),
                         if (widget.editId == null ||
-                            widget.editId.replaceAll('"', '').trim().isEmpty &&
-                                !isEligibleForFree) ...[
+                            widget.editId.replaceAll('"', '').trim().isEmpty) ...[
                           CommonTextField1(
                             lable: 'Plan',
                             isRead: true,
@@ -449,15 +448,16 @@ class _BikeAdState extends State<BikeAd> {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
               child: FutureBuilder(
-                future: AuthService.isEligibleForAd,
+                future: Future.wait([
+                  AuthService.isNewUser,
+                ]),
                 builder: (context, asyncSnapshot) {
                   if (asyncSnapshot.connectionState ==
                       ConnectionState.waiting) {
                     return const SizedBox();
                   }
-                  final isEligible = asyncSnapshot.data ?? false;
+                  final isNewUser = asyncSnapshot.data?[0] ?? false;
                   final editId = widget.editId.replaceAll('"', '').trim();
-
                   return BlocConsumer<MarkAsListingCubit, MarkAsListingState>(
                     listener: (context, updateState) {
                       if (updateState is MarkAsListingSuccess ||
@@ -482,8 +482,13 @@ class _BikeAdState extends State<BikeAd> {
                                 state is BikesAdLoading ||
                                 updateState is MarkAsListingUpdateLoading,
                             text: 'Submit Ad',
-                            onPlusTap: !isEligible
+                            onPlusTap: isNewUser
                                 ? () {
+                              context.push(
+                                '/register?from=ad',
+                              );
+                                  }
+                                :() {
                                     if (_formKey.currentState?.validate() ??
                                         false) {
                                       final Map<String, dynamic> data = {
@@ -508,9 +513,9 @@ class _BikeAdState extends State<BikeAd> {
 
                                       if (widget.editId == null ||
                                           widget.editId
-                                                  .replaceAll('"', '')
-                                                  .trim()
-                                                  .isEmpty) {
+                                              .replaceAll('"', '')
+                                              .trim()
+                                              .isEmpty) {
                                         data["plan_id"] = planId;
                                         data["package_id"] = packageId;
                                       }
@@ -532,9 +537,6 @@ class _BikeAdState extends State<BikeAd> {
                                         );
                                       }
                                     }
-                                  }
-                                : () {
-                                    context.push("/plans");
                                   },
                           );
                         },

@@ -454,15 +454,20 @@ class _MobileAdState extends State<MobileAd> {
           bottomNavigationBar: SafeArea(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-              child: FutureBuilder<bool>(
-                future: AuthService.isEligibleForAd,
+              child: FutureBuilder(
+                future: Future.wait([
+                  AuthService.isEligibleForAd,
+                  AuthService.isNewUser,
+                ]),
                 builder: (context, asyncSnapshot) {
                   if (asyncSnapshot.connectionState ==
                       ConnectionState.waiting) {
                     return const SizedBox();
                   }
 
-                  final isEligible = asyncSnapshot.data ?? false;
+                  final isEligible = asyncSnapshot.data?[0] ?? false;
+                  final isNewUser = asyncSnapshot.data?[1] ?? false;
+                  AppLogger.info("isEligible: ${isEligible}");
                   final editId = widget.editId.replaceAll('"', '').trim();
 
                   return BlocConsumer<MarkAsListingCubit, MarkAsListingState>(
@@ -489,7 +494,11 @@ class _MobileAdState extends State<MobileAd> {
                                 state is MobileAdLoading ||
                                 updateState is MarkAsListingUpdateLoading,
                             text: 'Submit Ad',
-                            onPlusTap: !isEligible
+                            onPlusTap: isNewUser
+                                ? () {
+                              context.push('/register?from=ad');
+                                  }
+                                : !isEligible
                                 ? () {
                                     if (_formKey.currentState?.validate() ??
                                         false) {

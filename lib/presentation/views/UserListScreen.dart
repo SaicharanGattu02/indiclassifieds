@@ -312,7 +312,7 @@ class _ChatCard extends StatelessWidget {
         _initials(name),
         style: AppTextStyles.titleLarge(Colors.white).copyWith(
           fontWeight: FontWeight.bold,
-          fontSize: size * 0.42,
+          fontSize:22,
         ),
       ),
     );
@@ -371,7 +371,7 @@ class _ChatCard extends StatelessWidget {
                               name,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: AppTextStyles.titleLarge(textColor).copyWith(
+                              style: AppTextStyles.titleMedium(textColor).copyWith(
                                 fontWeight: FontWeight.w600,
                               ),
                             ),

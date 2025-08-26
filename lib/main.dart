@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:indiclassifieds/services/ApiClient.dart';
+import 'package:indiclassifieds/services/SecureStorageService.dart';
 import 'package:indiclassifieds/state_injector.dart';
 import 'package:indiclassifieds/theme/AppTheme.dart';
 
@@ -17,8 +18,7 @@ import 'data/cubit/theme_cubit.dart';
 import 'firebase_options.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-FlutterLocalNotificationsPlugin();
-
+    FlutterLocalNotificationsPlugin();
 
 const AndroidNotificationChannel channel = AndroidNotificationChannel(
   'high_importance_channel',
@@ -32,20 +32,22 @@ Future<void> main() async {
   ApiClient.setupInterceptors();
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  // Initialize SecureStorageService and ThemeCubit
+  final storage =
+      SecureStorageService.instance; // Get the instance of SecureStorageService
+  final themeCubit = ThemeCubit(storage);
+  // Set the user's saved theme mode on app startup
+  await themeCubit.setUser();
+
   try {
-    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
     print("Firebase initialized");
   } catch (e) {
     print("Error initializing Firebase: $e");
   }
   FirebaseMessaging messaging = FirebaseMessaging.instance;
-
-  // Request permissions (iOS)
-  NotificationSettings settings = await messaging.requestPermission(
-    alert: true,
-    badge: true,
-    sound: true,
-  );
 
   // Get the APNs token (iOS)
   // if (Platform.isIOS) {
@@ -69,16 +71,16 @@ Future<void> main() async {
   // Create notification channel (Android)
   await flutterLocalNotificationsPlugin
       .resolvePlatformSpecificImplementation<
-      AndroidFlutterLocalNotificationsPlugin
-  >()
+        AndroidFlutterLocalNotificationsPlugin
+      >()
       ?.createNotificationChannel(channel);
 
   const DarwinInitializationSettings iosInitSettings =
-  DarwinInitializationSettings(
-    requestAlertPermission: true,
-    requestBadgePermission: true,
-    requestSoundPermission: true,
-  );
+      DarwinInitializationSettings(
+        requestAlertPermission: true,
+        requestBadgePermission: true,
+        requestSoundPermission: true,
+      );
 
   const InitializationSettings initializationSettings = InitializationSettings(
     android: AndroidInitializationSettings('@mipmap/ic_launcher'),
@@ -125,19 +127,19 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 // Function to display local notifications
 void showNotification(
-    RemoteNotification notification,
-    AndroidNotification android,
-    Map<String, dynamic> data,
-    ) async {
+  RemoteNotification notification,
+  AndroidNotification android,
+  Map<String, dynamic> data,
+) async {
   AndroidNotificationDetails androidPlatformChannelSpecifics =
-  AndroidNotificationDetails(
-    'your_channel_id', // Your channel ID
-    'your_channel_name', // Your channel name
-    importance: Importance.max,
-    priority: Priority.high,
-    playSound: true,
-    icon: '@mipmap/ic_launcher',
-  );
+      AndroidNotificationDetails(
+        'your_channel_id', // Your channel ID
+        'your_channel_name', // Your channel name
+        importance: Importance.max,
+        priority: Priority.high,
+        playSound: true,
+        icon: '@mipmap/ic_launcher',
+      );
   NotificationDetails platformChannelSpecifics = NotificationDetails(
     android: androidPlatformChannelSpecifics,
   );

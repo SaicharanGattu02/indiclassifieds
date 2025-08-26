@@ -97,7 +97,8 @@ class _CarsAdState extends State<CarsAd> {
           nameController.text = commonAdData.data?.listing?.fullName ?? '';
           phoneController.text = commonAdData.data?.listing?.mobileNumber ?? '';
           ownershipType = commonAdData.data?.listing?.ownership ?? "";
-          yearOfManufacturingController.text = commonAdData.data?.listing?.yearOfManufacturing.toString()??"";
+          yearOfManufacturingController.text =
+              commonAdData.data?.listing?.yearOfManufacturing.toString() ?? "";
           fuelType = commonAdData.data?.listing?.fuelType ?? "";
           transmission = commonAdData.data?.listing?.transmission ?? "";
           kmsController.text =
@@ -118,7 +119,6 @@ class _CarsAdState extends State<CarsAd> {
                 .map((img) => ImageData(id: img.id ?? 0, url: img.image ?? ""))
                 .toList();
           }
-
         }
         setState(() => isLoading = false);
       });
@@ -375,9 +375,13 @@ class _CarsAdState extends State<CarsAd> {
                             {"label": "2nd Owner", "value": "2nd-owner"},
                             {"label": "3rd Owner", "value": "3rd-owner"},
                             {"label": "4th Owner", "value": "4th-owner"},
-                            {"label": "Above 4 Owners", "value": "above-4-owners"},
+                            {
+                              "label": "Above 4 Owners",
+                              "value": "above-4-owners",
+                            },
                           ],
-                          onSelected: (val) => setState(() => ownershipType = val),
+                          onSelected: (val) =>
+                              setState(() => ownershipType = val),
                         ),
                         SizedBox(height: 12),
                         ChipSelector(
@@ -387,7 +391,8 @@ class _CarsAdState extends State<CarsAd> {
                             {"label": "Manual", "value": "manual"},
                             {"label": "Automatic", "value": "automatic"},
                           ],
-                          onSelected: (val) => setState(() => transmission = val),
+                          onSelected: (val) =>
+                              setState(() => transmission = val),
                         ),
                         CommonTextField1(
                           lable: 'Name',
@@ -410,7 +415,11 @@ class _CarsAdState extends State<CarsAd> {
                           ],
                           color: textColor,
                           keyboardType: TextInputType.phone,
-                          prefixIcon: Icon(Icons.call, color: textColor, size: 16),
+                          prefixIcon: Icon(
+                            Icons.call,
+                            color: textColor,
+                            size: 16,
+                          ),
                         ),
                         CommonTextField1(
                           lable: 'Address',
@@ -419,14 +428,19 @@ class _CarsAdState extends State<CarsAd> {
                           color: textColor,
                         ),
                         if (widget.editId == null ||
-                            widget.editId.replaceAll('"', '').trim().isEmpty) ...[
+                            widget.editId
+                                .replaceAll('"', '')
+                                .trim()
+                                .isEmpty) ...[
                           CommonTextField1(
                             lable: 'Plan',
                             isRead: true,
                             hint: 'Select Plan',
                             controller: planController,
                             color: textColor,
-                            validator: (v) => (v == null || v.trim().isEmpty && !isEligibleForFree)
+                            validator: (v) =>
+                                (v == null ||
+                                    v.trim().isEmpty)
                                 ? 'Plan is Required'
                                 : null,
                             onTap: () {
@@ -437,7 +451,9 @@ class _CarsAdState extends State<CarsAd> {
                                 context: context,
                                 controller: planController,
                                 onSelectPlan: (selectedPlan) {
-                                  print('Selected plan: ${selectedPlan.planName}');
+                                  print(
+                                    'Selected plan: ${selectedPlan.planName}',
+                                  );
                                   planId = selectedPlan.planId;
                                   packageId = selectedPlan.packageId;
                                 },
@@ -451,93 +467,101 @@ class _CarsAdState extends State<CarsAd> {
                     ),
                   ),
                 ),
-            bottomNavigationBar: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-                child: FutureBuilder<bool>(
-                  future: AuthService.isEligibleForAd,
-                  builder: (context, asyncSnapshot) {
-                    final isEligible = asyncSnapshot.data ?? false;
-
-                    return BlocConsumer<MarkAsListingCubit, MarkAsListingState>(
-                      listener: (context, updateState) {
-                        if (updateState is MarkAsListingSuccess ||
-                            updateState is MarkAsListingUpdateSuccess) {
-                          context.pushReplacement("/successfully");
-                        } else if (updateState is MarkAsListingFailure) {
-                          CustomSnackBar1.show(context, updateState.error);
-                        }
-                      },
-                      builder: (context, updateState) {
-                        return BlocConsumer<CarsAdCubit, CarsAdStates>(
-                          listener: (context, state) {
-                            if (state is CarsAdSuccess) {
-                              context.pushReplacement("/successfully");
-                            } else if (state is CarsAdFailure) {
-                              CustomSnackBar1.show(context, state.error);
-                            }
-                          },
-                          builder: (context, state) {
-                            return CustomAppButton1(
-                              isLoading: state is CarsAdLoading ||
-                                  updateState is MarkAsListingUpdateLoading,
-                              text: 'Submit Ad',
-                              onPlusTap: () {
-                                if (!isEligible) {
-                                  if (_formKey.currentState?.validate() ?? false) {
-                                    final Map<String, dynamic> data = {
-                                      "title": titleController.text,
-                                      "brand": brandController.text,
-                                      "description": descriptionController.text,
-                                      "sub_category_id": widget.subCatId,
-                                      "category_id": widget.catId,
-                                      "location": locationController.text,
-                                      "mobile_number": phoneController.text,
-                                      "price": priceController.text,
-                                      "full_name": nameController.text,
-                                      "state_id": selectedStateId,
-                                      "city_id": selectedCityId,
-                                      "year_of_manufacturing":
-                                      yearOfManufacturingController.text,
-                                      "kms_run": kmsController.text,
-                                      "ownership": ownershipType,
-                                      "fuel_type": fuelType,
-                                      "transmission": transmission,
-                                    };
-
-                                    final editId = widget.editId.replaceAll('"', '').trim();
-                                    if (editId.isEmpty) {
-                                      data["plan_id"] = planId;
-                                      data["package_id"] = packageId;
-                                    }
-
-                                    if (_images.isNotEmpty) {
-                                      data["images"] =
-                                          _images.map((file) => file.path).toList();
-                                    }
-
-                                    if (editId.isNotEmpty) {
-                                      context.read<MarkAsListingCubit>().markAsUpdate(editId, data);
-                                    } else {
-                                      context.read<CarsAdCubit>().postCarsAd(data);
-                                    }
+          bottomNavigationBar: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+              child: FutureBuilder(
+                future: Future.wait([AuthService.isNewUser]),
+                builder: (context, asyncSnapshot) {
+                  final isNewUser = asyncSnapshot.data?[0] ?? false;
+                  return BlocConsumer<MarkAsListingCubit, MarkAsListingState>(
+                    listener: (context, updateState) {
+                      if (updateState is MarkAsListingSuccess ||
+                          updateState is MarkAsListingUpdateSuccess) {
+                        context.pushReplacement("/successfully");
+                      } else if (updateState is MarkAsListingFailure) {
+                        CustomSnackBar1.show(context, updateState.error);
+                      }
+                    },
+                    builder: (context, updateState) {
+                      return BlocConsumer<CarsAdCubit, CarsAdStates>(
+                        listener: (context, state) {
+                          if (state is CarsAdSuccess) {
+                            context.pushReplacement("/successfully");
+                          } else if (state is CarsAdFailure) {
+                            CustomSnackBar1.show(context, state.error);
+                          }
+                        },
+                        builder: (context, state) {
+                          return CustomAppButton1(
+                            isLoading:
+                                state is CarsAdLoading ||
+                                updateState is MarkAsListingUpdateLoading,
+                            text: 'Submit Ad',
+                            onPlusTap: isNewUser
+                                ? () {
+                                    context.push('/register?from=ad');
                                   }
-                                } else {
-                                  context.push("/plans");
-                                }
-                              },
-                            );
-                          },
-                        );
-                      },
-                    );
-                  },
-                ),
-              ),
-            )
+                                : () {
+                                    if (_formKey.currentState?.validate() ??
+                                        false) {
+                                      final Map<String, dynamic> data = {
+                                        "title": titleController.text,
+                                        "brand": brandController.text,
+                                        "description":
+                                            descriptionController.text,
+                                        "sub_category_id": widget.subCatId,
+                                        "category_id": widget.catId,
+                                        "location": locationController.text,
+                                        "mobile_number": phoneController.text,
+                                        "price": priceController.text,
+                                        "full_name": nameController.text,
+                                        "state_id": selectedStateId,
+                                        "city_id": selectedCityId,
+                                        "year_of_manufacturing":
+                                            yearOfManufacturingController.text,
+                                        "kms_run": kmsController.text,
+                                        "ownership": ownershipType,
+                                        "fuel_type": fuelType,
+                                        "transmission": transmission,
+                                      };
 
+                                      final editId = widget.editId
+                                          .replaceAll('"', '')
+                                          .trim();
+                                      if (editId.isEmpty) {
+                                        data["plan_id"] = planId;
+                                        data["package_id"] = packageId;
+                                      }
+
+                                      if (_images.isNotEmpty) {
+                                        data["images"] = _images
+                                            .map((file) => file.path)
+                                            .toList();
+                                      }
+
+                                      if (editId.isNotEmpty) {
+                                        context
+                                            .read<MarkAsListingCubit>()
+                                            .markAsUpdate(editId, data);
+                                      } else {
+                                        context.read<CarsAdCubit>().postCarsAd(
+                                          data,
+                                        );
+                                      }
+                                    }
+                                  },
+                          );
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
         );
-      }
+      },
     );
   }
 }
