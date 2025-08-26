@@ -272,7 +272,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             color: isDarkMode
                                                 ? Colors.white
                                                 : Colors.black87,
-                                            fontSize: 14,
+                                            fontSize: 13,
                                           ),
                                     ),
                                   ],
@@ -364,7 +364,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             color: isDarkMode
                                                 ? Colors.white
                                                 : Colors.black87,
-                                            fontSize: 14,
+                                            fontSize: 13,
                                           ),
                                     ),
 

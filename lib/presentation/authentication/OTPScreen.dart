@@ -163,7 +163,7 @@ class _OtpscreenState extends State<Otpscreen> {
                           // Glass outer card
                           Container(
                             width: double.infinity,
-                            padding: const EdgeInsets.all(18),
+                            padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
                               color: Colors.white.withOpacity(
                                 isDark ? 0.06 : 0.12,
@@ -187,7 +187,7 @@ class _OtpscreenState extends State<Otpscreen> {
                                 // Solid inner card
                                 Container(
                                   width: double.infinity,
-                                  padding: const EdgeInsets.all(18),
+                                  padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(
                                     color: cardColor,
                                     borderRadius: BorderRadius.circular(18),
@@ -284,10 +284,9 @@ class _OtpscreenState extends State<Otpscreen> {
                                           ),
                                           fieldHeight: 40,
                                           fieldWidth: 40,
-                                          fieldOuterPadding:
-                                              const EdgeInsets.symmetric(
-                                                horizontal: 4,
-                                              ),
+                                          fieldOuterPadding: EdgeInsets.only(
+                                            right: 2,
+                                          ),
                                           activeFillColor: isDark
                                               ? const Color(0xFF131A22)
                                               : Colors.white,

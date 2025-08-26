@@ -32,10 +32,11 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   void initState() {
     super.initState();
+    context.read<ProductsCubit2>().getProducts(search: "");
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
           _scrollController.position.maxScrollExtent - 200) {
-        context.read<ProductsCubit>().getMoreProducts("");
+        context.read<ProductsCubit2>().getMoreProducts("");
       }
     });
     searchController.addListener(() {
@@ -108,6 +109,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 style: AppTextStyles.bodyLarge(textColor),
                 decoration: InputDecoration(
                   hintText: "Search for products...",
+                  hintStyle: AppTextStyles.bodyLarge(textColor),
                   prefixIcon: Icon(Icons.search),
                   border: OutlineInputBorder(),
                 ),

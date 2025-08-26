@@ -112,14 +112,6 @@ class _LoginscreenState extends State<Loginscreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // Label
-                                Text(
-                                  "Mobile Number",
-                                  style: AppTextStyles.labelLarge(textColor)
-                                      .copyWith(fontWeight: FontWeight.w700),
-                                ),
-                                const SizedBox(height: 8),
-
                                 // Phone field
                                 CommonTextField1(
                                   lable: "Mobile Number",
