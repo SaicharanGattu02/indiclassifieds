@@ -559,11 +559,11 @@ class _MobileAdState extends State<MobileAd> {
                                 }
 
                                 // Check for plan selection (only for new ads, not edits)
-                                if ((widget.editId == null || widget.editId.replaceAll('"', '').trim().isEmpty) &&
-                                    (planId == null || packageId == null)) {
-                                  CustomSnackBar1.show(context, "Please select a plan");
-                                  isValid = false;
-                                }
+                                // if ((widget.editId == null || widget.editId.replaceAll('"', '').trim().isEmpty) &&
+                                //     (planId == null || packageId == null)) {
+                                //   CustomSnackBar1.show(context, "Please select a plan");
+                                //   isValid = false;
+                                // }
 
                                 // Check for images (if not eligible for free plan)
                                 if (_images.isEmpty &&

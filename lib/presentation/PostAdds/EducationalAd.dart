@@ -556,15 +556,15 @@ class _EducationalAdState extends State<EducationalAd> {
                                 }
 
                                 // Validate plan selection for new ads
-                                if ((widget.editId == null ||
-                                    widget.editId.replaceAll('"', '').trim().isEmpty) &&
-                                    (planId == null || packageId == null)) {
-                                  CustomSnackBar1.show(
-                                    context,
-                                    "Please select a plan",
-                                  );
-                                  isValid = false;
-                                }
+                                // if ((widget.editId == null ||
+                                //     widget.editId.replaceAll('"', '').trim().isEmpty) &&
+                                //     (planId == null || packageId == null)) {
+                                //   CustomSnackBar1.show(
+                                //     context,
+                                //     "Please select a plan",
+                                //   );
+                                //   isValid = false;
+                                // }
 
                                 // Validate city
                                 if (selectedCityId == null) {

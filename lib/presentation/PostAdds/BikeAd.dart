@@ -637,19 +637,19 @@ class _BikeAdState extends State<BikeAd> {
                                       } else {
                                         setState(() => _showimagesError = false);
                                       }
-                                      if ((widget.editId == null ||
-                                              widget.editId
-                                                  .replaceAll('"', '')
-                                                  .trim()
-                                                  .isEmpty) &&
-                                          (planId == null ||
-                                              packageId == null)) {
-                                        CustomSnackBar1.show(
-                                          context,
-                                          "Please select a plan",
-                                        );
-                                        isValid = false;
-                                      }
+                                      // if ((widget.editId == null ||
+                                      //         widget.editId
+                                      //             .replaceAll('"', '')
+                                      //             .trim()
+                                      //             .isEmpty) &&
+                                      //     (planId == null ||
+                                      //         packageId == null)) {
+                                      //   CustomSnackBar1.show(
+                                      //     context,
+                                      //     "Please select a plan",
+                                      //   );
+                                      //   isValid = false;
+                                      // }
                                       if (selectedCityId == null) {
                                         setState(() => _showCityError = true);
                                         isValid = false;

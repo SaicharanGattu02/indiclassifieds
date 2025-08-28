@@ -501,19 +501,19 @@ class _JobsAdState extends State<JobsAd> {
                                         );
                                         isValid = false;
                                       }
-                                      if ((widget.editId == null ||
-                                              widget.editId
-                                                  .replaceAll('"', '')
-                                                  .trim()
-                                                  .isEmpty) &&
-                                          (planId == null ||
-                                              packageId == null)) {
-                                        CustomSnackBar1.show(
-                                          context,
-                                          "Please select a plan",
-                                        );
-                                        isValid = false;
-                                      }
+                                      // if ((widget.editId == null ||
+                                      //         widget.editId
+                                      //             .replaceAll('"', '')
+                                      //             .trim()
+                                      //             .isEmpty) &&
+                                      //     (planId == null ||
+                                      //         packageId == null)) {
+                                      //   CustomSnackBar1.show(
+                                      //     context,
+                                      //     "Please select a plan",
+                                      //   );
+                                      //   isValid = false;
+                                      // }
                                       if (selectedCityId == null) {
                                         setState(() => _showCityError = true);
                                         isValid = false;

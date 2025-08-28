@@ -561,11 +561,11 @@ class _PetAdScreenState extends State<PetAdScreen> {
                                 }
 
 
-                                if ((widget.editId == null || widget.editId.replaceAll('"', '').trim().isEmpty) &&
-                                    (planId == null || packageId == null)) {
-                                  errorMessages.add("Please select a plan");
-                                  isValid = false;
-                                }
+                                // if ((widget.editId == null || widget.editId.replaceAll('"', '').trim().isEmpty) &&
+                                //     (planId == null || packageId == null)) {
+                                //   errorMessages.add("Please select a plan");
+                                //   isValid = false;
+                                // }
 
                                 if (_images.isEmpty &&
                                     (widget.editId == null ||
