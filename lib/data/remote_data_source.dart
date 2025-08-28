@@ -653,15 +653,16 @@ class RemoteDataSourceImpl implements RemoteDataSource {
   @override
   Future<AdSuccessModel?> postCarsAd(Map<String, dynamic> data) async {
     final formData = await buildFormData(data);
+    AppLogger.log(' cars :${formData}');
     try {
       Response response = await ApiClient.post(
         "${APIEndpointUrls.post_cars_ad}",
         data: formData,
       );
-      AppLogger.log('get CarsAd :${response.data}');
+      AppLogger.log(' CarsAd :${response.data}');
       return AdSuccessModel.fromJson(response.data);
     } catch (e) {
-      AppLogger.error('get CarsAd :: $e');
+      AppLogger.error(' CarsAd :: $e');
       return null;
     }
   }
@@ -669,6 +670,7 @@ class RemoteDataSourceImpl implements RemoteDataSource {
   @override
   Future<AdSuccessModel?> postBikeAd(Map<String, dynamic> data) async {
     final formData = await buildFormData(data);
+    AppLogger.log(' AstrologyAd formData :${formData}');
     try {
       Response response = await ApiClient.post(
         "${APIEndpointUrls.post_bikes_ad}",
@@ -752,15 +754,16 @@ class RemoteDataSourceImpl implements RemoteDataSource {
   @override
   Future<AdSuccessModel?> postAstrologyAd(Map<String, dynamic> data) async {
     final formData = await buildFormData(data);
+    AppLogger.log(' AstrologyAd formData :${formData}');
     try {
       Response response = await ApiClient.post(
         "${APIEndpointUrls.post_astrology_ad}",
         data: formData,
       );
-      AppLogger.log('get AstrologyAd :${response.data}');
+      AppLogger.log('AstrologyAd :${response.data}');
       return AdSuccessModel.fromJson(response.data);
     } catch (e) {
-      AppLogger.error('get AstrologyAd :: $e');
+      AppLogger.error(' AstrologyAd :: $e');
       return null;
     }
   }

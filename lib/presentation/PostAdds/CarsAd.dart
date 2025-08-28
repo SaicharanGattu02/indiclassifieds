@@ -78,6 +78,9 @@ class _CarsAdState extends State<CarsAd> {
   String? transmission;
   int? planId;
   int? packageId;
+  bool _showFuelTypeError = false;
+  bool _showOwnershipTypeError = false;
+  bool _showTransmissionError = false;
 
   bool isLoading = true;
   List<ImageData> _imageDataList = [];
@@ -154,12 +157,6 @@ class _CarsAdState extends State<CarsAd> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         CommonTextField1(
-                          isRead: true,
-                          lable: 'Brand',
-                          controller: brandController,
-                          color: textColor,
-                        ),
-                        CommonTextField1(
                           lable: ' Add Title',
                           hint: 'Enter Title',
                           controller: titleController,
@@ -168,6 +165,13 @@ class _CarsAdState extends State<CarsAd> {
                               ? 'Required title'
                               : null,
                         ),
+                        CommonTextField1(
+                          isRead: true,
+                          lable: 'Brand',
+                          controller: brandController,
+                          color: textColor,
+                        ),
+
                         CommonTextField1(
                           lable: 'Year of Manufacturing',
                           hint: 'Enter Year of Manufacturing',
@@ -185,7 +189,7 @@ class _CarsAdState extends State<CarsAd> {
                           keyboardType: TextInputType.number,
                           color: textColor,
                           validator: (v) => (v == null || v.trim().isEmpty)
-                              ? 'Memory ( RAM) required'
+                              ? 'KMs Run is required'
                               : null,
                         ),
                         CommonTextField1(
@@ -255,9 +259,6 @@ class _CarsAdState extends State<CarsAd> {
                                 color: textColor,
                                 size: 16,
                               ),
-                              validator: (v) => (v == null || v.trim().isEmpty)
-                                  ? 'State required'
-                                  : null,
                             ),
                           ),
                         ),
@@ -311,9 +312,6 @@ class _CarsAdState extends State<CarsAd> {
                                 color: textColor,
                                 size: 16,
                               ),
-                              validator: (v) => (v == null || v.trim().isEmpty)
-                                  ? 'City required'
-                                  : null,
                             ),
                           ),
                         ),
@@ -357,6 +355,7 @@ class _CarsAdState extends State<CarsAd> {
                         ChipSelector(
                           initialValue: fuelType,
                           title: "Fuel Type",
+                          showError: _showFuelTypeError,
                           options: [
                             {"label": "Petrol", "value": "petrol"},
                             {"label": "Diesel", "value": "diesel"},
@@ -370,6 +369,7 @@ class _CarsAdState extends State<CarsAd> {
                         ChipSelector(
                           initialValue: ownershipType,
                           title: "Ownership Type",
+                          showError: _showOwnershipTypeError,
                           options: [
                             {"label": "1st Owner", "value": "1st-owner"},
                             {"label": "2nd Owner", "value": "2nd-owner"},
@@ -387,6 +387,7 @@ class _CarsAdState extends State<CarsAd> {
                         ChipSelector(
                           initialValue: transmission,
                           title: "Transmission",
+                          showError: _showTransmissionError,
                           options: [
                             {"label": "Manual", "value": "manual"},
                             {"label": "Automatic", "value": "automatic"},
@@ -404,6 +405,9 @@ class _CarsAdState extends State<CarsAd> {
                             color: textColor,
                             size: 16,
                           ),
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Name required'
+                              : null,
                         ),
                         CommonTextField1(
                           lable: 'Phone Number',
@@ -420,12 +424,18 @@ class _CarsAdState extends State<CarsAd> {
                             color: textColor,
                             size: 16,
                           ),
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Phone required'
+                              : null,
                         ),
                         CommonTextField1(
                           lable: 'Address',
                           hint: 'Enter Address',
                           controller: locationController,
                           color: textColor,
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Required location'
+                              : null,
                         ),
                         if (widget.editId == null ||
                             widget.editId
@@ -438,9 +448,7 @@ class _CarsAdState extends State<CarsAd> {
                             hint: 'Select Plan',
                             controller: planController,
                             color: textColor,
-                            validator: (v) =>
-                                (v == null ||
-                                    v.trim().isEmpty)
+                            validator: (v) => (v == null || v.trim().isEmpty)
                                 ? 'Plan is Required'
                                 : null,
                             onTap: () {
@@ -505,49 +513,137 @@ class _CarsAdState extends State<CarsAd> {
                                 : () {
                                     if (_formKey.currentState?.validate() ??
                                         false) {
-                                      final Map<String, dynamic> data = {
-                                        "title": titleController.text,
-                                        "brand": brandController.text,
-                                        "description":
-                                            descriptionController.text,
-                                        "sub_category_id": widget.subCatId,
-                                        "category_id": widget.catId,
-                                        "location": locationController.text,
-                                        "mobile_number": phoneController.text,
-                                        "price": priceController.text,
-                                        "full_name": nameController.text,
-                                        "state_id": selectedStateId,
-                                        "city_id": selectedCityId,
-                                        "year_of_manufacturing":
-                                            yearOfManufacturingController.text,
-                                        "kms_run": kmsController.text,
-                                        "ownership": ownershipType,
-                                        "fuel_type": fuelType,
-                                        "transmission": transmission,
-                                      };
-
-                                      final editId = widget.editId
-                                          .replaceAll('"', '')
-                                          .trim();
-                                      if (editId.isEmpty) {
-                                        data["plan_id"] = planId;
-                                        data["package_id"] = packageId;
-                                      }
-
-                                      if (_images.isNotEmpty) {
-                                        data["images"] = _images
-                                            .map((file) => file.path)
-                                            .toList();
-                                      }
-
-                                      if (editId.isNotEmpty) {
-                                        context
-                                            .read<MarkAsListingCubit>()
-                                            .markAsUpdate(editId, data);
+                                      bool isValid = true;
+                                      if (selectedStateId == null) {
+                                        setState(() => _showStateError = true);
+                                        isValid = false;
                                       } else {
-                                        context.read<CarsAdCubit>().postCarsAd(
-                                          data,
+                                        setState(() => _showStateError = false);
+                                      }
+                                      if (locationController.text
+                                          .trim()
+                                          .isEmpty) {
+                                        CustomSnackBar1.show(
+                                          context,
+                                          "Please enter location",
                                         );
+                                        isValid = false;
+                                      }
+                                      if ((widget.editId == null ||
+                                              widget.editId
+                                                  .replaceAll('"', '')
+                                                  .trim()
+                                                  .isEmpty) &&
+                                          (planId == null ||
+                                              packageId == null)) {
+                                        CustomSnackBar1.show(
+                                          context,
+                                          "Please select a plan",
+                                        );
+                                        isValid = false;
+                                      }
+                                      if (selectedCityId == null) {
+                                        setState(() => _showCityError = true);
+                                        isValid = false;
+                                      } else {
+                                        setState(() => _showCityError = false);
+                                      }
+                                      if (_images.isEmpty &&
+                                          (widget.editId == null ||
+                                              widget.editId
+                                                      .replaceAll('"', '')
+                                                      .trim()
+                                                      .isEmpty &&
+                                                  !isEligibleForFree)) {
+                                        setState(() => _showimagesError = true);
+                                        isValid = false;
+                                      } else {
+                                        setState(
+                                          () => _showimagesError = false,
+                                        );
+                                      }
+
+                                      if (fuelType == null ||
+                                          fuelType!.isEmpty) {
+                                        setState(
+                                          () => _showFuelTypeError = true,
+                                        );
+                                        isValid = false;
+                                      } else {
+                                        setState(
+                                          () => _showFuelTypeError = false,
+                                        );
+                                      }
+
+                                      if (ownershipType == null ||
+                                          ownershipType!.isEmpty) {
+                                        setState(
+                                          () => _showOwnershipTypeError = true,
+                                        );
+                                        isValid = false;
+                                      } else {
+                                        setState(
+                                          () => _showOwnershipTypeError = false,
+                                        );
+                                      }
+                                      if (transmission == null ||
+                                          transmission!.isEmpty) {
+                                        setState(
+                                          () => _showTransmissionError = true,
+                                        );
+                                        isValid = false;
+                                      } else {
+                                        setState(
+                                          () => _showTransmissionError = false,
+                                        );
+                                      }
+
+                                      if (isValid) {
+                                        final Map<String, dynamic> data = {
+                                          "title": titleController.text,
+                                          "brand": brandController.text,
+                                          "description":
+                                              descriptionController.text,
+                                          "sub_category_id": widget.subCatId,
+                                          "category_id": widget.catId,
+                                          "location": locationController.text,
+                                          "mobile_number": phoneController.text,
+                                          "price": priceController.text,
+                                          "full_name": nameController.text,
+                                          "state_id": selectedStateId,
+                                          "city_id": selectedCityId,
+                                          "year_of_manufacturing":
+                                              yearOfManufacturingController
+                                                  .text,
+                                          "kms_run": kmsController.text,
+                                          "ownership": ownershipType,
+                                          "fuel_type": fuelType,
+                                          "transmission": transmission,
+                                        };
+
+                                        final editId = widget.editId
+                                            .replaceAll('"', '')
+                                            .trim();
+                                        if (editId.isEmpty) {
+                                          data["plan_id"] = planId;
+                                          data["package_id"] = packageId;
+                                        }
+
+                                        if (_images.isNotEmpty) {
+                                          data["images"] = _images
+                                              .map((file) => file.path)
+                                              .toList();
+                                        }
+
+                                        if (editId.isNotEmpty) {
+                                          context
+                                              .read<MarkAsListingCubit>()
+                                              .markAsUpdate(editId, data);
+                                        } else {
+                                          context
+                                              .read<CarsAdCubit>()
+                                              .postCarsAd(data);
+                                        }
                                       }
                                     }
                                   },

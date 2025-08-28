@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,7 +20,6 @@ import '../../data/remote_data_source.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../utils/AppLogger.dart';
 import '../../utils/ImagePickerHelper.dart';
-
 import '../../utils/planhelper.dart';
 import '../../widgets/CommonLoader.dart';
 import '../../widgets/CommonTextField.dart';
@@ -56,6 +54,8 @@ class _BikeAdState extends State<BikeAd> {
   bool _showStateError = false;
   bool _showCityError = false;
   bool _showimagesError = false;
+  bool _showFuelTypeError = false;
+  bool _showOwnershipTypeError = false;
   final descriptionController = TextEditingController();
   final brandController = TextEditingController();
   final locationController = TextEditingController();
@@ -180,7 +180,7 @@ class _BikeAdState extends State<BikeAd> {
                           keyboardType: TextInputType.number,
                           color: textColor,
                           validator: (v) => (v == null || v.trim().isEmpty)
-                              ? 'Memory ( RAM) required'
+                              ? 'KMs Run is required'
                               : null,
                         ),
                         CommonTextField1(
@@ -250,9 +250,6 @@ class _BikeAdState extends State<BikeAd> {
                                 color: textColor,
                                 size: 16,
                               ),
-                              validator: (v) => (v == null || v.trim().isEmpty)
-                                  ? 'State required'
-                                  : null,
                             ),
                           ),
                         ),
@@ -306,9 +303,6 @@ class _BikeAdState extends State<BikeAd> {
                                 color: textColor,
                                 size: 16,
                               ),
-                              validator: (v) => (v == null || v.trim().isEmpty)
-                                  ? 'City required'
-                                  : null,
                             ),
                           ),
                         ),
@@ -357,9 +351,13 @@ class _BikeAdState extends State<BikeAd> {
                             {"label": "Electric", "value": "electric"},
                           ],
                           initialValue: fuelType,
-                          onSelected: (val) => setState(() => fuelType = val),
+                          showError: _showFuelTypeError,
+                          onSelected: (val) => setState(() {
+                            fuelType = val;
+                            _showFuelTypeError = false;
+                          }),
                         ),
-                        SizedBox(height: 12),
+                        const SizedBox(height: 12),
                         ChipSelector(
                           title: "Ownership Type",
                           options: [
@@ -373,8 +371,11 @@ class _BikeAdState extends State<BikeAd> {
                             },
                           ],
                           initialValue: ownershipType,
-                          onSelected: (val) =>
-                              setState(() => ownershipType = val),
+                          showError: _showOwnershipTypeError,
+                          onSelected: (val) => setState(() {
+                            ownershipType = val;
+                            _showOwnershipTypeError = false;
+                          }),
                         ),
                         CommonTextField1(
                           lable: 'Name',
@@ -386,6 +387,9 @@ class _BikeAdState extends State<BikeAd> {
                             color: textColor,
                             size: 16,
                           ),
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Name required'
+                              : null,
                         ),
                         CommonTextField1(
                           lable: 'Phone Number',
@@ -402,15 +406,24 @@ class _BikeAdState extends State<BikeAd> {
                             color: textColor,
                             size: 16,
                           ),
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Phone required'
+                              : null,
                         ),
                         CommonTextField1(
                           lable: 'Address',
                           hint: 'Enter Address',
                           controller: locationController,
                           color: textColor,
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Required location'
+                              : null,
                         ),
                         if (widget.editId == null ||
-                            widget.editId.replaceAll('"', '').trim().isEmpty) ...[
+                            widget.editId
+                                .replaceAll('"', '')
+                                .trim()
+                                .isEmpty) ...[
                           CommonTextField1(
                             lable: 'Plan',
                             isRead: true,
@@ -448,14 +461,8 @@ class _BikeAdState extends State<BikeAd> {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
               child: FutureBuilder(
-                future: Future.wait([
-                  AuthService.isNewUser,
-                ]),
+                future: Future.wait([AuthService.isNewUser]),
                 builder: (context, asyncSnapshot) {
-                  if (asyncSnapshot.connectionState ==
-                      ConnectionState.waiting) {
-                    return const SizedBox();
-                  }
                   final isNewUser = asyncSnapshot.data?[0] ?? false;
                   final editId = widget.editId.replaceAll('"', '').trim();
                   return BlocConsumer<MarkAsListingCubit, MarkAsListingState>(
@@ -484,57 +491,134 @@ class _BikeAdState extends State<BikeAd> {
                             text: 'Submit Ad',
                             onPlusTap: isNewUser
                                 ? () {
-                              context.push(
-                                '/register?from=ad',
-                              );
+                                    context.push('/register?from=ad');
                                   }
-                                :() {
+                                : () {
                                     if (_formKey.currentState?.validate() ??
                                         false) {
-                                      final Map<String, dynamic> data = {
-                                        "title": titleController.text,
-                                        "brand": brandController.text,
-                                        "description":
-                                            descriptionController.text,
-                                        "sub_category_id": widget.subCatId,
-                                        "category_id": widget.catId,
-                                        "location": locationController.text,
-                                        "mobile_number": phoneController.text,
-                                        "price": priceController.text,
-                                        "full_name": nameController.text,
-                                        "state_id": selectedStateId,
-                                        "city_id": selectedCityId,
-                                        "year_of_manufacturing":
-                                            yearOfManufacturingController.text,
-                                        "kms_run": kmsController.text,
-                                        "ownership": ownershipType,
-                                        "fuel_type": fuelType,
-                                      };
-
-                                      if (widget.editId == null ||
-                                          widget.editId
-                                              .replaceAll('"', '')
-                                              .trim()
-                                              .isEmpty) {
-                                        data["plan_id"] = planId;
-                                        data["package_id"] = packageId;
-                                      }
-                                      if (_images.isNotEmpty) {
-                                        data["images"] = _images
-                                            .map((file) => file.path)
-                                            .toList();
-                                      }
-                                      if (widget.editId
-                                          .replaceAll('"', '')
-                                          .trim()
-                                          .isNotEmpty) {
-                                        context
-                                            .read<MarkAsListingCubit>()
-                                            .markAsUpdate(widget.editId, data);
+                                      bool isValid = true;
+                                      if (selectedStateId == null) {
+                                        setState(() => _showStateError = true);
+                                        isValid = false;
                                       } else {
-                                        context.read<BikesAdCubit>().postBikeAd(
-                                          data,
+                                        setState(() => _showStateError = false);
+                                      }
+                                      if (locationController.text
+                                          .trim()
+                                          .isEmpty) {
+                                        CustomSnackBar1.show(
+                                          context,
+                                          "Please enter location",
                                         );
+                                        isValid = false;
+                                      }
+                                      if ((widget.editId == null ||
+                                              widget.editId
+                                                  .replaceAll('"', '')
+                                                  .trim()
+                                                  .isEmpty) &&
+                                          (planId == null ||
+                                              packageId == null)) {
+                                        CustomSnackBar1.show(
+                                          context,
+                                          "Please select a plan",
+                                        );
+                                        isValid = false;
+                                      }
+                                      if (selectedCityId == null) {
+                                        setState(() => _showCityError = true);
+                                        isValid = false;
+                                      } else {
+                                        setState(() => _showCityError = false);
+                                      }
+                                      if (_images.isEmpty &&
+                                          (widget.editId == null ||
+                                              widget.editId
+                                                      .replaceAll('"', '')
+                                                      .trim()
+                                                      .isEmpty &&
+                                                  !isEligibleForFree)) {
+                                        setState(() => _showimagesError = true);
+                                        isValid = false;
+                                      } else {
+                                        setState(
+                                          () => _showimagesError = false,
+                                        );
+                                      }
+
+                                      if (fuelType == null ||
+                                          fuelType!.isEmpty) {
+                                        setState(
+                                          () => _showFuelTypeError = true,
+                                        );
+                                        isValid = false;
+                                      } else {
+                                        setState(
+                                          () => _showFuelTypeError = false,
+                                        );
+                                      }
+
+                                      if (ownershipType == null ||
+                                          ownershipType!.isEmpty) {
+                                        setState(
+                                          () => _showOwnershipTypeError = true,
+                                        );
+                                        isValid = false;
+                                      } else {
+                                        setState(
+                                          () => _showOwnershipTypeError = false,
+                                        );
+                                      }
+                                      if (isValid) {
+                                        final Map<String, dynamic> data = {
+                                          "title": titleController.text,
+                                          "brand": brandController.text,
+                                          "description":
+                                              descriptionController.text,
+                                          "sub_category_id": widget.subCatId,
+                                          "category_id": widget.catId,
+                                          "location": locationController.text,
+                                          "mobile_number": phoneController.text,
+                                          "price": priceController.text,
+                                          "full_name": nameController.text,
+                                          "state_id": selectedStateId,
+                                          "city_id": selectedCityId,
+                                          "year_of_manufacturing":
+                                              yearOfManufacturingController
+                                                  .text,
+                                          "kms_run": kmsController.text,
+                                          "ownership": ownershipType,
+                                          "fuel_type": fuelType,
+                                        };
+
+                                        if (widget.editId == null ||
+                                            widget.editId
+                                                .replaceAll('"', '')
+                                                .trim()
+                                                .isEmpty) {
+                                          data["plan_id"] = planId;
+                                          data["package_id"] = packageId;
+                                        }
+                                        if (_images.isNotEmpty) {
+                                          data["images"] = _images
+                                              .map((file) => file.path)
+                                              .toList();
+                                        }
+                                        if (widget.editId
+                                            .replaceAll('"', '')
+                                            .trim()
+                                            .isNotEmpty) {
+                                          context
+                                              .read<MarkAsListingCubit>()
+                                              .markAsUpdate(
+                                                widget.editId,
+                                                data,
+                                              );
+                                        } else {
+                                          context
+                                              .read<BikesAdCubit>()
+                                              .postBikeAd(data);
+                                        }
                                       }
                                     }
                                   },

@@ -74,6 +74,7 @@ class _CommercialVehicleAdState extends State<CommercialVehicleAd> {
   final planController = TextEditingController();
   int? planId;
   int? packageId;
+  bool _showVehicleNumberError = false;
 
   bool isLoading = true;
   List<ImageData> _imageDataList = [];
@@ -171,10 +172,25 @@ class _CommercialVehicleAdState extends State<CommercialVehicleAd> {
                           hint: 'Enter Vehicle Number',
                           controller: vehicleNumberController,
                           color: textColor,
-                          validator: (v) => (v == null || v.trim().isEmpty)
-                              ? 'Vehicle Number is required'
-                              : null,
                         ),
+                        if (_showVehicleNumberError) ...[
+                          Padding(
+                            padding: const EdgeInsets.only(top: 5),
+                            child: ShakeWidget(
+                              key: Key("vehicle_number_error"),
+                              duration: const Duration(milliseconds: 700),
+                              child: const Text(
+                                'Please Enter Vehicle Number',
+                                style: TextStyle(
+                                  fontFamily: 'roboto_serif',
+                                  fontSize: 12,
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
 
                         CommonTextField1(
                           lable: 'Description',
@@ -244,9 +260,6 @@ class _CommercialVehicleAdState extends State<CommercialVehicleAd> {
                                 color: textColor,
                                 size: 16,
                               ),
-                              validator: (v) => (v == null || v.trim().isEmpty)
-                                  ? 'State required'
-                                  : null,
                             ),
                           ),
                         ),
@@ -300,9 +313,6 @@ class _CommercialVehicleAdState extends State<CommercialVehicleAd> {
                                 color: textColor,
                                 size: 16,
                               ),
-                              validator: (v) => (v == null || v.trim().isEmpty)
-                                  ? 'City required'
-                                  : null,
                             ),
                           ),
                         ),
@@ -354,6 +364,9 @@ class _CommercialVehicleAdState extends State<CommercialVehicleAd> {
                             color: textColor,
                             size: 16,
                           ),
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Name required'
+                              : null,
                         ),
                         CommonTextField1(
                           lable: 'Phone Number',
@@ -370,12 +383,18 @@ class _CommercialVehicleAdState extends State<CommercialVehicleAd> {
                             color: textColor,
                             size: 16,
                           ),
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Phone required'
+                              : null,
                         ),
                         CommonTextField1(
                           lable: 'Address',
                           hint: 'Enter Address',
                           controller: locationController,
                           color: textColor,
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Required location'
+                              : null,
                         ),
                         if (widget.editId == null ||
                             widget.editId.replaceAll('"', '').trim().isEmpty &&
@@ -416,9 +435,7 @@ class _CommercialVehicleAdState extends State<CommercialVehicleAd> {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
               child: FutureBuilder(
-                future: Future.wait([
-                  AuthService.isNewUser,
-                ]),
+                future: Future.wait([AuthService.isNewUser]),
                 builder: (context, asyncSnapshot) {
                   final isNewUser = asyncSnapshot.data?[0] ?? false;
                   return BlocConsumer<MarkAsListingCubit, MarkAsListingState>(
@@ -450,9 +467,7 @@ class _CommercialVehicleAdState extends State<CommercialVehicleAd> {
                             text: 'Submit Ad',
                             onPlusTap: isNewUser
                                 ? () {
-                              context.push(
-                                '/register?from=ad',
-                              );
+                                    context.push('/register?from=ad');
                                   }
                                 : () {
                                     if (_images.isEmpty &&
@@ -468,46 +483,105 @@ class _CommercialVehicleAdState extends State<CommercialVehicleAd> {
 
                                     if (_formKey.currentState?.validate() ??
                                         false) {
-                                      final Map<String, dynamic> data = {
-                                        "title": titleController.text,
-                                        "brand": brandController.text,
-                                        "description":
-                                            descriptionController.text,
-                                        "sub_category_id": widget.subCatId,
-                                        "category_id": widget.catId,
-                                        "location": locationController.text,
-                                        "mobile_number": phoneController.text,
-                                        "price": priceController.text,
-                                        "full_name": nameController.text,
-                                        "state_id": selectedStateId,
-                                        "city_id": selectedCityId,
-                                        "vehicle_number":
-                                            vehicleNumberController.text,
-                                      };
-
-                                      final editId = widget.editId
-                                          .replaceAll('"', '')
-                                          .trim();
-
-                                      if (editId.isEmpty) {
-                                        data["plan_id"] = planId;
-                                        data["package_id"] = packageId;
-                                      }
-
-                                      if (_images.isNotEmpty) {
-                                        data["images"] = _images
-                                            .map((file) => file.path)
-                                            .toList();
-                                      }
-
-                                      if (editId.isNotEmpty) {
-                                        context
-                                            .read<MarkAsListingCubit>()
-                                            .markAsUpdate(editId, data);
+                                      bool isValid = true;
+                                      if (selectedStateId == null) {
+                                        setState(() => _showStateError = true);
+                                        isValid = false;
                                       } else {
-                                        context
-                                            .read<CommercialVehileAdCubit>()
-                                            .postCommercialVehicleAd(data);
+                                        setState(() => _showStateError = false);
+                                      }
+                                      if (locationController.text
+                                          .trim()
+                                          .isEmpty) {
+                                        CustomSnackBar1.show(
+                                          context,
+                                          "Please enter location",
+                                        );
+                                        isValid = false;
+                                      }
+                                      if ((widget.editId == null ||
+                                              widget.editId
+                                                  .replaceAll('"', '')
+                                                  .trim()
+                                                  .isEmpty) &&
+                                          (planId == null ||
+                                              packageId == null)) {
+                                        CustomSnackBar1.show(
+                                          context,
+                                          "Please select a plan",
+                                        );
+                                        isValid = false;
+                                      }
+                                      if (selectedCityId == null) {
+                                        setState(() => _showCityError = true);
+                                        isValid = false;
+                                      } else {
+                                        setState(() => _showCityError = false);
+                                      }
+                                      if (vehicleNumberController.text.trim().isEmpty) {
+                                        setState(() => _showVehicleNumberError = true);
+                                        isValid = false;
+                                      } else {
+                                        setState(() => _showVehicleNumberError = false);
+                                      }
+
+                                      if (_images.isEmpty &&
+                                          (widget.editId == null ||
+                                              widget.editId
+                                                      .replaceAll('"', '')
+                                                      .trim()
+                                                      .isEmpty &&
+                                                  !isEligibleForFree)) {
+                                        setState(() => _showimagesError = true);
+                                        isValid = false;
+                                      } else {
+                                        setState(
+                                          () => _showimagesError = false,
+                                        );
+                                      }
+
+                                      if (isValid) {
+                                        final Map<String, dynamic> data = {
+                                          "title": titleController.text,
+                                          "brand": brandController.text,
+                                          "description":
+                                              descriptionController.text,
+                                          "sub_category_id": widget.subCatId,
+                                          "category_id": widget.catId,
+                                          "location": locationController.text,
+                                          "mobile_number": phoneController.text,
+                                          "price": priceController.text,
+                                          "full_name": nameController.text,
+                                          "state_id": selectedStateId,
+                                          "city_id": selectedCityId,
+                                          "vehicle_number":
+                                              vehicleNumberController.text,
+                                        };
+
+                                        final editId = widget.editId
+                                            .replaceAll('"', '')
+                                            .trim();
+
+                                        if (editId.isEmpty) {
+                                          data["plan_id"] = planId;
+                                          data["package_id"] = packageId;
+                                        }
+
+                                        if (_images.isNotEmpty) {
+                                          data["images"] = _images
+                                              .map((file) => file.path)
+                                              .toList();
+                                        }
+
+                                        if (editId.isNotEmpty) {
+                                          context
+                                              .read<MarkAsListingCubit>()
+                                              .markAsUpdate(editId, data);
+                                        } else {
+                                          context
+                                              .read<CommercialVehileAdCubit>()
+                                              .postCommercialVehicleAd(data);
+                                        }
                                       }
                                     }
                                   },

@@ -1,13 +1,15 @@
-
 import 'package:flutter/material.dart';
 
+import '../Components/ShakeWidget.dart';
 import '../theme/ThemeHelper.dart';
+
 
 class ChipSelector extends StatefulWidget {
   final String title;
   final List<Map<String, String>> options;
   final Function(String) onSelected;
   final String? initialValue;
+  final bool showError; // New parameter for error state
 
   const ChipSelector({
     Key? key,
@@ -15,6 +17,7 @@ class ChipSelector extends StatefulWidget {
     required this.options,
     required this.onSelected,
     this.initialValue,
+    this.showError = false, // Default to false
   }) : super(key: key);
 
   @override
@@ -77,6 +80,24 @@ class _ChipSelectorState extends State<ChipSelector> {
             );
           }).toList(),
         ),
+        if (widget.showError) ...[
+          Padding(
+            padding: const EdgeInsets.only(top: 5),
+            child: ShakeWidget(
+              key: Key("${widget.title.toLowerCase().replaceAll(' ', '_')}_error_${DateTime.now().millisecondsSinceEpoch}"),
+              duration: const Duration(milliseconds: 700),
+              child: Text(
+                'Please select ${widget.title}',
+                style: const TextStyle(
+                  fontFamily: 'roboto_serif',
+                  fontSize: 12,
+                  color: Colors.red,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }

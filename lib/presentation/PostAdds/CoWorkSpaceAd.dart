@@ -93,7 +93,7 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
   int? selectedCityId;
 
   String? seatTypeOffered;
-
+  bool seatTypeError = false;
   List<File> _images = [];
   final int _maxImages = 6;
 
@@ -158,6 +158,21 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
     } else {
       setState(() => _showimagesError = false);
     }
+    if (areaSizeController.text.isEmpty) {
+      hasError = false;
+    } else {
+      setState(() => hasError = true);
+    }
+    if (deskCapacityController.text.isEmpty) {
+      hasError = false;
+    } else {
+      setState(() => hasError = true);
+    }
+    if (availableSeatsController.text.isEmpty) {
+      hasError = false;
+    } else {
+      setState(() => hasError = true);
+    }
 
     if (selectedStateId == null) {
       setState(() => _showStateError = true);
@@ -172,38 +187,45 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
     } else {
       setState(() => _showCityError = false);
     }
-
-    if (hasError) return;
-    final editId = widget.editId.replaceAll('"', '').trim();
-    final Map<String, dynamic> data = {
-      "title": titleController.text.trim(),
-      "description": descriptionController.text.trim(),
-      "sub_category_id": widget.subCatId,
-      "category_id": widget.catId,
-      "location": locationController.text.trim(),
-      "mobile_number": phoneController.text.trim(),
-      "email": emailController.text.trim(),
-      "price": priceController.text.trim(),
-      "full_name": nameController.text.trim(),
-      "state_id": selectedStateId,
-      "city_id": selectedCityId,
-      "area_size": "${areaSizeController.text.trim()} sqft",
-      "available_seats": availableSeatsController.text.trim(),
-      "desk_capacity": deskCapacityController.text.trim(),
-      "seat_type": seatTypeOffered,
-    };
-    if (editId.isEmpty) {
-      data["plan_id"] = planId;
-      data["package_id"] = packageId;
-    }
-
-    if (_images.isNotEmpty) {
-      data["images"] = _images.map((file) => file.path).toList();
-    }
-    if (editId.isNotEmpty) {
-      context.read<MarkAsListingCubit>().markAsUpdate(editId, data);
+    if (seatTypeOffered == null || seatTypeOffered!.isEmpty) {
+      setState(() => seatTypeError = true);
+      hasError = false;
     } else {
-      context.read<CoWorkingAdCubit>().postCoWorkingAd(data);
+      setState(() => seatTypeError = false);
+    }
+
+    if (hasError) {
+      final editId = widget.editId.replaceAll('"', '').trim();
+      final Map<String, dynamic> data = {
+        "title": titleController.text.trim(),
+        "description": descriptionController.text.trim(),
+        "sub_category_id": widget.subCatId,
+        "category_id": widget.catId,
+        "location": locationController.text.trim(),
+        "mobile_number": phoneController.text.trim(),
+        "email": emailController.text.trim(),
+        "price": priceController.text.trim(),
+        "full_name": nameController.text.trim(),
+        "state_id": selectedStateId,
+        "city_id": selectedCityId,
+        "area_size": "${areaSizeController.text.trim()} sqft",
+        "available_seats": availableSeatsController.text.trim(),
+        "desk_capacity": deskCapacityController.text.trim(),
+        "seat_type": seatTypeOffered,
+      };
+      if (editId.isEmpty) {
+        data["plan_id"] = planId;
+        data["package_id"] = packageId;
+      }
+
+      if (_images.isNotEmpty) {
+        data["images"] = _images.map((file) => file.path).toList();
+      }
+      if (editId.isNotEmpty) {
+        context.read<MarkAsListingCubit>().markAsUpdate(editId, data);
+      } else {
+        context.read<CoWorkingAdCubit>().postCoWorkingAd(data);
+      }
     }
   }
 
@@ -326,6 +348,7 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
                         const SizedBox(height: 12),
 
                         ChipSelector(
+                          showError: seatTypeError,
                           initialValue: seatTypeOffered,
                           title: "Seat Type Offered",
                           options: [
@@ -469,7 +492,10 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
                               : null,
                         ),
                         if (widget.editId == null ||
-                            widget.editId.replaceAll('"', '').trim().isEmpty) ...[
+                            widget.editId
+                                .replaceAll('"', '')
+                                .trim()
+                                .isEmpty) ...[
                           CommonTextField1(
                             lable: 'Plan',
                             isRead: true,
@@ -512,10 +538,10 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
                   AuthService.isNewUser,
                 ]),
                 builder: (context, asyncSnapshot) {
-                  if (asyncSnapshot.connectionState ==
-                      ConnectionState.waiting) {
-                    return const SizedBox();
-                  }
+                  // if (asyncSnapshot.connectionState ==
+                  //     ConnectionState.waiting) {
+                  //   return const SizedBox();
+                  // }
                   final isEligible = asyncSnapshot.data?[0] ?? false;
                   final isNewUser = asyncSnapshot.data?[1] ?? false;
                   AppLogger.info("isEligible: ${isEligible}");
@@ -546,11 +572,9 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
                             text: 'Submit Ad',
                             onPlusTap: isNewUser
                                 ? () {
-                              context.push(
-                                '/register?from=ad',
-                              );
+                                    context.push('/register?from=ad');
                                   }
-                                :() => _submitAd(context),
+                                : () => _submitAd(context),
                           );
                         },
                       );

@@ -223,9 +223,6 @@ class _JobsAdState extends State<JobsAd> {
                                 color: textColor,
                                 size: 16,
                               ),
-                              validator: (v) => (v == null || v.trim().isEmpty)
-                                  ? 'State required'
-                                  : null,
                             ),
                           ),
                         ),
@@ -278,9 +275,6 @@ class _JobsAdState extends State<JobsAd> {
                                 color: textColor,
                                 size: 16,
                               ),
-                              validator: (v) => (v == null || v.trim().isEmpty)
-                                  ? 'City required'
-                                  : null,
                             ),
                           ),
                         ),
@@ -322,26 +316,6 @@ class _JobsAdState extends State<JobsAd> {
                         ),
 
                         const SizedBox(height: 12),
-                        if (_showimagesError && _images.isEmpty) ...[
-                          Padding(
-                            padding: const EdgeInsets.only(top: 5),
-                            child: ShakeWidget(
-                              key: Key(
-                                "images_error_${DateTime.now().millisecondsSinceEpoch}",
-                              ),
-                              duration: const Duration(milliseconds: 700),
-                              child: const Text(
-                                'Please upload at least one image',
-                                style: TextStyle(
-                                  fontFamily: 'roboto_serif',
-                                  fontSize: 12,
-                                  color: Colors.red,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
                         CommonTextField1(
                           lable: 'Name',
                           hint: 'Enter name',
@@ -351,7 +325,9 @@ class _JobsAdState extends State<JobsAd> {
                             Icons.person,
                             color: textColor,
                             size: 16,
-                          ),
+                          ),validator: (v) => (v == null || v.trim().isEmpty)
+                            ? 'Name required'
+                            : null,
                         ),
                         CommonTextField1(
                           lable: 'Phone Number',
@@ -367,16 +343,23 @@ class _JobsAdState extends State<JobsAd> {
                             Icons.call,
                             color: textColor,
                             size: 16,
-                          ),
+                          ), validator: (v) => (v == null || v.trim().isEmpty)
+                            ? 'Phone required'
+                            : null,
                         ),
                         CommonTextField1(
                           lable: 'Address',
                           hint: 'Enter Address',
                           controller: locationController,
-                          color: textColor,
+                          color: textColor,validator: (v) => (v == null || v.trim().isEmpty)
+                            ? 'Required location'
+                            : null,
                         ),
                         if (widget.editId == null ||
-                            widget.editId.replaceAll('"', '').trim().isEmpty) ...[
+                            widget.editId
+                                .replaceAll('"', '')
+                                .trim()
+                                .isEmpty) ...[
                           CommonTextField1(
                             lable: 'Plan',
                             isRead: true,
@@ -413,17 +396,10 @@ class _JobsAdState extends State<JobsAd> {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
               child: FutureBuilder(
-                future: Future.wait([
-                  AuthService.isNewUser,
-                ]),
+                future: Future.wait([AuthService.isNewUser]),
                 builder: (context, asyncSnapshot) {
-                  if (asyncSnapshot.connectionState ==
-                      ConnectionState.waiting) {
-                    return const SizedBox();
-                  }
                   final isNewUser = asyncSnapshot.data?[0] ?? false;
                   final editId = widget.editId.replaceAll('"', '').trim();
-
                   return BlocConsumer<MarkAsListingCubit, MarkAsListingState>(
                     listener: (context, updateState) {
                       if (updateState is MarkAsListingSuccess ||
@@ -455,44 +431,101 @@ class _JobsAdState extends State<JobsAd> {
                                 : () {
                                     if (_formKey.currentState?.validate() ??
                                         false) {
-                                      final Map<String, dynamic> data = {
-                                        "title": titleController.text,
-                                        "brand": brandController.text,
-                                        "description":
-                                            descriptionController.text,
-                                        "sub_category_id": widget.subCatId,
-                                        "category_id": widget.catId,
-                                        "location": locationController.text,
-                                        "mobile_number": phoneController.text,
-                                        "price": priceController.text,
-                                        "full_name": nameController.text,
-                                        "state_id": selectedStateId,
-                                        "city_id": selectedCityId,
-                                        "company_name":
-                                            companyNameController.text,
-                                        "salary_range":
-                                            salaryRangeController.text,
-                                      };
-
-                                      if (editId.isEmpty) {
-                                        data["plan_id"] = planId;
-                                        data["package_id"] = packageId;
-                                      }
-
-                                      if (_images.isNotEmpty) {
-                                        data["images"] = _images
-                                            .map((file) => file.path)
-                                            .toList();
-                                      }
-
-                                      if (editId.isNotEmpty) {
-                                        context
-                                            .read<MarkAsListingCubit>()
-                                            .markAsUpdate(editId, data);
+                                      bool isValid = true;
+                                      if (selectedStateId == null) {
+                                        setState(() => _showStateError = true);
+                                        isValid = false;
                                       } else {
-                                        context.read<JobsAdCubit>().postjobsAd(
-                                          data,
+                                        setState(() => _showStateError = false);
+                                      }
+                                      if (locationController.text
+                                          .trim()
+                                          .isEmpty) {
+                                        CustomSnackBar1.show(
+                                          context,
+                                          "Please enter location",
                                         );
+                                        isValid = false;
+                                      }
+                                      if ((widget.editId == null ||
+                                              widget.editId
+                                                  .replaceAll('"', '')
+                                                  .trim()
+                                                  .isEmpty) &&
+                                          (planId == null ||
+                                              packageId == null)) {
+                                        CustomSnackBar1.show(
+                                          context,
+                                          "Please select a plan",
+                                        );
+                                        isValid = false;
+                                      }
+                                      if (selectedCityId == null) {
+                                        setState(() => _showCityError = true);
+                                        isValid = false;
+                                      } else {
+                                        setState(() => _showCityError = false);
+                                      }
+
+                                      if (_images.isEmpty &&
+                                          (widget.editId == null ||
+                                              widget.editId
+                                                      .replaceAll('"', '')
+                                                      .trim()
+                                                      .isEmpty &&
+                                                  !isEligibleForFree)) {
+                                        setState(() => _showimagesError = true);
+                                        isValid = false;
+                                      } else {
+                                        setState(
+                                          () => _showimagesError = false,
+                                        );
+                                      }
+                                      if (salaryRangeController.text.isEmpty) {
+                                        isValid = false;
+                                      } else {
+                                        isValid = true;
+                                      }
+
+                                      if (isValid) {
+                                        final Map<String, dynamic> data = {
+                                          "title": titleController.text,
+                                          "brand": brandController.text,
+                                          "description":
+                                              descriptionController.text,
+                                          "sub_category_id": widget.subCatId,
+                                          "category_id": widget.catId,
+                                          "location": locationController.text,
+                                          "mobile_number": phoneController.text,
+                                          "price": priceController.text,
+                                          "full_name": nameController.text,
+                                          "state_id": selectedStateId,
+                                          "city_id": selectedCityId,
+                                          "company_name":
+                                              companyNameController.text,
+                                          "salary_range":
+                                              salaryRangeController.text,
+                                        };
+
+                                        if (editId.isEmpty) {
+                                          data["plan_id"] = planId;
+                                          data["package_id"] = packageId;
+                                        }
+                                        if (_images.isNotEmpty) {
+                                          data["images"] = _images
+                                              .map((file) => file.path)
+                                              .toList();
+                                        }
+
+                                        if (editId.isNotEmpty) {
+                                          context
+                                              .read<MarkAsListingCubit>()
+                                              .markAsUpdate(editId, data);
+                                        } else {
+                                          context
+                                              .read<JobsAdCubit>()
+                                              .postjobsAd(data);
+                                        }
                                       }
                                     }
                                   },

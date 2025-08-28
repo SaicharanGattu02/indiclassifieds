@@ -67,7 +67,6 @@ class _AstrologyAdState extends State<AstrologyAd> {
   bool _showStateError = false;
   bool _showCityError = false;
   bool _showimagesError = false;
-
   int? selectedStateId;
   int? selectedCityId;
   int? planId;
@@ -144,36 +143,9 @@ class _AstrologyAdState extends State<AstrologyAd> {
     super.dispose();
   }
 
-  Future<void> _selectDate(BuildContext context) async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2024),
-      lastDate: DateTime(2035),
-    );
-    if (picked != null) {
-      setState(() {
-        dateController.text = "${picked.day}-${picked.month}-${picked.year}";
-      });
-    }
-  }
-
-  Future<void> _selectTime(BuildContext context) async {
-    final picked = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    );
-    if (picked != null) {
-      setState(() {
-        timeController.text = picked.format(context);
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final textColor = ThemeHelper.textColor(context);
-
     return FutureBuilder(
       future: AuthService.isEligibleForFree,
       builder: (context, asyncSnapshot) {
@@ -237,7 +209,6 @@ class _AstrologyAdState extends State<AstrologyAd> {
                             );
                           }).toList(),
                         ),
-
                         CommonTextField1(
                           lable: 'Price',
                           hint: 'Enter Price',
@@ -511,16 +482,22 @@ class _AstrologyAdState extends State<AstrologyAd> {
                                     if (_formKey.currentState?.validate() ??
                                         false) {
                                       bool isValid = true;
-
-                                      // Validate State
                                       if (selectedStateId == null) {
                                         setState(() => _showStateError = true);
                                         isValid = false;
                                       } else {
                                         setState(() => _showStateError = false);
                                       }
-
-                                      // Validate City
+                                      if (locationController.text.trim().isEmpty) {
+                                        CustomSnackBar1.show(context, "Please enter location");
+                                        isValid = false;
+                                      }
+                                      if ((widget.editId == null ||
+                                          widget.editId.replaceAll('"', '').trim().isEmpty) &&
+                                          (planId == null || packageId == null)) {
+                                        CustomSnackBar1.show(context, "Please select a plan");
+                                        isValid = false;
+                                      }
                                       if (selectedCityId == null) {
                                         setState(() => _showCityError = true);
                                         isValid = false;
@@ -528,7 +505,6 @@ class _AstrologyAdState extends State<AstrologyAd> {
                                         setState(() => _showCityError = false);
                                       }
 
-                                      // Validate Images
                                       if (_images.isEmpty &&
                                           (widget.editId == null ||
                                               widget.editId
@@ -580,16 +556,9 @@ class _AstrologyAdState extends State<AstrologyAd> {
                                             .replaceAll('"', '')
                                             .trim()
                                             .isNotEmpty) {
-                                          context
-                                              .read<MarkAsListingCubit>()
-                                              .markAsUpdate(
-                                                widget.editId,
-                                                data,
-                                              );
+                                          context.read<MarkAsListingCubit>().markAsUpdate(widget.editId, data,);
                                         } else {
-                                          context
-                                              .read<AstrologyAdCubit>()
-                                              .postAstrologyAd(data);
+                                          context.read<AstrologyAdCubit>().postAstrologyAd(data);
                                         }
                                       }
                                     }

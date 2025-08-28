@@ -246,8 +246,6 @@ class _CityRentalsAdState extends State<CityRentalsAd> {
                           ),
                         ),
                         if (_showStateError) _buildErrorText("Please Select State"),
-
-                        /// CITY FIELD
                         GestureDetector(
                           onTap: () async {
                             final selectedCity = await showModalBottomSheet(
@@ -418,77 +416,95 @@ class _CityRentalsAdState extends State<CityRentalsAd> {
                                     if (_formKey.currentState?.validate() ??
                                         false) {
                                       bool isValid = true;
-
                                       if (selectedStateId == null) {
                                         setState(() => _showStateError = true);
                                         isValid = false;
                                       } else {
                                         setState(() => _showStateError = false);
                                       }
-
+                                      if (locationController.text
+                                          .trim()
+                                          .isEmpty) {
+                                        CustomSnackBar1.show(
+                                          context,
+                                          "Please enter location",
+                                        );
+                                        isValid = false;
+                                      }
+                                      if ((widget.editId == null ||
+                                          widget.editId
+                                              .replaceAll('"', '')
+                                              .trim()
+                                              .isEmpty) &&
+                                          (planId == null ||
+                                              packageId == null)) {
+                                        CustomSnackBar1.show(
+                                          context,
+                                          "Please select a plan",
+                                        );
+                                        isValid = false;
+                                      }
                                       if (selectedCityId == null) {
                                         setState(() => _showCityError = true);
                                         isValid = false;
                                       } else {
                                         setState(() => _showCityError = false);
                                       }
-
-                                      if (_images.isEmpty) {
+                                      if (_images.isEmpty &&
+                                          (widget.editId == null ||
+                                              widget.editId
+                                                  .replaceAll('"', '')
+                                                  .trim()
+                                                  .isEmpty &&
+                                                  !isEligibleForFree)) {
                                         setState(() => _showimagesError = true);
                                         isValid = false;
                                       } else {
-                                        setState(() => _showimagesError = false);
+                                        setState(
+                                              () => _showimagesError = false,
+                                        );
                                       }
+                                      if (isValid) {
+                                        final Map<String, dynamic> data = {
+                                          "title": titleController.text,
+                                          "description": descriptionController
+                                              .text,
+                                          "sub_category_id": widget.subCatId,
+                                          "category_id": widget.catId,
+                                          "location": locationController.text,
+                                          "mobile_number": phoneController.text,
+                                          "vehicle_number": vechicleNumber.text,
+                                          "rental_duration": rentalDuration
+                                              .text,
+                                          "price": priceController.text,
+                                          "full_name": nameController.text,
+                                          "state_id": selectedStateId,
+                                          "city_id": selectedCityId,
+                                        };
 
-                                      if (widget.editId == null || widget.editId.replaceAll('"', '').trim().isEmpty) {
-                                        if (planId == null || packageId == null) {
-                                          CustomSnackBar1.show(
-                                            context,
-                                            "Please select a plan",
-                                          );
-                                          isValid = false;
+                                        final editId = widget.editId
+                                            .replaceAll('"', '')
+                                            .trim();
+
+                                        if (editId.isEmpty) {
+                                          data["plan_id"] = planId;
+                                          data["package_id"] = packageId;
                                         }
-                                      }
 
-                                      if (!isValid) return;
-
-                                      final Map<String, dynamic> data = {
-                                        "title": titleController.text,
-                                        "description": descriptionController.text,
-                                        "sub_category_id": widget.subCatId,
-                                        "category_id": widget.catId,
-                                        "location": locationController.text,
-                                        "mobile_number": phoneController.text,
-                                        "vehicle_number": vechicleNumber.text,
-                                        "rental_duration": rentalDuration.text,
-                                        "price": priceController.text,
-                                        "full_name": nameController.text,
-                                        "state_id": selectedStateId,
-                                        "city_id": selectedCityId,
-                                      };
-
-                                      final editId = widget.editId
-                                          .replaceAll('"', '')
-                                          .trim();
-
-                                      if (editId.isEmpty) {
-                                        data["plan_id"] = planId;
-                                        data["package_id"] = packageId;
-                                      }
-
-                                      if (_images.isNotEmpty) {
-                                        data["images"] = _images
-                                            .map((file) => file.path)
-                                            .toList();
-                                      }
-                                      if (editId.isNotEmpty) {
-                                        context
-                                            .read<MarkAsListingCubit>()
-                                            .markAsUpdate(editId, data);
-                                      } else {
-                                        context
-                                            .read<CityRentalsAdCubit>()
-                                            .postCityRentalsAd(data);
+                                        if (_images.isNotEmpty) {
+                                          data["images"] = _images
+                                              .map((file) => file.path)
+                                              .toList();
+                                        }
+                                        if (editId.isNotEmpty) {
+                                          context
+                                              .read<MarkAsListingCubit>()
+                                              .markAsUpdate(editId, data);
+                                        } else {
+                                          context
+                                              .read<CityRentalsAdCubit>()
+                                              .postCityRentalsAd(data);
+                                        }
                                       }
                                     }
                                   },
