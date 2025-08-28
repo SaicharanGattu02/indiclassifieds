@@ -567,7 +567,9 @@ class _BikeAdState extends State<BikeAd> {
                       return BlocConsumer<BikesAdCubit, BikesAdStates>(
                         listener: (context, state) {
                           if (state is BikesAdSuccess) {
-                            context.pushReplacement("/successfully");
+                            context.pushReplacement(
+                              "/successfully?title=Your ad has been Added successfully",
+                            );
                           } else if (state is BikesAdFailure) {
                             CustomSnackBar1.show(context, state.error);
                           }

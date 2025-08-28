@@ -555,7 +555,9 @@ class _CarsAdState extends State<CarsAd> {
                       return BlocConsumer<CarsAdCubit, CarsAdStates>(
                         listener: (context, state) {
                           if (state is CarsAdSuccess) {
-                            context.pushReplacement("/successfully");
+                            context.pushReplacement(
+                              "/successfully?title=Your ad has been Added successfully",
+                            );
                           } else if (state is CarsAdFailure) {
                             CustomSnackBar1.show(context, state.error);
                           }

@@ -556,7 +556,10 @@ class _AstrologyAdState extends State<AstrologyAd> {
                       return BlocConsumer<AstrologyAdCubit, AstrologyAdStates>(
                         listener: (context, state) {
                           if (state is AstrologyAdSuccess) {
-                            context.pushReplacement("/successfully");
+                            context.pushReplacement(
+                              "/successfully?title=Your ad has been Added successfully",
+                            );
+
                           } else if (state is AstrologyAdFailure) {
                             CustomSnackBar1.show(context, state.error);
                           }

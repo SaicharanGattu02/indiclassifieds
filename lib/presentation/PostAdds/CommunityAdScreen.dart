@@ -460,7 +460,9 @@ class _CommunityAdScreenState extends State<CommunityAdScreen> {
                       return BlocConsumer<CommunityAdCubit, CommunityAdStates>(
                         listener: (context, state) {
                           if (state is CommunityAdSuccess) {
-                            context.pushReplacement("/successfully");
+                            context.pushReplacement(
+                              "/successfully?title=Your ad has been Added successfully",
+                            );
                           } else if (state is CommunityAdFailure) {
                             CustomSnackBar1.show(context, state.error);
                           }

@@ -34,7 +34,7 @@ class _SuccessScreenState extends State<SuccessScreen> {
               ),
               const SizedBox(height: 10),
               Text(
-                widget.title??"Your ad has been added successfully 🎉",
+                widget.title??"",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 18,

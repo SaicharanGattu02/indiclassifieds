@@ -469,7 +469,9 @@ class _JobsAdState extends State<JobsAd> {
                       return BlocConsumer<JobsAdCubit, JobsAdStates>(
                         listener: (context, state) {
                           if (state is JobsAdSuccess) {
-                            context.pushReplacement("/successfully");
+                            context.pushReplacement(
+                              "/successfully?title=Your ad has been Added successfully",
+                            );
                           } else if (state is JobsAdFailure) {
                             CustomSnackBar1.show(context, state.error);
                           }

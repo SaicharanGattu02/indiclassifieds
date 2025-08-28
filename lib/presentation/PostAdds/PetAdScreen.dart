@@ -524,7 +524,9 @@ class _PetAdScreenState extends State<PetAdScreen> {
                       return BlocConsumer<PetsAdCubit, PetsAdStates>(
                         listener: (context, state) {
                           if (state is PetsAdSuccess) {
-                            context.pushReplacement("/successfully");
+                            context.pushReplacement(
+                              "/successfully?title=Your ad has been Added successfully",
+                            );
                           } else if (state is PetsAdFailure) {
                             CustomSnackBar1.show(context, state.error);
                           }

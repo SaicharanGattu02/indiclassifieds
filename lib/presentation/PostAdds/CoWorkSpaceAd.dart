@@ -624,7 +624,9 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
                       return BlocConsumer<CoWorkingAdCubit, CoWorkingAdStates>(
                         listener: (context, state) {
                           if (state is CoWorkingAdSuccess) {
-                            context.pushReplacement("/successfully");
+                            context.pushReplacement(
+                              "/successfully?title=Your ad has been Added successfully",
+                            );
                           } else if (state is CoWorkingAdFailure) {
                             CustomSnackBar1.show(context, state.error);
                           }

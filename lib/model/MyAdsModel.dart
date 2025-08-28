@@ -53,6 +53,7 @@ class Data {
   String? postedAt;
   int? totalLikes;
   String? image;
+  String? path;
 
   Data(
       {this.id,
@@ -72,6 +73,7 @@ class Data {
         this.subCategory,
         this.postedAt,
         this.totalLikes,
+        this.path,
         this.image});
 
   Data.fromJson(Map<String, dynamic> json) {
@@ -97,6 +99,7 @@ class Data {
     postedAt = json['posted_at'];
     totalLikes = json['total_likes'];
     image = json['image'];
+    path = json['path'];
   }
 
   Map<String, dynamic> toJson() {
@@ -127,6 +130,7 @@ class Data {
     data['posted_at'] = this.postedAt;
     data['total_likes'] = this.totalLikes;
     data['image'] = this.image;
+    data['path'] = this.path;
     return data;
   }
 }

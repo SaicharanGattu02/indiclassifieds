@@ -484,7 +484,9 @@ class _EducationalAdState extends State<EducationalAd> {
                       return BlocConsumer<EducationAdCubit, EducationAdStates>(
                         listener: (context, state) async {
                           if (state is EducationAdSuccess) {
-                            context.pushReplacement("/successfully");
+                            context.pushReplacement(
+                              "/successfully?title=Your ad has been Added successfully",
+                            );
                             if (isEligibleForFree) {
                               final plan = await context
                                   .read<UserActivePlanCubit>()

@@ -120,7 +120,7 @@ class AdCardDynamic extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      _priceText(ad.price),
+                      ad.path != "job_ad" ? _priceText(ad.price): "" ,
                       style: AppTextStyles.titleLarge(Colors.blue),
                     ),
                   ],

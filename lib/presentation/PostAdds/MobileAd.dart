@@ -526,7 +526,9 @@ class _MobileAdState extends State<MobileAd> {
                       return BlocConsumer<MobileAdCubit, MobileAdStates>(
                         listener: (context, state) {
                           if (state is MobileAdSuccess) {
-                            context.pushReplacement("/successfully");
+                            context.pushReplacement(
+                              "/successfully?title=Your ad has been Added successfully",
+                            );
                           } else if (state is MobileAdFailure) {
                             CustomSnackBar1.show(context, state.error);
                           }

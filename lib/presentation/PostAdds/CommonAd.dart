@@ -484,7 +484,9 @@ class _CommonAdState extends State<CommonAd> {
                       return BlocConsumer<CommonAdCubit, CommonAdStates>(
                         listener: (context, state) {
                           if (state is CommonAdSuccess) {
-                            context.pushReplacement("/successfully");
+                            context.pushReplacement(
+                              "/successfully?title=Your ad has been Added successfully",
+                            );
                           } else if (state is CommonAdFailure) {
                             CustomSnackBar1.show(context, state.error);
                           }

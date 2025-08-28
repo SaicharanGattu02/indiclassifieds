@@ -658,7 +658,9 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
                   return BlocConsumer<PropertyAdCubit, PropertyAdStates>(
                     listener: (context, state) {
                       if (state is PropertyAdSuccess) {
-                        context.pushReplacement("/successfully");
+                        context.pushReplacement(
+                          "/successfully?title=Your ad has been Added successfully",
+                        );
                       } else if (state is PropertyAdFailure) {
                         CustomSnackBar1.show(context, state.error);
                       }

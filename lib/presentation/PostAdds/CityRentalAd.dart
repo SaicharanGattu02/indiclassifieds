@@ -453,7 +453,9 @@ class _CityRentalsAdState extends State<CityRentalsAd> {
                       return BlocConsumer<CityRentalsAdCubit, CityRentalsAdStates>(
                         listener: (context, state) {
                           if (state is CityRentalsAdSuccess) {
-                            context.pushReplacement("/successfully");
+                            context.pushReplacement(
+                              "/successfully?title=Your ad has been Added successfully",
+                            );
                           } else if (state is CityRentalsAdFailure) {
                             CustomSnackBar1.show(context, state.error);
                           }
