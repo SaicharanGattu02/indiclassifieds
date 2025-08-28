@@ -206,8 +206,9 @@ final GoRouter appRouter = GoRouter(
       path: '/successfully',
       pageBuilder: (context, state) {
         final nextRoute = state.uri.queryParameters['next'] ?? "";
+        final title = state.uri.queryParameters['title'] ?? "";
         return buildSlideTransitionPage(
-          SuccessScreen(nextRoute: nextRoute),
+          SuccessScreen(title: title,nextRoute: nextRoute,),
           state,
         );
       },

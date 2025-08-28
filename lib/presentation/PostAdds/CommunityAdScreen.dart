@@ -449,7 +449,9 @@ class _CommunityAdScreenState extends State<CommunityAdScreen> {
                     listener: (context, updateState) {
                       if (updateState is MarkAsListingSuccess ||
                           updateState is MarkAsListingUpdateSuccess) {
-                        context.pushReplacement("/successfully");
+                        context.pushReplacement(
+                          "/successfully?title=Your ad has been updated successfully",
+                        );
                       } else if (updateState is MarkAsListingFailure) {
                         CustomSnackBar1.show(context, updateState.error);
                       }

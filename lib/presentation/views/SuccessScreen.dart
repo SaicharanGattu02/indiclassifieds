@@ -5,8 +5,9 @@ import 'package:lottie/lottie.dart';
 import '../../theme/ThemeHelper.dart';
 
 class SuccessScreen extends StatefulWidget {
+  final String?title;
   final String? nextRoute;
-  const SuccessScreen({super.key, this.nextRoute});
+  const SuccessScreen({super.key, this.nextRoute,this.title});
 
   @override
   State<SuccessScreen> createState() => _SuccessScreenState();
@@ -33,7 +34,7 @@ class _SuccessScreenState extends State<SuccessScreen> {
               ),
               const SizedBox(height: 10),
               Text(
-                "Your ad has been added successfully 🎉",
+                widget.title??"Your ad has been added successfully 🎉",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 18,
