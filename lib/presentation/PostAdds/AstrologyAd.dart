@@ -606,18 +606,20 @@ class _AstrologyAdState extends State<AstrologyAd> {
                                         setState(() => _showCityError = false);
                                       }
 
-                                      if (_images.isEmpty) {
-                                        setState(() => _showimagesError = true);
+                                      if (_images.isEmpty &&
+                                          (widget.editId == null ||
+                                              widget.editId
+                                                  .replaceAll('"', '')
+                                                  .trim()
+                                                  .isEmpty)) {
                                         CustomSnackBar1.show(
                                           context,
                                           "Please select atleast 2 images",
                                         );
-                                        isValid = false;
-
-                                      } else {
-                                        setState(
-                                              () => _showimagesError = false,
+                                        setState(() => _showimagesError = true
                                         );
+                                      } else {
+                                        setState(() => _showimagesError = false);
                                       }
                                       if (priceController.text.isEmpty) {
                                         setState(() => _showPriceError = true);

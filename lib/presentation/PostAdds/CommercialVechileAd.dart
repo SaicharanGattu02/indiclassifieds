@@ -77,6 +77,8 @@ class _CommercialVehicleAdState extends State<CommercialVehicleAd> {
   int? planId;
   int? packageId;
   bool _showVehicleNumberError = false;
+  bool _showDescriptionError = false;
+  bool _showPriceError = false;
 
   bool isLoading = true;
   List<ImageData> _imageDataList = [];
@@ -209,26 +211,13 @@ class _CommercialVehicleAdState extends State<CommercialVehicleAd> {
                           lable: 'Vehicle Number',
                           hint: 'Enter Vehicle Number',
                           controller: vehicleNumberController,
-                          color: textColor,
+                          color: textColor,validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please Enter Vehicle Number';
+                          }
+                          return null;
+                        },
                         ),
-                        if (_showVehicleNumberError) ...[
-                          Padding(
-                            padding: const EdgeInsets.only(top: 5),
-                            child: ShakeWidget(
-                              key: Key("vehicle_number_error"),
-                              duration: const Duration(milliseconds: 700),
-                              child: const Text(
-                                'Please Enter Vehicle Number',
-                                style: TextStyle(
-                                  fontFamily: 'roboto_serif',
-                                  fontSize: 12,
-                                  color: Colors.red,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
 
                         CommonTextField1(
                           lable: 'Description',
@@ -522,20 +511,24 @@ class _CommercialVehicleAdState extends State<CommercialVehicleAd> {
                                     context.push('/register?from=ad');
                                   }
                                 : () {
-                                    if (_images.isEmpty &&
-                                        (widget.editId == null ||
-                                            widget.editId
-                                                .replaceAll('"', '')
-                                                .trim()
-                                                .isEmpty)) {
-                                      setState(() => _showimagesError = true);
-                                    } else {
-                                      setState(() => _showimagesError = false);
-                                    }
+
 
                                     if (_formKey.currentState?.validate() ??
                                         false) {
                                       bool isValid = true;
+
+                                      if (descriptionController.text.trim().isEmpty) {
+                                        setState(() => _showDescriptionError = true);
+                                        isValid = false;
+                                      } else {
+                                        setState(() => _showDescriptionError = false);
+                                      }
+                                      if (priceController.text.trim().isEmpty) {
+                                        setState(() => _showPriceError = true);
+                                        isValid = false;
+                                      } else {
+                                        setState(() => _showPriceError = false);
+                                      }
                                       if (selectedStateId == null) {
                                         setState(() => _showStateError = true);
                                         isValid = false;
@@ -576,20 +569,20 @@ class _CommercialVehicleAdState extends State<CommercialVehicleAd> {
                                       } else {
                                         setState(() => _showVehicleNumberError = false);
                                       }
-
                                       if (_images.isEmpty &&
                                           (widget.editId == null ||
                                               widget.editId
-                                                      .replaceAll('"', '')
-                                                      .trim()
-                                                      .isEmpty &&
-                                                  !isEligibleForFree)) {
-                                        setState(() => _showimagesError = true);
-                                        isValid = false;
-                                      } else {
-                                        setState(
-                                          () => _showimagesError = false,
+                                                  .replaceAll('"', '')
+                                                  .trim()
+                                                  .isEmpty)) {
+                                        CustomSnackBar1.show(
+                                          context,
+                                          "Please select atleast 2 images",
                                         );
+                                        setState(() => _showimagesError = true
+                                        );
+                                      } else {
+                                        setState(() => _showimagesError = false);
                                       }
 
                                       if (isValid) {
