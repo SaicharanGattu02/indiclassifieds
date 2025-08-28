@@ -81,7 +81,6 @@ class _CommonAdState extends State<CommonAd> {
   void initState() {
     super.initState();
     debugPrint("typee:${widget.editId}");
-    titleController.text = widget.SubCatName ?? "";
     final id = widget.editId.replaceAll('"', '').trim();
     if (id != null && id.isNotEmpty) {
       context.read<GetListingAdCubit>().getListingAd(widget.editId).then((
@@ -90,6 +89,7 @@ class _CommonAdState extends State<CommonAd> {
         if (commonAdData != null) {
           descriptionController.text =
               commonAdData.data?.listing?.description ?? '';
+          titleController.text=commonAdData.data?.listing?.title??widget.SubCatName;
           locationController.text = commonAdData.data?.listing?.location ?? '';
           priceController.text = commonAdData.data?.listing?.price ?? '';
           nameController.text = commonAdData.data?.listing?.fullName ?? '';

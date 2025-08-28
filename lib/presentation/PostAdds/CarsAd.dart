@@ -101,6 +101,7 @@ class _CarsAdState extends State<CarsAd> {
         if (commonAdData != null) {
           descriptionController.text =
               commonAdData.data?.listing?.description ?? '';
+          titleController.text=commonAdData.data?.listing?.title??"";
           locationController.text = commonAdData.data?.listing?.location ?? '';
           priceController.text = commonAdData.data?.listing?.price ?? '';
           nameController.text = commonAdData.data?.listing?.fullName ?? '';
@@ -135,7 +136,6 @@ class _CarsAdState extends State<CarsAd> {
       setState(() => isLoading = false);
     }
     brandController.text = widget.SubCatName ?? "";
-    titleController.text = widget.CatName ?? "";
     fetchData();
   }
 
@@ -200,7 +200,7 @@ class _CarsAdState extends State<CarsAd> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         CommonTextField1(
-                          lable: ' Add Title',
+                          lable: 'Add Title',
                           hint: 'Enter Title',
                           controller: titleController,
                           color: textColor,

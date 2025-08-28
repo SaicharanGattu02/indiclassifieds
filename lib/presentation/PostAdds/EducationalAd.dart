@@ -86,6 +86,7 @@ class _EducationalAdState extends State<EducationalAd> {
         if (commonAdData != null) {
           descriptionController.text =
               commonAdData.data?.listing?.description ?? '';
+          titleController.text=commonAdData.data?.listing?.title??widget.SubCatName;
           locationController.text = commonAdData.data?.listing?.location ?? '';
           priceController.text = commonAdData.data?.listing?.price ?? '';
           nameController.text = commonAdData.data?.listing?.fullName ?? '';
@@ -113,7 +114,7 @@ class _EducationalAdState extends State<EducationalAd> {
     } else {
       setState(() => isLoading = false);
     }
-    titleController.text = widget.CatName ?? "";
+    // titleController.text = widget.CatName ?? "";
     brandController.text = widget.SubCatName ?? "";
     fetchData();
   }

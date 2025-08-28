@@ -98,6 +98,7 @@ class _CityRentalsAdState extends State<CityRentalsAd> {
         if (commonAdData != null) {
           descriptionController.text =
               commonAdData.data?.listing?.description ?? '';
+          titleController.text=commonAdData.data?.listing?.title??"";
           locationController.text = commonAdData.data?.listing?.location ?? '';
           priceController.text = commonAdData.data?.listing?.price ?? '';
           nameController.text = commonAdData.data?.listing?.fullName ?? '';
@@ -128,7 +129,7 @@ class _CityRentalsAdState extends State<CityRentalsAd> {
       setState(() => isLoading = false);
     }
     brandController.text = widget.SubCatName ?? "";
-    titleController.text = widget.CatName ?? "";
+    // titleController.text = widget.CatName ?? "";
     fetchData();
   }
 

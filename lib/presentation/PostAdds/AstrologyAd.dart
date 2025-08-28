@@ -94,6 +94,7 @@ class _AstrologyAdState extends State<AstrologyAd> {
         if (commonAdData != null) {
           descriptionController.text =
               commonAdData.data?.listing?.description ?? '';
+          titleController.text=commonAdData.data?.listing?.title??"";
           locationController.text = commonAdData.data?.listing?.location ?? '';
           priceController.text = commonAdData.data?.listing?.price ?? '';
           nameController.text = commonAdData.data?.listing?.fullName ?? '';
@@ -129,7 +130,7 @@ class _AstrologyAdState extends State<AstrologyAd> {
       setState(() => isLoading = false);
     }
     super.initState();
-    titleController.text = widget.SubCatName ?? "";
+
     fetchData();
   }
 

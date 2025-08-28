@@ -87,7 +87,7 @@ class _BikeAdState extends State<BikeAd> {
   void initState() {
     super.initState();
     brandController.text = widget.SubCatName ?? "";
-    titleController.text = widget.CatName ?? "";
+
     final id = widget.editId.replaceAll('"', '').trim();
     if (id != null && id.isNotEmpty) {
       context.read<GetListingAdCubit>().getListingAd(widget.editId).then((
@@ -96,6 +96,7 @@ class _BikeAdState extends State<BikeAd> {
         if (commonAdData != null) {
           descriptionController.text =
               commonAdData.data?.listing?.description ?? '';
+          titleController.text=commonAdData.data?.listing?.title??"";
           locationController.text = commonAdData.data?.listing?.location ?? '';
           priceController.text = commonAdData.data?.listing?.price ?? '';
           nameController.text = commonAdData.data?.listing?.fullName ?? '';
@@ -190,8 +191,7 @@ class _BikeAdState extends State<BikeAd> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         CommonTextField1(
-                          isRead: true,
-                          lable: ' Add Title',
+                          lable: 'Add Title',
                           hint: 'Enter Title',
                           controller: titleController,
                           color: textColor,

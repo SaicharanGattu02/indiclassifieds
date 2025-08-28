@@ -101,7 +101,7 @@ class _JobsAdState extends State<JobsAd> {
             selectedCityId = commonAdData.data?.listing?.cityId;
             cityController.text = commonAdData.data?.listing?.cityName ?? '';
           }
-
+          titleController.text=commonAdData.data?.listing?.title??widget.SubCatName;
           if (commonAdData.data?.listing?.images != null) {
             _imageDataList = commonAdData.data!.listing!.images!
                 .where((img) => (img.image ?? "").isNotEmpty)
@@ -114,7 +114,7 @@ class _JobsAdState extends State<JobsAd> {
     } else {
       setState(() => isLoading = false);
     }
-    titleController.text = widget.CatName ?? "";
+    // titleController.text = widget.CatName ?? "";
     brandController.text = widget.SubCatName ?? "";
     fetchData();
   }
