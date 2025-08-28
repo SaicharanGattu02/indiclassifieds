@@ -13,7 +13,7 @@ class MarkAsListingCubit extends Cubit<MarkAsListingState> {
       if (response != null && response.success == true) {
         emit(MarkAsListingSuccess(response));
       } else {
-        emit(MarkAsListingFailure(response?.message ?? ""));
+        emit(MarkAsListingFailure("${response?.message ?? ""}.${response?.error ?? ""}"));
       }
     } catch (e) {
       emit(MarkAsListingFailure(e.toString()));
@@ -27,7 +27,7 @@ class MarkAsListingCubit extends Cubit<MarkAsListingState> {
       if (response != null && response.success == true) {
         emit(MarkAsListingDeleted(response));
       } else {
-        emit(MarkAsListingFailure(response?.message ?? ""));
+        emit(MarkAsListingFailure("${response?.message ?? ""}.${response?.error ?? ""}"));
       }
     } catch (e) {
       emit(MarkAsListingFailure(e.toString()));
@@ -41,7 +41,7 @@ class MarkAsListingCubit extends Cubit<MarkAsListingState> {
       if (response != null && response.success == true) {
         emit(MarkAsListingUpdateSuccess(response));
       } else {
-        emit(MarkAsListingFailure(response?.message ?? ""));
+        emit(MarkAsListingFailure("${response?.message ?? ""}.${response?.error ?? ""}"));
       }
     } catch (e) {
       emit(MarkAsListingFailure(e.toString()));
@@ -54,7 +54,7 @@ class MarkAsListingCubit extends Cubit<MarkAsListingState> {
       if (response != null && response.success == true) {
         emit(MarkAsListingImageDelete(response));
       } else {
-        emit(MarkAsListingFailure(response?.message ?? ""));
+        emit(MarkAsListingFailure("${response?.message ?? ""}.${response?.error ?? ""}"));
       }
     } catch (e) {
       emit(MarkAsListingFailure(e.toString()));

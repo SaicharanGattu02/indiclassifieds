@@ -662,155 +662,182 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
                     },
                     builder: (context, state) {
                       return CustomAppButton1(
-                        isLoading:
-                            state is PropertyAdLoading ||
-                            updateState is MarkAsListingUpdateLoading,
+                        isLoading: state is PropertyAdLoading || updateState is MarkAsListingUpdateLoading,
                         text: 'Submit Ad',
                         onPlusTap: isNewUser
                             ? () {
-                                context.push('/register?from=ad');
-                              }
+                          context.push('/register?from=ad');
+                        }
                             : () {
-                                if (_formKey.currentState?.validate() ??
-                                    false) {
-                                  String? propertyType;
+                          if (_formKey.currentState?.validate() ?? false) {
+                            String? propertyType;
 
-                                  if (widget.SubCatName == "For Sale") {
-                                    propertyType = "sale";
-                                  } else if (widget.SubCatName == "For Rent") {
-                                    propertyType = "rent";
-                                  } else if (widget.SubCatName ==
-                                      "Commercial") {
-                                    propertyType = "commercial";
-                                  }
-                                  bool isValid = true;
-                                  if (selectedStateId == null) {
-                                    setState(() => _showStateError = true);
-                                    isValid = false;
-                                  } else {
-                                    setState(() => _showStateError = false);
-                                  }
-                                  if (locationController.text.trim().isEmpty) {
-                                    CustomSnackBar1.show(
-                                      context,
-                                      "Please enter location",
-                                    );
-                                    isValid = false;
-                                  }
-                                  // if ((widget.editId == null ||
-                                  //         widget.editId
-                                  //             .replaceAll('"', '')
-                                  //             .trim()
-                                  //             .isEmpty) &&
-                                  //     (planId == null || packageId == null)) {
-                                  //   CustomSnackBar1.show(
-                                  //     context,
-                                  //     "Please select a plan",
-                                  //   );
-                                  //   isValid = false;
-                                  // }
-                                  if (selectedCityId == null) {
-                                    setState(() => _showCityError = true);
-                                    isValid = false;
-                                  } else {
-                                    setState(() => _showCityError = false);
-                                  }
-                                  if (_images.isEmpty &&
-                                      (widget.editId == null ||
-                                          widget.editId
-                                              .replaceAll('"', '')
-                                              .trim()
-                                              .isEmpty)) {
-                                    setState(() => _showimagesError = true);
-                                    isValid = false;
-                                  } else {
-                                    setState(() => _showimagesError = false);
-                                  }
-                                  if (facingDirection == null ||
-                                      facingDirection!.isEmpty) {
-                                    setState(
-                                      () => _facingDirectionError = true,
-                                    );
-                                    isValid = false;
-                                  } else {
-                                    setState(
-                                      () => _facingDirectionError = false,
-                                    );
-                                  }
-                                  if (furnishingStatus == null ||
-                                      furnishingStatus!.isEmpty) {
-                                    setState(() => _furnishingError = true);
-                                    isValid = false;
-                                  } else {
-                                    setState(() => _furnishingError = false);
-                                  }
-                                  if (projectStatus == null ||
-                                      projectStatus!.isEmpty) {
-                                    setState(() => _projectStatusError = true);
-                                    isValid = false;
-                                  } else {
-                                    setState(() => _projectStatusError = false);
-                                  }
-                                  if (listedBy == null || listedBy!.isEmpty) {
-                                    setState(() => _listeByError = true);
-                                    isValid = false;
-                                  } else {
-                                    setState(() => _listeByError = false);
-                                  }
-                                  if (isValid) {
-                                    final Map<String, dynamic> data = {
-                                      "title": titleController.text,
-                                      "brand": brandController.text,
-                                      "description": descriptionController.text,
-                                      "sub_category_id": widget.subCatId,
-                                      "category_id": widget.catId,
-                                      "location": locationController.text,
-                                      "mobile_number": phoneController.text,
-                                      "price": totelPriceController.text,
-                                      if (widget.SubCatName == "For Sale")
-                                        "squre_pt":
-                                            priceSquareFeetController.text,
-                                      "full_name": nameController.text,
-                                      "state_id": selectedStateId,
-                                      "city_id": selectedCityId,
-                                      "bhk_type": "${bhkController.text} BHK",
-                                      "no_of_bathrooms":
-                                          noOfBathroomsController.text,
-                                      "no_of_carparking_spaces":
-                                          parkingController.text,
-                                      "facing_direction": facingDirection,
-                                      "furnishing_status": furnishingStatus,
-                                      "project_status": projectStatus,
-                                      "listed_by": listedBy,
-                                      "floor_number": floorNoController.text,
-                                      "room_no": roomNoController.text,
-                                      "location_key": latlng,
-                                      "property_type": propertyType,
-                                    };
+                            if (widget.SubCatName == "For Sale") {
+                              propertyType = "sale";
+                            } else if (widget.SubCatName == "For Rent") {
+                              propertyType = "rent";
+                            } else if (widget.SubCatName == "Commercial") {
+                              propertyType = "commercial";
+                            }
 
-                                    if (editId.isEmpty) {
-                                      data["plan_id"] = planId;
-                                      data["package_id"] = packageId;
-                                    }
+                            bool isValid = true;
 
-                                    if (_images.isNotEmpty) {
-                                      data["images"] = _images
-                                          .map((file) => file.path)
-                                          .toList();
-                                    }
+                            if (selectedStateId == null) {
+                              setState(() => _showStateError = true);
+                              isValid = false;
+                            } else {
+                              setState(() => _showStateError = false);
+                            }
 
-                                    if (editId.isNotEmpty) {
-                                      context
-                                          .read<MarkAsListingCubit>()
-                                          .markAsUpdate(editId, data);
-                                    } else {
-                                      context
-                                          .read<PropertyAdCubit>()
-                                          .postPropertyAd(data);
-                                    }
-                                  }
-                                }
-                              },
+                            // Check for city selection
+                            if (selectedCityId == null) {
+                              setState(() => _showCityError = true);
+                              isValid = false;
+                            } else {
+                              setState(() => _showCityError = false);
+                            }
+
+                            // Check for location
+                            if (locationController.text.trim().isEmpty) {
+                              CustomSnackBar1.show(context, "Please enter location");
+                              isValid = false;
+                            }
+
+                            // Check for plan selection (only for new ads, not edits)
+                            if ((widget.editId == null || widget.editId.replaceAll('"', '').trim().isEmpty) &&
+                                (planId == null || packageId == null)) {
+                              CustomSnackBar1.show(context, "Please select a plan");
+                              isValid = false;
+                            }
+
+                            if (_images.isEmpty &&
+                                (widget.editId == null ||
+                                    widget.editId
+                                        .replaceAll('"', '')
+                                        .trim()
+                                        .isEmpty)) {
+                              CustomSnackBar1.show(
+                                context,
+                                "Please select atleast 2 images",
+                              );
+                              setState(() => _showimagesError = true
+                              );
+                            } else {
+                              setState(() => _showimagesError = false);
+                            }
+
+                            if (facingDirection == null || facingDirection!.isEmpty) {
+                              setState(() => _facingDirectionError = true);
+                              isValid = false;
+                            } else {
+                              setState(() => _facingDirectionError = false);
+                            }
+
+                            // Check for furnishing status
+                            if (furnishingStatus == null || furnishingStatus!.isEmpty) {
+                              setState(() => _furnishingError = true);
+                              isValid = false;
+                            } else {
+                              setState(() => _furnishingError = false);
+                            }
+
+                            // Check for project status
+                            if (projectStatus == null || projectStatus!.isEmpty) {
+                              setState(() => _projectStatusError = true);
+                              isValid = false;
+                            } else {
+                              setState(() => _projectStatusError = false);
+                            }
+
+                            // Check for listed by
+                            if (listedBy == null || listedBy!.isEmpty) {
+                              setState(() => _listeByError = true);
+                              isValid = false;
+                            } else {
+                              setState(() => _listeByError = false);
+                            }
+
+                            // Check for description
+                            if (descriptionController.text.trim().isEmpty) {
+                              CustomSnackBar1.show(context, "Please enter description");
+                              isValid = false;
+                            }
+
+                            // Check for number of bathrooms
+                            if (noOfBathroomsController.text.trim().isEmpty) {
+                              CustomSnackBar1.show(context, "Please enter number of bathrooms");
+                              isValid = false;
+                            }
+
+                            // Check for number of car parking spaces
+                            if (parkingController.text.trim().isEmpty) {
+                              CustomSnackBar1.show(context, "Please enter number of car parking spaces");
+                              isValid = false;
+                            }
+
+                            // Check for floor number
+                            if (floorNoController.text.trim().isEmpty) {
+                              CustomSnackBar1.show(context, "Please enter floor number");
+                              isValid = false;
+                            }
+
+                            // Check for room number
+                            if (roomNoController.text.trim().isEmpty) {
+                              CustomSnackBar1.show(context, "Please enter room number");
+                              isValid = false;
+                            }
+
+                            // Check for price
+                            if (totelPriceController.text.trim().isEmpty) {
+                              CustomSnackBar1.show(context, "Please enter price");
+                              isValid = false;
+                            }
+
+                            // Proceed with API call only if all validations pass
+                            if (isValid) {
+                              final Map<String, dynamic> data = {
+                                "title": titleController.text,
+                                "brand": brandController.text,
+                                "description": descriptionController.text,
+                                "sub_category_id": widget.subCatId,
+                                "category_id": widget.catId,
+                                "location": locationController.text,
+                                "mobile_number": phoneController.text,
+                                "price": totelPriceController.text,
+                                if (widget.SubCatName == "For Sale") "squre_pt": priceSquareFeetController.text,
+                                "full_name": nameController.text,
+                                "state_id": selectedStateId,
+                                "city_id": selectedCityId,
+                                "bhk_type": "${bhkController.text} BHK",
+                                "no_of_bathrooms": noOfBathroomsController.text,
+                                "no_of_carparking_spaces": parkingController.text,
+                                "facing_direction": facingDirection,
+                                "furnishing_status": furnishingStatus,
+                                "project_status": projectStatus,
+                                "listed_by": listedBy,
+                                "floor_number": floorNoController.text,
+                                "room_no": roomNoController.text,
+                                "location_key": latlng,
+                                "property_type": propertyType,
+                              };
+
+                              if (widget.editId == null || widget.editId.replaceAll('"', '').trim().isEmpty) {
+                                data["plan_id"] = planId;
+                                data["package_id"] = packageId;
+                              }
+
+                              if (_images.isNotEmpty) {
+                                data["images"] = _images.map((file) => file.path).toList();
+                              }
+
+                              if (widget.editId != null && widget.editId.replaceAll('"', '').trim().isNotEmpty) {
+                                context.read<MarkAsListingCubit>().markAsUpdate(widget.editId, data);
+                              } else {
+                                context.read<PropertyAdCubit>().postPropertyAd(data);
+                              }
+                            }
+                          }
+                        },
                       );
                     },
                   );

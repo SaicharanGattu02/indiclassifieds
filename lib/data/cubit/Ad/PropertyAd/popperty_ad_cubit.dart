@@ -13,7 +13,11 @@ class PropertyAdCubit extends Cubit<PropertyAdStates> {
       if (response != null && response.success == true) {
         emit(PropertyAdSuccess(response));
       } else {
-        emit(PropertyAdFailure(response?.message ?? ""));
+        emit(
+          PropertyAdFailure(
+            "${response?.message ?? ""}.${response?.error ?? ""}",
+          ),
+        );
       }
     } catch (e) {
       emit(PropertyAdFailure(e.toString()));

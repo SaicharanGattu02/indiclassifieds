@@ -2,12 +2,14 @@ class MarkAsListingModel {
   bool? success;
   String? message;
   Data? data;
+  String? error;
 
   MarkAsListingModel({this.success, this.message, this.data});
 
   MarkAsListingModel.fromJson(Map<String, dynamic> json) {
     success = json['success'];
     message = json['message'];
+    error = json['error'];
     data = json['data'] != null ? new Data.fromJson(json['data']) : null;
   }
 
@@ -15,6 +17,7 @@ class MarkAsListingModel {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['success'] = this.success;
     data['message'] = this.message;
+    data['error'] = this.error;
     if (this.data != null) {
       data['data'] = this.data!.toJson();
     }

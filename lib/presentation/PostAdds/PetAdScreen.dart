@@ -569,12 +569,19 @@ class _PetAdScreenState extends State<PetAdScreen> {
 
                                 if (_images.isEmpty &&
                                     (widget.editId == null ||
-                                        widget.editId.replaceAll('"', '').trim().isEmpty &&
-                                            !isEligibleForFree)) {
-                                  showImagesError = true;
-                                  isValid = false;
+                                        widget.editId
+                                            .replaceAll('"', '')
+                                            .trim()
+                                            .isEmpty)) {
+                                  CustomSnackBar1.show(
+                                    context,
+                                    "Please select atleast 2 images",
+                                  );
+                                  setState(() => _showimagesError = true
+                                  );
+                                } else {
+                                  setState(() => _showimagesError = false);
                                 }
-
                                 // Validate description
                                 if (descriptionController.text.trim().isEmpty) {
                                   errorMessages.add("Please enter a description");

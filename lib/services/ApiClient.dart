@@ -149,7 +149,7 @@ class ApiClient {
         onResponse: (response, handler) async {
           final status = response.statusCode ?? 0;
 
-          if (status >= 200 && status < 300) {
+          if (status >= 200 && status < 450) {
             // success
             return handler.next(response);
           }
