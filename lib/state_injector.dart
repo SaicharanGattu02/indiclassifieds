@@ -73,6 +73,7 @@ import 'data/cubit/LogInWithMobile/login_with_mobile_repository.dart';
 import 'data/cubit/MyAds/GetMarkAsListing/get_listing_ad_cubit.dart';
 import 'data/cubit/Payment/payment_repository.dart';
 import 'data/cubit/PostAdvertisement/post_advertisement_cubit.dart';
+import 'data/cubit/PostCategories/categories_cubit.dart';
 import 'data/cubit/Products/Product_cubit1.dart';
 import 'data/cubit/Products/Product_cubit2.dart';
 import 'data/cubit/States/states_cubit.dart';
@@ -249,6 +250,9 @@ class StateInjector {
     ),
     BlocProvider<CategoriesCubit>(
       create: (context) => CategoriesCubit(context.read<CategoriesRepo>()),
+    ),
+    BlocProvider<PostCategoriesCubit>(
+      create: (context) => PostCategoriesCubit(context.read<CategoriesRepo>()),
     ),
     BlocProvider<NewCategoriesCubit>(
       create: (context) => NewCategoriesCubit(context.read<CategoriesRepo>()),

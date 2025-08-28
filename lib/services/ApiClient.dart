@@ -17,44 +17,117 @@ class ApiClient {
       },
     ),
   );
+  //
+  // static const List<String> _unauthenticatedEndpoints = [
+  //   '/api/app/send-otp',
+  //   '/api/app/verify-otp',
+  //   '/api/app/refresh-token-for-user',
+  //   '/api/app/get-all-categories',
+  //   '/api/app/get-all-sub-categories',
+  //   '/api/app/get-all-listings-with-pagination',
+  //   '/api/app/get-all-carousels',
+  //   '/api/app/get-all-cities',
+  // ];
 
-  static const List<String> _unauthenticatedEndpoints = [
-    '/api/app/send-otp',
-    '/api/app/verify-otp',
-    '/api/app/refresh-token-for-user',
-    '/api/app/get-all-categories',
-    '/api/app/get-all-sub-categories',
-    '/api/app/get-all-listings-with-pagination',
-    '/api/app/get-all-carousels',
-    '/api/app/get-all-cities',
-  ];
+  // static void setupInterceptors() {
+  //   _dio.interceptors.add(
+  //     InterceptorsWrapper(
+  //       onRequest: (options, handler) async {
+  //         debugPrint('Interceptor triggered for: ${options.uri}');
+  //
+  //         // 👉 First check if request path is in unauthenticated list
+  //         final isUnauthenticatedEndpoint = _unauthenticatedEndpoints.any(
+  //               (endpoint) => options.uri.path.startsWith(endpoint),
+  //         );
+  //
+  //         // 👉 Check guest condition
+  //         final isGuestUser = await AuthService.isGuest;
+  //
+  //         if (isUnauthenticatedEndpoint || isGuestUser) {
+  //           debugPrint('Skipping token check for: ${options.uri}');
+  //           return handler.next(options); // Don’t attach Authorization
+  //         }
+  //
+  //         // Otherwise: normal flow with token refresh
+  //         final isExpired = await AuthService.isTokenExpired();
+  //         if (isExpired) {
+  //           debugPrint('Token is expired, attempting to refresh...');
+  //           final refreshed = await _refreshToken();
+  //           if (!refreshed) {
+  //             debugPrint('❌ Token refresh failed, redirecting to login...');
+  //             await AuthService.logout();
+  //             return handler.reject(
+  //               DioException(
+  //                 requestOptions: options,
+  //                 error: 'Token refresh failed, please log in again',
+  //                 type: DioExceptionType.cancel,
+  //               ),
+  //             );
+  //           }
+  //         }
+  //
+  //         final accessToken = await AuthService.getAccessToken();
+  //         if (accessToken != null) {
+  //           options.headers["Authorization"] = "Bearer $accessToken";
+  //         }
+  //
+  //         return handler.next(options);
+  //       },
+  //       onResponse: (response, handler) {
+  //         return handler.next(response);
+  //       },
+  //       onError: (DioException e, handler) async {
+  //         final isUnauthenticated = _unauthenticatedEndpoints.any(
+  //           (endpoint) => e.requestOptions.uri.path.endsWith(endpoint),
+  //         );
+  //
+  //         if (isUnauthenticated) {
+  //           debugPrint(
+  //             'Unauthenticated endpoint error, skipping logout: ${e.requestOptions.uri}',
+  //           );
+  //           return handler.next(e); // Skip logout for unauthenticated endpoints
+  //         }
+  //
+  //         if (e.response?.statusCode == 401) {
+  //           debugPrint(
+  //             '❌ Unauthorized: Token invalid or user not found, redirecting to login...',
+  //           );
+  //           await AuthService.logout();
+  //           return handler.reject(
+  //             DioException(
+  //               requestOptions: e.requestOptions,
+  //               error: 'Unauthorized, please log in again',
+  //               type: DioExceptionType.badResponse,
+  //               response: e.response,
+  //             ),
+  //           );
+  //         }
+  //         return handler.next(e); // Pass other errors to the next interceptor
+  //       },
+  //     ),
+  //   );
+  // }
 
   static void setupInterceptors() {
+    _dio.interceptors.clear();
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
           debugPrint('Interceptor triggered for: ${options.uri}');
-
-          // 👉 First check if request path is in unauthenticated list
-          final isUnauthenticatedEndpoint = _unauthenticatedEndpoints.any(
-                (endpoint) => options.uri.path.startsWith(endpoint),
-          );
-
-          // 👉 Check guest condition
           final isGuestUser = await AuthService.isGuest;
-
-          if (isUnauthenticatedEndpoint || isGuestUser) {
-            debugPrint('Skipping token check for: ${options.uri}');
-            return handler.next(options); // Don’t attach Authorization
+          if (isGuestUser) {
+            // 🚫 Guest → no token
+            debugPrint('Guest user → skipping token for ${options.uri}');
+            options.headers.remove('Authorization');
+            return handler.next(options);
           }
-
-          // Otherwise: normal flow with token refresh
+          // ✅ Non-guest → token required
           final isExpired = await AuthService.isTokenExpired();
           if (isExpired) {
-            debugPrint('Token is expired, attempting to refresh...');
+            debugPrint('Token expired → trying refresh...');
             final refreshed = await _refreshToken();
             if (!refreshed) {
-              debugPrint('❌ Token refresh failed, redirecting to login...');
+              debugPrint('❌ Token refresh failed, logging out...');
               await AuthService.logout();
               return handler.reject(
                 DioException(
@@ -67,31 +140,20 @@ class ApiClient {
           }
 
           final accessToken = await AuthService.getAccessToken();
-          if (accessToken != null) {
-            options.headers["Authorization"] = "Bearer $accessToken";
+          if (accessToken != null && accessToken.isNotEmpty) {
+            options.headers['Authorization'] = 'Bearer $accessToken';
+          } else {
+            debugPrint('⚠️ Non-guest but no token found');
           }
 
           return handler.next(options);
         },
-        onResponse: (response, handler) {
-          return handler.next(response);
-        },
+
+        onResponse: (response, handler) => handler.next(response),
+
         onError: (DioException e, handler) async {
-          final isUnauthenticated = _unauthenticatedEndpoints.any(
-            (endpoint) => e.requestOptions.uri.path.endsWith(endpoint),
-          );
-
-          if (isUnauthenticated) {
-            debugPrint(
-              'Unauthenticated endpoint error, skipping logout: ${e.requestOptions.uri}',
-            );
-            return handler.next(e); // Skip logout for unauthenticated endpoints
-          }
-
           if (e.response?.statusCode == 401) {
-            debugPrint(
-              '❌ Unauthorized: Token invalid or user not found, redirecting to login...',
-            );
+            debugPrint('❌ 401 Unauthorized, logging out...');
             await AuthService.logout();
             return handler.reject(
               DioException(
@@ -102,7 +164,7 @@ class ApiClient {
               ),
             );
           }
-          return handler.next(e); // Pass other errors to the next interceptor
+          return handler.next(e);
         },
       ),
     );

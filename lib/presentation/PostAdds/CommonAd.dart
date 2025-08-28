@@ -73,7 +73,6 @@ class _CommonAdState extends State<CommonAd> {
   int? planId;
   int? packageId;
   bool isLoading = true;
-  String? latlng;
 
   List<ImageData> _imageDataList = [];
   @override

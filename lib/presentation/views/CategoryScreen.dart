@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:indiclassifieds/data/cubit/Categories/categories_states.dart';
 import 'package:indiclassifieds/utils/color_constants.dart';
 import '../../data/cubit/Categories/categories_cubit.dart';
+import '../../data/cubit/PostCategories/categories_cubit.dart';
+import '../../data/cubit/PostCategories/categories_states.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../utils/spinkittsLoader.dart';
@@ -21,7 +23,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<CategoriesCubit>().getCategories();
+    context.read<PostCategoriesCubit>().getPostCategories();
   }
 
   @override
@@ -52,11 +54,11 @@ class _CategoryScreenState extends State<CategoryScreen> {
               style: AppTextStyles.bodyMedium(Colors.grey),
             ),
             const SizedBox(height: 20),
-            BlocBuilder<CategoriesCubit, CategoriesStates>(
+            BlocBuilder<PostCategoriesCubit, PostCategoriesStates>(
               builder: (context, state) {
-                if (state is CategoriesLoading) {
+                if (state is PostCategoriesLoading) {
                   return Center(child: DottedProgressWithLogo());
-                } else if (state is CategoriesLoaded) {
+                } else if (state is PostCategoriesLoaded) {
                   final categories = state.categoryModel.categoriesList;
                   return Expanded(
                     child: GridView.builder(
@@ -127,7 +129,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                       },
                     ),
                   );
-                } else if (state is CategoriesFailure) {
+                } else if (state is PostCategoriesFailure) {
                   return Center(child: Text(state.error ?? ""));
                 }
                 return Center(child: Text("No Data"));

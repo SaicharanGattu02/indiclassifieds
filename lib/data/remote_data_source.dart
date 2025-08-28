@@ -84,6 +84,7 @@ abstract class RemoteDataSource {
   Future<ChatUsersModel?> getChatUsers(String query);
   Future<ChatMessagesModel?> getChatMessages(String user_id, int page);
   Future<TransectionHistoryModel?> getTransections(int page);
+  Future<CategoryModel?> getPostCategories();
 }
 
 class RemoteDataSourceImpl implements RemoteDataSource {
@@ -119,6 +120,20 @@ class RemoteDataSourceImpl implements RemoteDataSource {
       }
     }
     return FormData.fromMap(formMap);
+  }
+
+  @override
+  Future<CategoryModel?> getPostCategories() async {
+    try {
+      Response response = await ApiClient.get(
+        "${APIEndpointUrls.get_all_categories_for_post}",
+      );
+      AppLogger.log('getPostCategories:${response.data}');
+      return CategoryModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('getPostCategories :: $e');
+      return null;
+    }
   }
 
   @override

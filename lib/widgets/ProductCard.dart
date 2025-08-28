@@ -23,8 +23,10 @@ class ProductCard extends StatelessWidget {
         : Colors.white;
 
     return InkWell(
-      onTap: (){
-        context.push("/products_details?listingId=${products.id}&subcategory_id=${products.subCategory}");
+      onTap: () {
+        context.push(
+          "/products_details?listingId=${products.id}&subcategory_id=${products.subCategory}",
+        );
       },
       child: Container(
         decoration: BoxDecoration(
@@ -106,6 +108,8 @@ class ProductCard extends StatelessWidget {
                   children: [
                     Text(
                       products.title ?? "",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: AppTextStyles.titleMedium(textColor),
                     ),
                     SizedBox(height: 6),
@@ -144,7 +148,10 @@ class ProductCard extends StatelessWidget {
 class ProductCard1 extends StatelessWidget {
   final ProductsList productsList;
   final VoidCallback onWishlistToggle;
-  const ProductCard1({required this.productsList, required this.onWishlistToggle});
+  const ProductCard1({
+    required this.productsList,
+    required this.onWishlistToggle,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -154,8 +161,10 @@ class ProductCard1 extends StatelessWidget {
         : Colors.white;
 
     return InkWell(
-      onTap: (){
-        context.push("/products_details?listingId=${productsList.id}&subcategory_id=${productsList.subCategoryId}");
+      onTap: () {
+        context.push(
+          "/products_details?listingId=${productsList.id}&subcategory_id=${productsList.subCategoryId}",
+        );
       },
       child: Container(
         decoration: BoxDecoration(

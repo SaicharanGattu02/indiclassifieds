@@ -90,7 +90,7 @@ class SimilarProductCard extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(10, 6, 10, 0),
               child: Text(
                 title,
-                maxLines: 2,
+                maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: AppTextStyles.bodyMedium(
                   textColor,

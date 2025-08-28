@@ -4,6 +4,7 @@ import 'package:indiclassifieds/model/CategoryModel.dart';
 abstract class CategoriesRepo {
   Future<CategoryModel?> getCategories();
   Future<CategoryModel?> getNewCategories();
+  Future<CategoryModel?> getPostCategories();
 }
 
 class CategoriesRepoImpl implements CategoriesRepo {
@@ -18,5 +19,10 @@ class CategoriesRepoImpl implements CategoriesRepo {
   @override
   Future<CategoryModel?> getNewCategories() async {
     return await remoteDataSource.getNewCategory();
+  }
+
+  @override
+  Future<CategoryModel?> getPostCategories() async{
+    return await remoteDataSource.getPostCategories();
   }
 }
