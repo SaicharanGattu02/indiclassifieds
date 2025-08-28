@@ -214,7 +214,7 @@ class _EditProfileState extends State<EditProfile> {
                       controller: _phoneController,
                       color: textColor,
                       validator: (v) => (v == null || v.trim().isEmpty)
-                          ? "Email required"
+                          ? "Phone Number required"
                           : null,
                     ),
                     GestureDetector(
@@ -375,7 +375,7 @@ class _EditProfileState extends State<EditProfile> {
                             final data = {
                               "name": _nameController.text.trim(),
                               "email": _emailController.text.trim(),
-                              "phone": _phoneController.text.trim(),
+                              "mobile": _phoneController.text.trim(),
                               "image": imageToSend,
                               "state_id": selectedStateId, // Optional or null
                               "city_id": selectedCityId, // Optional or null

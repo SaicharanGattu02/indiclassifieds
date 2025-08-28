@@ -68,7 +68,7 @@ class _SubCategoriesScreenState extends State<SubCategoriesScreen> {
                                         .subCategoryModel
                                         .sub_category_banner ??
                                     "",
-                                fit: BoxFit.contain,
+                                fit: BoxFit.cover,
                                 placeholder: (context, url) => Center(
                                   child: spinkits.getSpinningLinespinkit(),
                                 ),

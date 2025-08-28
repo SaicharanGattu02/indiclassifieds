@@ -68,7 +68,8 @@ class _AdsScreenState extends State<AdsScreen> {
   void _onChangeTab(AdStatus status) {
     setState(() => selectedStatus = status);
 
-    if (!(isGuestUser ?? true)) { // call only if not guest
+    if (!(isGuestUser ?? true)) {
+      // call only if not guest
       context.read<MyAdsCubit>().getMyAds(status.apiParam);
     }
   }
@@ -80,8 +81,8 @@ class _AdsScreenState extends State<AdsScreen> {
     final isScrollEnd = sn.metrics.pixels >= (sn.metrics.maxScrollExtent - 200);
     final movingForward =
         sn is ScrollUpdateNotification &&
-            sn.scrollDelta != null &&
-            sn.scrollDelta! > 0;
+        sn.scrollDelta != null &&
+        sn.scrollDelta! > 0;
 
     if (isScrollEnd && movingForward) {
       context.read<MyAdsCubit>().getMoreMyAds(selectedStatus.apiParam);
@@ -107,147 +108,145 @@ class _AdsScreenState extends State<AdsScreen> {
           ? Center(child: DottedProgressWithLogo()) // still checking
           : (isGuestUser == true)
           ? Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          spacing: 12,
-          children: [
-            Image.asset(
-              'assets/nodata/no_data.png',
-              width: SizeConfig.screenWidth * 0.22,
-              height: SizeConfig.screenHeight * 0.12,
-            ),
-            Text(
-              'Login to view your ads',
-              style: AppTextStyles.headlineSmall(textColor),
-            ),
-          ],
-        ),
-      )
-          : Column(
-        children: [
-          // ✅ Tabs
-          Padding(
-            padding: const EdgeInsets.symmetric(
-                horizontal: 16, vertical: 12),
-            child: Row(
-              children: AdStatus.values.map((status) {
-                final isSelected = selectedStatus == status;
-                return Expanded(
-                  child: Padding(
-                    padding:
-                    const EdgeInsets.symmetric(horizontal: 4),
-                    child: TextButton(
-                      onPressed: () => _onChangeTab(status),
-                      style: TextButton.styleFrom(
-                        backgroundColor: isSelected
-                            ? AppColors.primary
-                            : Colors.grey.shade200,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                        padding:
-                        const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                      child: Text(
-                        status.label.toUpperCase(),
-                        style: AppTextStyles.bodyMedium(
-                          isSelected
-                              ? Colors.white
-                              : Colors.grey.shade700,
-                        ).copyWith(fontWeight: FontWeight.w600),
-                      ),
-                    ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                spacing: 12,
+                children: [
+                  Image.asset(
+                    'assets/nodata/no_data.png',
+                    width: SizeConfig.screenWidth * 0.4,
+                    height: SizeConfig.screenHeight * 0.12,
                   ),
-                );
-              }).toList(),
-            ),
-          ),
-
-          // ✅ Ads list
-          Expanded(
-            child: BlocBuilder<MyAdsCubit, MyAdsStates>(
-              builder: (context, state) {
-                final isLoading = state is MyAdsLoading ||
-                    state is MyAdsInitially;
-                final isLoadingMore = state is MyAdsLoadingMore;
-                final hasNextPage = (state is MyAdsLoaded)
-                    ? state.hasNextPage
-                    : (state is MyAdsLoadingMore)
-                    ? state.hasNextPage
-                    : false;
-                if (isLoading) {
-                  return Center(child: DottedProgressWithLogo());
-                }
-                if (state is MyAdsFailure) {
-                  return Center(
-                    child: Text(
-                      state.error.isEmpty
-                          ? 'Failed to load ads'
-                          : state.error,
-                      style: AppTextStyles.bodyMedium(textColor),
-                    ),
-                  );
-                }
-                final model = (state is MyAdsLoaded)
-                    ? state.myAdsModel
-                    : (state is MyAdsLoadingMore)
-                    ? state.myAdsModel
-                    : null;
-
-                final items = model?.data ?? [];
-
-                if (items.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      spacing: 12,
-                      children: [
-                        Image.asset(
-                          'assets/nodata/no_data.png',
-                          width: SizeConfig.screenWidth * 0.22,
-                          height: SizeConfig.screenHeight * 0.12,
+                  Text(
+                    'Login to view your ads',
+                    style: AppTextStyles.headlineSmall(textColor),
+                  ),
+                ],
+              ),
+            )
+          : Column(
+              children: [
+                // ✅ Tabs
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  child: Row(
+                    children: AdStatus.values.map((status) {
+                      final isSelected = selectedStatus == status;
+                      return Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: TextButton(
+                            onPressed: () => _onChangeTab(status),
+                            style: TextButton.styleFrom(
+                              backgroundColor: isSelected
+                                  ? AppColors.primary
+                                  : Colors.grey.shade200,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(24),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                            child: Text(
+                              status.label.toUpperCase(),
+                              style: AppTextStyles.bodyMedium(
+                                isSelected
+                                    ? Colors.white
+                                    : Colors.grey.shade700,
+                              ).copyWith(fontWeight: FontWeight.w600),
+                            ),
+                          ),
                         ),
-                        Text(
-                          'No ${selectedStatus.label.toLowerCase()} Found!',
-                          style: AppTextStyles.headlineSmall(
-                              textColor),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-                return NotificationListener<ScrollNotification>(
-                  onNotification: (sn) =>
-                      _onScrollNotification(sn, hasNextPage),
-                  child: ListView.separated(
-                    padding: const EdgeInsets.all(16),
-                    itemCount:
-                    items.length + (isLoadingMore ? 1 : 0),
-                    separatorBuilder: (_, __) =>
-                    const SizedBox(height: 16),
-                    itemBuilder: (_, index) {
-                      if (isLoadingMore && index == items.length) {
-                        return const Padding(
-                          padding:
-                          EdgeInsets.symmetric(vertical: 12),
-                          child: Center(
-                              child: CircularProgressIndicator()),
+                      );
+                    }).toList(),
+                  ),
+                ),
+
+                // ✅ Ads list
+                Expanded(
+                  child: BlocBuilder<MyAdsCubit, MyAdsStates>(
+                    builder: (context, state) {
+                      final isLoading =
+                          state is MyAdsLoading || state is MyAdsInitially;
+                      final isLoadingMore = state is MyAdsLoadingMore;
+                      final hasNextPage = (state is MyAdsLoaded)
+                          ? state.hasNextPage
+                          : (state is MyAdsLoadingMore)
+                          ? state.hasNextPage
+                          : false;
+                      if (isLoading) {
+                        return Center(child: DottedProgressWithLogo());
+                      }
+                      if (state is MyAdsFailure) {
+                        return Center(
+                          child: Text(
+                            state.error.isEmpty
+                                ? 'Failed to load ads'
+                                : state.error,
+                            style: AppTextStyles.bodyMedium(textColor),
+                          ),
                         );
                       }
-                      final ad = items[index];
-                      return AdCardDynamic(
-                        ad: ad,
-                        isDark: isDark,
-                        textColor: textColor,
+                      final model = (state is MyAdsLoaded)
+                          ? state.myAdsModel
+                          : (state is MyAdsLoadingMore)
+                          ? state.myAdsModel
+                          : null;
+
+                      final items = model?.data ?? [];
+
+                      if (items.isEmpty) {
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            spacing: 12,
+                            children: [
+                              Image.asset(
+                                'assets/nodata/no_data.png',
+                                width: SizeConfig.screenWidth * 0.22,
+                                height: SizeConfig.screenHeight * 0.12,
+                              ),
+                              Text(
+                                'No ${selectedStatus.label.toLowerCase()} Found!',
+                                style: AppTextStyles.headlineSmall(textColor),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                      return NotificationListener<ScrollNotification>(
+                        onNotification: (sn) =>
+                            _onScrollNotification(sn, hasNextPage),
+                        child: ListView.separated(
+                          padding: const EdgeInsets.all(16),
+                          itemCount: items.length + (isLoadingMore ? 1 : 0),
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 16),
+                          itemBuilder: (_, index) {
+                            if (isLoadingMore && index == items.length) {
+                              return const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 12),
+                                child: Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              );
+                            }
+                            final ad = items[index];
+                            return AdCardDynamic(
+                              ad: ad,
+                              isDark: isDark,
+                              textColor: textColor,
+                            );
+                          },
+                        ),
                       );
                     },
                   ),
-                );
-              },
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }

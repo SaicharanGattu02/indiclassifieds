@@ -9,6 +9,8 @@ import '../../data/cubit/ChatUsers/ChatUsersCubit.dart';
 import '../../data/cubit/ChatUsers/ChatUsersStates.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
+import '../../utils/media_query_helper.dart';
+import '../../widgets/CommonLoader.dart';
 import 'ChatScreen.dart';
 
 import 'package:flutter/material.dart';
@@ -27,30 +29,31 @@ class _UserListScreenState extends State<UserListScreen> with SingleTickerProvid
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
-  // --- at the top of your State class ---
   Timer? _searchDebounce;
   static const _searchDelay = Duration(milliseconds: 350);
-  String _lastFiredQuery = '';   // avoids redundant fetches
+  String _lastFiredQuery = '';
   String _query = '';
 
+  bool? _isGuestUser; // <-- track guest
 
   @override
   void initState() {
     super.initState();
-    // Fetch chat users
-    context.read<ChatUsersCubit>().fetchChatUsers("");
-    getUserId();
-
-    // Initialize animation controller
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 600),
-    );
-    _fadeAnimation = CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    );
+    _init();
+    _animationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
+    _fadeAnimation = CurvedAnimation(parent: _animationController, curve: Curves.easeInOut);
     _animationController.forward();
+  }
+
+  Future<void> _init() async {
+    final isGuest = await AuthService.isGuest;
+    setState(() => _isGuestUser = isGuest);
+
+    // only fetch if NOT guest
+    if (!isGuest) {
+      context.read<ChatUsersCubit>().fetchChatUsers("");
+      getUserId();
+    }
   }
 
   Future<void> getUserId() async {
@@ -67,26 +70,25 @@ class _UserListScreenState extends State<UserListScreen> with SingleTickerProvid
   }
 
   void _onSearchChanged(String v) {
+    if (_isGuestUser ?? true) return; // block in guest mode
     setState(() => _query = v);
     _searchDebounce?.cancel();
     _searchDebounce = Timer(_searchDelay, () {
       if (!mounted) return;
       final q = _query.trim();
-      if (q == _lastFiredQuery) return; // no-op if same as last fired
+      if (q == _lastFiredQuery) return;
       _lastFiredQuery = q;
       context.read<ChatUsersCubit>().fetchChatUsers(q);
     });
   }
 
   void _clearSearch() {
+    if (_isGuestUser ?? true) return; // block in guest mode
     _searchDebounce?.cancel();
-    setState(() {
-      _query = '';
-    });
+    setState(() => _query = '');
     _lastFiredQuery = '';
     context.read<ChatUsersCubit>().fetchChatUsers('');
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -100,16 +102,27 @@ class _UserListScreenState extends State<UserListScreen> with SingleTickerProvid
         elevation: 0,
         backgroundColor: bg,
         surfaceTintColor: Colors.transparent,
-        title: Text(
-          'Messages',
-          style: AppTextStyles.headlineMedium(textColor).copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        actions: [
-        ],
+        title: Text('Messages', style: AppTextStyles.headlineMedium(textColor).copyWith(fontWeight: FontWeight.bold)),
       ),
-      body: Column(
+      body: (_isGuestUser == null)
+          ? Center(child: DottedProgressWithLogo()) // determining guest status
+          : (_isGuestUser == true)
+      // ---------- Guest placeholder (no API calls, no search) ----------
+          ? Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset('assets/nodata/no_data.png',
+                width: SizeConfig.screenWidth * 0.4,
+                height: SizeConfig.screenHeight * 0.12),
+            const SizedBox(height: 12),
+            Text('Login to view your messages',
+                style: AppTextStyles.headlineSmall(textColor)),
+          ],
+        ),
+      )
+      // -------------------- Logged-in UI --------------------
+          : Column(
         children: [
           FadeTransition(
             opacity: _fadeAnimation,
@@ -127,7 +140,7 @@ class _UserListScreenState extends State<UserListScreen> with SingleTickerProvid
                     ),
                   ],
                 ),
-                child:TextField(
+                child: TextField(
                   controller: _search,
                   onChanged: _onSearchChanged,
                   style: AppTextStyles.bodyMedium(textColor),
@@ -148,8 +161,6 @@ class _UserListScreenState extends State<UserListScreen> with SingleTickerProvid
               ),
             ),
           ),
-
-          // Dynamic List
           Expanded(
             child: BlocBuilder<ChatUsersCubit, ChatUsersStates>(
               builder: (context, state) {
@@ -162,20 +173,21 @@ class _UserListScreenState extends State<UserListScreen> with SingleTickerProvid
                   final filtered = _query.trim().isEmpty
                       ? users
                       : users
-                      .where((u) => (u.name ?? '').toLowerCase().contains(_query.toLowerCase()))
+                      .where((u) => (u.name ?? '')
+                      .toLowerCase()
+                      .contains(_query.toLowerCase()))
                       .toList();
 
                   if (filtered.isEmpty) {
                     return Center(
-                      child: Text(
-                        'No users found',
-                        style: AppTextStyles.bodyLarge(textColor.withOpacity(0.7)),
-                      ),
+                      child: Text('No users found',
+                          style: AppTextStyles.bodyLarge(textColor.withOpacity(0.7))),
                     );
                   }
 
                   return RefreshIndicator(
-                    onRefresh: () async => context.read<ChatUsersCubit>().fetchChatUsers(""),
+                    onRefresh: () async =>
+                        context.read<ChatUsersCubit>().fetchChatUsers(""),
                     color: textColor,
                     backgroundColor: card,
                     child: ListView.separated(
@@ -191,13 +203,14 @@ class _UserListScreenState extends State<UserListScreen> with SingleTickerProvid
                         return _ChatCard(
                           id: id,
                           name: name,
-                          imageUrl: imageUrl, // ← pass it
+                          imageUrl: imageUrl,
                           onTap: () {
-                            context.push('/chat?receiverId=$id&receiverName=$name&receiverImage=${user.profileImage}');
+                            context.push(
+                                '/chat?receiverId=$id&receiverName=$name&receiverImage=${user.profileImage}');
                           },
                           card: card,
                           textColor: textColor,
-                          animationDelay: i * 100, // Staggered animation for each card
+                          animationDelay: i * 100,
                         );
                       },
                     ),
@@ -216,17 +229,14 @@ class _UserListScreenState extends State<UserListScreen> with SingleTickerProvid
   Widget _buildShimmerList(Color card, Color textColor) {
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
-      itemCount: 6, // Number of shimmer placeholders
+      itemCount: 6,
       separatorBuilder: (_, __) => const SizedBox(height: 8),
       itemBuilder: (_, __) => Shimmer.fromColors(
         baseColor: card.withOpacity(0.5),
         highlightColor: card.withOpacity(0.8),
         child: Container(
           height: 72,
-          decoration: BoxDecoration(
-            color: card,
-            borderRadius: BorderRadius.circular(16),
-          ),
+          decoration: BoxDecoration(color: card, borderRadius: BorderRadius.circular(16)),
         ),
       ),
     );
@@ -238,24 +248,15 @@ class _UserListScreenState extends State<UserListScreen> with SingleTickerProvid
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(
-            error,
-            style: AppTextStyles.bodyLarge(textColor.withOpacity(0.7)),
-            textAlign: TextAlign.center,
-          ),
+          Text(error, style: AppTextStyles.bodyLarge(textColor.withOpacity(0.7)), textAlign: TextAlign.center),
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () => context.read<ChatUsersCubit>().fetchChatUsers(""),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.blue,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            child: Text(
-              'Retry',
-              style: AppTextStyles.bodyMedium(Colors.white),
-            ),
+            child: Text('Retry', style: AppTextStyles.bodyMedium(Colors.white)),
           ),
         ],
       ),

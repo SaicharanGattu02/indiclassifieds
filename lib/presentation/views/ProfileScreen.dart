@@ -22,10 +22,23 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  bool? _isGuestUser; // ← track guest
+
   @override
   void initState() {
     super.initState();
-    context.read<ProfileCubit>().getProfileDetails();
+    _init();
+  }
+
+  Future<void> _init() async {
+    final isGuest = await AuthService.isGuest;
+    setState(() => _isGuestUser = isGuest);
+
+    // fetch profile ONLY if not guest
+    if (!isGuest) {
+      // ignore: use_build_context_synchronously
+      context.read<ProfileCubit>().getProfileDetails();
+    }
   }
 
   @override
@@ -49,203 +62,152 @@ class _ProfileScreenState extends State<ProfileScreen> {
         iconTheme: IconThemeData(color: textColor),
         title: Text('Profile', style: AppTextStyles.headlineSmall(textColor)),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: BlocBuilder<ProfileCubit, ProfileStates>(
-          builder: (context, state) {
-            if (state is ProfileLoading) {
-              return SizedBox(
-                height: height * 0.75,
-                child: Center(child: DottedProgressWithLogo()),
-              );
-            } else if (state is ProfileLoaded) {
-              final user_data = state.profileModel.data;
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Center(
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        CachedNetworkImage(
-                          imageUrl: user_data?.image ?? "",
-                          imageBuilder: (context, imageProvider) => Container(
-                            padding: EdgeInsets.all(12),
-                            width: 120,
-                            height: 120,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              image: DecorationImage(
-                                image: imageProvider,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
+      body: (_isGuestUser == null)
+        ? SizedBox(height: height * 0.75, child: const Center(child: DottedProgressWithLogo()))
+        : (_isGuestUser == true)
+    // ── Guest view: no API, simple prompt
+        ? _GuestProfilePlaceholder(textColor: textColor)
+    // ── Logged-in view: original BlocBuilder flow
+        : SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: BlocBuilder<ProfileCubit, ProfileStates>(
+        builder: (context, state) {
+          if (state is ProfileLoading) {
+            return SizedBox(
+              height: height * 0.75,
+              child: const Center(child: DottedProgressWithLogo()),
+            );
+          } else if (state is ProfileLoaded) {
+            final user_data = state.profileModel.data;
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Center(
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      CachedNetworkImage(
+                        imageUrl: user_data?.image ?? "",
+                        imageBuilder: (context, imageProvider) => Container(
+                          padding: const EdgeInsets.all(12),
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
                           ),
-                          placeholder: (context, url) => Container(
-                            width: 120,
-                            height: 120,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(shape: BoxShape.circle),
-                            child: Center(
-                              child: spinkits.getSpinningLinespinkit(),
-                            ),
-                          ),
-                          errorWidget: (context, url, error) => Container(
-                            width: 120,
-                            height: 120,
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                              image: DecorationImage(
-                                image: AssetImage("assets/images/profile.png"),
-                                fit: BoxFit.cover,
-                              ),
+                        ),
+                        placeholder: (context, url) => Container(
+                          width: 120,
+                          height: 120,
+                          alignment: Alignment.center,
+                          decoration: const BoxDecoration(shape: BoxShape.circle),
+                          child: Center(child: spinkits.getSpinningLinespinkit()),
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          width: 120,
+                          height: 120,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            image: DecorationImage(
+                              image: AssetImage("assets/images/profile.png"),
+                              fit: BoxFit.cover,
                             ),
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    user_data?.name ?? "",
-                    style: AppTextStyles.headlineSmall(textColor),
-                  ),
-                  Text(
-                    user_data?.email ?? "",
-                    style: AppTextStyles.bodySmall(textColor),
-                  ),
-                  const SizedBox(height: 8),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
                       ),
-                    ),
-                    onPressed: () {
-                      context.push('/edit_profile_screen');
-                    },
-                    child: const Text(
-                      'Edit Profile',
-                      style: TextStyle(color: Colors.white),
-                    ),
+                    ],
                   ),
-                  const SizedBox(height: 20),
-                  _settingsTile(
-                    Icons.unsubscribe_outlined,
-                    Colors.blue.shade100,
-                    'Subscription',
-                    isDark,
-                    textColor,
-                    trailing: Icons.arrow_forward_ios,
-                    onTap: () {
-                      context.push("/plans");
-                    },
-                  ),
-                  // _settingsTile(
-                  //   Icons.unsubscribe_outlined,
-                  //   Colors.blue.shade100,
-                  //   'Advertisements',
-                  //   isDark,
-                  //   textColor,
-                  //   trailing: Icons.arrow_forward_ios,
-                  //   onTap: () {
-                  //     context.push("/advertisements");
-                  //   },
-                  // ),
-                  _settingsTile(
-                    onTap: () {
-                      context.push('/wish_list');
-                    },
-                    Icons.favorite,
-                    Colors.red.shade100,
-                    'Wishlist',
-                    isDark,
-                    textColor,
-                    trailing: Icons.arrow_forward_ios,
-                  ),
-                  _settingsTile(
-                    onTap: () {
-                      context.push('/transactions');
-                    },
-                    Icons.receipt_long,
-                    Colors.blue.shade100,
-                    'Transaction History',
-                    isDark,
-                    textColor,
-                    trailing: Icons.arrow_forward_ios,
-                  ),
-                  // _settingsTile(
-                  //   Icons.nightlight_round,
-                  //   Colors.purple.shade100,
-                  //   'Dark Theme',
-                  //   ThemeHelper.isDarkMode(context),
-                  //   ThemeHelper.textColor(context),
-                  //   // isSwitch: true,
-                  //   // switchValue: effectiveDark,
-                  //   onSwitchChanged: (val) {
-                  //     final cubit = context.read<ThemeCubit>();
-                  //     if (val) {
-                  //       cubit.setDarkTheme(); // exits System if it was set
-                  //     } else {
-                  //       cubit.setLightTheme();
-                  //     }
-                  //   },
-                  //   onTap: () => _openThemePicker(
-                  //     context,
-                  //   ), // optional system/light/dark sheet
-                  //   trailingText: isSystem ? 'System' : null,
-                  // ),
-                  _settingsTile(
-                    Icons.share,
-                    Colors.orange.shade100,
-                    'Share this App',
-                    isDark,
-                    textColor,
-                    trailing: Icons.arrow_forward_ios,
-                  ),
-                  _settingsTile(
-                    Icons.star_rate,
-                    Colors.yellow.shade100,
-                    'Rate us',
-                    isDark,
-                    textColor,
-                    trailing: Icons.arrow_forward_ios,
-                  ),
-                  _settingsTile(
-                    Icons.headset_mic,
-                    Colors.lightBlue.shade100,
-                    'Contact us',
-                    isDark,
-                    textColor,
-                    trailing: Icons.arrow_forward_ios,
-                  ),
-                  _settingsTile(
-                    Icons.info,
-                    Colors.purple.shade100,
-                    'About us',
-                    isDark,
-                    textColor,
-                    trailing: Icons.arrow_forward_ios,
-                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(user_data?.name ?? "", style: AppTextStyles.headlineSmall(textColor)),
+                Text(user_data?.email ?? "", style: AppTextStyles.bodySmall(textColor)),
+                const SizedBox(height: 8),
 
-                  const SizedBox(height: 20),
-
-                  CustomAppButton1(
-                    text: "Log Out",
-                    onPlusTap: () {
-                      showLogoutDialog(context);
-                    },
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                   ),
-                  const SizedBox(height: 20),
-                ],
-              );
-            } else {
-              return Center(child: Text("No data Found!"));
-            }
-          },
-        ),
+                  onPressed: () => context.push('/edit_profile_screen'),
+                  child: const Text('Edit Profile', style: TextStyle(color: Colors.white)),
+                ),
+                const SizedBox(height: 20),
+
+                _settingsTile(
+                  Icons.unsubscribe_outlined,
+                  Colors.blue.shade100,
+                  'Subscription',
+                  isDark,
+                  textColor,
+                  trailing: Icons.arrow_forward_ios,
+                  onTap: () => context.push("/plans"),
+                ),
+                _settingsTile(
+                  Icons.favorite,
+                  Colors.red.shade100,
+                  'Wishlist',
+                  isDark,
+                  textColor,
+                  trailing: Icons.arrow_forward_ios,
+                  onTap: () => context.push('/wish_list'),
+                ),
+                _settingsTile(
+                  Icons.receipt_long,
+                  Colors.blue.shade100,
+                  'Transaction History',
+                  isDark,
+                  textColor,
+                  trailing: Icons.arrow_forward_ios,
+                  onTap: () => context.push('/transactions'),
+                ),
+                // _settingsTile(
+                //   Icons.share,
+                //   Colors.orange.shade100,
+                //   'Share this App',
+                //   isDark,
+                //   textColor,
+                //   trailing: Icons.arrow_forward_ios,
+                // ),
+                // _settingsTile(
+                //   Icons.star_rate,
+                //   Colors.yellow.shade100,
+                //   'Rate us',
+                //   isDark,
+                //   textColor,
+                //   trailing: Icons.arrow_forward_ios,
+                // ),
+                // _settingsTile(
+                //   Icons.headset_mic,
+                //   Colors.lightBlue.shade100,
+                //   'Contact us',
+                //   isDark,
+                //   textColor,
+                //   trailing: Icons.arrow_forward_ios,
+                // ),
+                // _settingsTile(
+                //   Icons.info,
+                //   Colors.purple.shade100,
+                //   'About us',
+                //   isDark,
+                //   textColor,
+                //   trailing: Icons.arrow_forward_ios,
+                // ),
+
+                const SizedBox(height: 20),
+                CustomAppButton1(
+                  text: "Log Out",
+                  onPlusTap: () => showLogoutDialog(context),
+                ),
+                const SizedBox(height: 20),
+              ],
+            );
+          } else {
+            return Center(child: Text("No data Found!", style: AppTextStyles.bodyMedium(textColor)));
+          }
+        },
       ),
+    ),
     );
   }
 
@@ -535,3 +497,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
 }
+
+
+/// Simple guest-only placeholder widget
+class _GuestProfilePlaceholder extends StatelessWidget {
+  final Color textColor;
+  const _GuestProfilePlaceholder({required this.textColor});
+
+  @override
+  Widget build(BuildContext context) {
+    final card = ThemeHelper.cardColor(context);
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset('assets/nodata/no_data.png', width: 100, height: 100),
+            const SizedBox(height: 12),
+            Text('You are browsing as a guest',
+                style: AppTextStyles.headlineSmall(textColor), textAlign: TextAlign.center),
+            const SizedBox(height: 8),
+            Text('Login to view and edit your profile.',
+                style: AppTextStyles.bodyMedium(textColor.withOpacity(0.8)),
+                textAlign: TextAlign.center),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: 180,
+              child: ElevatedButton(
+                onPressed: () => context.push('/login'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: card,
+                  foregroundColor: textColor,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: const Text('Go to Login'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
