@@ -10,6 +10,7 @@ import '../../Components/CutomAppBar.dart';
 import '../../Components/ShakeWidget.dart';
 import '../../data/cubit/Ad/BikesAd/bikes_ad_cubit.dart';
 import '../../data/cubit/Ad/BikesAd/bikes_ad_states.dart';
+import '../../data/cubit/City/city_cubit.dart';
 import '../../data/cubit/MyAds/GetMarkAsListing/get_listing_ad_cubit.dart';
 import '../../data/cubit/MyAds/MarkAsListing/mark_as_listing_cubit.dart';
 import '../../data/cubit/MyAds/MarkAsListing/mark_as_listing_state.dart';
@@ -20,6 +21,8 @@ import '../../data/remote_data_source.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../utils/AppLogger.dart';
 import '../../utils/ImagePickerHelper.dart';
+import '../../utils/constants.dart';
+import '../../utils/place_picker_bottomsheet.dart';
 import '../../utils/planhelper.dart';
 import '../../widgets/CommonLoader.dart';
 import '../../widgets/CommonTextField.dart';
@@ -56,6 +59,10 @@ class _BikeAdState extends State<BikeAd> {
   bool _showimagesError = false;
   bool _showFuelTypeError = false;
   bool _showOwnershipTypeError = false;
+  bool _showDescriptionError = false;
+  bool _showManufactureError = false;
+  bool _showKmsError = false;
+  bool _showPriceError = false;
   final descriptionController = TextEditingController();
   final brandController = TextEditingController();
   final locationController = TextEditingController();
@@ -120,6 +127,42 @@ class _BikeAdState extends State<BikeAd> {
     } else {
       setState(() => isLoading = false);
     }
+    fetchData();
+  }
+
+  void fetchData() async {
+    String? name = await AuthService.getName();
+    String? phone = await AuthService.getMobile();
+    String? stateIdStr = await AuthService.getState();
+    String? cityIdStr = await AuthService.getCity();
+    String? stateId = await AuthService.getStateId();
+    String? cityId = await AuthService.getCityId();
+
+    if (name != null && name.isNotEmpty) {
+      nameController.text = name;
+    }
+
+    if (phone != null && phone.isNotEmpty) {
+      phoneController.text = phone;
+    }
+
+    if (stateIdStr != null && stateIdStr.isNotEmpty) {
+      stateController.text = stateIdStr;
+    }
+
+    if (cityIdStr != null && cityIdStr.isNotEmpty) {
+      cityController.text = cityIdStr;
+    }
+    if (stateId != null && stateId.isNotEmpty) {
+      setState(() {
+        selectedStateId = int.tryParse(stateId);
+      });
+    }  if (cityId != null && cityId.isNotEmpty) {
+      setState(() {
+        selectedCityId = int.tryParse(cityId);
+      });
+    }
+    debugPrint("✅ INFO: state: $stateId");
   }
 
   String? imagePath;
@@ -169,9 +212,19 @@ class _BikeAdState extends State<BikeAd> {
                           controller: yearOfManufacturingController,
                           keyboardType: TextInputType.number,
                           color: textColor,
-                          validator: (v) => (v == null || v.trim().isEmpty)
-                              ? 'Year of Manufacturing is required'
-                              : null,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly, // Allow only digits
+                          ],
+                          validator: (v) {
+                            if (v == null || v.trim().isEmpty) {
+                              return 'Year of Manufacturing is required';
+                            }
+                            final year = int.tryParse(v);
+                            if (year == null || year < 1900 || year > DateTime.now().year) {
+                              return 'Enter a valid year';
+                            }
+                            return null;
+                          },
                         ),
                         CommonTextField1(
                           lable: 'KMs Run',
@@ -179,9 +232,19 @@ class _BikeAdState extends State<BikeAd> {
                           controller: kmsController,
                           keyboardType: TextInputType.number,
                           color: textColor,
-                          validator: (v) => (v == null || v.trim().isEmpty)
-                              ? 'KMs Run is required'
-                              : null,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly, // Allow only digits
+                          ],
+                          validator: (v) {
+                            if (v == null || v.trim().isEmpty) {
+                              return 'KMs Run is required';
+                            }
+                            final kms = int.tryParse(v);
+                            if (kms == null || kms < 0) {
+                              return 'Enter a valid number';
+                            }
+                            return null;
+                          },
                         ),
                         CommonTextField1(
                           lable: 'Description',
@@ -208,11 +271,20 @@ class _BikeAdState extends State<BikeAd> {
                             color: textColor,
                             size: 16,
                           ),
-                          validator: (v) => (v == null || v.trim().isEmpty)
-                              ? 'Price required'
-                              : null,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly, // Allow only digits
+                          ],
+                          validator: (v) {
+                            if (v == null || v.trim().isEmpty) {
+                              return 'Price required';
+                            }
+                            final price = int.tryParse(v);
+                            if (price == null || price <= 0) {
+                              return 'Enter a valid price';
+                            }
+                            return null;
+                          },
                         ),
-
                         GestureDetector(
                           onTap: () async {
                             final selectedState = await showModalBottomSheet(
@@ -412,12 +484,27 @@ class _BikeAdState extends State<BikeAd> {
                         ),
                         CommonTextField1(
                           lable: 'Address',
-                          hint: 'Enter Address',
+                          hint: 'Enter Location',
                           controller: locationController,
-                          color: textColor,
+                          color: ThemeHelper.textColor(context),
                           validator: (v) => (v == null || v.trim().isEmpty)
-                              ? 'Required location'
+                              ? 'Required Location'
                               : null,
+                          isRead: true,
+                          onTap: () async {
+                            FocusScope.of(context).unfocus();
+                            final picked = await openPlacePickerBottomSheet(
+                              context: context,
+                              googleApiKey: google_map_key,
+                              controller: locationController,
+                              appendToExisting: false,
+                              components: 'country:in',
+                              language: 'en',
+                            );
+                            if (picked != null) {
+                              latlng = "${picked.lat}, ${picked.lng}";
+                            }
+                          },
                         ),
                         if (widget.editId == null ||
                             widget.editId
@@ -512,6 +599,42 @@ class _BikeAdState extends State<BikeAd> {
                                         );
                                         isValid = false;
                                       }
+                                      if (descriptionController.text.trim().isEmpty) {
+                                        setState(() => _showDescriptionError = true);
+                                        isValid = false;
+                                      } else {
+                                        setState(() => _showDescriptionError = false);
+                                      }
+                                      if (priceController.text.trim().isEmpty) {
+                                        setState(() => _showPriceError = true);
+                                        isValid = false;
+                                      } else {
+                                        setState(() => _showPriceError = false);
+                                      }
+                                      if (yearOfManufacturingController.text.trim().isEmpty) {
+                                        setState(() => _showManufactureError = true);
+                                        isValid = false;
+                                      } else {
+                                        setState(() => _showManufactureError = false);
+                                      }if (kmsController.text.trim().isEmpty) {
+                                        setState(() => _showKmsError = true);
+                                        isValid = false;
+                                      } else {
+                                        setState(() => _showKmsError = false);
+                                      }
+                                      if (_images.isEmpty) {
+                                        setState(() => _showimagesError = true);
+                                        CustomSnackBar1.show(
+                                          context,
+                                          "Please select atleast 2 images",
+                                        );
+                                        isValid = false;
+
+                                      } else {
+                                        setState(
+                                              () => _showimagesError = false,
+                                        );
+                                      }
                                       if ((widget.editId == null ||
                                               widget.editId
                                                   .replaceAll('"', '')
@@ -583,6 +706,7 @@ class _BikeAdState extends State<BikeAd> {
                                           "full_name": nameController.text,
                                           "state_id": selectedStateId,
                                           "city_id": selectedCityId,
+                                          "location_key": latlng,
                                           "year_of_manufacturing":
                                               yearOfManufacturingController
                                                   .text,

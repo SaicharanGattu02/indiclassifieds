@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../theme/AppTextStyles.dart';
 import '../Components/ShakeWidget.dart';
 import '../theme/ThemeHelper.dart';
+import '../utils/color_constants.dart';
 
 class CommonTextField extends StatelessWidget {
   final String hint;
@@ -17,6 +18,7 @@ class CommonTextField extends StatelessWidget {
   final bool showError;
   final String errorKey;
   final String errorMsg;
+
   final List<TextInputFormatter>? inputFormatters;
 
   const CommonTextField({
@@ -41,6 +43,8 @@ class CommonTextField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+         SizedBox(height: 20),
+
         TextField(
           style: AppTextStyles.bodyMedium(color),
           controller: controller,

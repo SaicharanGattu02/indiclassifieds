@@ -21,6 +21,8 @@ import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../utils/AppLogger.dart';
 import '../../utils/ImagePickerHelper.dart';
+import '../../utils/constants.dart';
+import '../../utils/place_picker_bottomsheet.dart';
 import '../../utils/planhelper.dart';
 import '../../widgets/CommonLoader.dart';
 import '../../widgets/CommonTextField.dart';
@@ -116,6 +118,42 @@ class _CommunityAdScreenState extends State<CommunityAdScreen> {
     }
     brandController.text = widget.SubCatName ?? "";
     titleController.text = widget.CatName ?? "";
+    fetchData();
+  }
+
+  void fetchData() async {
+    String? name = await AuthService.getName();
+    String? phone = await AuthService.getMobile();
+    String? stateIdStr = await AuthService.getState();
+    String? cityIdStr = await AuthService.getCity();
+    String? stateId = await AuthService.getStateId();
+    String? cityId = await AuthService.getCityId();
+
+    if (name != null && name.isNotEmpty) {
+      nameController.text = name;
+    }
+
+    if (phone != null && phone.isNotEmpty) {
+      phoneController.text = phone;
+    }
+
+    if (stateIdStr != null && stateIdStr.isNotEmpty) {
+      stateController.text = stateIdStr;
+    }
+
+    if (cityIdStr != null && cityIdStr.isNotEmpty) {
+      cityController.text = cityIdStr;
+    }
+    if (stateId != null && stateId.isNotEmpty) {
+      setState(() {
+        selectedStateId = int.tryParse(stateId);
+      });
+    } if (cityId != null && cityId.isNotEmpty) {
+      setState(() {
+        selectedCityId = int.tryParse(cityId);
+      });
+    }
+    debugPrint("✅ INFO: state: $stateId");
   }
 
   @override
@@ -334,10 +372,25 @@ class _CommunityAdScreenState extends State<CommunityAdScreen> {
                           lable: 'Address',
                           hint: 'Enter Location',
                           controller: locationController,
-                          color: textColor,
+                          color: ThemeHelper.textColor(context),
                           validator: (v) => (v == null || v.trim().isEmpty)
-                              ? 'Required location'
+                              ? 'Required Location'
                               : null,
+                          isRead: true,
+                          onTap: () async {
+                            FocusScope.of(context).unfocus();
+                            final picked = await openPlacePickerBottomSheet(
+                              context: context,
+                              googleApiKey: google_map_key,
+                              controller: locationController,
+                              appendToExisting: false,
+                              components: 'country:in',
+                              language: 'en',
+                            );
+                            if (picked != null) {
+                              latlng = "${picked.lat}, ${picked.lng}";
+                            }
+                          },
                         ),
                         if (widget.editId == null ||
                             widget.editId
@@ -486,6 +539,7 @@ class _CommunityAdScreenState extends State<CommunityAdScreen> {
                                           "location": locationController.text,
                                           "mobile_number": phoneController.text,
                                           "email": emailController.text,
+                                          "location_key": latlng,
                                           "player_slots":
                                               _availablePlayerSlots.text,
                                           "price": priceController.text,

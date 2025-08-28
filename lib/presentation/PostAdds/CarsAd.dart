@@ -25,6 +25,8 @@ import '../../utils/AppLogger.dart';
 import '../../utils/ImagePickerHelper.dart';
 import '../../utils/ImageUtils.dart';
 import '../../utils/color_constants.dart';
+import '../../utils/constants.dart';
+import '../../utils/place_picker_bottomsheet.dart';
 import '../../utils/planhelper.dart';
 import '../../widgets/CommonLoader.dart';
 import '../../widgets/CommonTextField.dart';
@@ -81,6 +83,10 @@ class _CarsAdState extends State<CarsAd> {
   bool _showFuelTypeError = false;
   bool _showOwnershipTypeError = false;
   bool _showTransmissionError = false;
+  bool _showDescriptionError = false;
+  bool _showManufactureError = false;
+  bool _showKmsError = false;
+  bool _showPriceError = false;
 
   bool isLoading = true;
   List<ImageData> _imageDataList = [];
@@ -130,6 +136,43 @@ class _CarsAdState extends State<CarsAd> {
     }
     brandController.text = widget.SubCatName ?? "";
     titleController.text = widget.CatName ?? "";
+    fetchData();
+  }
+
+  void fetchData() async {
+    String? name = await AuthService.getName();
+    String? phone = await AuthService.getMobile();
+    String? stateIdStr = await AuthService.getState();
+    String? cityIdStr = await AuthService.getCity();
+    String? stateId = await AuthService.getStateId();
+    String? cityId = await AuthService.getCityId();
+
+
+    if (name != null && name.isNotEmpty) {
+      nameController.text = name;
+    }
+
+    if (phone != null && phone.isNotEmpty) {
+      phoneController.text = phone;
+    }
+
+    if (stateIdStr != null && stateIdStr.isNotEmpty) {
+      stateController.text = stateIdStr;
+    }
+
+    if (cityIdStr != null && cityIdStr.isNotEmpty) {
+      cityController.text = cityIdStr;
+    }
+    if (stateId != null && stateId.isNotEmpty) {
+      setState(() {
+        selectedStateId = int.tryParse(stateId);
+      });
+    }  if (cityId != null && cityId.isNotEmpty) {
+      setState(() {
+        selectedCityId = int.tryParse(cityId);
+      });
+    }
+    debugPrint("✅ INFO: state: $stateId");
   }
 
   String? imagePath;
@@ -430,12 +473,27 @@ class _CarsAdState extends State<CarsAd> {
                         ),
                         CommonTextField1(
                           lable: 'Address',
-                          hint: 'Enter Address',
+                          hint: 'Enter Location',
                           controller: locationController,
-                          color: textColor,
+                          color: ThemeHelper.textColor(context),
                           validator: (v) => (v == null || v.trim().isEmpty)
-                              ? 'Required location'
+                              ? 'Required Location'
                               : null,
+                          isRead: true,
+                          onTap: () async {
+                            FocusScope.of(context).unfocus();
+                            final picked = await openPlacePickerBottomSheet(
+                              context: context,
+                              googleApiKey: google_map_key,
+                              controller: locationController,
+                              appendToExisting: false,
+                              components: 'country:in',
+                              language: 'en',
+                            );
+                            if (picked != null) {
+                              latlng = "${picked.lat}, ${picked.lng}";
+                            }
+                          },
                         ),
                         if (widget.editId == null ||
                             widget.editId
@@ -548,18 +606,40 @@ class _CarsAdState extends State<CarsAd> {
                                       } else {
                                         setState(() => _showCityError = false);
                                       }
-                                      if (_images.isEmpty &&
-                                          (widget.editId == null ||
-                                              widget.editId
-                                                      .replaceAll('"', '')
-                                                      .trim()
-                                                      .isEmpty &&
-                                                  !isEligibleForFree)) {
-                                        setState(() => _showimagesError = true);
+                                      if (descriptionController.text.trim().isEmpty) {
+                                        setState(() => _showDescriptionError = true);
                                         isValid = false;
                                       } else {
+                                        setState(() => _showDescriptionError = false);
+                                      }
+                                      if (priceController.text.trim().isEmpty) {
+                                        setState(() => _showPriceError = true);
+                                        isValid = false;
+                                      } else {
+                                        setState(() => _showPriceError = false);
+                                      }
+                                      if (yearOfManufacturingController.text.trim().isEmpty) {
+                                        setState(() => _showManufactureError = true);
+                                        isValid = false;
+                                      } else {
+                                        setState(() => _showManufactureError = false);
+                                      }if (kmsController.text.trim().isEmpty) {
+                                        setState(() => _showKmsError = true);
+                                        isValid = false;
+                                      } else {
+                                        setState(() => _showKmsError = false);
+                                      }
+                                      if (_images.isEmpty) {
+                                        setState(() => _showimagesError = true);
+                                        CustomSnackBar1.show(
+                                          context,
+                                          "Please select atleast 2 images",
+                                        );
+                                        isValid = false;
+
+                                      } else {
                                         setState(
-                                          () => _showimagesError = false,
+                                              () => _showimagesError = false,
                                         );
                                       }
 
@@ -612,6 +692,7 @@ class _CarsAdState extends State<CarsAd> {
                                           "full_name": nameController.text,
                                           "state_id": selectedStateId,
                                           "city_id": selectedCityId,
+                                          "location_key": latlng,
                                           "year_of_manufacturing":
                                               yearOfManufacturingController
                                                   .text,

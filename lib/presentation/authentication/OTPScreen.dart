@@ -426,6 +426,10 @@ class _OtpscreenState extends State<Otpscreen> {
                                               data.refreshToken ?? "",
                                               data.accessTokenExpiry ?? 0,
                                               data.newUser ?? false,
+                                              data.user?.state,
+                                              data.user?.city,
+                                              data.user?.stateId,
+                                              data.user?.cityId,
                                             );
                                             if (data.newUser == true) {
                                               context.pushReplacement(

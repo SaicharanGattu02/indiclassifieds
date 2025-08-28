@@ -25,6 +25,8 @@ import '../../utils/AppLogger.dart';
 import '../../utils/ImagePickerHelper.dart';
 import '../../utils/ImageUtils.dart';
 import '../../utils/color_constants.dart';
+import '../../utils/constants.dart';
+import '../../utils/place_picker_bottomsheet.dart';
 import '../../utils/planhelper.dart';
 import '../../widgets/CommonLoader.dart';
 import '../../widgets/CommonTextField.dart';
@@ -116,6 +118,42 @@ class _JobsAdState extends State<JobsAd> {
     }
     titleController.text = widget.CatName ?? "";
     brandController.text = widget.SubCatName ?? "";
+    fetchData();
+  }
+
+  void fetchData() async {
+    String? name = await AuthService.getName();
+    String? phone = await AuthService.getMobile();
+    String? stateIdStr = await AuthService.getState();
+    String? cityIdStr = await AuthService.getCity();
+    String? stateId = await AuthService.getStateId();
+    String? cityId = await AuthService.getCityId();
+
+    if (name != null && name.isNotEmpty) {
+      nameController.text = name;
+    }
+
+    if (phone != null && phone.isNotEmpty) {
+      phoneController.text = phone;
+    }
+
+    if (stateIdStr != null && stateIdStr.isNotEmpty) {
+      stateController.text = stateIdStr;
+    }
+
+    if (cityIdStr != null && cityIdStr.isNotEmpty) {
+      cityController.text = cityIdStr;
+    }
+    if (stateId != null && stateId.isNotEmpty) {
+      setState(() {
+        selectedStateId = int.tryParse(stateId);
+      });
+    } if (cityId != null && cityId.isNotEmpty) {
+      setState(() {
+        selectedCityId = int.tryParse(cityId);
+      });
+    }
+    debugPrint("✅ INFO: state: $stateId");
   }
 
   String? imagePath;
@@ -325,9 +363,10 @@ class _JobsAdState extends State<JobsAd> {
                             Icons.person,
                             color: textColor,
                             size: 16,
-                          ),validator: (v) => (v == null || v.trim().isEmpty)
-                            ? 'Name required'
-                            : null,
+                          ),
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Name required'
+                              : null,
                         ),
                         CommonTextField1(
                           lable: 'Phone Number',
@@ -343,17 +382,34 @@ class _JobsAdState extends State<JobsAd> {
                             Icons.call,
                             color: textColor,
                             size: 16,
-                          ), validator: (v) => (v == null || v.trim().isEmpty)
-                            ? 'Phone required'
-                            : null,
+                          ),
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Phone required'
+                              : null,
                         ),
                         CommonTextField1(
                           lable: 'Address',
-                          hint: 'Enter Address',
+                          hint: 'Enter Location',
                           controller: locationController,
-                          color: textColor,validator: (v) => (v == null || v.trim().isEmpty)
-                            ? 'Required location'
-                            : null,
+                          color: ThemeHelper.textColor(context),
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Required Location'
+                              : null,
+                          isRead: true,
+                          onTap: () async {
+                            FocusScope.of(context).unfocus();
+                            final picked = await openPlacePickerBottomSheet(
+                              context: context,
+                              googleApiKey: google_map_key,
+                              controller: locationController,
+                              appendToExisting: false,
+                              components: 'country:in',
+                              language: 'en',
+                            );
+                            if (picked != null) {
+                              latlng = "${picked.lat}, ${picked.lng}";
+                            }
+                          },
                         ),
                         if (widget.editId == null ||
                             widget.editId
@@ -486,6 +542,11 @@ class _JobsAdState extends State<JobsAd> {
                                       } else {
                                         isValid = true;
                                       }
+                                      if (descriptionController.text.isEmpty) {
+                                        isValid = false;
+                                      } else {
+                                        isValid = true;
+                                      }
 
                                       if (isValid) {
                                         final Map<String, dynamic> data = {
@@ -501,6 +562,7 @@ class _JobsAdState extends State<JobsAd> {
                                           "full_name": nameController.text,
                                           "state_id": selectedStateId,
                                           "city_id": selectedCityId,
+                                          "location_key": latlng,
                                           "company_name":
                                               companyNameController.text,
                                           "salary_range":

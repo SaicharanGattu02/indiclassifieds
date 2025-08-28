@@ -17,6 +17,10 @@ class AuthService {
   static const String _mobile = "mobile";
   static const String _id = "id";
   static const String _isNewUser = "isNewUser";
+  static const String _isState = "state";
+  static const String _isStateId = "stateId";
+  static const String _isCityId = "cityId";
+  static const String _isCity = "city";
 
   static final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
@@ -30,6 +34,10 @@ class AuthService {
   static Future<String?> getEmail() async => await _storage.read(key: _email);
   static Future<String?> getMobile() async => await _storage.read(key: _mobile);
   static Future<String?> getId() async => await _storage.read(key: _id);
+  static Future<String?> getState() async => await _storage.read(key: _isState);
+  static Future<String?> getCity() async => await _storage.read(key: _isCity);
+  static Future<String?> getStateId() async => await _storage.read(key: _isStateId);
+  static Future<String?> getCityId() async => await _storage.read(key: _isCityId);
 
   static Future<String?> getAccessToken() async =>
       await _storage.read(key: _accessTokenKey);
@@ -115,6 +123,10 @@ class AuthService {
     String? refreshToken,
     int expiresIn,
     bool isNewUser,
+      String? state,
+      String? city,
+      int? isStateId,
+      int? isCityId,
   ) async {
     await _storage.write(key: _accessTokenKey, value: accessToken);
     await _storage.write(key: _userName, value: userName);
@@ -124,6 +136,11 @@ class AuthService {
     await _storage.write(key: _refreshTokenKey, value: refreshToken ?? "");
     await _storage.write(key: _tokenExpiryKey, value: expiresIn.toString());
     await _storage.write(key: _isNewUser, value: isNewUser.toString());
+    await _storage.write(key: _isState, value: state);
+    await _storage.write(key: _isCity, value: city);
+    await _storage.write(key: _isStateId, value: isStateId.toString());
+    await _storage.write(key: _isCityId, value: isCityId.toString());
+
     debugPrint(
       '✅ Tokens saved on login::accessToken= $accessToken,refreshToken=$refreshToken,expiryTime=$expiresIn,userId=$id',
     );

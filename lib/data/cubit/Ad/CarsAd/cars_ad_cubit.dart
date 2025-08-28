@@ -14,7 +14,7 @@ class CarsAdCubit extends Cubit<CarsAdStates> {
       if (response != null && response.success == true) {
         emit(CarsAdSuccess(response));
       } else {
-        emit(CarsAdFailure(response?.message ?? ""));
+        emit(CarsAdFailure("${response?.message ?? ""}.${response?.error ?? ""}."));
       }
     } catch (e) {
       emit(CarsAdFailure(e.toString()));

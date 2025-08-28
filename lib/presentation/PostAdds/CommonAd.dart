@@ -54,6 +54,7 @@ class _CommonAdState extends State<CommonAd> {
   int? selectedStateId;
   int? selectedCityId;
   bool _showStateError = false;
+  bool _showPriceError = false;
   bool _showCityError = false;
   bool _showimagesError = false;
   bool _showPaymentError = false;
@@ -114,6 +115,42 @@ class _CommonAdState extends State<CommonAd> {
     } else {
       setState(() => isLoading = false);
     }
+    fetchData();
+  }
+
+  void fetchData() async {
+    String? name = await AuthService.getName();
+    String? phone = await AuthService.getMobile();
+    String? stateIdStr = await AuthService.getState();
+    String? cityIdStr = await AuthService.getCity();
+    String? stateId = await AuthService.getStateId();
+    String? cityId = await AuthService.getCityId();
+
+    if (name != null && name.isNotEmpty) {
+      nameController.text = name;
+    }
+
+    if (phone != null && phone.isNotEmpty) {
+      phoneController.text = phone;
+    }
+
+    if (stateIdStr != null && stateIdStr.isNotEmpty) {
+      stateController.text = stateIdStr;
+    }
+
+    if (cityIdStr != null && cityIdStr.isNotEmpty) {
+      cityController.text = cityIdStr;
+    }
+    if (stateId != null && stateId.isNotEmpty) {
+      setState(() {
+        selectedStateId = int.tryParse(stateId);
+      });
+    } if (cityId != null && cityId.isNotEmpty) {
+      setState(() {
+        selectedCityId = int.tryParse(cityId);
+      });
+    }
+    debugPrint("✅ INFO: state: $stateId");
   }
 
   void removeOldImage(ImageData image) {
@@ -181,10 +218,25 @@ class _CommonAdState extends State<CommonAd> {
                             color: textColor,
                             size: 16,
                           ),
-                          validator: (v) => (v == null || v.trim().isEmpty)
-                              ? 'Price required'
-                              : null,
                         ),
+                        if (_showPriceError) ...[
+                          Padding(
+                            padding:  EdgeInsets.only(top: 5),
+                            child: ShakeWidget(
+                              key: Key("price"),
+                              duration:  Duration(milliseconds: 700),
+                              child:  Text(
+                                'Price required',
+                                style: TextStyle(
+                                  fontFamily: 'roboto_serif',
+                                  fontSize: 12,
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
 
                         GestureDetector(
                           onTap: () async {
@@ -473,7 +525,6 @@ class _CommonAdState extends State<CommonAd> {
                                         );
                                       }
 
-                                      // State validation
                                       if (selectedStateId == null) {
                                         setState(() => _showStateError = true);
                                         isValid = false;
@@ -487,6 +538,14 @@ class _CommonAdState extends State<CommonAd> {
                                       } else {
                                         setState(() => _showCityError = false);
                                       }
+
+                                      if (priceController.text.isEmpty) {
+                                        setState(() => _showPriceError = true);
+                                        isValid = false;
+                                      } else {
+                                        setState(() => _showPriceError = false);
+                                      }
+
                                       if (widget.editId == null ||
                                           widget.editId
                                                   .replaceAll('"', '')

@@ -16,6 +16,8 @@ import '../../theme/ThemeHelper.dart';
 import '../../theme/app_colors.dart';
 import '../../utils/AppLogger.dart';
 import '../../utils/ImagePickerHelper.dart';
+import '../../utils/constants.dart';
+import '../../utils/place_picker_bottomsheet.dart';
 import '../../utils/planhelper.dart';
 import '../../widgets/CommonLoader.dart';
 import '../../widgets/CommonTextField.dart';
@@ -59,7 +61,6 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
   bool negotiable = false;
   int? selectedStateId;
   int? selectedCityId;
-  bool _showPaymentError = false;
   bool _showStateError = false;
   bool _showCityError = false;
   bool _showimagesError = false;
@@ -88,9 +89,13 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
   String? projectStatus;
   String? listedBy;
   String? imagePath;
+  bool _listeByError = false;
+  bool _furnishingError = false;
+  bool _facingDirectionError = false;
+  bool _projectStatusError = false;
+
   List<File> _images = [];
   final int _maxImages = 6;
-  final ImagePicker _picker = ImagePicker();
 
   bool isLoading = true;
   List<ImageData> _imageDataList = [];
@@ -145,6 +150,42 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
     }
     titleController.text = widget.CatName ?? "";
     brandController.text = widget.SubCatName ?? "";
+    fetchData();
+  }
+
+  void fetchData() async {
+    String? name = await AuthService.getName();
+    String? phone = await AuthService.getMobile();
+    String? stateIdStr = await AuthService.getState();
+    String? cityIdStr = await AuthService.getCity();
+    String? stateId = await AuthService.getStateId();
+    String? cityId = await AuthService.getCityId();
+
+    if (name != null && name.isNotEmpty) {
+      nameController.text = name;
+    }
+
+    if (phone != null && phone.isNotEmpty) {
+      phoneController.text = phone;
+    }
+
+    if (stateIdStr != null && stateIdStr.isNotEmpty) {
+      stateController.text = stateIdStr;
+    }
+
+    if (cityIdStr != null && cityIdStr.isNotEmpty) {
+      cityController.text = cityIdStr;
+    }
+    if (stateId != null && stateId.isNotEmpty) {
+      setState(() {
+        selectedStateId = int.tryParse(stateId);
+      });
+    } if (cityId != null && cityId.isNotEmpty) {
+      setState(() {
+        selectedCityId = int.tryParse(cityId);
+      });
+    }
+    debugPrint("✅ INFO: state: $stateId");
   }
 
   String _getLabel() {
@@ -294,9 +335,6 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
                             color: textColor,
                             size: 16,
                           ),
-                          validator: (v) => (v == null || v.trim().isEmpty)
-                              ? 'State required'
-                              : null,
                         ),
                       ),
                     ),
@@ -350,9 +388,6 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
                             color: textColor,
                             size: 16,
                           ),
-                          validator: (v) => (v == null || v.trim().isEmpty)
-                              ? 'City required'
-                              : null,
                         ),
                       ),
                     ),
@@ -408,9 +443,11 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
                       ],
                       onSelected: (val) =>
                           setState(() => facingDirection = val),
+                      showError: _facingDirectionError,
                     ),
                     const SizedBox(height: 12),
                     ChipSelector(
+                      showError: _furnishingError,
                       initialValue: furnishingStatus,
                       title: "Furnishing Status",
                       options: [
@@ -426,6 +463,7 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
                     ),
                     const SizedBox(height: 12),
                     ChipSelector(
+                      showError: _projectStatusError,
                       initialValue: projectStatus,
                       title: "Project Status",
                       options: [
@@ -440,6 +478,7 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
                     ),
                     const SizedBox(height: 12),
                     ChipSelector(
+                      showError: _listeByError,
                       initialValue: listedBy,
                       title: "Listed By",
                       options: [
@@ -512,6 +551,9 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
                         color: textColor,
                         size: 16,
                       ),
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? 'Name required'
+                          : null,
                     ),
                     CommonTextField1(
                       lable: 'Phone Number',
@@ -524,6 +566,9 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
                       color: textColor,
                       keyboardType: TextInputType.phone,
                       prefixIcon: Icon(Icons.call, color: textColor, size: 16),
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? 'Phone required'
+                          : null,
                     ),
                     // CommonTextField1(
                     //   lable: 'Email (Optional)',
@@ -534,12 +579,27 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
                     // ),
                     CommonTextField1(
                       lable: 'Address',
-                      hint: 'Enter Address',
+                      hint: 'Enter Location',
                       controller: locationController,
-                      color: textColor,
-                      // validator: (v) => (v == null || v.trim().isEmpty)
-                      //     ? 'Required Address '
-                      //     : null,
+                      color: ThemeHelper.textColor(context),
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? 'Required Location'
+                          : null,
+                      isRead: true,
+                      onTap: () async {
+                        FocusScope.of(context).unfocus();
+                        final picked = await openPlacePickerBottomSheet(
+                          context: context,
+                          googleApiKey: google_map_key,
+                          controller: locationController,
+                          appendToExisting: false,
+                          components: 'country:in',
+                          language: 'en',
+                        );
+                        if (picked != null) {
+                          latlng = "${picked.lat}, ${picked.lng}";
+                        }
+                      },
                     ),
                     if (widget.editId == null ||
                         widget.editId.replaceAll('"', '').trim().isEmpty) ...[
@@ -579,9 +639,6 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
           child: FutureBuilder(
             future: Future.wait([AuthService.isNewUser]),
             builder: (context, asyncSnapshot) {
-              if (asyncSnapshot.connectionState == ConnectionState.waiting) {
-                return const SizedBox();
-              }
               final isNewUser = asyncSnapshot.data?[0] ?? false;
               final editId = widget.editId.replaceAll('"', '').trim();
 
@@ -626,55 +683,131 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
                                       "Commercial") {
                                     propertyType = "commercial";
                                   }
-
-                                  final Map<String, dynamic> data = {
-                                    "title": titleController.text,
-                                    "brand": brandController.text,
-                                    "description": descriptionController.text,
-                                    "sub_category_id": widget.subCatId,
-                                    "category_id": widget.catId,
-                                    "location": locationController.text,
-                                    "mobile_number": phoneController.text,
-                                    "price": totelPriceController.text,
-                                    if (widget.SubCatName == "For Sale")
-                                      "squre_pt":
-                                          priceSquareFeetController.text,
-                                    "full_name": nameController.text,
-                                    "state_id": selectedStateId,
-                                    "city_id": selectedCityId,
-                                    "bhk_type": "${bhkController.text} BHK",
-                                    "no_of_bathrooms":
-                                        noOfBathroomsController.text,
-                                    "no_of_carparking_spaces":
-                                        parkingController.text,
-                                    "facing_direction": facingDirection,
-                                    "furnishing_status": furnishingStatus,
-                                    "project_status": projectStatus,
-                                    "listed_by": listedBy,
-                                    "floor_number": floorNoController.text,
-                                    "room_no": roomNoController.text,
-                                    "property_type": propertyType,
-                                  };
-
-                                  if (editId.isEmpty) {
-                                    data["plan_id"] = planId;
-                                    data["package_id"] = packageId;
-                                  }
-
-                                  if (_images.isNotEmpty) {
-                                    data["images"] = _images
-                                        .map((file) => file.path)
-                                        .toList();
-                                  }
-
-                                  if (editId.isNotEmpty) {
-                                    context
-                                        .read<MarkAsListingCubit>()
-                                        .markAsUpdate(editId, data);
+                                  bool isValid = true;
+                                  if (selectedStateId == null) {
+                                    setState(() => _showStateError = true);
+                                    isValid = false;
                                   } else {
-                                    context
-                                        .read<PropertyAdCubit>()
-                                        .postPropertyAd(data);
+                                    setState(() => _showStateError = false);
+                                  }
+                                  if (locationController.text.trim().isEmpty) {
+                                    CustomSnackBar1.show(
+                                      context,
+                                      "Please enter location",
+                                    );
+                                    isValid = false;
+                                  }
+                                  if ((widget.editId == null ||
+                                          widget.editId
+                                              .replaceAll('"', '')
+                                              .trim()
+                                              .isEmpty) &&
+                                      (planId == null || packageId == null)) {
+                                    CustomSnackBar1.show(
+                                      context,
+                                      "Please select a plan",
+                                    );
+                                    isValid = false;
+                                  }
+                                  if (selectedCityId == null) {
+                                    setState(() => _showCityError = true);
+                                    isValid = false;
+                                  } else {
+                                    setState(() => _showCityError = false);
+                                  }
+                                  if (_images.isEmpty &&
+                                      (widget.editId == null ||
+                                          widget.editId
+                                              .replaceAll('"', '')
+                                              .trim()
+                                              .isEmpty)) {
+                                    setState(() => _showimagesError = true);
+                                    isValid = false;
+                                  } else {
+                                    setState(() => _showimagesError = false);
+                                  }
+                                  if (facingDirection == null ||
+                                      facingDirection!.isEmpty) {
+                                    setState(
+                                      () => _facingDirectionError = true,
+                                    );
+                                    isValid = false;
+                                  } else {
+                                    setState(
+                                      () => _facingDirectionError = false,
+                                    );
+                                  }
+                                  if (furnishingStatus == null ||
+                                      furnishingStatus!.isEmpty) {
+                                    setState(() => _furnishingError = true);
+                                    isValid = false;
+                                  } else {
+                                    setState(() => _furnishingError = false);
+                                  }
+                                  if (projectStatus == null ||
+                                      projectStatus!.isEmpty) {
+                                    setState(() => _projectStatusError = true);
+                                    isValid = false;
+                                  } else {
+                                    setState(() => _projectStatusError = false);
+                                  }
+                                  if (listedBy == null || listedBy!.isEmpty) {
+                                    setState(() => _listeByError = true);
+                                    isValid = false;
+                                  } else {
+                                    setState(() => _listeByError = false);
+                                  }
+                                  if (isValid) {
+                                    final Map<String, dynamic> data = {
+                                      "title": titleController.text,
+                                      "brand": brandController.text,
+                                      "description": descriptionController.text,
+                                      "sub_category_id": widget.subCatId,
+                                      "category_id": widget.catId,
+                                      "location": locationController.text,
+                                      "mobile_number": phoneController.text,
+                                      "price": totelPriceController.text,
+                                      if (widget.SubCatName == "For Sale")
+                                        "squre_pt":
+                                            priceSquareFeetController.text,
+                                      "full_name": nameController.text,
+                                      "state_id": selectedStateId,
+                                      "city_id": selectedCityId,
+                                      "bhk_type": "${bhkController.text} BHK",
+                                      "no_of_bathrooms":
+                                          noOfBathroomsController.text,
+                                      "no_of_carparking_spaces":
+                                          parkingController.text,
+                                      "facing_direction": facingDirection,
+                                      "furnishing_status": furnishingStatus,
+                                      "project_status": projectStatus,
+                                      "listed_by": listedBy,
+                                      "floor_number": floorNoController.text,
+                                      "room_no": roomNoController.text,
+                                      "location_key": latlng,
+                                      "property_type": propertyType,
+                                    };
+
+                                    if (editId.isEmpty) {
+                                      data["plan_id"] = planId;
+                                      data["package_id"] = packageId;
+                                    }
+
+                                    if (_images.isNotEmpty) {
+                                      data["images"] = _images
+                                          .map((file) => file.path)
+                                          .toList();
+                                    }
+
+                                    if (editId.isNotEmpty) {
+                                      context
+                                          .read<MarkAsListingCubit>()
+                                          .markAsUpdate(editId, data);
+                                    } else {
+                                      context
+                                          .read<PropertyAdCubit>()
+                                          .postPropertyAd(data);
+                                    }
                                   }
                                 }
                               },

@@ -9,6 +9,7 @@ import '../../Components/CutomAppBar.dart';
 import '../../Components/ShakeWidget.dart';
 import '../../data/cubit/Ad/AstrologyAd/astrology_ad_cubit.dart';
 import '../../data/cubit/Ad/AstrologyAd/astrology_ad_states.dart';
+import '../../data/cubit/City/city_cubit.dart';
 import '../../data/cubit/MyAds/GetMarkAsListing/get_listing_ad_cubit.dart';
 import '../../data/cubit/MyAds/MarkAsListing/mark_as_listing_cubit.dart';
 import '../../data/cubit/MyAds/MarkAsListing/mark_as_listing_state.dart';
@@ -20,6 +21,8 @@ import '../../services/AuthService.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../utils/AppLogger.dart';
 import '../../utils/ImagePickerHelper.dart';
+import '../../utils/constants.dart';
+import '../../utils/place_picker_bottomsheet.dart';
 import '../../utils/planhelper.dart';
 import '../../widgets/CommonLoader.dart';
 import '../../widgets/CommonTextField.dart';
@@ -66,7 +69,10 @@ class _AstrologyAdState extends State<AstrologyAd> {
   final int _maxImages = 6;
   bool _showStateError = false;
   bool _showCityError = false;
+  bool _showLanguageError = false;
+  bool _showDescriptionError = false;
   bool _showimagesError = false;
+  bool _showPriceError = false;
   int? selectedStateId;
   int? selectedCityId;
   int? planId;
@@ -124,6 +130,42 @@ class _AstrologyAdState extends State<AstrologyAd> {
     }
     super.initState();
     titleController.text = widget.SubCatName ?? "";
+    fetchData();
+  }
+
+  void fetchData() async {
+    String? name = await AuthService.getName();
+    String? phone = await AuthService.getMobile();
+    String? stateIdStr = await AuthService.getState();
+    String? cityIdStr = await AuthService.getCity();
+    String? stateId = await AuthService.getStateId();
+    String? cityId = await AuthService.getCityId();
+
+    if (name != null && name.isNotEmpty) {
+      nameController.text = name;
+    }
+
+    if (phone != null && phone.isNotEmpty) {
+      phoneController.text = phone;
+    }
+
+    if (stateIdStr != null && stateIdStr.isNotEmpty) {
+      stateController.text = stateIdStr;
+    }
+
+    if (cityIdStr != null && cityIdStr.isNotEmpty) {
+      cityController.text = cityIdStr;
+    }
+    if (stateId != null && stateId.isNotEmpty) {
+      setState(() {
+        selectedStateId = int.tryParse(stateId);
+      });
+    }
+    if (cityId != null && cityId.isNotEmpty) {
+      setState(() {
+        selectedCityId = int.tryParse(cityId);
+      });
+    }
   }
 
   @override
@@ -174,13 +216,13 @@ class _AstrologyAdState extends State<AstrologyAd> {
                         ),
                         CommonTextField1(
                           lable: 'Description',
-                          hint: 'Enter  Upto  500 words',
+                          hint: 'Enter description',
                           controller: descriptionController,
                           color: textColor,
-                          maxLines: 5,
+                          maxLines: 4,
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
-                              return 'Description required';
+                              return 'Description is required';
                             }
                             return null;
                           },
@@ -209,9 +251,26 @@ class _AstrologyAdState extends State<AstrologyAd> {
                             );
                           }).toList(),
                         ),
+                        if (_showLanguageError)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 5),
+                            child: ShakeWidget(
+                              key: Key('languages_error_${DateTime.now().millisecondsSinceEpoch}'),
+                              duration: const Duration(milliseconds: 700),
+                              child: const Text(
+                                'Please select at least one language',
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontSize: 12,
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
                         CommonTextField1(
                           lable: 'Price',
-                          hint: 'Enter Price',
+                          hint: 'Enter price',
                           controller: priceController,
                           color: textColor,
                           keyboardType: TextInputType.number,
@@ -220,10 +279,25 @@ class _AstrologyAdState extends State<AstrologyAd> {
                             color: textColor,
                             size: 16,
                           ),
-                          validator: (v) => (v == null || v.trim().isEmpty)
-                              ? 'Price required'
-                              : null,
                         ),
+                        if (_showPriceError) ...[
+                          Padding(
+                            padding:  EdgeInsets.only(top: 5),
+                            child: ShakeWidget(
+                              key: Key("price"),
+                              duration:  Duration(milliseconds: 700),
+                              child:  Text(
+                                'Price required',
+                                style: TextStyle(
+                                  fontFamily: 'roboto_serif',
+                                  fontSize: 12,
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
 
                         SizedBox(height: 12),
                         CommonImagePicker(
@@ -404,10 +478,25 @@ class _AstrologyAdState extends State<AstrologyAd> {
                           lable: 'Address',
                           hint: 'Enter Location',
                           controller: locationController,
-                          color: textColor,
+                          color: ThemeHelper.textColor(context),
                           validator: (v) => (v == null || v.trim().isEmpty)
-                              ? 'Required location'
+                              ? 'Required Location'
                               : null,
+                          isRead: true,
+                          onTap: () async {
+                            FocusScope.of(context).unfocus();
+                            final picked = await openPlacePickerBottomSheet(
+                              context: context,
+                              googleApiKey: google_map_key,
+                              controller: locationController,
+                              appendToExisting: false,
+                              components: 'country:in',
+                              language: 'en',
+                            );
+                            if (picked != null) {
+                              latlng = "${picked.lat}, ${picked.lng}";
+                            }
+                          },
                         ),
                         if (widget.editId == null ||
                             widget.editId
@@ -488,14 +577,26 @@ class _AstrologyAdState extends State<AstrologyAd> {
                                       } else {
                                         setState(() => _showStateError = false);
                                       }
-                                      if (locationController.text.trim().isEmpty) {
-                                        CustomSnackBar1.show(context, "Please enter location");
+                                      if (locationController.text
+                                          .trim()
+                                          .isEmpty) {
+                                        CustomSnackBar1.show(
+                                          context,
+                                          "Please enter location",
+                                        );
                                         isValid = false;
                                       }
                                       if ((widget.editId == null ||
-                                          widget.editId.replaceAll('"', '').trim().isEmpty) &&
-                                          (planId == null || packageId == null)) {
-                                        CustomSnackBar1.show(context, "Please select a plan");
+                                              widget.editId
+                                                  .replaceAll('"', '')
+                                                  .trim()
+                                                  .isEmpty) &&
+                                          (planId == null ||
+                                              packageId == null)) {
+                                        CustomSnackBar1.show(
+                                          context,
+                                          "Please select a plan",
+                                        );
                                         isValid = false;
                                       }
                                       if (selectedCityId == null) {
@@ -519,7 +620,24 @@ class _AstrologyAdState extends State<AstrologyAd> {
                                           () => _showimagesError = false,
                                         );
                                       }
-
+                                      if (priceController.text.isEmpty) {
+                                        setState(() => _showPriceError = true);
+                                        isValid = false;
+                                      } else {
+                                        setState(() => _showPriceError = false);
+                                      }
+                                      if (descriptionController.text.trim().isEmpty) {
+                                        setState(() => _showDescriptionError = true);
+                                        isValid = false;
+                                      } else {
+                                        setState(() => _showDescriptionError = false);
+                                      }
+                                      if (selectedLanguages.isEmpty) {
+                                        setState(() => _showLanguageError = true);
+                                        isValid = false;
+                                      } else {
+                                        setState(() => _showLanguageError = false);
+                                      }
                                       if (isValid) {
                                         final Map<String, dynamic> data = {
                                           "title": titleController.text,
@@ -529,6 +647,7 @@ class _AstrologyAdState extends State<AstrologyAd> {
                                           "category_id": widget.catId,
                                           "location": locationController.text,
                                           "mobile_number": phoneController.text,
+                                          "location_key": latlng,
                                           "languages_spoken": selectedLanguages
                                               .join(", "),
                                           "price": priceController.text,
@@ -556,9 +675,16 @@ class _AstrologyAdState extends State<AstrologyAd> {
                                             .replaceAll('"', '')
                                             .trim()
                                             .isNotEmpty) {
-                                          context.read<MarkAsListingCubit>().markAsUpdate(widget.editId, data,);
+                                          context
+                                              .read<MarkAsListingCubit>()
+                                              .markAsUpdate(
+                                                widget.editId,
+                                                data,
+                                              );
                                         } else {
-                                          context.read<AstrologyAdCubit>().postAstrologyAd(data);
+                                          context
+                                              .read<AstrologyAdCubit>()
+                                              .postAstrologyAd(data);
                                         }
                                       }
                                     }

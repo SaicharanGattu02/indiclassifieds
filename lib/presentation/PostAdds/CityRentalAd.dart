@@ -23,6 +23,8 @@ import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../utils/AppLogger.dart';
 import '../../utils/ImagePickerHelper.dart';
+import '../../utils/constants.dart';
+import '../../utils/place_picker_bottomsheet.dart';
 import '../../utils/planhelper.dart';
 import '../../widgets/CommonLoader.dart';
 import '../../widgets/CommonTextField.dart';
@@ -57,7 +59,10 @@ class _CityRentalsAdState extends State<CityRentalsAd> {
   bool _showStateError = false;
   bool _showCityError = false;
   bool _showimagesError = false;
-
+  bool _showDescriptionError = false;
+  bool _showPriceError = false;
+  bool _showVechicleNumberError = false;
+  bool _showDurationError = false;
   final descriptionController = TextEditingController();
   final brandController = TextEditingController();
   final locationController = TextEditingController();
@@ -124,6 +129,42 @@ class _CityRentalsAdState extends State<CityRentalsAd> {
     }
     brandController.text = widget.SubCatName ?? "";
     titleController.text = widget.CatName ?? "";
+    fetchData();
+  }
+
+  void fetchData() async {
+    String? name = await AuthService.getName();
+    String? phone = await AuthService.getMobile();
+    String? stateIdStr = await AuthService.getState();
+    String? cityIdStr = await AuthService.getCity();
+    String? stateId = await AuthService.getStateId();
+    String? cityId = await AuthService.getCityId();
+
+    if (name != null && name.isNotEmpty) {
+      nameController.text = name;
+    }
+
+    if (phone != null && phone.isNotEmpty) {
+      phoneController.text = phone;
+    }
+
+    if (stateIdStr != null && stateIdStr.isNotEmpty) {
+      stateController.text = stateIdStr;
+    }
+
+    if (cityIdStr != null && cityIdStr.isNotEmpty) {
+      cityController.text = cityIdStr;
+    }
+    if (stateId != null && stateId.isNotEmpty) {
+      setState(() {
+        selectedStateId = int.tryParse(stateId);
+      });
+    } if (cityId != null && cityId.isNotEmpty) {
+      setState(() {
+        selectedCityId = int.tryParse(cityId);
+      });
+    }
+    debugPrint("✅ INFO: state: $stateId");
   }
 
   @override
@@ -333,12 +374,26 @@ class _CityRentalsAdState extends State<CityRentalsAd> {
                           lable: 'Address',
                           hint: 'Enter Location',
                           controller: locationController,
-                          color: textColor,
+                          color: ThemeHelper.textColor(context),
                           validator: (v) => (v == null || v.trim().isEmpty)
-                              ? 'Required location'
+                              ? 'Required Location'
                               : null,
+                          isRead: true,
+                          onTap: () async {
+                            FocusScope.of(context).unfocus();
+                            final picked = await openPlacePickerBottomSheet(
+                              context: context,
+                              googleApiKey: google_map_key,
+                              controller: locationController,
+                              appendToExisting: false,
+                              components: 'country:in',
+                              language: 'en',
+                            );
+                            if (picked != null) {
+                              latlng = "${picked.lat}, ${picked.lng}";
+                            }
+                          },
                         ),
-
                         if (widget.editId == null ||
                             widget.editId.replaceAll('"', '').trim().isEmpty && !isEligibleForFree) ...[
                           CommonTextField1(
@@ -464,6 +519,30 @@ class _CityRentalsAdState extends State<CityRentalsAd> {
                                               () => _showimagesError = false,
                                         );
                                       }
+                                      if (descriptionController.text.trim().isEmpty) {
+                                        setState(() => _showDescriptionError = true);
+                                        isValid = false;
+                                      } else {
+                                        setState(() => _showDescriptionError = false);
+                                      }
+                                      if (priceController.text.trim().isEmpty) {
+                                        setState(() => _showPriceError = true);
+                                        isValid = false;
+                                      } else {
+                                        setState(() => _showPriceError = false);
+                                      }
+                                      if (vechicleNumber.text.trim().isEmpty) {
+                                        setState(() => _showVechicleNumberError = true);
+                                        isValid = false;
+                                      } else {
+                                        setState(() => _showVechicleNumberError = false);
+                                      }
+                                      if (rentalDuration.text.trim().isEmpty) {
+                                        setState(() => _showDurationError = true);
+                                        isValid = false;
+                                      } else {
+                                        setState(() => _showDurationError = false);
+                                      }
                                       if (isValid) {
                                         final Map<String, dynamic> data = {
                                           "title": titleController.text,
@@ -480,6 +559,7 @@ class _CityRentalsAdState extends State<CityRentalsAd> {
                                           "full_name": nameController.text,
                                           "state_id": selectedStateId,
                                           "city_id": selectedCityId,
+                                          "location_key": latlng,
                                         };
 
                                         final editId = widget.editId

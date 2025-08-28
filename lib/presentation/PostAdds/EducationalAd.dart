@@ -24,6 +24,8 @@ import '../../utils/AppLogger.dart';
 import '../../utils/ImagePickerHelper.dart';
 import '../../utils/ImageUtils.dart';
 import '../../utils/color_constants.dart';
+import '../../utils/constants.dart';
+import '../../utils/place_picker_bottomsheet.dart';
 import '../../utils/planhelper.dart' show showPlanBottomSheet;
 import '../../widgets/CommonLoader.dart';
 import '../../widgets/CommonTextField.dart';
@@ -113,6 +115,42 @@ class _EducationalAdState extends State<EducationalAd> {
     }
     titleController.text = widget.CatName ?? "";
     brandController.text = widget.SubCatName ?? "";
+    fetchData();
+  }
+
+  void fetchData() async {
+    String? name = await AuthService.getName();
+    String? phone = await AuthService.getMobile();
+    String? stateIdStr = await AuthService.getState();
+    String? cityIdStr = await AuthService.getCity();
+    String? stateId = await AuthService.getStateId();
+    String? cityId = await AuthService.getCityId();
+
+    if (name != null && name.isNotEmpty) {
+      nameController.text = name;
+    }
+
+    if (phone != null && phone.isNotEmpty) {
+      phoneController.text = phone;
+    }
+
+    if (stateIdStr != null && stateIdStr.isNotEmpty) {
+      stateController.text = stateIdStr;
+    }
+
+    if (cityIdStr != null && cityIdStr.isNotEmpty) {
+      cityController.text = cityIdStr;
+    }
+    if (stateId != null && stateId.isNotEmpty) {
+      setState(() {
+        selectedStateId = int.tryParse(stateId);
+      });
+    } if (cityId != null && cityId.isNotEmpty) {
+      setState(() {
+        selectedCityId = int.tryParse(cityId);
+      });
+    }
+    debugPrint("✅ INFO: state: $stateId");
   }
 
   String? imagePath;
@@ -361,12 +399,27 @@ class _EducationalAdState extends State<EducationalAd> {
                         ),
                         CommonTextField1(
                           lable: 'Address',
-                          hint: 'Enter Address',
+                          hint: 'Enter Location',
                           controller: locationController,
-                          color: textColor,
+                          color: ThemeHelper.textColor(context),
                           validator: (v) => (v == null || v.trim().isEmpty)
-                              ? 'Required location'
+                              ? 'Required Location'
                               : null,
+                          isRead: true,
+                          onTap: () async {
+                            FocusScope.of(context).unfocus();
+                            final picked = await openPlacePickerBottomSheet(
+                              context: context,
+                              googleApiKey: google_map_key,
+                              controller: locationController,
+                              appendToExisting: false,
+                              components: 'country:in',
+                              language: 'en',
+                            );
+                            if (picked != null) {
+                              latlng = "${picked.lat}, ${picked.lng}";
+                            }
+                          },
                         ),
                         if (widget.editId == null ||
                             widget.editId
@@ -530,6 +583,7 @@ class _EducationalAdState extends State<EducationalAd> {
                                           "sub_category_id": widget.subCatId,
                                           "category_id": widget.catId,
                                           "location": locationController.text,
+                                          "location_key": latlng,
                                           "mobile_number": phoneController.text,
                                           "price": priceController.text,
                                           "full_name": nameController.text,

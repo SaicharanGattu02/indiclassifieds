@@ -24,6 +24,8 @@ import '../../theme/ThemeHelper.dart';
 import '../../utils/ImagePickerHelper.dart';
 import '../../utils/ImageUtils.dart';
 import '../../utils/color_constants.dart';
+import '../../utils/constants.dart';
+import '../../utils/place_picker_bottomsheet.dart';
 import '../../utils/planhelper.dart';
 import '../../widgets/CommonLoader.dart';
 import '../../widgets/CommonTextField.dart';
@@ -118,6 +120,42 @@ class _MobileAdState extends State<MobileAd> {
     }
     titleController.text = widget.CatName ?? "";
     brandController.text = widget.SubCatName ?? "";
+    fetchData();
+  }
+
+  void fetchData() async {
+    String? name = await AuthService.getName();
+    String? phone = await AuthService.getMobile();
+    String? stateIdStr = await AuthService.getState();
+    String? cityIdStr = await AuthService.getCity();
+    String? stateId = await AuthService.getStateId();
+    String? cityId = await AuthService.getCityId();
+
+    if (name != null && name.isNotEmpty) {
+      nameController.text = name;
+    }
+
+    if (phone != null && phone.isNotEmpty) {
+      phoneController.text = phone;
+    }
+
+    if (stateIdStr != null && stateIdStr.isNotEmpty) {
+      stateController.text = stateIdStr;
+    }
+
+    if (cityIdStr != null && cityIdStr.isNotEmpty) {
+      cityController.text = cityIdStr;
+    }
+    if (stateId != null && stateId.isNotEmpty) {
+      setState(() {
+        selectedStateId = int.tryParse(stateId);
+      });
+    } if (cityId != null && cityId.isNotEmpty) {
+      setState(() {
+        selectedCityId = int.tryParse(cityId);
+      });
+    }
+    debugPrint("✅ INFO: state: $stateId");
   }
 
   List<File> _images = [];
@@ -240,9 +278,6 @@ class _MobileAdState extends State<MobileAd> {
                                 color: textColor,
                                 size: 16,
                               ),
-                              validator: (v) => (v == null || v.trim().isEmpty)
-                                  ? 'State required'
-                                  : null,
                             ),
                           ),
                         ),
@@ -296,9 +331,6 @@ class _MobileAdState extends State<MobileAd> {
                                 color: textColor,
                                 size: 16,
                               ),
-                              validator: (v) => (v == null || v.trim().isEmpty)
-                                  ? 'City required'
-                                  : null,
                             ),
                           ),
                         ),
@@ -329,7 +361,6 @@ class _MobileAdState extends State<MobileAd> {
                           controller: storageCapacityController,
                           inputFormatters: [
                             FilteringTextInputFormatter.digitsOnly,
-                            LengthLimitingTextInputFormatter(10),
                           ],
                           color: textColor,
                           validator: (v) => (v == null || v.trim().isEmpty)
@@ -342,7 +373,6 @@ class _MobileAdState extends State<MobileAd> {
                           controller: ramController,
                           inputFormatters: [
                             FilteringTextInputFormatter.digitsOnly,
-                            LengthLimitingTextInputFormatter(10),
                           ],
                           color: textColor,
                           keyboardType: TextInputType.text,
@@ -409,12 +439,27 @@ class _MobileAdState extends State<MobileAd> {
                         // ),
                         CommonTextField1(
                           lable: 'Address',
-                          hint: 'Enter Address',
+                          hint: 'Enter Location',
                           controller: locationController,
-                          color: textColor,
+                          color: ThemeHelper.textColor(context),
                           validator: (v) => (v == null || v.trim().isEmpty)
-                              ? 'Required Address '
+                              ? 'Required Location'
                               : null,
+                          isRead: true,
+                          onTap: () async {
+                            FocusScope.of(context).unfocus();
+                            final picked = await openPlacePickerBottomSheet(
+                              context: context,
+                              googleApiKey: google_map_key,
+                              controller: locationController,
+                              appendToExisting: false,
+                              components: 'country:in',
+                              language: 'en',
+                            );
+                            if (picked != null) {
+                              latlng = "${picked.lat}, ${picked.lng}";
+                            }
+                          },
                         ),
                         if (widget.editId == null ||
                             widget.editId.replaceAll('"', '').trim().isEmpty &&
@@ -460,11 +505,6 @@ class _MobileAdState extends State<MobileAd> {
                   AuthService.isNewUser,
                 ]),
                 builder: (context, asyncSnapshot) {
-                  if (asyncSnapshot.connectionState ==
-                      ConnectionState.waiting) {
-                    return const SizedBox();
-                  }
-
                   final isEligible = asyncSnapshot.data?[0] ?? false;
                   final isNewUser = asyncSnapshot.data?[1] ?? false;
                   AppLogger.info("isEligible: ${isEligible}");
@@ -498,52 +538,124 @@ class _MobileAdState extends State<MobileAd> {
                                 ? () {
                                     context.push('/register?from=ad');
                                   }
-                                : !isEligible
-                                ? () {
+                                : () {
                                     if (_formKey.currentState?.validate() ??
                                         false) {
-                                      final Map<String, dynamic> data = {
-                                        "title": titleController.text,
-                                        "brand": brandController.text,
-                                        "description":
-                                            descriptionController.text,
-                                        "sub_category_id": widget.subCatId,
-                                        "category_id": widget.catId,
-                                        "location": locationController.text,
-                                        "mobile_number": phoneController.text,
-                                        "price": priceController.text,
-                                        "full_name": nameController.text,
-                                        "state_id": selectedStateId,
-                                        "city_id": selectedCityId,
-                                        "storage":
-                                            storageCapacityController.text,
-                                        "ram": "${ramController.text}Gb",
-                                      };
-
-                                      if (editId.isEmpty) {
-                                        data["plan_id"] = planId;
-                                        data["package_id"] = packageId;
-                                      }
-
-                                      if (_images.isNotEmpty) {
-                                        data["images"] = _images
-                                            .map((file) => file.path)
-                                            .toList();
-                                      }
-
-                                      if (editId.isNotEmpty) {
-                                        context
-                                            .read<MarkAsListingCubit>()
-                                            .markAsUpdate(editId, data);
+                                      bool isValid = true;
+                                      if (selectedStateId == null) {
+                                        setState(() => _showStateError = true);
+                                        isValid = false;
                                       } else {
-                                        context
-                                            .read<MobileAdCubit>()
-                                            .postMobileAd(data);
+                                        setState(() => _showStateError = false);
+                                      }
+                                      if (selectedCityId == null) {
+                                        setState(() => _showCityError = true);
+                                        isValid = false;
+                                      } else {
+                                        setState(() => _showCityError = false);
+                                      }
+                                      if (locationController.text
+                                          .trim()
+                                          .isEmpty) {
+                                        CustomSnackBar1.show(
+                                          context,
+                                          "Please enter location",
+                                        );
+                                        isValid = false;
+                                      }
+                                      if ((widget.editId == null ||
+                                              widget.editId
+                                                  .replaceAll('"', '')
+                                                  .trim()
+                                                  .isEmpty) &&
+                                          (planId == null ||
+                                              packageId == null)) {
+                                        CustomSnackBar1.show(
+                                          context,
+                                          "Please select a plan",
+                                        );
+                                        isValid = false;
+                                      }
+
+                                      if (_images.isEmpty &&
+                                          (widget.editId == null ||
+                                              widget.editId
+                                                      .replaceAll('"', '')
+                                                      .trim()
+                                                      .isEmpty &&
+                                                  !isEligibleForFree)) {
+                                        setState(() => _showimagesError = true);
+                                        isValid = false;
+                                      } else {
+                                        setState(
+                                          () => _showimagesError = false,
+                                        );
+                                      }
+                                      if (descriptionController.text.isEmpty) {
+                                        isValid = false;
+                                      } else {
+                                        isValid = true;
+                                      }
+                                      if (ramController.text.isEmpty) {
+                                        isValid = false;
+                                      } else {
+                                        isValid = true;
+                                      }
+                                      if (priceController.text.isEmpty) {
+                                        isValid = false;
+                                      } else {
+                                        isValid = true;
+                                      }
+                                      if (storageCapacityController
+                                          .text
+                                          .isEmpty) {
+                                        isValid = false;
+                                      } else {
+                                        isValid = true;
+                                      }
+
+                                      if (isValid) {
+                                        final Map<String, dynamic> data = {
+                                          "title": titleController.text,
+                                          "brand": brandController.text,
+                                          "description":
+                                              descriptionController.text,
+                                          "sub_category_id": widget.subCatId,
+                                          "category_id": widget.catId,
+                                          "location": locationController.text,
+                                          "location_key": latlng,
+                                          "mobile_number": phoneController.text,
+                                          "price": priceController.text,
+                                          "full_name": nameController.text,
+                                          "state_id": selectedStateId,
+                                          "city_id": selectedCityId,
+                                          "storage":
+                                              storageCapacityController.text,
+                                          "ram": "${ramController.text}",
+                                        };
+
+                                        if (editId.isEmpty) {
+                                          data["plan_id"] = planId;
+                                          data["package_id"] = packageId;
+                                        }
+
+                                        if (_images.isNotEmpty) {
+                                          data["images"] = _images
+                                              .map((file) => file.path)
+                                              .toList();
+                                        }
+
+                                        if (editId.isNotEmpty) {
+                                          context
+                                              .read<MarkAsListingCubit>()
+                                              .markAsUpdate(editId, data);
+                                        } else {
+                                          context
+                                              .read<MobileAdCubit>()
+                                              .postMobileAd(data);
+                                        }
                                       }
                                     }
-                                  }
-                                : () {
-                                    context.push("/plans");
                                   },
                           );
                         },
@@ -556,18 +668,6 @@ class _MobileAdState extends State<MobileAd> {
           ),
         );
       },
-    );
-  }
-
-  Widget _sectionTitle(String title, Color color) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 20, bottom: 10),
-      child: Text(
-        title,
-        style: AppTextStyles.titleMedium(
-          color,
-        ).copyWith(fontSize: 15, fontWeight: FontWeight.w600),
-      ),
     );
   }
 }

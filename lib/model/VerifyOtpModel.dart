@@ -75,8 +75,10 @@ class User {
   dynamic resetTokenCreatedAt;
   String? role;
   String? country;
-  dynamic stateId;
-  dynamic cityId;
+  String? state;
+  String? city;
+  int? stateId;
+  int? cityId;
   dynamic address;
   dynamic image;
   String? bio;
@@ -101,6 +103,8 @@ class User {
     this.role,
     this.country,
     this.stateId,
+    this.state,
+    this.city,
     this.cityId,
     this.address,
     this.image,
@@ -129,6 +133,8 @@ class User {
     stateId = json['state_id'];
     cityId = json['city_id'];
     address = json['address'];
+    state = json['state_name'];
+    city = json['city_name'];
     image = json['image'];
     bio = json['bio'];
     status = json['status'];
@@ -155,6 +161,8 @@ class User {
     data['country'] = country;
     data['state_id'] = stateId;
     data['city_id'] = cityId;
+    data['state_name'] = state;
+    data['city_name'] = city;
     data['address'] = address;
     data['image'] = image;
     data['bio'] = bio;
