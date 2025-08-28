@@ -33,10 +33,10 @@ class SimilarProductCard extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Container(
-        width: 180,
+        width: 200,
         decoration: BoxDecoration(
           color: cardColor,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(8),
           border: Border.all(color: borderColor),
         ),
         child: Column(
@@ -59,7 +59,7 @@ class SimilarProductCard extends StatelessWidget {
                   )
                       : ClipRRect(
                     borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(14),
+                      top: Radius.circular(8),
                     ),
                     child: Image.network(imageUrl!, fit: BoxFit.cover),
                   ),
@@ -87,7 +87,7 @@ class SimilarProductCard extends StatelessWidget {
             ),
             // info
             Padding(
-              padding: const EdgeInsets.fromLTRB(10, 8, 10, 0),
+              padding: const EdgeInsets.fromLTRB(10, 6, 10, 0),
               child: Text(
                 title,
                 maxLines: 2,
@@ -107,7 +107,7 @@ class SimilarProductCard extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(10, 6, 10, 10),
+              padding: const EdgeInsets.fromLTRB(10, 6, 10, 6),
               child: Row(
                 children: [
                   Icon(Icons.place, size: 14, color: textColor.withOpacity(.6)),

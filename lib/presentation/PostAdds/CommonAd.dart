@@ -21,6 +21,8 @@ import '../../services/AuthService.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../utils/ImagePickerHelper.dart';
+import '../../utils/constants.dart';
+import '../../utils/place_picker_bottomsheet.dart';
 import '../../utils/planhelper.dart';
 import '../../widgets/CommonLoader.dart';
 import '../../widgets/CommonTextField.dart';
@@ -71,6 +73,7 @@ class _CommonAdState extends State<CommonAd> {
   int? planId;
   int? packageId;
   bool isLoading = true;
+  String? latlng;
 
   List<ImageData> _imageDataList = [];
   @override
@@ -364,10 +367,25 @@ class _CommonAdState extends State<CommonAd> {
                           lable: 'Address',
                           hint: 'Enter Location',
                           controller: locationController,
-                          color: textColor,
+                          color: ThemeHelper.textColor(context),
                           validator: (v) => (v == null || v.trim().isEmpty)
                               ? 'Required Location'
                               : null,
+                          isRead: true,
+                          onTap: () async {
+                            FocusScope.of(context).unfocus();
+                            final picked = await openPlacePickerBottomSheet(
+                              context: context,
+                              googleApiKey: google_map_key,
+                              controller: locationController,
+                              appendToExisting: false,
+                              components: 'country:in',
+                              language: 'en',
+                            );
+                            if (picked != null) {
+                              latlng = "${picked.lat}, ${picked.lng}";
+                            }
+                          },
                         ),
                         if (widget.editId == null ||
                             widget.editId
@@ -491,11 +509,11 @@ class _CommonAdState extends State<CommonAd> {
                                       if (isValid) {
                                         final Map<String, dynamic> data = {
                                           "title": titleController.text,
-                                          "description":
-                                              descriptionController.text,
+                                          "description": descriptionController.text,
                                           "sub_category_id": widget.subCatId,
                                           "category_id": widget.catId,
                                           "location": locationController.text,
+                                          "location_key": latlng,
                                           "mobile_number": phoneController.text,
                                           if (widget.editId == null ||
                                               widget.editId
