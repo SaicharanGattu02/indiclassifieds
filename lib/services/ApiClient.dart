@@ -26,6 +26,7 @@ class ApiClient {
     '/api/app/get-all-sub-categories',
     '/api/app/get-all-listings-with-pagination',
     '/api/app/get-all-carousels',
+    '/api/app/get-all-cities',
   ];
 
   static void setupInterceptors() {

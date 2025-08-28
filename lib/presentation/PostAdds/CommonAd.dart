@@ -3,12 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:indiclassifieds/Components/CustomAppButton.dart';
 import 'package:indiclassifieds/Components/CustomSnackBar.dart';
 import 'package:indiclassifieds/Components/CutomAppBar.dart';
 import 'package:indiclassifieds/utils/AppLogger.dart';
-
 import '../../Components/ShakeWidget.dart';
 import '../../data/cubit/Ad/CommonAd/common_ad_cubit.dart';
 import '../../data/cubit/Ad/CommonAd/common_ad_states.dart';
@@ -23,10 +21,7 @@ import '../../services/AuthService.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../utils/ImagePickerHelper.dart';
-import '../../utils/ImageUtils.dart';
-import '../../utils/color_constants.dart';
 import '../../utils/planhelper.dart';
-import '../../utils/spinkittsLoader.dart';
 import '../../widgets/CommonLoader.dart';
 import '../../widgets/CommonTextField.dart';
 import '../../widgets/SelectCityBottomSheet.dart';
@@ -375,7 +370,10 @@ class _CommonAdState extends State<CommonAd> {
                               : null,
                         ),
                         if (widget.editId == null ||
-                            widget.editId.replaceAll('"', '').trim().isEmpty) ...[
+                            widget.editId
+                                .replaceAll('"', '')
+                                .trim()
+                                .isEmpty) ...[
                           CommonTextField1(
                             lable: 'Plan',
                             isRead: true,
@@ -413,9 +411,7 @@ class _CommonAdState extends State<CommonAd> {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
               child: FutureBuilder(
-                future: Future.wait([
-                  AuthService.isNewUser,
-                ]),
+                future: Future.wait([AuthService.isNewUser]),
                 builder: (context, asyncSnapshot) {
                   final isNewUser = asyncSnapshot.data?[0] ?? false;
                   return BlocConsumer<MarkAsListingCubit, MarkAsListingState>(
