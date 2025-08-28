@@ -72,7 +72,7 @@ class _EducationalAdState extends State<EducationalAd> {
   final planController = TextEditingController();
   int? planId;
   int? packageId;
-
+  bool _showDescriptionError = false;
   bool isLoading = true;
   List<ImageData> _imageDataList = [];
   @override
@@ -502,120 +502,127 @@ class _EducationalAdState extends State<EducationalAd> {
                         builder: (context, state) {
                           return CustomAppButton1(
                             isLoading:
-                                state is EducationAdLoading ||
-                                updateState is MarkAsListingUpdateLoading,
+                            state is EducationAdLoading || updateState is MarkAsListingUpdateLoading,
                             text: 'Submit Ad',
                             onPlusTap: isNewUser
                                 ? () {
-                                    context.push('/register?from=ad');
-                                  }
+                              context.push('/register?from=ad');
+                            }
                                 : () {
-                                    if (_formKey.currentState?.validate() ??
-                                        false) {
-                                      bool isValid = true;
-                                      if (selectedStateId == null) {
-                                        setState(() => _showStateError = true);
-                                        isValid = false;
-                                      } else {
-                                        setState(() => _showStateError = false);
-                                      }
-                                      if (locationController.text
-                                          .trim()
-                                          .isEmpty) {
-                                        CustomSnackBar1.show(
-                                          context,
-                                          "Please enter location",
-                                        );
-                                        isValid = false;
-                                      }
-                                      if (instituteNameController
-                                          .text
-                                          .isEmpty) {
-                                        isValid = false;
-                                      } else {
-                                        isValid = true;
-                                      }
-                                      if (priceController.text.isEmpty) {
-                                        isValid = false;
-                                      } else {
-                                        isValid = true;
-                                      }
-                                      if ((widget.editId == null ||
-                                              widget.editId
-                                                  .replaceAll('"', '')
-                                                  .trim()
-                                                  .isEmpty) &&
-                                          (planId == null ||
-                                              packageId == null)) {
-                                        CustomSnackBar1.show(
-                                          context,
-                                          "Please select a plan",
-                                        );
-                                        isValid = false;
-                                      }
-                                      if (selectedCityId == null) {
-                                        setState(() => _showCityError = true);
-                                        isValid = false;
-                                      } else {
-                                        setState(() => _showCityError = false);
-                                      }
+                              if (_formKey.currentState?.validate() ?? false) {
+                                bool isValid = true;
 
-                                      if (_images.isEmpty &&
-                                          (widget.editId == null ||
-                                              widget.editId
-                                                      .replaceAll('"', '')
-                                                      .trim()
-                                                      .isEmpty &&
-                                                  !isEligibleForFree)) {
-                                        setState(() => _showimagesError = true);
-                                        isValid = false;
-                                      } else {
-                                        setState(
-                                          () => _showimagesError = false,
-                                        );
-                                      }
-                                      if (isValid) {
-                                        final Map<String, dynamic> data = {
-                                          "title": titleController.text,
-                                          "brand": brandController.text,
-                                          "description":
-                                              descriptionController.text,
-                                          "sub_category_id": widget.subCatId,
-                                          "category_id": widget.catId,
-                                          "location": locationController.text,
-                                          "location_key": latlng,
-                                          "mobile_number": phoneController.text,
-                                          "price": priceController.text,
-                                          "full_name": nameController.text,
-                                          "state_id": selectedStateId,
-                                          "city_id": selectedCityId,
-                                          "institute_name":
-                                              instituteNameController.text,
-                                        };
+                                // Validate state
+                                if (selectedStateId == null) {
+                                  setState(() => _showStateError = true);
+                                  isValid = false;
+                                } else {
+                                  setState(() => _showStateError = false);
+                                }
 
-                                        if (editId.isEmpty) {
-                                          data["plan_id"] = planId;
-                                          data["package_id"] = packageId;
-                                        }
+                                // Validate location
+                                if (locationController.text.trim().isEmpty) {
+                                  CustomSnackBar1.show(
+                                    context,
+                                    "Please enter location",
+                                  );
+                                  isValid = false;
+                                }
 
-                                        if (_images.isNotEmpty) {
-                                          data["images"] = _images
-                                              .map((file) => file.path)
-                                              .toList();
-                                        }
+                                // Validate institute name
+                                if (instituteNameController.text.trim().isEmpty) {
+                                  CustomSnackBar1.show(
+                                    context,
+                                    "Please enter institute name",
+                                  );
+                                  isValid = false;
+                                }
 
-                                        if (editId.isNotEmpty) {
-                                          context
-                                              .read<MarkAsListingCubit>()
-                                              .markAsUpdate(editId, data);
-                                        } else {
-                                          context
-                                              .read<EducationAdCubit>()
-                                              .postEducationAd(data);
-                                        }
-                                      }
-                                    }
-                                  },
+                                // Validate description
+                                if (descriptionController.text.trim().isEmpty) {
+                                  setState(() => _showDescriptionError = true);
+                                  isValid = false;
+                                } else {
+                                  setState(() => _showDescriptionError = false);
+                                }
+
+                                // Validate price
+                                if (priceController.text.trim().isEmpty) {
+                                  CustomSnackBar1.show(
+                                    context,
+                                    "Please enter price",
+                                  );
+                                  isValid = false;
+                                }
+
+                                // Validate plan selection for new ads
+                                if ((widget.editId == null ||
+                                    widget.editId.replaceAll('"', '').trim().isEmpty) &&
+                                    (planId == null || packageId == null)) {
+                                  CustomSnackBar1.show(
+                                    context,
+                                    "Please select a plan",
+                                  );
+                                  isValid = false;
+                                }
+
+                                // Validate city
+                                if (selectedCityId == null) {
+                                  setState(() => _showCityError = true);
+                                  isValid = false;
+                                } else {
+                                  setState(() => _showCityError = false);
+                                }
+
+                                // Validate images
+                                if (_images.isEmpty &&
+                                    (widget.editId == null ||
+                                        widget.editId.replaceAll('"', '').trim().isEmpty)) {
+                                  CustomSnackBar1.show(
+                                    context,
+                                    "Please select at least 2 images",
+                                  );
+                                  setState(() => _showimagesError = true);
+                                  isValid = false;
+                                } else {
+                                  setState(() => _showimagesError = false);
+                                }
+
+
+                                if (isValid) {
+                                  final Map<String, dynamic> data = {
+                                    "title": titleController.text,
+                                    "brand": brandController.text,
+                                    "description": descriptionController.text,
+                                    "sub_category_id": widget.subCatId,
+                                    "category_id": widget.catId,
+                                    "location": locationController.text,
+                                    "location_key": latlng,
+                                    "mobile_number": phoneController.text,
+                                    "price": priceController.text,
+                                    "full_name": nameController.text,
+                                    "state_id": selectedStateId,
+                                    "city_id": selectedCityId,
+                                    "institute_name": instituteNameController.text,
+                                  };
+
+                                  if (editId.isEmpty) {
+                                    data["plan_id"] = planId;
+                                    data["package_id"] = packageId;
+                                  }
+
+                                  if (_images.isNotEmpty) {
+                                    data["images"] = _images.map((file) => file.path).toList();
+                                  }
+
+                                  if (editId.isNotEmpty) {
+                                    context.read<MarkAsListingCubit>().markAsUpdate(editId, data);
+                                  } else {
+                                    context.read<EducationAdCubit>().postEducationAd(data);
+                                  }
+                                }
+                              }
+                            },
                           );
                         },
                       );

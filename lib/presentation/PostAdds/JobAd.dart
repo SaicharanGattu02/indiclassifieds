@@ -539,15 +539,10 @@ class _JobsAdState extends State<JobsAd> {
                                       }
                                       if (salaryRangeController.text.isEmpty) {
                                         isValid = false;
-                                      } else {
-                                        isValid = true;
                                       }
                                       if (descriptionController.text.isEmpty) {
                                         isValid = false;
-                                      } else {
-                                        isValid = true;
                                       }
-
                                       if (isValid) {
                                         final Map<String, dynamic> data = {
                                           "title": titleController.text,

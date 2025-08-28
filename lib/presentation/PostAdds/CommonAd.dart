@@ -55,6 +55,7 @@ class _CommonAdState extends State<CommonAd> {
   int? selectedCityId;
   bool _showStateError = false;
   bool _showPriceError = false;
+  bool _showDescriptionError = false;
   bool _showCityError = false;
   bool _showimagesError = false;
   bool _showPaymentError = false;
@@ -145,7 +146,8 @@ class _CommonAdState extends State<CommonAd> {
       setState(() {
         selectedStateId = int.tryParse(stateId);
       });
-    } if (cityId != null && cityId.isNotEmpty) {
+    }
+    if (cityId != null && cityId.isNotEmpty) {
       setState(() {
         selectedCityId = int.tryParse(cityId);
       });
@@ -218,26 +220,10 @@ class _CommonAdState extends State<CommonAd> {
                             color: textColor,
                             size: 16,
                           ),
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Price required'
+                              : null,
                         ),
-                        if (_showPriceError) ...[
-                          Padding(
-                            padding:  EdgeInsets.only(top: 5),
-                            child: ShakeWidget(
-                              key: Key("price"),
-                              duration:  Duration(milliseconds: 700),
-                              child:  Text(
-                                'Price required',
-                                style: TextStyle(
-                                  fontFamily: 'roboto_serif',
-                                  fontSize: 12,
-                                  color: Colors.red,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-
                         GestureDetector(
                           onTap: () async {
                             final selectedState = await showModalBottomSheet(
@@ -516,9 +502,17 @@ class _CommonAdState extends State<CommonAd> {
                                         false) {
                                       bool isValid = true;
 
-                                      if (_images.isEmpty) {
+                                      if (_images.isEmpty &&
+                                          (widget.editId == null ||
+                                              widget.editId
+                                                  .replaceAll('"', '')
+                                                  .trim()
+                                                  .isEmpty)) {
+                                        CustomSnackBar1.show(
+                                          context,
+                                          "Please select atleast 2 images",
+                                        );
                                         setState(() => _showimagesError = true);
-                                        isValid = false;
                                       } else {
                                         setState(
                                           () => _showimagesError = false,
@@ -539,7 +533,19 @@ class _CommonAdState extends State<CommonAd> {
                                         setState(() => _showCityError = false);
                                       }
 
-                                      if (priceController.text.isEmpty) {
+                                      if (descriptionController.text
+                                          .trim()
+                                          .isEmpty) {
+                                        setState(
+                                          () => _showDescriptionError = true,
+                                        );
+                                        isValid = false;
+                                      } else {
+                                        setState(
+                                          () => _showDescriptionError = false,
+                                        );
+                                      }
+                                      if (priceController.text.trim().isEmpty) {
                                         setState(() => _showPriceError = true);
                                         isValid = false;
                                       } else {
@@ -567,7 +573,8 @@ class _CommonAdState extends State<CommonAd> {
                                       if (isValid) {
                                         final Map<String, dynamic> data = {
                                           "title": titleController.text,
-                                          "description": descriptionController.text,
+                                          "description":
+                                              descriptionController.text,
                                           "sub_category_id": widget.subCatId,
                                           "category_id": widget.catId,
                                           "location": locationController.text,

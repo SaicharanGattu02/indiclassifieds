@@ -70,6 +70,8 @@ class _CommunityAdScreenState extends State<CommunityAdScreen> {
   final stateController = TextEditingController();
   final cityController = TextEditingController();
   final planController = TextEditingController();
+  bool _showPriceError = false;
+  bool _showDescriptionError = false;
 
   List<File> _images = [];
   final int _maxImages = 6;
@@ -518,16 +520,36 @@ class _CommunityAdScreenState extends State<CommunityAdScreen> {
                                       if (_images.isEmpty &&
                                           (widget.editId == null ||
                                               widget.editId
-                                                      .replaceAll('"', '')
-                                                      .trim()
-                                                      .isEmpty &&
-                                                  !isEligibleForFree)) {
+                                                  .replaceAll('"', '')
+                                                  .trim()
+                                                  .isEmpty)) {
+                                        CustomSnackBar1.show(
+                                          context,
+                                          "Please select atleast 2 images",
+                                        );
                                         setState(() => _showimagesError = true);
+                                      } else {
+                                        setState(
+                                              () => _showimagesError = false,
+                                        );
+                                      }
+                                      if (descriptionController.text
+                                          .trim()
+                                          .isEmpty) {
+                                        setState(
+                                              () => _showDescriptionError = true,
+                                        );
                                         isValid = false;
                                       } else {
                                         setState(
-                                          () => _showimagesError = false,
+                                              () => _showDescriptionError = false,
                                         );
+                                      }
+                                      if (priceController.text.trim().isEmpty) {
+                                        setState(() => _showPriceError = true);
+                                        isValid = false;
+                                      } else {
+                                        setState(() => _showPriceError = false);
                                       }
                                       if (isValid) {
                                         final Map<String, dynamic> data = {

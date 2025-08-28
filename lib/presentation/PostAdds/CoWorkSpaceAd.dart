@@ -57,6 +57,9 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
   bool _showStateError = false;
   bool _showCityError = false;
   bool _showimagesError = false;
+  bool _showPriceError = false;
+  bool _showDescriptionError = false;
+  bool _showDeskSpaceError = false;
 
   final titleController = TextEditingController();
   final descriptionController = TextEditingController();
@@ -177,7 +180,8 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
       setState(() {
         selectedStateId = int.tryParse(stateId);
       });
-    } if (cityId != null && cityId.isNotEmpty) {
+    }
+    if (cityId != null && cityId.isNotEmpty) {
       setState(() {
         selectedCityId = int.tryParse(cityId);
       });
@@ -190,12 +194,15 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
 
     bool hasError = false;
 
-    if (_images.isEmpty) {
+    if (_images.isEmpty &&
+        (widget.editId == null ||
+            widget.editId.replaceAll('"', '').trim().isEmpty)) {
+      CustomSnackBar1.show(context, "Please select atleast 2 images");
       setState(() => _showimagesError = true);
-      hasError = true;
     } else {
       setState(() => _showimagesError = false);
     }
+
     if (areaSizeController.text.isEmpty) {
       hasError = false;
     } else {
@@ -206,6 +213,7 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
     } else {
       setState(() => hasError = true);
     }
+
     if (availableSeatsController.text.isEmpty) {
       hasError = false;
     } else {
