@@ -188,6 +188,7 @@ final GoRouter appRouter = GoRouter(
         // read from query params
         final listingIdStr = state.uri.queryParameters['listingId'];
         final subcategory_idstr = state.uri.queryParameters['subcategory_id'];
+        final seller_id = state.uri.queryParameters['seller_id'];
 
         final listingId = int.tryParse(listingIdStr ?? '') ?? 0;
         final subcategory_id = int.tryParse(subcategory_idstr ?? '') ?? 0;
@@ -196,6 +197,7 @@ final GoRouter appRouter = GoRouter(
           ProductDetailsScreen(
             listingId: listingId,
             subcategory_id: subcategory_id,
+            seller_id: seller_id??"",
           ),
           state,
         );

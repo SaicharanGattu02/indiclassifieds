@@ -108,7 +108,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 final banner_data = state.bannersModel;
                 final category_data = state.categoryModel;
                 final new_category_data = state.NewcategoryModel;
-                final products_data = state.subcategoryProductsModel;
                 return SingleChildScrollView(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
@@ -163,28 +162,32 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           items: banner_data?.data?.map((banner) {
                             return InkWell(
-                              // onTap: () => _launchUrl(banner['url']!),
-                              child: Container(
-                                width: double.infinity,
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child:CachedNetworkImage(
-                                    imageUrl: banner.image ?? "",
-                                    fit: BoxFit.cover,
-                                    placeholder: (context, url) =>
-                                        Center(
-                                          child: spinkits
-                                              .getSpinningLinespinkit(),
-                                        ),
-                                    errorWidget:
-                                        (context, url, error) =>
-                                        Center(
-                                          child: Icon(
-                                            Icons.broken_image,
-                                            size: 40,
-                                            color: Colors.grey,
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                  right: 8,
+                                ), // 👈 space on right
+                                child: SizedBox(
+                                  width: MediaQuery.of(
+                                    context,
+                                  ).size.width, // 👈 full width
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: CachedNetworkImage(
+                                      imageUrl: banner.image ?? "",
+                                      fit: BoxFit.cover,
+                                      placeholder: (context, url) => Center(
+                                        child: spinkits
+                                            .getSpinningLinespinkit(),
+                                      ),
+                                      errorWidget: (context, url, error) =>
+                                          Center(
+                                            child: Icon(
+                                              Icons.broken_image,
+                                              size: 40,
+                                              color: Colors.grey,
+                                            ),
                                           ),
-                                        ),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -528,9 +531,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                               isLiked: p.isFavorited ?? false,
                                               onLikeToggle: isGuest
                                                   ? () {
-                                                      context.push(
-                                                        "/login",
-                                                      );
+                                                      context.push("/login");
                                                     }
                                                   : () {
                                                       if (p.id != null) {

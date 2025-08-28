@@ -36,8 +36,10 @@ class AuthService {
   static Future<String?> getId() async => await _storage.read(key: _id);
   static Future<String?> getState() async => await _storage.read(key: _isState);
   static Future<String?> getCity() async => await _storage.read(key: _isCity);
-  static Future<String?> getStateId() async => await _storage.read(key: _isStateId);
-  static Future<String?> getCityId() async => await _storage.read(key: _isCityId);
+  static Future<String?> getStateId() async =>
+      await _storage.read(key: _isStateId);
+  static Future<String?> getCityId() async =>
+      await _storage.read(key: _isCityId);
 
   static Future<String?> getAccessToken() async =>
       await _storage.read(key: _accessTokenKey);
@@ -123,10 +125,10 @@ class AuthService {
     String? refreshToken,
     int expiresIn,
     bool isNewUser,
-      String? state,
-      String? city,
-      int? isStateId,
-      int? isCityId,
+    String? state,
+    String? city,
+    int? isStateId,
+    int? isCityId,
   ) async {
     await _storage.write(key: _accessTokenKey, value: accessToken);
     await _storage.write(key: _userName, value: userName);

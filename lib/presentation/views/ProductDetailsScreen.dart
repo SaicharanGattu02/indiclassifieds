@@ -35,11 +35,13 @@ extension DetailsX on Details {
 
 class ProductDetailsScreen extends StatefulWidget {
   final int listingId;
+  final String seller_id;
   final int subcategory_id;
   const ProductDetailsScreen({
     super.key,
     required this.listingId,
     required this.subcategory_id,
+    required this.seller_id,
   });
 
   @override

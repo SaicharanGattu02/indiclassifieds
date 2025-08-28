@@ -23,7 +23,8 @@ class UserListScreen extends StatefulWidget {
   State<UserListScreen> createState() => _UserListScreenState();
 }
 
-class _UserListScreenState extends State<UserListScreen> with SingleTickerProviderStateMixin {
+class _UserListScreenState extends State<UserListScreen>
+    with SingleTickerProviderStateMixin {
   String? userId;
   final TextEditingController _search = TextEditingController();
   late AnimationController _animationController;
@@ -34,14 +35,20 @@ class _UserListScreenState extends State<UserListScreen> with SingleTickerProvid
   String _lastFiredQuery = '';
   String _query = '';
 
-  bool? _isGuestUser; // <-- track guest
+  bool? _isGuestUser;
 
   @override
   void initState() {
     super.initState();
     _init();
-    _animationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
-    _fadeAnimation = CurvedAnimation(parent: _animationController, curve: Curves.easeInOut);
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    );
     _animationController.forward();
   }
 
@@ -64,6 +71,7 @@ class _UserListScreenState extends State<UserListScreen> with SingleTickerProvid
   @override
   void dispose() {
     _search.dispose();
+    _search.clear();
     _searchDebounce?.cancel();
     _animationController.dispose();
     super.dispose();
@@ -102,126 +110,172 @@ class _UserListScreenState extends State<UserListScreen> with SingleTickerProvid
         elevation: 0,
         backgroundColor: bg,
         surfaceTintColor: Colors.transparent,
-        title: Text('Messages', style: AppTextStyles.headlineMedium(textColor).copyWith(fontWeight: FontWeight.bold)),
+        title: Text(
+          'Messages',
+          style: AppTextStyles.headlineMedium(
+            textColor,
+          ).copyWith(fontWeight: FontWeight.bold),
+        ),
       ),
       body: (_isGuestUser == null)
           ? Center(child: DottedProgressWithLogo()) // determining guest status
           : (_isGuestUser == true)
-      // ---------- Guest placeholder (no API calls, no search) ----------
+          // ---------- Guest placeholder (no API calls, no search) ----------
           ? Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset('assets/nodata/no_data.png',
-                width: SizeConfig.screenWidth * 0.4,
-                height: SizeConfig.screenHeight * 0.12),
-            const SizedBox(height: 12),
-            Text('Login to view your messages',
-                style: AppTextStyles.headlineSmall(textColor)),
-          ],
-        ),
-      )
-      // -------------------- Logged-in UI --------------------
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/nodata/no_data.png',
+                    width: SizeConfig.screenWidth * 0.4,
+                    height: SizeConfig.screenHeight * 0.12,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Login to view your messages',
+                    style: AppTextStyles.headlineSmall(textColor),
+                  ),
+                ],
+              ),
+            )
+          // -------------------- Logged-in UI --------------------
           : Column(
-        children: [
-          FadeTransition(
-            opacity: _fadeAnimation,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.7),
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+              children: [
+                FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.surfaceVariant.withOpacity(0.7),
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: TextField(
+                        controller: _search,
+                        onChanged: _onSearchChanged,
+                        style: AppTextStyles.bodyMedium(textColor),
+                        decoration: InputDecoration(
+                          hintText: 'Search by name…',
+                          hintStyle: AppTextStyles.bodyMedium(
+                            textColor.withOpacity(0.6),
+                          ),
+                          prefixIcon: Icon(
+                            Icons.search,
+                            color: textColor.withOpacity(0.8),
+                          ),
+                          suffixIcon: _query.isNotEmpty
+                              ? IconButton(
+                                  icon: Icon(
+                                    Icons.clear,
+                                    color: textColor.withOpacity(0.8),
+                                  ),
+                                  onPressed: _clearSearch,
+                                )
+                              : null,
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 14,
+                            horizontal: 16,
+                          ),
+                        ),
+                      ),
                     ),
-                  ],
-                ),
-                child: TextField(
-                  controller: _search,
-                  onChanged: _onSearchChanged,
-                  style: AppTextStyles.bodyMedium(textColor),
-                  decoration: InputDecoration(
-                    hintText: 'Search by name…',
-                    hintStyle: AppTextStyles.bodyMedium(textColor.withOpacity(0.6)),
-                    prefixIcon: Icon(Icons.search, color: textColor.withOpacity(0.8)),
-                    suffixIcon: _query.isNotEmpty
-                        ? IconButton(
-                      icon: Icon(Icons.clear, color: textColor.withOpacity(0.8)),
-                      onPressed: _clearSearch,
-                    )
-                        : null,
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
                   ),
                 ),
-              ),
-            ),
-          ),
-          Expanded(
-            child: BlocBuilder<ChatUsersCubit, ChatUsersStates>(
-              builder: (context, state) {
-                if (state is ChatUsersLoading) {
-                  return _buildShimmerList(card, textColor);
-                } else if (state is ChatUsersFailure) {
-                  return _buildErrorState(context, state.error, textColor);
-                } else if (state is ChatUsersLoaded) {
-                  final users = state.chatUsersModel.data ?? [];
-                  final filtered = _query.trim().isEmpty
-                      ? users
-                      : users
-                      .where((u) => (u.name ?? '')
-                      .toLowerCase()
-                      .contains(_query.toLowerCase()))
-                      .toList();
-
-                  if (filtered.isEmpty) {
-                    return Center(
-                      child: Text('No users found',
-                          style: AppTextStyles.bodyLarge(textColor.withOpacity(0.7))),
-                    );
-                  }
-
-                  return RefreshIndicator(
-                    onRefresh: () async =>
-                        context.read<ChatUsersCubit>().fetchChatUsers(""),
-                    color: textColor,
-                    backgroundColor: card,
-                    child: ListView.separated(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
-                      itemCount: filtered.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 8),
-                      itemBuilder: (context, i) {
-                        final user = filtered[i];
-                        final id = user.userId ?? 0;
-                        final name = user.name ?? '';
-                        final imageUrl = user.profileImage ?? '';
-                        return _ChatCard(
-                          id: id,
-                          name: name,
-                          imageUrl: imageUrl,
-                          onTap: () {
-                            context.push(
-                                '/chat?receiverId=$id&receiverName=$name&receiverImage=${user.profileImage}');
-                          },
-                          card: card,
-                          textColor: textColor,
-                          animationDelay: i * 100,
+                Expanded(
+                  child: BlocBuilder<ChatUsersCubit, ChatUsersStates>(
+                    builder: (context, state) {
+                      if (state is ChatUsersLoading) {
+                        return _buildShimmerList(card, textColor);
+                      } else if (state is ChatUsersFailure) {
+                        return _buildErrorState(
+                          context,
+                          state.error,
+                          textColor,
                         );
-                      },
-                    ),
-                  );
-                }
-                return const SizedBox();
-              },
+                      } else if (state is ChatUsersLoaded) {
+                        final users = state.chatUsersModel.data ?? [];
+                        final filtered = _query.trim().isEmpty
+                            ? users
+                            : users
+                                  .where(
+                                    (u) => (u.name ?? '')
+                                        .toLowerCase()
+                                        .contains(_query.toLowerCase()),
+                                  )
+                                  .toList();
+
+                        if (filtered.isEmpty) {
+                          return Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Image.asset(
+                                  'assets/nodata/no_data.png',
+                                  width: MediaQuery.of(context).size.width * 0.4,
+                                  height: MediaQuery.of(context).size.height * 0.15,
+                                ),
+                                Text(
+                                  'No Users Found!',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16,
+                                    color: ThemeHelper.textColor(context),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+
+                        return RefreshIndicator(
+                          onRefresh: () async =>
+                              context.read<ChatUsersCubit>().fetchChatUsers(""),
+                          color: textColor,
+                          backgroundColor: card,
+                          child: ListView.separated(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+                            itemCount: filtered.length,
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(height: 8),
+                            itemBuilder: (context, i) {
+                              final user = filtered[i];
+                              final id = user.userId ?? 0;
+                              final name = user.name ?? '';
+                              final imageUrl = user.profileImage ?? '';
+                              return _ChatCard(
+                                id: id,
+                                name: name,
+                                imageUrl: imageUrl,
+                                onTap: () {
+                                  context.push(
+                                    '/chat?receiverId=$id&receiverName=$name&receiverImage=${user.profileImage}',
+                                  );
+                                },
+                                card: card,
+                                textColor: textColor,
+                                animationDelay: i * 100,
+                              );
+                            },
+                          ),
+                        );
+                      }
+                      return const SizedBox();
+                    },
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -236,7 +290,10 @@ class _UserListScreenState extends State<UserListScreen> with SingleTickerProvid
         highlightColor: card.withOpacity(0.8),
         child: Container(
           height: 72,
-          decoration: BoxDecoration(color: card, borderRadius: BorderRadius.circular(16)),
+          decoration: BoxDecoration(
+            color: card,
+            borderRadius: BorderRadius.circular(16),
+          ),
         ),
       ),
     );
@@ -248,13 +305,19 @@ class _UserListScreenState extends State<UserListScreen> with SingleTickerProvid
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(error, style: AppTextStyles.bodyLarge(textColor.withOpacity(0.7)), textAlign: TextAlign.center),
+          Text(
+            error,
+            style: AppTextStyles.bodyLarge(textColor.withOpacity(0.7)),
+            textAlign: TextAlign.center,
+          ),
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () => context.read<ChatUsersCubit>().fetchChatUsers(""),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.blue,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
             child: Text('Retry', style: AppTextStyles.bodyMedium(Colors.white)),
           ),
@@ -277,7 +340,7 @@ class _ChatCard extends StatelessWidget {
 
   final int id;
   final String name;
-  final String imageUrl;        // ← new
+  final String imageUrl; // ← new
   final VoidCallback onTap;
   final Color card;
   final Color textColor;
@@ -285,10 +348,14 @@ class _ChatCard extends StatelessWidget {
 
   bool get _hasImage =>
       imageUrl.trim().isNotEmpty &&
-          Uri.tryParse(imageUrl)?.hasAbsolutePath == true;
+      Uri.tryParse(imageUrl)?.hasAbsolutePath == true;
 
   String _initials(String name) {
-    final parts = name.trim().split(RegExp(r'\s+')).where((e) => e.isNotEmpty).toList();
+    final parts = name
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((e) => e.isNotEmpty)
+        .toList();
     if (parts.isEmpty) return '?';
     if (parts.length == 1) return parts.first.characters.first.toUpperCase();
     final a = parts[0].characters.first.toUpperCase();
@@ -311,10 +378,9 @@ class _ChatCard extends StatelessWidget {
       alignment: Alignment.center,
       child: Text(
         _initials(name),
-        style: AppTextStyles.titleLarge(Colors.white).copyWith(
-          fontWeight: FontWeight.bold,
-          fontSize:22,
-        ),
+        style: AppTextStyles.titleLarge(
+          Colors.white,
+        ).copyWith(fontWeight: FontWeight.bold, fontSize: 22),
       ),
     );
   }
@@ -339,7 +405,6 @@ class _ChatCard extends StatelessWidget {
     return _initialsAvatar(size);
   }
 
-
   @override
   Widget build(BuildContext context) {
     return AnimatedOpacity(
@@ -357,7 +422,7 @@ class _ChatCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             child: Row(
               children: [
-                _avatar(size: 48),                 // ← image or initials
+                _avatar(size: 48), // ← image or initials
                 const SizedBox(width: 12),
 
                 // Name (and future: last message/time/unread)
@@ -372,9 +437,9 @@ class _ChatCard extends StatelessWidget {
                               name,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: AppTextStyles.titleMedium(textColor).copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
+                              style: AppTextStyles.titleMedium(
+                                textColor,
+                              ).copyWith(fontWeight: FontWeight.w600),
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -393,4 +458,3 @@ class _ChatCard extends StatelessWidget {
     );
   }
 }
-

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:indiclassifieds/utils/AppLogger.dart';
 import '../Components/CustomAppButton.dart';
 import '../Components/CustomSnackBar.dart';
 import '../data/cubit/MyAds/MarkAsListing/mark_as_listing_cubit.dart';
@@ -59,7 +60,6 @@ class AdCardDynamic extends StatelessWidget {
   Widget build(BuildContext context) {
     final imageUrl = ad.image ?? '';
     final location = ad.location ?? '';
-
     return Container(
       decoration: BoxDecoration(
         color: isDark ? Colors.grey[900] : Colors.white,
@@ -120,7 +120,7 @@ class AdCardDynamic extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      ad.path != "job_ad" ? _priceText(ad.price): "" ,
+                      ad.category?.path != "job_ad" ? _priceText(ad.price) : "",
                       style: AppTextStyles.titleLarge(Colors.blue),
                     ),
                   ],
