@@ -417,28 +417,41 @@ class _OtpscreenState extends State<Otpscreen> {
                                         listener: (context, state) async {
                                           if (state is verifyMobileSuccess) {
                                             final data = state.verifyOtpModel;
-                                            await AuthService.saveTokens(
-                                              data.accessToken ?? "",
-                                              data.user?.name ?? "",
-                                              data.user?.email ?? "",
-                                              data.user?.mobile ?? "",
-                                              data.user?.id ?? 0,
-                                              data.refreshToken ?? "",
-                                              data.accessTokenExpiry ?? 0,
-                                              data.newUser ?? false,
-                                              data.user?.state,
-                                              data.user?.city,
-                                              data.user?.stateId,
-                                              data.user?.cityId,
-                                            );
-                                            if (data.newUser == true) {
-                                              context.pushReplacement(
-                                                '/register?from=otp',
+                                            if (data.success == true) {
+                                              await AuthService.saveTokens(
+                                                data.accessToken ?? "",
+                                                data.user?.name ?? "",
+                                                data.user?.email ?? "",
+                                                data.user?.mobile ?? "",
+                                                data.user?.id ?? 0,
+                                                data.refreshToken ?? "",
+                                                data.accessTokenExpiry ?? 0,
+                                                data.newUser ?? false,
+                                                data.user?.state,
+                                                data.user?.city,
+                                                data.user?.stateId,
+                                                data.user?.cityId,
                                               );
+                                              if (data.newUser == true) {
+                                                context.pushReplacement(
+                                                  '/register?from=otp',
+                                                );
+                                              } else {
+                                                context.pushReplacement(
+                                                  '/dashboard',
+                                                );
+                                              }
                                             } else {
-                                              context.pushReplacement(
-                                                '/dashboard',
-                                              );
+                                              if (data.code ==
+                                                  "ACCOUNT_DELETED") {
+                                                context.push(
+                                                  "/recover_account?user_id=${data.id.toString()}",
+                                                );
+                                              } else {
+                                                context.push(
+                                                  "/blocked_account",
+                                                );
+                                              }
                                             }
                                           } else if (state
                                               is OtpVerifyFailure) {

@@ -1,60 +1,44 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../utils/constants.dart';
 import 'AuthService.dart';
 import 'api_endpoint_urls.dart';
 
 class ApiClient {
-  static final Dio _dio = Dio(
-    BaseOptions(
-      baseUrl: "${APIEndpointUrls.baseUrl}",
-      connectTimeout: const Duration(seconds: 60),
-      receiveTimeout: const Duration(seconds: 60),
-      headers: {"Content-Type": "application/json"},
-      validateStatus: (status) {
-        return true;
-      },
-    ),
-  );
+  // static final Dio _dio = Dio(
+  //   BaseOptions(
+  //     baseUrl: "${APIEndpointUrls.baseUrl}",
+  //     connectTimeout: const Duration(seconds: 60),
+  //     receiveTimeout: const Duration(seconds: 60),
+  //     headers: {"Content-Type": "application/json"},
+  //     validateStatus: (status) {
+  //       return true;
+  //     },
+  //   ),
+  // );
   //
-  // static const List<String> _unauthenticatedEndpoints = [
-  //   '/api/app/send-otp',
-  //   '/api/app/verify-otp',
-  //   '/api/app/refresh-token-for-user',
-  //   '/api/app/get-all-categories',
-  //   '/api/app/get-all-sub-categories',
-  //   '/api/app/get-all-listings-with-pagination',
-  //   '/api/app/get-all-carousels',
-  //   '/api/app/get-all-cities',
-  // ];
-
   // static void setupInterceptors() {
+  //   _dio.interceptors.clear();
   //   _dio.interceptors.add(
   //     InterceptorsWrapper(
   //       onRequest: (options, handler) async {
   //         debugPrint('Interceptor triggered for: ${options.uri}');
-  //
-  //         // 👉 First check if request path is in unauthenticated list
-  //         final isUnauthenticatedEndpoint = _unauthenticatedEndpoints.any(
-  //               (endpoint) => options.uri.path.startsWith(endpoint),
-  //         );
-  //
-  //         // 👉 Check guest condition
   //         final isGuestUser = await AuthService.isGuest;
-  //
-  //         if (isUnauthenticatedEndpoint || isGuestUser) {
-  //           debugPrint('Skipping token check for: ${options.uri}');
-  //           return handler.next(options); // Don’t attach Authorization
+  //         if (isGuestUser) {
+  //           // 🚫 Guest → no token
+  //           debugPrint('Guest user → skipping token for ${options.uri}');
+  //           options.headers.remove('Authorization');
+  //           return handler.next(options);
   //         }
-  //
-  //         // Otherwise: normal flow with token refresh
+  //         // ✅ Non-guest → token required
   //         final isExpired = await AuthService.isTokenExpired();
   //         if (isExpired) {
-  //           debugPrint('Token is expired, attempting to refresh...');
+  //           debugPrint('Token expired → trying refresh...');
   //           final refreshed = await _refreshToken();
   //           if (!refreshed) {
-  //             debugPrint('❌ Token refresh failed, redirecting to login...');
+  //             debugPrint('❌ Token refresh failed, logging out...');
   //             await AuthService.logout();
   //             return handler.reject(
   //               DioException(
@@ -67,31 +51,20 @@ class ApiClient {
   //         }
   //
   //         final accessToken = await AuthService.getAccessToken();
-  //         if (accessToken != null) {
-  //           options.headers["Authorization"] = "Bearer $accessToken";
+  //         if (accessToken != null && accessToken.isNotEmpty) {
+  //           options.headers['Authorization'] = 'Bearer $accessToken';
+  //         } else {
+  //           debugPrint('⚠️ Non-guest but no token found');
   //         }
   //
   //         return handler.next(options);
   //       },
-  //       onResponse: (response, handler) {
-  //         return handler.next(response);
-  //       },
+  //
+  //       onResponse: (response, handler) => handler.next(response),
+  //
   //       onError: (DioException e, handler) async {
-  //         final isUnauthenticated = _unauthenticatedEndpoints.any(
-  //           (endpoint) => e.requestOptions.uri.path.endsWith(endpoint),
-  //         );
-  //
-  //         if (isUnauthenticated) {
-  //           debugPrint(
-  //             'Unauthenticated endpoint error, skipping logout: ${e.requestOptions.uri}',
-  //           );
-  //           return handler.next(e); // Skip logout for unauthenticated endpoints
-  //         }
-  //
   //         if (e.response?.statusCode == 401) {
-  //           debugPrint(
-  //             '❌ Unauthorized: Token invalid or user not found, redirecting to login...',
-  //           );
+  //           debugPrint('❌ 401 Unauthorized, logging out...');
   //           await AuthService.logout();
   //           return handler.reject(
   //             DioException(
@@ -101,27 +74,46 @@ class ApiClient {
   //               response: e.response,
   //             ),
   //           );
+  //         } else if (e.response?.statusCode == 403) {
+  //           debugPrint('❌ 403 Account Blocked');
+  //           final context = navigatorKey.currentContext;
+  //           context?.go("/blocked_account");
   //         }
-  //         return handler.next(e); // Pass other errors to the next interceptor
+  //         return handler.next(e);
   //       },
   //     ),
   //   );
   // }
 
+  static final Dio _dio = Dio(
+    BaseOptions(
+      baseUrl: APIEndpointUrls.baseUrl,
+      connectTimeout: const Duration(seconds: 60),
+      receiveTimeout: const Duration(seconds: 60),
+      headers: {"Content-Type": "application/json"},
+      // 2xx–4xx are treated as normal responses; 5xx become errors
+      validateStatus: (status) => status != null && status < 500,
+      // optional but handy:
+      receiveDataWhenStatusError: true,
+    ),
+  );
+
   static void setupInterceptors() {
     _dio.interceptors.clear();
+
+    // 1) Auth interceptor (token attach + refresh)
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
           debugPrint('Interceptor triggered for: ${options.uri}');
+
           final isGuestUser = await AuthService.isGuest;
           if (isGuestUser) {
-            // 🚫 Guest → no token
             debugPrint('Guest user → skipping token for ${options.uri}');
             options.headers.remove('Authorization');
             return handler.next(options);
           }
-          // ✅ Non-guest → token required
+
           final isExpired = await AuthService.isTokenExpired();
           if (isExpired) {
             debugPrint('Token expired → trying refresh...');
@@ -140,7 +132,7 @@ class ApiClient {
           }
 
           final accessToken = await AuthService.getAccessToken();
-          if (accessToken != null && accessToken.isNotEmpty) {
+          if (accessToken?.isNotEmpty == true) {
             options.headers['Authorization'] = 'Bearer $accessToken';
           } else {
             debugPrint('⚠️ Non-guest but no token found');
@@ -148,22 +140,115 @@ class ApiClient {
 
           return handler.next(options);
         },
+      ),
+    );
 
-        onResponse: (response, handler) => handler.next(response),
+    // 2) Global status handling interceptor
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onResponse: (response, handler) async {
+          final status = response.statusCode ?? 0;
 
-        onError: (DioException e, handler) async {
-          if (e.response?.statusCode == 401) {
+          if (status >= 200 && status < 300) {
+            // success
+            return handler.next(response);
+          }
+
+          // 4xx arrive here because validateStatus(<500) returns true
+          if (status == 401) {
             debugPrint('❌ 401 Unauthorized, logging out...');
             await AuthService.logout();
             return handler.reject(
               DioException(
-                requestOptions: e.requestOptions,
+                requestOptions: response.requestOptions,
+                response: response,
                 error: 'Unauthorized, please log in again',
                 type: DioExceptionType.badResponse,
+              ),
+            );
+          }
+
+          if (status == 403) {
+            debugPrint('❌ 403 Account Blocked');
+            final context = navigatorKey.currentContext;
+            context?.go('/blocked_account');
+            return handler.reject(
+              DioException(
+                requestOptions: response.requestOptions,
+                response: response,
+                error: 'Your account is blocked',
+                type: DioExceptionType.badResponse,
+              ),
+            );
+          }
+
+          // Any other 4xx -> normalize as DioException so repos/cubits can handle uniformly
+          return handler.reject(
+            DioException(
+              requestOptions: response.requestOptions,
+              response: response,
+              error: 'Request failed (${response.statusCode})',
+              type: DioExceptionType.badResponse,
+            ),
+          );
+        },
+
+        onError: (DioException e, handler) {
+          // Only 5xx (and network/timeout/cancel) reach here due to validateStatus(<500)
+          final code = e.response?.statusCode;
+
+          if (code == 401) {
+            // defensive: if a 401 still ends up here
+            AuthService.logout();
+            return handler.next(
+              DioException(
+                requestOptions: e.requestOptions,
+                response: e.response,
+                error: 'Unauthorized, please log in again',
+                type: DioExceptionType.badResponse,
+              ),
+            );
+          }
+
+          if (code == 403) {
+            final context = navigatorKey.currentContext;
+            context?.go('/blocked_account');
+            return handler.next(
+              DioException(
+                requestOptions: e.requestOptions,
+                response: e.response,
+                error: 'Your account is blocked',
+                type: DioExceptionType.badResponse,
+              ),
+            );
+          }
+
+          // Optionally map timeouts / no-internet to friendly errors
+          if (e.type == DioExceptionType.connectionTimeout ||
+              e.type == DioExceptionType.receiveTimeout ||
+              e.type == DioExceptionType.sendTimeout) {
+            return handler.next(
+              DioException(
+                requestOptions: e.requestOptions,
+                error: 'Network timeout, please try again',
+                type: e.type,
                 response: e.response,
               ),
             );
           }
+
+          if (e.type == DioExceptionType.connectionError) {
+            return handler.next(
+              DioException(
+                requestOptions: e.requestOptions,
+                error: 'No internet connection',
+                type: e.type,
+                response: e.response,
+              ),
+            );
+          }
+
+          // leave others as-is (includes 5xx)
           return handler.next(e);
         },
       ),

@@ -10,10 +10,12 @@ import 'package:indiclassifieds/presentation/views/PlansScreen.dart';
 import 'package:indiclassifieds/presentation/PostAdds/CommunityAdScreen.dart';
 import 'package:indiclassifieds/presentation/PostAdds/EducationalAd.dart';
 import 'package:indiclassifieds/presentation/views/ProductDetailsScreen.dart';
+import 'package:indiclassifieds/presentation/views/RecoverAccountScreen.dart';
 import 'package:indiclassifieds/presentation/views/SearchScreen.dart';
 import 'package:indiclassifieds/presentation/views/SplashScreen.dart';
 import 'package:indiclassifieds/presentation/views/SubCategoriesScreen.dart';
 import 'package:indiclassifieds/presentation/views/SuccessScreen1.dart';
+import 'package:indiclassifieds/utils/constants.dart';
 import '../data/cubit/Chat/private_chat_cubit.dart';
 import '../model/CategoryModel.dart';
 import '../presentation/PostAdds/AstrologyAd.dart';
@@ -31,6 +33,7 @@ import '../presentation/PostAdds/PropertiesAdScreen.dart';
 import 'package:indiclassifieds/presentation/views/ProductsListScreen.dart';
 import '../presentation/authentication/LoginScreen.dart';
 import '../presentation/authentication/OTPScreen.dart';
+import '../presentation/views/BlockedAccountScreen.dart';
 import '../presentation/views/ChatScreen.dart';
 import '../presentation/views/DetailsScreen.dart';
 import '../presentation/views/EditProfile.dart';
@@ -48,6 +51,7 @@ import '../services/AuthService.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
+  navigatorKey: navigatorKey,
   routes: [
     GoRoute(
       path: '/',
@@ -206,6 +210,24 @@ final GoRouter appRouter = GoRouter(
           SuccessScreen(nextRoute: nextRoute),
           state,
         );
+      },
+    ),
+
+    GoRoute(
+      path: '/recover_account',
+      pageBuilder: (context, state) {
+        final user_id = state.uri.queryParameters['user_id'] ?? "";
+        return buildSlideTransitionPage(
+          RecoverAccountScreen(user_id: user_id),
+          state,
+        );
+      },
+    ),
+
+    GoRoute(
+      path: '/blocked_account',
+      pageBuilder: (context, state) {
+        return buildSlideTransitionPage(BlockedAccountScreen(), state);
       },
     ),
 

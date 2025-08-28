@@ -155,12 +155,12 @@ class AdCardDynamic extends StatelessWidget {
 
           Column(
             children: [
-               Divider(height: 24, thickness: 0.5),
+              Divider(height: 24, thickness: 0.5),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   if (((ad.status ?? '').toLowerCase() == "pending" ||
-                      (ad.status ?? '').toLowerCase() == "approved") &&
+                          (ad.status ?? '').toLowerCase() == "approved") &&
                       ad.sold != true) ...[
                     ActionButton(
                       icon: Icons.edit_outlined,
@@ -320,7 +320,7 @@ class AdCardDynamic extends StatelessWidget {
                                           onPlusTap: () => context.pop(),
                                         ),
                                       ),
-                                      const SizedBox(width: 10),
+                                      const SizedBox(width: 5),
                                       Expanded(
                                         child:
                                             BlocConsumer<
@@ -344,6 +344,7 @@ class AdCardDynamic extends StatelessWidget {
                                               },
                                               builder: (context, markSoldState) {
                                                 return CustomAppButton1(
+                                                  textSize: 12,
                                                   onPlusTap: () {
                                                     context
                                                         .read<

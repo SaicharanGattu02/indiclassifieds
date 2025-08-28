@@ -67,6 +67,7 @@ class CustomAppButton1 extends StatelessWidget implements PreferredSizeWidget {
   final double? width;
   final double? height;
   final Color? textcolor;
+  final double? textSize;
   final VoidCallback? onPlusTap;
   final bool isLoading;
 
@@ -76,6 +77,7 @@ class CustomAppButton1 extends StatelessWidget implements PreferredSizeWidget {
     required this.onPlusTap,
     this.color,
     this.textcolor,
+    this.textSize,
     this.height,
     this.width,
     this.isLoading = false,
@@ -113,7 +115,7 @@ class CustomAppButton1 extends StatelessWidget implements PreferredSizeWidget {
                 style: TextStyle(
                   color: textcolor ?? Colors.white,
                   fontWeight: FontWeight.w600,
-                  fontSize: 16,
+                  fontSize: textSize?? 16,
                 ),
               ),
       ),

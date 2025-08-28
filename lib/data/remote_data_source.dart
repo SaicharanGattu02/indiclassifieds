@@ -85,6 +85,8 @@ abstract class RemoteDataSource {
   Future<ChatMessagesModel?> getChatMessages(String user_id, int page);
   Future<TransectionHistoryModel?> getTransections(int page);
   Future<CategoryModel?> getPostCategories();
+  Future<AdSuccessModel?> deleteAccount();
+  Future<AdSuccessModel?> recoverAccount(String id);
 }
 
 class RemoteDataSourceImpl implements RemoteDataSource {
@@ -120,6 +122,34 @@ class RemoteDataSourceImpl implements RemoteDataSource {
       }
     }
     return FormData.fromMap(formMap);
+  }
+
+  @override
+  Future<AdSuccessModel?> recoverAccount(String id) async {
+    try {
+      Response response = await ApiClient.get(
+        "${APIEndpointUrls.recovery_my_account}/$id",
+      );
+      AppLogger.log('recoverAccount:${response.data}');
+      return AdSuccessModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('recoverAccount :: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<AdSuccessModel?> deleteAccount() async {
+    try {
+      Response response = await ApiClient.get(
+        "${APIEndpointUrls.delete_my_account}",
+      );
+      AppLogger.log('deleteAccount:${response.data}');
+      return AdSuccessModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('deleteAccount :: $e');
+      return null;
+    }
   }
 
   @override

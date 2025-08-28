@@ -166,12 +166,25 @@ class _HomeScreenState extends State<HomeScreen> {
                               // onTap: () => _launchUrl(banner['url']!),
                               child: Container(
                                 width: double.infinity,
-                                padding: const EdgeInsets.only(right: 8.0),
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(10),
-                                  child: Image.network(
-                                    banner.image ?? "",
-                                    fit: BoxFit.fitWidth,
+                                  child:CachedNetworkImage(
+                                    imageUrl: banner.image ?? "",
+                                    fit: BoxFit.cover,
+                                    placeholder: (context, url) =>
+                                        Center(
+                                          child: spinkits
+                                              .getSpinningLinespinkit(),
+                                        ),
+                                    errorWidget:
+                                        (context, url, error) =>
+                                        Center(
+                                          child: Icon(
+                                            Icons.broken_image,
+                                            size: 40,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
                                   ),
                                 ),
                               ),

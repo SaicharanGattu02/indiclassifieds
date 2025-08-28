@@ -29,7 +29,7 @@ class ActionButton extends StatelessWidget {
           children: [
             Icon(icon, size: 16, color: textColor),
             const SizedBox(width: 4),
-            Text(label, style: AppTextStyles.bodyMedium(textColor)),
+            Text(label, style: AppTextStyles.bodySmall(textColor)),
           ],
         ),
       ),

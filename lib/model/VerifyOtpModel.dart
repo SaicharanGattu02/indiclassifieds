@@ -3,6 +3,8 @@ import 'dart:convert';
 class VerifyOtpModel {
   bool? success;
   String? message;
+  String? code;
+  int? id;
   String? accessToken;
   String? refreshToken;
   int? refreshTokenExpiry;
@@ -19,6 +21,7 @@ class VerifyOtpModel {
     this.accessTokenExpiry,
     this.newUser,
     this.user,
+    this.id,
   });
 
   /// Factory method to handle both String and Map inputs
@@ -35,6 +38,8 @@ class VerifyOtpModel {
   VerifyOtpModel.fromJson(Map<String, dynamic> json) {
     success = json['success'];
     message = json['message'];
+    code = json['code'];
+    id = json['id'];
     accessToken = json['accessToken'];
     refreshToken = json['refreshToken'];
     accessTokenExpiry = json['accessTokenExpiry'];
@@ -47,6 +52,8 @@ class VerifyOtpModel {
     final Map<String, dynamic> data = {};
     data['success'] = success;
     data['message'] = message;
+    data['id'] = id;
+    data['code'] = code;
     data['accessToken'] = accessToken;
     data['refreshToken'] = refreshToken;
     data['accessTokenExpiry'] = accessTokenExpiry;

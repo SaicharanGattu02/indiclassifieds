@@ -1,9 +1,9 @@
 class APIEndpointUrls {
-  static const String baseUrl = 'http://192.168.80.107:8081/';
-  static const String socket_url = 'http://192.168.80.107:8081';
+  // static const String baseUrl = 'http://192.168.80.107:8081/';
+  // static const String socket_url = 'http://192.168.80.107:8081';
 
-  // static const String baseUrl = 'https://ind.ozrit.live/';
-  // static const String socket_url = 'https://ind.ozrit.live';
+  static const String baseUrl = 'https://ind.ozrit.live/';
+  static const String socket_url = 'https://ind.ozrit.live';
   static const String apiUrl = 'api/app/';
 
   /// Authentiocation Urls
@@ -17,7 +17,6 @@ class APIEndpointUrls {
   static const String update_user_details_by_user =
       '${apiUrl}update-user-details-by-user';
 
-  /// get Apis
   static const String get_category = '${apiUrl}get-all-categories';
   static const String get_sub_category = '${apiUrl}get-all-sub-categories';
   static const String get_listings_by_sub_category =
@@ -50,8 +49,9 @@ class APIEndpointUrls {
       '${apiUrl}get-active-adversments-details';
   static const String get_all_carousels = '${apiUrl}get-all-carousels';
   static const String get_user_active_plans = '${apiUrl}get-user-active-plans';
+  static const String recovery_my_account = '${apiUrl}recovery-my-account';
+  static const String delete_my_account = '${apiUrl}delete-my-account';
 
-  /// post apis
   static const String post_common_ad = '${apiUrl}add-common-list-to-listings';
   static const String post_mobile_ad = '${apiUrl}add-mobile-to-listings';
   static const String post_property_ad = '${apiUrl}add-property-to-listings';
@@ -72,7 +72,8 @@ class APIEndpointUrls {
   static const String verify_payment_order = '${apiUrl}verify-payment';
   static const String register_user_details = '${apiUrl}register-user-details';
   static const String get_all_users_by_chat = '${apiUrl}get-all-users-by-chat';
-  static const String get_all_categories_for_post = '${apiUrl}get-all-categories-for-post';
+  static const String get_all_categories_for_post =
+      '${apiUrl}get-all-categories-for-post';
   static const String get_my_friend_messages =
       '${apiUrl}get-my-friend-messages';
   static const String get_transection_history =

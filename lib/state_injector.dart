@@ -13,6 +13,8 @@ import 'package:indiclassifieds/data/cubit/ChatUsers/ChatUsersCubit.dart';
 import 'package:indiclassifieds/data/cubit/ChatUsers/ChatUsersRepo.dart';
 import 'package:indiclassifieds/data/cubit/City/city_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Dashboard/DashboardCubit.dart';
+import 'package:indiclassifieds/data/cubit/DeleteAccount/DeleteAccountCubit.dart';
+import 'package:indiclassifieds/data/cubit/DeleteAccount/DeleteAccountRepository.dart';
 import 'package:indiclassifieds/data/cubit/MyAds/MarkAsListing/mark_as_listing_cubit.dart';
 import 'package:indiclassifieds/data/cubit/MyAds/my_ads_cubit.dart';
 import 'package:indiclassifieds/data/cubit/MyAds/my_ads_repo.dart';
@@ -28,6 +30,8 @@ import 'package:indiclassifieds/data/cubit/Products/products_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Products/products_repository.dart';
 import 'package:indiclassifieds/data/cubit/Profile/profile_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Profile/profile_repo.dart';
+import 'package:indiclassifieds/data/cubit/RecoverAccount/recover_account_cubit.dart';
+import 'package:indiclassifieds/data/cubit/RecoverAccount/recover_account_repository.dart';
 import 'package:indiclassifieds/data/cubit/Register/register_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Register/register_repo.dart';
 import 'package:indiclassifieds/data/cubit/Transections/transactions_cubit.dart';
@@ -231,6 +235,16 @@ class StateInjector {
       create: (context) =>
           TransactionsImpl(remoteDataSource: context.read<RemoteDataSource>()),
     ),
+    RepositoryProvider<DeleteAccountRepo>(
+      create: (context) => DeleteAccountRepoImpl(
+        remoteDataSource: context.read<RemoteDataSource>(),
+      ),
+    ),
+    RepositoryProvider<RecoverAccountRepo>(
+      create: (context) => RecoverAccountRepoImpl(
+        remoteDataSource: context.read<RemoteDataSource>(),
+      ),
+    ),
   ];
 
   static final blocProviders = <BlocProvider>[
@@ -387,7 +401,14 @@ class StateInjector {
       create: (context) =>
           TransactionCubit(context.read<TransactionsRepository>()),
     ),
-
+    BlocProvider<DeleteAccountCubit>(
+      create: (context) =>
+          DeleteAccountCubit(context.read<DeleteAccountRepo>()),
+    ),
+    BlocProvider<RecoverAccountCubit>(
+      create: (context) =>
+          RecoverAccountCubit(context.read<RecoverAccountRepo>()),
+    ),
     BlocProvider<DashboardCubit>(
       create: (context) => DashboardCubit(
         bannersCubit: context.read<BannerCubit>(),
