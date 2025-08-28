@@ -22,6 +22,10 @@ class ApiClient {
     '/api/app/send-otp',
     '/api/app/verify-otp',
     '/api/app/refresh-token-for-user',
+    '/api/app/get-all-categories',
+    '/api/app/get-all-sub-categories',
+    '/api/app/get-all-listings-with-pagination',
+    '/api/app/get-all-carousels',
   ];
 
   static void setupInterceptors() {
@@ -30,20 +34,20 @@ class ApiClient {
         onRequest: (options, handler) async {
           debugPrint('Interceptor triggered for: ${options.uri}');
 
-          // Check if the request is for an unauthenticated endpoint
-          final isUnauthenticated = _unauthenticatedEndpoints.any(
-            (endpoint) => options.uri.path.startsWith(
-              endpoint,
-            ), // Use startsWith instead of endsWith
+          // 👉 First check if request path is in unauthenticated list
+          final isUnauthenticatedEndpoint = _unauthenticatedEndpoints.any(
+                (endpoint) => options.uri.path.startsWith(endpoint),
           );
 
-          if (isUnauthenticated) {
-            debugPrint(
-              'Unauthenticated endpoint, skipping token check: ${options.uri}',
-            );
-            return handler.next(options); // Skip token check and proceed
+          // 👉 Check guest condition
+          final isGuestUser = await AuthService.isGuest;
+
+          if (isUnauthenticatedEndpoint || isGuestUser) {
+            debugPrint('Skipping token check for: ${options.uri}');
+            return handler.next(options); // Don’t attach Authorization
           }
 
+          // Otherwise: normal flow with token refresh
           final isExpired = await AuthService.isTokenExpired();
           if (isExpired) {
             debugPrint('Token is expired, attempting to refresh...');
@@ -62,20 +66,10 @@ class ApiClient {
           }
 
           final accessToken = await AuthService.getAccessToken();
-          debugPrint('Token retrieved for request: $accessToken');
           if (accessToken != null) {
             options.headers["Authorization"] = "Bearer $accessToken";
-          } else {
-            debugPrint('❌ No access token available, redirecting to login...');
-            await AuthService.logout();
-            return handler.reject(
-              DioException(
-                requestOptions: options,
-                error: 'No access token available, please log in again',
-                type: DioExceptionType.cancel,
-              ),
-            );
           }
+
           return handler.next(options);
         },
         onResponse: (response, handler) {
