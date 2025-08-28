@@ -164,7 +164,6 @@ class _AdsScreenState extends State<AdsScreen> {
                   ),
                 ),
 
-                // ✅ Ads list
                 Expanded(
                   child: BlocBuilder<MyAdsCubit, MyAdsStates>(
                     builder: (context, state) {

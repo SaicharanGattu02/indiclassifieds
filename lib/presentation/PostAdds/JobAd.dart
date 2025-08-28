@@ -65,7 +65,6 @@ class _JobsAdState extends State<JobsAd> {
   final brandController = TextEditingController();
   final locationController = TextEditingController();
   final titleController = TextEditingController();
-  final priceController = TextEditingController();
   final phoneController = TextEditingController();
   final stateController = TextEditingController();
   final cityController = TextEditingController();
@@ -90,7 +89,6 @@ class _JobsAdState extends State<JobsAd> {
           descriptionController.text =
               commonAdData.data?.listing?.description ?? '';
           locationController.text = commonAdData.data?.listing?.location ?? '';
-          priceController.text = commonAdData.data?.listing?.price ?? '';
           nameController.text = commonAdData.data?.listing?.fullName ?? '';
           phoneController.text = commonAdData.data?.listing?.mobileNumber ?? '';
           salaryRangeController.text =
@@ -553,7 +551,6 @@ class _JobsAdState extends State<JobsAd> {
                                           "category_id": widget.catId,
                                           "location": locationController.text,
                                           "mobile_number": phoneController.text,
-                                          "price": priceController.text,
                                           "full_name": nameController.text,
                                           "state_id": selectedStateId,
                                           "city_id": selectedCityId,

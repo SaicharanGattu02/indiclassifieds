@@ -530,133 +530,106 @@ class _MobileAdState extends State<MobileAd> {
                         },
                         builder: (context, state) {
                           return CustomAppButton1(
-                            isLoading:
-                                state is MobileAdLoading ||
-                                updateState is MarkAsListingUpdateLoading,
+                            isLoading: state is MobileAdLoading || updateState is MarkAsListingUpdateLoading,
                             text: 'Submit Ad',
                             onPlusTap: isNewUser
                                 ? () {
-                                    context.push('/register?from=ad');
-                                  }
+                              context.push('/register?from=ad');
+                            }
                                 : () {
-                                    if (_formKey.currentState?.validate() ??
-                                        false) {
-                                      bool isValid = true;
-                                      if (selectedStateId == null) {
-                                        setState(() => _showStateError = true);
-                                        isValid = false;
-                                      } else {
-                                        setState(() => _showStateError = false);
-                                      }
-                                      if (selectedCityId == null) {
-                                        setState(() => _showCityError = true);
-                                        isValid = false;
-                                      } else {
-                                        setState(() => _showCityError = false);
-                                      }
-                                      if (locationController.text
-                                          .trim()
-                                          .isEmpty) {
-                                        CustomSnackBar1.show(
-                                          context,
-                                          "Please enter location",
-                                        );
-                                        isValid = false;
-                                      }
-                                      if ((widget.editId == null ||
-                                              widget.editId
-                                                  .replaceAll('"', '')
-                                                  .trim()
-                                                  .isEmpty) &&
-                                          (planId == null ||
-                                              packageId == null)) {
-                                        CustomSnackBar1.show(
-                                          context,
-                                          "Please select a plan",
-                                        );
-                                        isValid = false;
-                                      }
+                              if (_formKey.currentState?.validate() ?? false) {
+                                bool isValid = true;
+                                if (locationController.text.trim().isEmpty) {
+                                  CustomSnackBar1.show(context, "Please enter location");
+                                  isValid = false;
+                                }
 
-                                      if (_images.isEmpty &&
-                                          (widget.editId == null ||
-                                              widget.editId
-                                                      .replaceAll('"', '')
-                                                      .trim()
-                                                      .isEmpty &&
-                                                  !isEligibleForFree)) {
-                                        setState(() => _showimagesError = true);
-                                        isValid = false;
-                                      } else {
-                                        setState(
-                                          () => _showimagesError = false,
-                                        );
-                                      }
-                                      if (descriptionController.text.isEmpty) {
-                                        isValid = false;
-                                      } else {
-                                        isValid = true;
-                                      }
-                                      if (ramController.text.isEmpty) {
-                                        isValid = false;
-                                      } else {
-                                        isValid = true;
-                                      }
-                                      if (priceController.text.isEmpty) {
-                                        isValid = false;
-                                      } else {
-                                        isValid = true;
-                                      }
-                                      if (storageCapacityController
-                                          .text
-                                          .isEmpty) {
-                                        isValid = false;
-                                      } else {
-                                        isValid = true;
-                                      }
+                                if (selectedStateId == null) {
+                                  setState(() => _showStateError = true);
+                                  isValid = false;
+                                } else {
+                                  setState(() => _showStateError = false);
+                                }
 
-                                      if (isValid) {
-                                        final Map<String, dynamic> data = {
-                                          "title": titleController.text,
-                                          "brand": brandController.text,
-                                          "description":
-                                              descriptionController.text,
-                                          "sub_category_id": widget.subCatId,
-                                          "category_id": widget.catId,
-                                          "location": locationController.text,
-                                          "location_key": latlng,
-                                          "mobile_number": phoneController.text,
-                                          "price": priceController.text,
-                                          "full_name": nameController.text,
-                                          "state_id": selectedStateId,
-                                          "city_id": selectedCityId,
-                                          "storage":
-                                              storageCapacityController.text,
-                                          "ram": "${ramController.text}",
-                                        };
+                                if (selectedCityId == null) {
+                                  setState(() => _showCityError = true);
+                                  isValid = false;
+                                } else {
+                                  setState(() => _showCityError = false);
+                                }
 
-                                        if (editId.isEmpty) {
-                                          data["plan_id"] = planId;
-                                          data["package_id"] = packageId;
-                                        }
+                                // Check for plan selection (only for new ads, not edits)
+                                if ((widget.editId == null || widget.editId.replaceAll('"', '').trim().isEmpty) &&
+                                    (planId == null || packageId == null)) {
+                                  CustomSnackBar1.show(context, "Please select a plan");
+                                  isValid = false;
+                                }
 
-                                        if (_images.isNotEmpty) {
-                                          data["images"] = _images
-                                              .map((file) => file.path)
-                                              .toList();
-                                        }
+                                // Check for images (if not eligible for free plan)
+                                if (_images.isEmpty &&
+                                    (widget.editId == null ||
+                                        widget.editId.replaceAll('"', '').trim().isEmpty &&
+                                            !isEligibleForFree)) {
+                                  setState(() => _showimagesError = true);
+                                  isValid = false;
+                                } else {
+                                  setState(() => _showimagesError = false);
+                                }
 
-                                        if (editId.isNotEmpty) {
-                                          context
-                                              .read<MarkAsListingCubit>()
-                                              .markAsUpdate(editId, data);
-                                        } else {
-                                          context
-                                              .read<MobileAdCubit>()
-                                              .postMobileAd(data);
-                                        }
-                                      }
-                                    }
-                                  },
+                                // Check other required fields
+                                if (descriptionController.text.trim().isEmpty) {
+                                  CustomSnackBar1.show(context, "Please enter description");
+                                  isValid = false;
+                                }
+                                if (ramController.text.trim().isEmpty) {
+                                  CustomSnackBar1.show(context, "Please enter RAM");
+                                  isValid = false;
+                                }
+                                if (priceController.text.trim().isEmpty) {
+                                  CustomSnackBar1.show(context, "Please enter price");
+                                  isValid = false;
+                                }
+                                if (storageCapacityController.text.trim().isEmpty) {
+                                  CustomSnackBar1.show(context, "Please enter storage capacity");
+                                  isValid = false;
+                                }
+
+                                // Proceed with API call only if all validations pass
+                                if (isValid) {
+                                  final Map<String, dynamic> data = {
+                                    "title": titleController.text,
+                                    "brand": brandController.text,
+                                    "description": descriptionController.text,
+                                    "sub_category_id": widget.subCatId,
+                                    "category_id": widget.catId,
+                                    "location": locationController.text,
+                                    "location_key": latlng,
+                                    "mobile_number": phoneController.text,
+                                    "price": priceController.text,
+                                    "full_name": nameController.text,
+                                    "state_id": selectedStateId,
+                                    "city_id": selectedCityId,
+                                    "storage": storageCapacityController.text,
+                                    "ram": ramController.text,
+                                  };
+
+                                  if (widget.editId == null || widget.editId.replaceAll('"', '').trim().isEmpty) {
+                                    data["plan_id"] = planId;
+                                    data["package_id"] = packageId;
+                                  }
+
+                                  if (_images.isNotEmpty) {
+                                    data["images"] = _images.map((file) => file.path).toList();
+                                  }
+
+                                  if (widget.editId != null && widget.editId.replaceAll('"', '').trim().isNotEmpty) {
+                                    context.read<MarkAsListingCubit>().markAsUpdate(widget.editId, data);
+                                  } else {
+                                    context.read<MobileAdCubit>().postMobileAd(data);
+                                  }
+                                }
+                              }
+                            },
                           );
                         },
                       );
