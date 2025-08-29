@@ -45,20 +45,28 @@ Future<void> main() async {
   } catch (e) {
     print("Error initializing Firebase: $e");
   }
-  FirebaseMessaging messaging = FirebaseMessaging.instance;
 
-  // Get the APNs token (iOS)
-  // if (Platform.isIOS) {
-  //   String? apnsToken = await messaging.getAPNSToken();
-  //   AppLogger.log("APNs Token: $apnsToken");
-  // }
+  await _requestPushPermissions();
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+  await FirebaseMessaging.instance.requestPermission(
+    alert: true,
+    badge: true,
+    sound: true,
+    provisional: false,
+  );
   //
-  // // Get the FCM token
-  // String? fcmToken = await messaging.getToken();
-  // AppLogger.log("FCM Token: $fcmToken");
-  // if (fcmToken != null) {
-  //   SecureStorageService.instance.setString("fb_token", fcmToken);
-  // }
+  // Get the APNs token (iOS)
+  if (Platform.isIOS) {
+    String? apnsToken = await messaging.getAPNSToken();
+    AppLogger.log("APNs Token: $apnsToken");
+  }
+
+  // Get the FCM token
+  String? fcmToken = await messaging.getToken();
+  AppLogger.log("FCM Token: $fcmToken");
+  if (fcmToken != null) {
+    SecureStorageService.instance.setString("fb_token", fcmToken);
+  }
 
   await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
     alert: true,
@@ -118,6 +126,24 @@ Future<void> main() async {
   );
 }
 
+Future<void> _requestPushPermissions() async {
+  if (Platform.isIOS) {
+    await FirebaseMessaging.instance.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+      provisional: false,
+    );
+  } else if (Platform.isAndroid) {
+    // Android 13+ runtime permission
+    final plugin = flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    await plugin?.requestNotificationsPermission();
+  }
+}
+
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
   //  AppLogger.log('A Background message just showed up :  ${message.data}');
@@ -131,8 +157,8 @@ void showNotification(
 ) async {
   AndroidNotificationDetails androidPlatformChannelSpecifics =
       AndroidNotificationDetails(
-        'your_channel_id', // Your channel ID
-        'your_channel_name', // Your channel name
+        'high_importance_channel',
+        'High Importance Notifications',
         importance: Importance.max,
         priority: Priority.high,
         playSound: true,

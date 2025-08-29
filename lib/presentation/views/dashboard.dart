@@ -1,6 +1,10 @@
+import 'dart:io';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:go_router/go_router.dart';
 import 'package:indiclassifieds/presentation/views/Home.dart';
 import 'package:indiclassifieds/presentation/views/ProfileScreen.dart';
@@ -9,6 +13,7 @@ import 'package:indiclassifieds/theme/app_colors.dart';
 
 import '../../data/cubit/UserActivePlans/user_active_plans_cubit.dart';
 import '../../data/cubit/theme_cubit.dart';
+import '../../main.dart';
 import '../../services/SocketService.dart';
 import '../../theme/ThemeHelper.dart';
 import 'AddsScreen.dart';
@@ -33,18 +38,40 @@ class _DashboardState extends State<Dashboard> {
     _selectedIndex = widget.initialTab;
     pageController = PageController(initialPage: _selectedIndex);
     getData();
+    _requestPushPermissions();
+  }
+
+  Future<void> _requestPushPermissions() async {
+    if (Platform.isIOS) {
+      await FirebaseMessaging.instance.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+        provisional: false,
+      );
+    } else if (Platform.isAndroid) {
+      // Android 13+ runtime permission
+      final plugin = flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >();
+      await plugin?.requestNotificationsPermission();
+    }
   }
 
   Future<void> getData() async {
-    final plan = await context
-        .read<UserActivePlanCubit>()
-        .getUserActivePlansData();
-    if (plan != null) {
-      AuthService.setPlanStatus(plan.goToPlansPage.toString() ?? "");
-      AuthService.setFreePlanStatus(plan.isFree.toString() ?? "");
+    final isGuest = await AuthService.isGuest;
+    if (!isGuest) {
+      final plan = await context
+          .read<UserActivePlanCubit>()
+          .getUserActivePlansData();
+      if (plan != null) {
+        AuthService.setPlanStatus(plan.goToPlansPage.toString() ?? "");
+        AuthService.setFreePlanStatus(plan.isFree.toString() ?? "");
+      }
+      final userId = await AuthService.getId();
+      SocketService.connect(userId ?? "");
     }
-    final userId = await  AuthService.getId();
-    SocketService.connect(userId??"");
   }
 
   void onItemTapped(int index) {
@@ -60,7 +87,10 @@ class _DashboardState extends State<Dashboard> {
       builder: (context, mode) {
         final cardColor = ThemeHelper.cardColor(context);
         return WillPopScope(
-          onWillPop: () async { SystemNavigator.pop(); return false; },
+          onWillPop: () async {
+            SystemNavigator.pop();
+            return false;
+          },
           child: Scaffold(
             resizeToAvoidBottomInset: false,
             body: PageView(
@@ -77,18 +107,22 @@ class _DashboardState extends State<Dashboard> {
                 ProfileScreen(),
               ],
             ),
-            floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerDocked,
             floatingActionButton: MediaQuery.removeViewInsets(
               context: context,
               removeBottom: true,
               child: Container(
-                width: 50, height: 50, margin: const EdgeInsets.only(top: 40),
+                width: 50,
+                height: 50,
+                margin: const EdgeInsets.only(top: 40),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.blue.withOpacity(0.4),
-                      blurRadius: 5, offset: const Offset(0, 6),
+                      blurRadius: 5,
+                      offset: const Offset(0, 6),
                     ),
                   ],
                 ),
@@ -100,7 +134,8 @@ class _DashboardState extends State<Dashboard> {
               ),
             ),
             bottomNavigationBar: SafeArea(
-              child: AnimatedContainer( // smooth color transition
+              child: AnimatedContainer(
+                // smooth color transition
                 duration: const Duration(milliseconds: 200),
                 height: 65,
                 color: cardColor,

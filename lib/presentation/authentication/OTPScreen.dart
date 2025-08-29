@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -494,7 +495,15 @@ class _OtpscreenState extends State<Otpscreen> {
                                                   ElevatedButton(
                                                     onPressed: loading
                                                         ? null
-                                                        : () {
+                                                        : () async {
+                                                            FirebaseMessaging
+                                                            messaging =
+                                                                FirebaseMessaging
+                                                                    .instance;
+                                                            String? fcmToken =
+                                                                await messaging
+                                                                    .getToken();
+
                                                             final otp =
                                                                 _otpController
                                                                     .text
@@ -510,6 +519,21 @@ class _OtpscreenState extends State<Otpscreen> {
                                                               );
                                                               return;
                                                             }
+
+                                                            // ✅ handle null fcm token gracefully
+                                                            if (fcmToken ==
+                                                                    null ||
+                                                                fcmToken
+                                                                    .isEmpty) {
+                                                              debugPrint(
+                                                                "⚠️ FCM token is null/empty, sending without it",
+                                                              );
+                                                              CustomSnackBar.show(
+                                                                context,
+                                                                '⚠️ FCM token is null/empty, sending without it',
+                                                              );
+                                                            }
+
                                                             context
                                                                 .read<
                                                                   LogInwithMobileCubit
@@ -518,6 +542,11 @@ class _OtpscreenState extends State<Otpscreen> {
                                                                   "mobile": widget
                                                                       .mobile,
                                                                   "otp": otp,
+                                                                  "fcm_token":
+                                                                      fcmToken ??
+                                                                      "", // fallback empty string
+                                                                  "fcm_type":
+                                                                      "app", // or "ios" depending on platform
                                                                 });
                                                           },
                                                     style: ElevatedButton.styleFrom(
