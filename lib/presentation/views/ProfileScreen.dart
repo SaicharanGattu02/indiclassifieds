@@ -188,6 +188,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           onTap: () => context.push('/transactions'),
                         ),
 
+                        _settingsTile(
+                          Icons.dark_mode_outlined,
+                          Colors.blue.shade100,
+                          'Dark Mode',
+                          isDark,
+                          textColor,
+                          trailing: Icons.arrow_forward_ios,
+                          onTap: () {
+                            _openThemePicker(context);
+                          },
+                        ),
+
                         // _settingsTile(
                         //   Icons.share,
                         //   Colors.orange.shade100,
@@ -200,22 +212,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         //   Icons.star_rate,
                         //   Colors.yellow.shade100,
                         //   'Rate us',
-                        //   isDark,
-                        //   textColor,
-                        //   trailing: Icons.arrow_forward_ios,
-                        // ),
-                        // _settingsTile(
-                        //   Icons.headset_mic,
-                        //   Colors.lightBlue.shade100,
-                        //   'Contact us',
-                        //   isDark,
-                        //   textColor,
-                        //   trailing: Icons.arrow_forward_ios,
-                        // ),
-                        // _settingsTile(
-                        //   Icons.info,
-                        //   Colors.purple.shade100,
-                        //   'About us',
                         //   isDark,
                         //   textColor,
                         //   trailing: Icons.arrow_forward_ios,

@@ -30,12 +30,11 @@ Future<void> main() async {
   ApiClient.setupInterceptors();
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-  // Initialize SecureStorageService and ThemeCubit
-  final storage =
-      SecureStorageService.instance; // Get the instance of SecureStorageService
+  final storage = SecureStorageService.instance;
   final themeCubit = ThemeCubit(storage);
-  // Set the user's saved theme mode on app startup
-  await themeCubit.setUser();
+  // Hydrate from secure storage before the UI builds
+  await themeCubit.hydrate();
+
 
   try {
     await Firebase.initializeApp(
@@ -119,7 +118,7 @@ Future<void> main() async {
     MultiRepositoryProvider(
       providers: StateInjector.repositoryProviders,
       child: MultiBlocProvider(
-        providers: StateInjector.blocProviders,
+        providers: StateInjector.blocProviders(themeCubit), // 👈 pass it in
         child: MyApp(),
       ),
     ),

@@ -94,7 +94,7 @@ class _AstrologyAdState extends State<AstrologyAd> {
         if (commonAdData != null) {
           descriptionController.text =
               commonAdData.data?.listing?.description ?? '';
-          titleController.text=commonAdData.data?.listing?.title??"";
+          titleController.text = commonAdData.data?.listing?.title ?? "";
           locationController.text = commonAdData.data?.listing?.location ?? '';
           priceController.text = commonAdData.data?.listing?.price ?? '';
           nameController.text = commonAdData.data?.listing?.fullName ?? '';
@@ -256,7 +256,9 @@ class _AstrologyAdState extends State<AstrologyAd> {
                           Padding(
                             padding: const EdgeInsets.only(top: 5),
                             child: ShakeWidget(
-                              key: Key('languages_error_${DateTime.now().millisecondsSinceEpoch}'),
+                              key: Key(
+                                'languages_error_${DateTime.now().millisecondsSinceEpoch}',
+                              ),
                               duration: const Duration(milliseconds: 700),
                               child: const Text(
                                 'Please select at least one language',
@@ -283,11 +285,11 @@ class _AstrologyAdState extends State<AstrologyAd> {
                         ),
                         if (_showPriceError) ...[
                           Padding(
-                            padding:  EdgeInsets.only(top: 5),
+                            padding: EdgeInsets.only(top: 5),
                             child: ShakeWidget(
                               key: Key("price"),
-                              duration:  Duration(milliseconds: 700),
-                              child:  Text(
+                              duration: Duration(milliseconds: 700),
+                              child: Text(
                                 'Price required',
                                 style: TextStyle(
                                   fontFamily: 'roboto_serif',
@@ -411,63 +413,63 @@ class _AstrologyAdState extends State<AstrologyAd> {
                             ),
                           ),
                         ],
-                        GestureDetector(
-                          onTap: () async {
-                            final selectedCity = await showModalBottomSheet(
-                              context: context,
-                              isScrollControlled: true,
-                              backgroundColor: Colors.transparent,
-                              builder: (context) {
-                                return SelectCityBottomSheet(
-                                  stateId: selectedStateId ?? 0,
-                                );
-                              },
-                            );
-
-                            if (selectedCity != null) {
-                              cityController.text = selectedCity.name ?? "";
-                              selectedCityId = selectedCity.id;
-                              setState(() {});
-                            }
-                          },
-                          child: AbsorbPointer(
-                            child: CommonTextField1(
-                              lable: 'City',
-                              hint: 'Select City',
-                              controller: cityController,
-                              color: textColor,
-                              keyboardType: TextInputType.text,
-                              isRead: true,
-                              prefixIcon: Icon(
-                                Icons.location_city_outlined,
-                                color: textColor,
-                                size: 16,
-                              ),
-                              // validator: (v) =>
-                              // (v == null || v.trim().isEmpty) ? 'City required' : null,
-                            ),
-                          ),
-                        ),
-                        if (_showCityError) ...[
-                          Padding(
-                            padding: const EdgeInsets.only(top: 5),
-                            child: ShakeWidget(
-                              key: Key(
-                                "dropdown_city_error_${DateTime.now().millisecondsSinceEpoch}",
-                              ),
-                              duration: const Duration(milliseconds: 700),
-                              child: const Text(
-                                'Please Select City',
-                                style: TextStyle(
-                                  fontFamily: 'roboto_serif',
-                                  fontSize: 12,
-                                  color: Colors.red,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                        // GestureDetector(
+                        //   onTap: () async {
+                        //     final selectedCity = await showModalBottomSheet(
+                        //       context: context,
+                        //       isScrollControlled: true,
+                        //       backgroundColor: Colors.transparent,
+                        //       builder: (context) {
+                        //         return SelectCityBottomSheet(
+                        //           stateId: selectedStateId ?? 0,
+                        //         );
+                        //       },
+                        //     );
+                        //
+                        //     if (selectedCity != null) {
+                        //       cityController.text = selectedCity.name ?? "";
+                        //       selectedCityId = selectedCity.id;
+                        //       setState(() {});
+                        //     }
+                        //   },
+                        //   child: AbsorbPointer(
+                        //     child: CommonTextField1(
+                        //       lable: 'City',
+                        //       hint: 'Select City',
+                        //       controller: cityController,
+                        //       color: textColor,
+                        //       keyboardType: TextInputType.text,
+                        //       isRead: true,
+                        //       prefixIcon: Icon(
+                        //         Icons.location_city_outlined,
+                        //         color: textColor,
+                        //         size: 16,
+                        //       ),
+                        //       // validator: (v) =>
+                        //       // (v == null || v.trim().isEmpty) ? 'City required' : null,
+                        //     ),
+                        //   ),
+                        // ),
+                        // if (_showCityError) ...[
+                        //   Padding(
+                        //     padding: const EdgeInsets.only(top: 5),
+                        //     child: ShakeWidget(
+                        //       key: Key(
+                        //         "dropdown_city_error_${DateTime.now().millisecondsSinceEpoch}",
+                        //       ),
+                        //       duration: const Duration(milliseconds: 700),
+                        //       child: const Text(
+                        //         'Please Select City',
+                        //         style: TextStyle(
+                        //           fontFamily: 'roboto_serif',
+                        //           fontSize: 12,
+                        //           color: Colors.red,
+                        //           fontWeight: FontWeight.w500,
+                        //         ),
+                        //       ),
+                        //     ),
+                        //   ),
+                        // ],
                         // CommonTextField1(
                         //   lable: 'Email (Optional)',
                         //   hint: 'Enter email',
@@ -547,7 +549,6 @@ class _AstrologyAdState extends State<AstrologyAd> {
                         context.pushReplacement(
                           "/successfully?title=Your ad has been updated successfully",
                         );
-
                       } else if (updateState is MarkAsListingFailure) {
                         CustomSnackBar1.show(context, updateState.error);
                       }
@@ -559,7 +560,6 @@ class _AstrologyAdState extends State<AstrologyAd> {
                             context.pushReplacement(
                               "/successfully?title=Your ad has been Added successfully",
                             );
-
                           } else if (state is AstrologyAdFailure) {
                             CustomSnackBar1.show(context, state.error);
                           }
@@ -606,12 +606,12 @@ class _AstrologyAdState extends State<AstrologyAd> {
                                       //   );
                                       //   isValid = false;
                                       // }
-                                      if (selectedCityId == null) {
-                                        setState(() => _showCityError = true);
-                                        isValid = false;
-                                      } else {
-                                        setState(() => _showCityError = false);
-                                      }
+                                      // if (selectedCityId == null) {
+                                      //   setState(() => _showCityError = true);
+                                      //   isValid = false;
+                                      // } else {
+                                      //   setState(() => _showCityError = false);
+                                      // }
 
                                       if (_images.isEmpty &&
                                           (widget.editId == null ||
@@ -623,10 +623,11 @@ class _AstrologyAdState extends State<AstrologyAd> {
                                           context,
                                           "Please select atleast 2 images",
                                         );
-                                        setState(() => _showimagesError = true
-                                        );
+                                        setState(() => _showimagesError = true);
                                       } else {
-                                        setState(() => _showimagesError = false);
+                                        setState(
+                                          () => _showimagesError = false,
+                                        );
                                       }
                                       if (priceController.text.isEmpty) {
                                         setState(() => _showPriceError = true);
@@ -634,17 +635,27 @@ class _AstrologyAdState extends State<AstrologyAd> {
                                       } else {
                                         setState(() => _showPriceError = false);
                                       }
-                                      if (descriptionController.text.trim().isEmpty) {
-                                        setState(() => _showDescriptionError = true);
+                                      if (descriptionController.text
+                                          .trim()
+                                          .isEmpty) {
+                                        setState(
+                                          () => _showDescriptionError = true,
+                                        );
                                         isValid = false;
                                       } else {
-                                        setState(() => _showDescriptionError = false);
+                                        setState(
+                                          () => _showDescriptionError = false,
+                                        );
                                       }
                                       if (selectedLanguages.isEmpty) {
-                                        setState(() => _showLanguageError = true);
+                                        setState(
+                                          () => _showLanguageError = true,
+                                        );
                                         isValid = false;
                                       } else {
-                                        setState(() => _showLanguageError = false);
+                                        setState(
+                                          () => _showLanguageError = false,
+                                        );
                                       }
                                       if (isValid) {
                                         final Map<String, dynamic> data = {
@@ -661,7 +672,7 @@ class _AstrologyAdState extends State<AstrologyAd> {
                                           "price": priceController.text,
                                           "full_name": nameController.text,
                                           "state_id": selectedStateId,
-                                          "city_id": selectedCityId,
+                                          // "city_id": selectedCityId,
                                         };
 
                                         if (widget.editId == null ||

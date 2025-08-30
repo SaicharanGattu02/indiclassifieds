@@ -228,12 +228,12 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
       setState(() => _showStateError = false);
     }
 
-    if (selectedCityId == null) {
-      setState(() => _showCityError = true);
-      hasError = true;
-    } else {
-      setState(() => _showCityError = false);
-    }
+    // if (selectedCityId == null) {
+    //   setState(() => _showCityError = true);
+    //   hasError = true;
+    // } else {
+    //   setState(() => _showCityError = false);
+    // }
     if (seatTypeOffered == null || seatTypeOffered!.isEmpty) {
       setState(() => seatTypeError = true);
       hasError = false;
@@ -255,7 +255,7 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
         "price": priceController.text.trim(),
         "full_name": nameController.text.trim(),
         "state_id": selectedStateId,
-        "city_id": selectedCityId,
+        // "city_id": selectedCityId,
         "area_size": "${areaSizeController.text.trim()} sqft",
         "available_seats": availableSeatsController.text.trim(),
         "desk_capacity": deskCapacityController.text.trim(),
@@ -494,42 +494,42 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
                         ),
                         if (_showStateError) _stateErrorWidget(),
 
-                        GestureDetector(
-                          onTap: () async {
-                            final selectedCity = await showModalBottomSheet(
-                              context: context,
-                              isScrollControlled: true,
-                              backgroundColor: Colors.transparent,
-                              builder: (context) {
-                                return SelectCityBottomSheet(
-                                  stateId: selectedStateId ?? 0,
-                                );
-                              },
-                            );
-                            if (selectedCity != null) {
-                              cityController.text = selectedCity.name ?? "";
-                              selectedCityId = selectedCity.id ?? 0;
-                              setState(() {});
-                            }
-                          },
-                          child: AbsorbPointer(
-                            child: CommonTextField1(
-                              lable: 'City',
-                              hint: 'Select City',
-                              controller: cityController,
-                              color: textColor,
-                              isRead: true,
-                              prefixIcon: Icon(
-                                Icons.location_city_outlined,
-                                color: textColor,
-                                size: 16,
-                              ),
-                              // validator: (v) =>
-                              // (v == null || v.trim().isEmpty) ? 'City required' : null,
-                            ),
-                          ),
-                        ),
-                        if (_showCityError) _cityErrorWidget(),
+                        // GestureDetector(
+                        //   onTap: () async {
+                        //     final selectedCity = await showModalBottomSheet(
+                        //       context: context,
+                        //       isScrollControlled: true,
+                        //       backgroundColor: Colors.transparent,
+                        //       builder: (context) {
+                        //         return SelectCityBottomSheet(
+                        //           stateId: selectedStateId ?? 0,
+                        //         );
+                        //       },
+                        //     );
+                        //     if (selectedCity != null) {
+                        //       cityController.text = selectedCity.name ?? "";
+                        //       selectedCityId = selectedCity.id ?? 0;
+                        //       setState(() {});
+                        //     }
+                        //   },
+                        //   child: AbsorbPointer(
+                        //     child: CommonTextField1(
+                        //       lable: 'City',
+                        //       hint: 'Select City',
+                        //       controller: cityController,
+                        //       color: textColor,
+                        //       isRead: true,
+                        //       prefixIcon: Icon(
+                        //         Icons.location_city_outlined,
+                        //         color: textColor,
+                        //         size: 16,
+                        //       ),
+                        //       // validator: (v) =>
+                        //       // (v == null || v.trim().isEmpty) ? 'City required' : null,
+                        //     ),
+                        //   ),
+                        // ),
+                        // if (_showCityError) _cityErrorWidget(),
                         CommonTextField1(
                           lable: 'Address',
                           hint: 'Enter Location',

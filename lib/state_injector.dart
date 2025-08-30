@@ -15,6 +15,7 @@ import 'package:indiclassifieds/data/cubit/City/city_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Dashboard/DashboardCubit.dart';
 import 'package:indiclassifieds/data/cubit/DeleteAccount/DeleteAccountCubit.dart';
 import 'package:indiclassifieds/data/cubit/DeleteAccount/DeleteAccountRepository.dart';
+import 'package:indiclassifieds/data/cubit/Location/location_cubit.dart';
 import 'package:indiclassifieds/data/cubit/MyAds/MarkAsListing/mark_as_listing_cubit.dart';
 import 'package:indiclassifieds/data/cubit/MyAds/my_ads_cubit.dart';
 import 'package:indiclassifieds/data/cubit/MyAds/my_ads_repo.dart';
@@ -247,11 +248,10 @@ class StateInjector {
     ),
   ];
 
-  static final blocProviders = <BlocProvider>[
+  static List<BlocProvider> blocProviders(ThemeCubit themeCubit) => [
     BlocProvider<InternetStatusBloc>(create: (context) => InternetStatusBloc()),
-    BlocProvider<ThemeCubit>(
-      create: (_) => ThemeCubit(SecureStorageService.instance),
-    ),
+    BlocProvider<ThemeCubit>.value(value: themeCubit),
+    BlocProvider<LocationCubit>(create: (context) => LocationCubit()),
     BlocProvider<LogInwithMobileCubit>(
       create: (context) =>
           LogInwithMobileCubit(context.read<LogInWithMobileRepository>()),

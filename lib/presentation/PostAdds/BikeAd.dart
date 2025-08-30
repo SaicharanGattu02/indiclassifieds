@@ -96,7 +96,7 @@ class _BikeAdState extends State<BikeAd> {
         if (commonAdData != null) {
           descriptionController.text =
               commonAdData.data?.listing?.description ?? '';
-          titleController.text=commonAdData.data?.listing?.title??"";
+          titleController.text = commonAdData.data?.listing?.title ?? "";
           locationController.text = commonAdData.data?.listing?.location ?? '';
           priceController.text = commonAdData.data?.listing?.price ?? '';
           nameController.text = commonAdData.data?.listing?.fullName ?? '';
@@ -158,7 +158,8 @@ class _BikeAdState extends State<BikeAd> {
       setState(() {
         selectedStateId = int.tryParse(stateId);
       });
-    }  if (cityId != null && cityId.isNotEmpty) {
+    }
+    if (cityId != null && cityId.isNotEmpty) {
       setState(() {
         selectedCityId = int.tryParse(cityId);
       });
@@ -213,14 +214,17 @@ class _BikeAdState extends State<BikeAd> {
                           keyboardType: TextInputType.number,
                           color: textColor,
                           inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly, // Allow only digits
+                            FilteringTextInputFormatter
+                                .digitsOnly, // Allow only digits
                           ],
                           validator: (v) {
                             if (v == null || v.trim().isEmpty) {
                               return 'Year of Manufacturing is required';
                             }
                             final year = int.tryParse(v);
-                            if (year == null || year < 1900 || year > DateTime.now().year) {
+                            if (year == null ||
+                                year < 1900 ||
+                                year > DateTime.now().year) {
                               return 'Enter a valid year';
                             }
                             return null;
@@ -233,7 +237,8 @@ class _BikeAdState extends State<BikeAd> {
                           keyboardType: TextInputType.number,
                           color: textColor,
                           inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly, // Allow only digits
+                            FilteringTextInputFormatter
+                                .digitsOnly, // Allow only digits
                           ],
                           validator: (v) {
                             if (v == null || v.trim().isEmpty) {
@@ -272,7 +277,8 @@ class _BikeAdState extends State<BikeAd> {
                             size: 16,
                           ),
                           inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly, // Allow only digits
+                            FilteringTextInputFormatter
+                                .digitsOnly, // Allow only digits
                           ],
                           validator: (v) {
                             if (v == null || v.trim().isEmpty) {
@@ -343,61 +349,61 @@ class _BikeAdState extends State<BikeAd> {
                             ),
                           ),
                         ],
-                        GestureDetector(
-                          onTap: () async {
-                            final selectedCity = await showModalBottomSheet(
-                              context: context,
-                              isScrollControlled: true,
-                              backgroundColor: Colors.transparent,
-                              builder: (context) {
-                                return SelectCityBottomSheet(
-                                  stateId: selectedStateId ?? 0,
-                                );
-                              },
-                            );
-
-                            if (selectedCity != null) {
-                              cityController.text = selectedCity.name ?? "";
-                              selectedCityId = selectedCity.id ?? "";
-                              setState(() {});
-                            }
-                          },
-                          child: AbsorbPointer(
-                            child: CommonTextField1(
-                              lable: 'City',
-                              hint: 'Select City',
-                              controller: cityController,
-                              color: textColor,
-                              keyboardType: TextInputType.text,
-                              isRead: true,
-                              prefixIcon: Icon(
-                                Icons.location_city_outlined,
-                                color: textColor,
-                                size: 16,
-                              ),
-                            ),
-                          ),
-                        ),
-                        if (_showCityError) ...[
-                          Padding(
-                            padding: const EdgeInsets.only(top: 5),
-                            child: ShakeWidget(
-                              key: Key(
-                                "dropdown_city_error_${DateTime.now().millisecondsSinceEpoch}",
-                              ),
-                              duration: const Duration(milliseconds: 700),
-                              child: const Text(
-                                'Please Select City',
-                                style: TextStyle(
-                                  fontFamily: 'roboto_serif',
-                                  fontSize: 12,
-                                  color: Colors.red,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                        // GestureDetector(
+                        //   onTap: () async {
+                        //     final selectedCity = await showModalBottomSheet(
+                        //       context: context,
+                        //       isScrollControlled: true,
+                        //       backgroundColor: Colors.transparent,
+                        //       builder: (context) {
+                        //         return SelectCityBottomSheet(
+                        //           stateId: selectedStateId ?? 0,
+                        //         );
+                        //       },
+                        //     );
+                        //
+                        //     if (selectedCity != null) {
+                        //       cityController.text = selectedCity.name ?? "";
+                        //       selectedCityId = selectedCity.id ?? "";
+                        //       setState(() {});
+                        //     }
+                        //   },
+                        //   child: AbsorbPointer(
+                        //     child: CommonTextField1(
+                        //       lable: 'City',
+                        //       hint: 'Select City',
+                        //       controller: cityController,
+                        //       color: textColor,
+                        //       keyboardType: TextInputType.text,
+                        //       isRead: true,
+                        //       prefixIcon: Icon(
+                        //         Icons.location_city_outlined,
+                        //         color: textColor,
+                        //         size: 16,
+                        //       ),
+                        //     ),
+                        //   ),
+                        // ),
+                        // if (_showCityError) ...[
+                        //   Padding(
+                        //     padding: const EdgeInsets.only(top: 5),
+                        //     child: ShakeWidget(
+                        //       key: Key(
+                        //         "dropdown_city_error_${DateTime.now().millisecondsSinceEpoch}",
+                        //       ),
+                        //       duration: const Duration(milliseconds: 700),
+                        //       child: const Text(
+                        //         'Please Select City',
+                        //         style: TextStyle(
+                        //           fontFamily: 'roboto_serif',
+                        //           fontSize: 12,
+                        //           color: Colors.red,
+                        //           fontWeight: FontWeight.w500,
+                        //         ),
+                        //       ),
+                        //     ),
+                        //   ),
+                        // ],
                         SizedBox(height: 12),
                         CommonImagePicker(
                           title: "Upload Product Images",
@@ -603,11 +609,17 @@ class _BikeAdState extends State<BikeAd> {
                                         );
                                         isValid = false;
                                       }
-                                      if (descriptionController.text.trim().isEmpty) {
-                                        setState(() => _showDescriptionError = true);
+                                      if (descriptionController.text
+                                          .trim()
+                                          .isEmpty) {
+                                        setState(
+                                          () => _showDescriptionError = true,
+                                        );
                                         isValid = false;
                                       } else {
-                                        setState(() => _showDescriptionError = false);
+                                        setState(
+                                          () => _showDescriptionError = false,
+                                        );
                                       }
                                       if (priceController.text.trim().isEmpty) {
                                         setState(() => _showPriceError = true);
@@ -615,12 +627,19 @@ class _BikeAdState extends State<BikeAd> {
                                       } else {
                                         setState(() => _showPriceError = false);
                                       }
-                                      if (yearOfManufacturingController.text.trim().isEmpty) {
-                                        setState(() => _showManufactureError = true);
+                                      if (yearOfManufacturingController.text
+                                          .trim()
+                                          .isEmpty) {
+                                        setState(
+                                          () => _showManufactureError = true,
+                                        );
                                         isValid = false;
                                       } else {
-                                        setState(() => _showManufactureError = false);
-                                      }if (kmsController.text.trim().isEmpty) {
+                                        setState(
+                                          () => _showManufactureError = false,
+                                        );
+                                      }
+                                      if (kmsController.text.trim().isEmpty) {
                                         setState(() => _showKmsError = true);
                                         isValid = false;
                                       } else {
@@ -636,10 +655,11 @@ class _BikeAdState extends State<BikeAd> {
                                           context,
                                           "Please select atleast 2 images",
                                         );
-                                        setState(() => _showimagesError = true
-                                        );
+                                        setState(() => _showimagesError = true);
                                       } else {
-                                        setState(() => _showimagesError = false);
+                                        setState(
+                                          () => _showimagesError = false,
+                                        );
                                       }
                                       // if ((widget.editId == null ||
                                       //         widget.editId
@@ -654,12 +674,12 @@ class _BikeAdState extends State<BikeAd> {
                                       //   );
                                       //   isValid = false;
                                       // }
-                                      if (selectedCityId == null) {
-                                        setState(() => _showCityError = true);
-                                        isValid = false;
-                                      } else {
-                                        setState(() => _showCityError = false);
-                                      }
+                                      // if (selectedCityId == null) {
+                                      //   setState(() => _showCityError = true);
+                                      //   isValid = false;
+                                      // } else {
+                                      //   setState(() => _showCityError = false);
+                                      // }
                                       if (_images.isEmpty &&
                                           (widget.editId == null ||
                                               widget.editId
@@ -711,7 +731,7 @@ class _BikeAdState extends State<BikeAd> {
                                           "price": priceController.text,
                                           "full_name": nameController.text,
                                           "state_id": selectedStateId,
-                                          "city_id": selectedCityId,
+                                          // "city_id": selectedCityId,
                                           "location_key": latlng,
                                           "year_of_manufacturing":
                                               yearOfManufacturingController

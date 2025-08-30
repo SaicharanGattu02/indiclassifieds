@@ -265,10 +265,10 @@ class _ProductsListScreenState extends State<ProductsListScreen> {
                           child: CustomAppButton1(
                             text: "Apply",
                             onPlusTap: () {
+                              final categoryIds = _selectedCategories.value;
                               final filters = {
-                                "categoryId":
-                                    _selectedCategories.value.isNotEmpty
-                                    ? _selectedCategories.value.join(",")
+                                "categoryId": categoryIds.isNotEmpty
+                                    ? categoryIds.join(",")
                                     : null,
                                 "sort_by": _selectedSort.value,
                                 "state_id": _selectedStateId.value?.toString(),
@@ -286,8 +286,12 @@ class _ProductsListScreenState extends State<ProductsListScreen> {
                               };
 
                               context.read<ProductsCubit2>().getProducts(
-                                subCategoryId: widget.subCategoryId,
-                                categoryId: filters["categoryId"],
+                                subCategoryId: categoryIds.isEmpty
+                                    ? widget.subCategoryId
+                                    : null,
+                                categoryId: categoryIds.isNotEmpty
+                                    ? filters["categoryId"]
+                                    : null,
                                 sort_by: filters["sort_by"],
                                 state_id: filters["state_id"],
                                 city_id: filters["city_id"],

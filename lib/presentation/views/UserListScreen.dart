@@ -108,6 +108,7 @@ class _UserListScreenState extends State<UserListScreen>
       backgroundColor: bg,
       appBar: AppBar(
         elevation: 0,
+        automaticallyImplyLeading: false,
         backgroundColor: bg,
         surfaceTintColor: Colors.transparent,
         title: Text(
@@ -221,8 +222,10 @@ class _UserListScreenState extends State<UserListScreen>
                               children: [
                                 Image.asset(
                                   'assets/nodata/no_data.png',
-                                  width: MediaQuery.of(context).size.width * 0.4,
-                                  height: MediaQuery.of(context).size.height * 0.15,
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.4,
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.15,
                                 ),
                                 Text(
                                   'No Users Found!',

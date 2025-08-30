@@ -5,10 +5,9 @@ enum AppThemeMode { system, light, dark }
 
 class ThemeCubit extends Cubit<AppThemeMode> {
   final SecureStorageService storage;
-
   ThemeCubit(this.storage) : super(AppThemeMode.system);
 
-  String get _key => 'theme';
+  static const String _key = 'theme';
 
   AppThemeMode _fromString(String? s) {
     switch (s) {
@@ -22,35 +21,40 @@ class ThemeCubit extends Cubit<AppThemeMode> {
     }
   }
 
-  /// Call this whenever you know the current user (login / app resume)
-  Future<void> setUser() async {
+  String _toString(AppThemeMode m) {
+    switch (m) {
+      case AppThemeMode.light:
+        return 'light';
+      case AppThemeMode.dark:
+        return 'dark';
+      case AppThemeMode.system:
+        return 'system';
+    }
+  }
+
+  /// Call once at app start (in main) to load saved theme
+  Future<void> hydrate() async {
     try {
       final saved = await storage.getString(_key);
-      // Fallback to system theme if no theme was saved
-      emit(_fromString(saved) ?? AppThemeMode.system);
+      emit(_fromString(saved));
     } catch (e) {
-      // In case of any error, default to system theme
       emit(AppThemeMode.system);
-      print('Error while setting theme: $e');
+      // ignore or log
     }
   }
-
 
   Future<void> setMode(AppThemeMode mode) async {
+    emit(mode);
     try {
-      emit(mode);
-      await storage.setString(_key, mode.name);
-    } catch (e) {
-      // Handle any errors that may occur during storage
-      print('Error while saving theme: $e');
+      await storage.setString(_key, _toString(mode));
+    } catch (_) {
+      // ignore or log
     }
   }
-
 
   Future<void> setLightTheme() => setMode(AppThemeMode.light);
   Future<void> setDarkTheme() => setMode(AppThemeMode.dark);
   Future<void> setSystemTheme() => setMode(AppThemeMode.system);
 
-  /// Optional: clear on logout
   Future<void> clearForCurrentUser() => storage.delete(_key);
 }

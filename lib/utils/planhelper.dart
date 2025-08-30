@@ -107,7 +107,7 @@ void showPlanBottomSheet({
                             Padding(
                               padding: const EdgeInsets.only(bottom: 16.0),
                               child: Text(
-                                "You have one free plan to post an Ad!",
+                                "You have 1 Free Ad to post!",
                                 textAlign: TextAlign.center,
                                 style: AppTextStyles.headlineSmall(textColor)
                                     .copyWith(
@@ -119,8 +119,8 @@ void showPlanBottomSheet({
                             _buildPlanCard(
                               context,
                               Plans(
-                                planName: 'Free Plan',
-                                packageName: 'Basic Free Plan',
+                                planName: 'Free Ad',
+                                packageName: 'Basic Free Ad',
                                 remaining: 1,
                                 endDate: 'N/A',
                               ),
@@ -131,7 +131,10 @@ void showPlanBottomSheet({
                             ),
                             SizedBox(height: 15),
                             Text(
-                              "Congratulations on your free plan! With this, you can post one ad. To access more features and post additional ads, consider subscribing to our premium plans.",
+                              "Your Free Ad allows you to post only one listing. "
+                              "To continue posting more ads and access extra features, "
+                              "please subscribe to one of our premium options.",
+                              textAlign: TextAlign.center,
                               style: AppTextStyles.bodyMedium(textColor),
                             ),
                             SizedBox(height: 24),
@@ -167,8 +170,8 @@ void showPlanBottomSheet({
                           _buildPlanCard(
                             context,
                             Plans(
-                              planName: 'Free Plan',
-                              packageName: 'Basic Free Plan',
+                              planName: 'Free Ad',
+                              packageName: 'Basic Free Ad',
                               remaining: 1,
                               endDate: 'N/A',
                             ),

@@ -323,61 +323,61 @@ class _CarsAdState extends State<CarsAd> {
                             ),
                           ),
                         ],
-                        GestureDetector(
-                          onTap: () async {
-                            final selectedCity = await showModalBottomSheet(
-                              context: context,
-                              isScrollControlled: true,
-                              backgroundColor: Colors.transparent,
-                              builder: (context) {
-                                return SelectCityBottomSheet(
-                                  stateId: selectedStateId ?? 0,
-                                );
-                              },
-                            );
-
-                            if (selectedCity != null) {
-                              cityController.text = selectedCity.name ?? "";
-                              selectedCityId = selectedCity.id ?? "";
-                              setState(() {});
-                            }
-                          },
-                          child: AbsorbPointer(
-                            child: CommonTextField1(
-                              lable: 'City',
-                              hint: 'Select City',
-                              controller: cityController,
-                              color: textColor,
-                              keyboardType: TextInputType.text,
-                              isRead: true,
-                              prefixIcon: Icon(
-                                Icons.location_city_outlined,
-                                color: textColor,
-                                size: 16,
-                              ),
-                            ),
-                          ),
-                        ),
-                        if (_showCityError) ...[
-                          Padding(
-                            padding: const EdgeInsets.only(top: 5),
-                            child: ShakeWidget(
-                              key: Key(
-                                "dropdown_city_error_${DateTime.now().millisecondsSinceEpoch}",
-                              ),
-                              duration: const Duration(milliseconds: 700),
-                              child: const Text(
-                                'Please Select City',
-                                style: TextStyle(
-                                  fontFamily: 'roboto_serif',
-                                  fontSize: 12,
-                                  color: Colors.red,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                        // GestureDetector(
+                        //   onTap: () async {
+                        //     final selectedCity = await showModalBottomSheet(
+                        //       context: context,
+                        //       isScrollControlled: true,
+                        //       backgroundColor: Colors.transparent,
+                        //       builder: (context) {
+                        //         return SelectCityBottomSheet(
+                        //           stateId: selectedStateId ?? 0,
+                        //         );
+                        //       },
+                        //     );
+                        //
+                        //     if (selectedCity != null) {
+                        //       cityController.text = selectedCity.name ?? "";
+                        //       selectedCityId = selectedCity.id ?? "";
+                        //       setState(() {});
+                        //     }
+                        //   },
+                        //   child: AbsorbPointer(
+                        //     child: CommonTextField1(
+                        //       lable: 'City',
+                        //       hint: 'Select City',
+                        //       controller: cityController,
+                        //       color: textColor,
+                        //       keyboardType: TextInputType.text,
+                        //       isRead: true,
+                        //       prefixIcon: Icon(
+                        //         Icons.location_city_outlined,
+                        //         color: textColor,
+                        //         size: 16,
+                        //       ),
+                        //     ),
+                        //   ),
+                        // ),
+                        // if (_showCityError) ...[
+                        //   Padding(
+                        //     padding: const EdgeInsets.only(top: 5),
+                        //     child: ShakeWidget(
+                        //       key: Key(
+                        //         "dropdown_city_error_${DateTime.now().millisecondsSinceEpoch}",
+                        //       ),
+                        //       duration: const Duration(milliseconds: 700),
+                        //       child: const Text(
+                        //         'Please Select City',
+                        //         style: TextStyle(
+                        //           fontFamily: 'roboto_serif',
+                        //           fontSize: 12,
+                        //           color: Colors.red,
+                        //           fontWeight: FontWeight.w500,
+                        //         ),
+                        //       ),
+                        //     ),
+                        //   ),
+                        // ],
                         SizedBox(height: 12),
                         CommonImagePicker(
                           title: "Upload Product Images",
@@ -604,12 +604,12 @@ class _CarsAdState extends State<CarsAd> {
                                       //   );
                                       //   isValid = false;
                                       // }
-                                      if (selectedCityId == null) {
-                                        setState(() => _showCityError = true);
-                                        isValid = false;
-                                      } else {
-                                        setState(() => _showCityError = false);
-                                      }
+                                      // if (selectedCityId == null) {
+                                      //   setState(() => _showCityError = true);
+                                      //   isValid = false;
+                                      // } else {
+                                      //   setState(() => _showCityError = false);
+                                      // }
                                       if (descriptionController.text.trim().isEmpty) {
                                         setState(() => _showDescriptionError = true);
                                         isValid = false;
@@ -696,7 +696,7 @@ class _CarsAdState extends State<CarsAd> {
                                           "price": priceController.text,
                                           "full_name": nameController.text,
                                           "state_id": selectedStateId,
-                                          "city_id": selectedCityId,
+                                          // "city_id": selectedCityId,
                                           "location_key": latlng,
                                           "year_of_manufacturing":
                                               yearOfManufacturingController

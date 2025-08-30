@@ -8,9 +8,12 @@ import 'package:indiclassifieds/data/cubit/Dashboard/DashboardState.dart';
 import 'package:indiclassifieds/services/AuthService.dart';
 import 'package:indiclassifieds/theme/app_colors.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../Components/CustomSnackBar.dart';
 import '../../data/cubit/AddToWishlist/addToWishlistCubit.dart';
 import '../../data/cubit/AddToWishlist/addToWishlistStates.dart';
+import '../../data/cubit/Location/location_cubit.dart';
+import '../../data/cubit/Location/location_state.dart';
 import '../../data/cubit/Products/Product_cubit1.dart';
 import '../../data/cubit/Products/products_cubit.dart';
 import '../../data/cubit/Products/products_state1.dart';
@@ -50,6 +53,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final borderColor = ThemeHelper.isDarkMode(context)
         ? Colors.white12
         : Colors.black12;
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
     SizeConfig.init(context);
     return FutureBuilder(
       future: AuthService.isGuest,
@@ -59,7 +64,10 @@ class _HomeScreenState extends State<HomeScreen> {
           appBar: AppBar(
             elevation: 0,
             automaticallyImplyLeading: false,
-            title: Row(
+            toolbarHeight: 75,
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 6,
               children: [
                 ClipRRect(
                   borderRadius: BorderRadiusGeometry.circular(4),
@@ -69,6 +77,34 @@ class _HomeScreenState extends State<HomeScreen> {
                     fit: BoxFit.cover,
                   ),
                 ),
+                BlocBuilder<LocationCubit, LocationState>(
+                  builder: (context, state) {
+                    return Visibility(
+                      visible: state is LocationLoaded,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.location_on_outlined,
+                            size: 20,
+                            color: textColor,
+                          ),
+                          SizedBox(
+                            width: screenWidth * 0.65,
+                            child: Text(
+                              state is LocationLoaded ? state.locationName : '',
+                              style: AppTextStyles.bodyMedium(textColor),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+                SizedBox(height: 6),
               ],
             ),
             actions: [
@@ -162,14 +198,26 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           items: banner_data?.data?.map((banner) {
                             return InkWell(
+                              onTap: () async {
+                                final url = banner.linkUrl ?? "";
+                                if (url.isNotEmpty &&
+                                    await canLaunchUrl(Uri.parse(url))) {
+                                  await launchUrl(
+                                    Uri.parse(url),
+                                    mode: LaunchMode.externalApplication,
+                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text("Could not launch link"),
+                                    ),
+                                  );
+                                }
+                              },
                               child: Padding(
-                                padding: const EdgeInsets.only(
-                                  right: 8,
-                                ), // 👈 space on right
+                                padding: const EdgeInsets.only(right: 8),
                                 child: SizedBox(
-                                  width: MediaQuery.of(
-                                    context,
-                                  ).size.width, // 👈 full width
+                                  width: MediaQuery.of(context).size.width,
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(10),
                                     child: CachedNetworkImage(

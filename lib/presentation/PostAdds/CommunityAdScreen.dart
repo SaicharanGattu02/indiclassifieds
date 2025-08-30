@@ -334,43 +334,43 @@ class _CommunityAdScreenState extends State<CommunityAdScreen> {
                         ),
                         if (_showStateError) _stateErrorWidget(),
 
-                        GestureDetector(
-                          onTap: () async {
-                            final selectedCity = await showModalBottomSheet(
-                              context: context,
-                              isScrollControlled: true,
-                              backgroundColor: Colors.transparent,
-                              builder: (context) {
-                                return SelectCityBottomSheet(
-                                  stateId: selectedStateId ?? 0,
-                                );
-                              },
-                            );
-
-                            if (selectedCity != null) {
-                              cityController.text = selectedCity.name ?? "";
-                              selectedCityId = selectedCity.id ?? 0;
-                              setState(() {});
-                            }
-                          },
-                          child: AbsorbPointer(
-                            child: CommonTextField1(
-                              lable: 'City',
-                              hint: 'Select City',
-                              controller: cityController,
-                              color: textColor,
-                              isRead: true,
-                              prefixIcon: Icon(
-                                Icons.location_city_outlined,
-                                color: textColor,
-                                size: 16,
-                              ),
-                              // validator: (v) =>
-                              // (v == null || v.trim().isEmpty) ? 'City required' : null,
-                            ),
-                          ),
-                        ),
-                        if (_showCityError) _cityErrorWidget(),
+                        // GestureDetector(
+                        //   onTap: () async {
+                        //     final selectedCity = await showModalBottomSheet(
+                        //       context: context,
+                        //       isScrollControlled: true,
+                        //       backgroundColor: Colors.transparent,
+                        //       builder: (context) {
+                        //         return SelectCityBottomSheet(
+                        //           stateId: selectedStateId ?? 0,
+                        //         );
+                        //       },
+                        //     );
+                        //
+                        //     if (selectedCity != null) {
+                        //       cityController.text = selectedCity.name ?? "";
+                        //       selectedCityId = selectedCity.id ?? 0;
+                        //       setState(() {});
+                        //     }
+                        //   },
+                        //   child: AbsorbPointer(
+                        //     child: CommonTextField1(
+                        //       lable: 'City',
+                        //       hint: 'Select City',
+                        //       controller: cityController,
+                        //       color: textColor,
+                        //       isRead: true,
+                        //       prefixIcon: Icon(
+                        //         Icons.location_city_outlined,
+                        //         color: textColor,
+                        //         size: 16,
+                        //       ),
+                        //       // validator: (v) =>
+                        //       // (v == null || v.trim().isEmpty) ? 'City required' : null,
+                        //     ),
+                        //   ),
+                        // ),
+                        // if (_showCityError) _cityErrorWidget(),
                         CommonTextField1(
                           lable: 'Address',
                           hint: 'Enter Location',
@@ -511,12 +511,12 @@ class _CommunityAdScreenState extends State<CommunityAdScreen> {
                                       //   );
                                       //   isValid = false;
                                       // }
-                                      if (selectedCityId == null) {
-                                        setState(() => _showCityError = true);
-                                        isValid = false;
-                                      } else {
-                                        setState(() => _showCityError = false);
-                                      }
+                                      // if (selectedCityId == null) {
+                                      //   setState(() => _showCityError = true);
+                                      //   isValid = false;
+                                      // } else {
+                                      //   setState(() => _showCityError = false);
+                                      // }
                                       if(_availablePlayerSlots.text.isEmpty){
                                         isValid = false;
                                       }else{
@@ -572,7 +572,7 @@ class _CommunityAdScreenState extends State<CommunityAdScreen> {
                                           "price": priceController.text,
                                           "full_name": nameController.text,
                                           "state_id": selectedStateId,
-                                          "city_id": selectedCityId,
+                                          // "city_id": selectedCityId,
                                         };
 
                                         if (editId.isEmpty) {

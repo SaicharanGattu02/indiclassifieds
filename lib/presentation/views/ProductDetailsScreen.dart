@@ -9,6 +9,7 @@ import 'package:indiclassifieds/model/WishlistModel.dart';
 import 'package:indiclassifieds/services/AuthService.dart';
 import 'package:indiclassifieds/utils/AppLogger.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../data/cubit/ProductDetails/product_details_cubit.dart';
 import '../../data/cubit/ProductDetails/product_details_states.dart';
@@ -157,7 +158,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               final details = data.details;
               final posted = data.postedBy;
 
-              final title = listing.title ?? "—";
+              final title = listing.title ?? "Check this Listing";
               final priceStr = _formatINR(listing.price);
               final location =
                   "${listing.location},${listing.city_name},${listing.state_name}" ??
@@ -177,48 +178,100 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       children: [
                         AspectRatio(
                           aspectRatio: 16 / 9,
-                          child: PageView.builder(
-                            controller: _pgCtrl,
-                            onPageChanged: (i) => setState(() => _page = i),
-                            itemCount: (images.isEmpty ? 1 : images.length),
-                            itemBuilder: (_, i) {
-                              final url = images.isNotEmpty
-                                  ? images[i].image
-                                  : null;
-                              return GestureDetector(
-                                onTap: () {
-                                  if (url != null) {
-                                    // Navigate to PhotoViewScreen with the list of images and the tapped index
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => PhotoViewScreen(
-                                          images:
-                                              images, // Pass the entire list of images
-                                          initialIndex:
-                                              i, // Pass the tapped image index
-                                        ),
-                                      ),
-                                    );
-                                  }
+                          child: Stack(
+                            children: [
+                              // Images
+                              PageView.builder(
+                                controller: _pgCtrl,
+                                onPageChanged: (i) => setState(() => _page = i),
+                                itemCount: (images.isEmpty ? 1 : images.length),
+                                itemBuilder: (_, i) {
+                                  final url = images.isNotEmpty
+                                      ? images[i].image
+                                      : null;
+                                  return GestureDetector(
+                                    onTap: () {
+                                      if (images.isNotEmpty) {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                PhotoViewScreen(
+                                                  images: images,
+                                                  initialIndex: i,
+                                                ),
+                                          ),
+                                        );
+                                      }
+                                    },
+                                    child: _ImageHero(url: url),
+                                  );
                                 },
-                                child: _ImageHero(url: url),
-                              );
-                            },
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Center(
-                          child: _Dots(
-                            count: images.isEmpty ? 1 : images.length,
-                            index: _page,
+                              ),
+
+                              // Top-right overlay actions
+                              // Top-right overlay actions (vertical)
+                              Positioned(
+                                top: 12,
+                                right: 12,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    _RoundIconButton(
+                                      icon: Icons.ios_share_rounded,
+                                      tooltip: 'Share',
+                                      onTap: () {
+                                        final shareUrl =
+                                            'https://indclassifieds.in/';
+                                        Share.share(
+                                          shareUrl,
+                                          subject:
+                                              title ?? 'Check this listing',
+                                        );
+                                      },
+                                    ),
+                                    const SizedBox(height: 8),
+                                    _RoundIconButton(
+                                      icon: Icons.fullscreen_rounded,
+                                      tooltip: 'View',
+                                      onTap: () {
+                                        if (images.isNotEmpty) {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  PhotoViewScreen(
+                                                    images: images,
+                                                    initialIndex: _page,
+                                                  ),
+                                            ),
+                                          );
+                                        }
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              // Bottom dots
+                              Positioned(
+                                left: 0,
+                                right: 0,
+                                bottom: 12,
+                                child: Center(
+                                  child: _Dots(
+                                    count: images.isEmpty ? 1 : images.length,
+                                    index: _page,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         const SizedBox(height: 16),
                       ],
                     ),
                   ),
-
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -672,6 +725,42 @@ class _BottomCtaBar extends StatelessWidget {
               child: CustomAppButton1(text: "Chat", onPlusTap: onChat),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RoundIconButton extends StatelessWidget {
+  final IconData icon;
+  final String? tooltip;
+  final VoidCallback onTap;
+  const _RoundIconButton({
+    required this.icon,
+    required this.onTap,
+    this.tooltip,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return ClipOval(
+      child: Material(
+        color: (isDark ? Colors.black54 : Colors.white70),
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Tooltip(
+              message: tooltip ?? '',
+              child: Icon(
+                icon,
+                size: 20,
+                color: isDark ? Colors.white : Colors.black87,
+              ),
+            ),
+          ),
         ),
       ),
     );

@@ -591,7 +591,7 @@ class RemoteDataSourceImpl implements RemoteDataSource {
   Future<CategoryModel?> getCategory() async {
     try {
       Response response = await ApiClient.get(
-        "${APIEndpointUrls.get_category}",
+        "${APIEndpointUrls.get_category}?featured_category=false",
       );
       AppLogger.log('get Category :${response.data}');
       return CategoryModel.fromJson(response.data);
