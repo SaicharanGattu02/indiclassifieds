@@ -1,16 +1,20 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer' as AppLogger;
 import 'dart:io';
+import 'package:app_links/app_links.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:go_router/go_router.dart';
 import 'package:indiclassifieds/services/ApiClient.dart';
 import 'package:indiclassifieds/services/SecureStorageService.dart';
 import 'package:indiclassifieds/state_injector.dart';
 import 'package:indiclassifieds/theme/AppTheme.dart';
+import 'package:indiclassifieds/utils/DeepLinkMapper.dart';
 import 'app_routes/router.dart';
 import 'data/cubit/theme_cubit.dart';
 import 'firebase_options.dart';
@@ -119,7 +123,8 @@ Future<void> main() async {
       providers: StateInjector.repositoryProviders,
       child: MultiBlocProvider(
         providers: StateInjector.blocProviders(themeCubit), // 👈 pass it in
-        child: MyApp(),
+        child: MyApp(
+        ),
       ),
     ),
   );
@@ -177,29 +182,102 @@ void showNotification(
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+  const MyApp({
+    super.key,
+  });
 
   @override
   State<MyApp> createState() => _MyAppState();
 }
 
+
 class _MyAppState extends State<MyApp> {
+  StreamSubscription<Uri>? _linkSubscription;
+  String? _queuedLocation;         // queue if router not ready yet
+  String? _lastHandled;            // de-dupe
+  bool _routerReady = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Mark router ready after first frame (MaterialApp.router is built)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _routerReady = true;
+      if (_queuedLocation != null) {
+        appRouter.push(_queuedLocation!);
+        _lastHandled = _queuedLocation;
+        _queuedLocation = null;
+      }
+    });
+    _initDeepLinks();
+  }
+
+  void _navigateSafely(String location) {
+    if (_lastHandled == location) return;
+    final uri = Uri.parse(location);
+
+    if (_routerReady) {
+      appRouter.goNamed(
+        'products_details',
+        queryParameters: {
+          'listingId': uri.queryParameters['listingId'] ?? '0',
+          'subcategory_id': uri.queryParameters['subcategory_id'] ?? '0',
+        },
+      );
+      _lastHandled = location;
+    } else {
+      _queuedLocation = location;
+    }
+  }
+
+
+  Future<void> _initDeepLinks() async {
+    final appLinks = AppLinks();
+    debugPrint('DeepLink: initDeepLinks started');
+
+    // Initial link (cold start)
+    try {
+      final initialUri = await appLinks.getInitialLink();
+      debugPrint('DeepLink: getInitialLink -> $initialUri');
+      final loc = DeepLinkMapper.toLocation(initialUri);
+      if (loc != null) {
+        debugPrint('DeepLink: (initial) navigating to $loc');
+        _navigateSafely(loc);
+      }
+    } catch (e) {
+      debugPrint('DeepLink: Initial app link error: $e');
+    }
+
+    // Stream for runtime links
+    _linkSubscription = appLinks.uriLinkStream.listen(
+          (uri) {
+        debugPrint('DeepLink: uriLinkStream -> $uri');
+        final loc = DeepLinkMapper.toLocation(uri);
+        if (loc != null) {
+          debugPrint('DeepLink: navigating to $loc');
+          _navigateSafely(loc);
+        }
+      },
+      onError: (e) => debugPrint('DeepLink: Link stream error: $e'),
+    );
+  }
+
+  @override
+  void dispose() {
+    debugPrint('DeepLink: dispose, cancelling subscription');
+    _linkSubscription?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ThemeCubit, AppThemeMode>(
       builder: (context, appThemeMode) {
-        ThemeMode themeMode;
-        switch (appThemeMode) {
-          case AppThemeMode.light:
-            themeMode = ThemeMode.light;
-            break;
-          case AppThemeMode.dark:
-            themeMode = ThemeMode.dark;
-            break;
-          case AppThemeMode.system:
-          default:
-            themeMode = ThemeMode.system;
-        }
+        final themeMode = switch (appThemeMode) {
+          AppThemeMode.light => ThemeMode.light,
+          AppThemeMode.dark => ThemeMode.dark,
+          _ => ThemeMode.system,
+        };
         return MaterialApp.router(
           title: 'IND Classifieds',
           theme: AppTheme.getLightTheme(),
@@ -212,3 +290,5 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
+
+

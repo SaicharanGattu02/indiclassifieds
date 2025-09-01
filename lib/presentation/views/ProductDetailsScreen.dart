@@ -36,13 +36,11 @@ extension DetailsX on Details {
 
 class ProductDetailsScreen extends StatefulWidget {
   final int listingId;
-  final String seller_id;
   final int subcategory_id;
   const ProductDetailsScreen({
     super.key,
     required this.listingId,
     required this.subcategory_id,
-    required this.seller_id,
   });
 
   @override
@@ -208,9 +206,6 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                   );
                                 },
                               ),
-
-                              // Top-right overlay actions
-                              // Top-right overlay actions (vertical)
                               Positioned(
                                 top: 12,
                                 right: 12,
@@ -222,7 +217,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                       tooltip: 'Share',
                                       onTap: () {
                                         final shareUrl =
-                                            'https://indclassifieds.in/';
+                                            'https://indclassifieds.in/singlelistingdetails/${data.listing?.subCategoryId}?detailId=${data.listing?.id}';
+                                        AppLogger.info("shareUrl:${shareUrl}");
                                         Share.share(
                                           shareUrl,
                                           subject:

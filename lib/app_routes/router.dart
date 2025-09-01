@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/animation.dart';
 import 'package:flutter/cupertino.dart';
@@ -35,7 +36,6 @@ import '../presentation/authentication/LoginScreen.dart';
 import '../presentation/authentication/OTPScreen.dart';
 import '../presentation/views/BlockedAccountScreen.dart';
 import '../presentation/views/ChatScreen.dart';
-import '../presentation/views/DetailsScreen.dart';
 import '../presentation/views/EditProfile.dart';
 import '../presentation/views/FavouritesScreen.dart';
 import '../presentation/views/FilterScreen.dart';
@@ -188,7 +188,6 @@ final GoRouter appRouter = GoRouter(
         // read from query params
         final listingIdStr = state.uri.queryParameters['listingId'];
         final subcategory_idstr = state.uri.queryParameters['subcategory_id'];
-        final seller_id = state.uri.queryParameters['seller_id'];
 
         final listingId = int.tryParse(listingIdStr ?? '') ?? 0;
         final subcategory_id = int.tryParse(subcategory_idstr ?? '') ?? 0;
@@ -197,7 +196,6 @@ final GoRouter appRouter = GoRouter(
           ProductDetailsScreen(
             listingId: listingId,
             subcategory_id: subcategory_id,
-            seller_id: seller_id??"",
           ),
           state,
         );
@@ -280,25 +278,6 @@ final GoRouter appRouter = GoRouter(
             subCatId: subCatId,
             SubCatName: SubCategoryName,
             editId: editId,
-          ),
-          state,
-        );
-      },
-    ),
-
-    GoRoute(
-      path: '/details_screen',
-      pageBuilder: (context, state) {
-        final categoryId = state.uri.queryParameters['catId'] ?? "";
-        final categoryName = state.uri.queryParameters['CatName'] ?? "";
-        final SubCategoryName = state.uri.queryParameters['SubCatName'] ?? "";
-        final subCatId = state.uri.queryParameters['subCatId'] ?? "";
-        return buildSlideTransitionPage(
-          DetailsScreen(
-            catId: categoryId,
-            CatName: categoryName,
-            subCatId: subCatId,
-            SubCatName: SubCategoryName,
           ),
           state,
         );
@@ -568,10 +547,10 @@ final GoRouter appRouter = GoRouter(
 );
 
 Page<dynamic> buildSlideTransitionPage(Widget child, GoRouterState state) {
-  // if (Platform.isIOS) {
-  //   // Use default Cupertino transition on iOS
-  //   return CupertinoPage(key: state.pageKey, child: child);
-  // }
+  if (Platform.isIOS) {
+    // Use default Cupertino transition on iOS
+    return CupertinoPage(key: state.pageKey, child: child);
+  }
 
   return CustomTransitionPage(
     key: state.pageKey,
@@ -588,10 +567,10 @@ Page<dynamic> buildSlideTransitionPage(Widget child, GoRouterState state) {
 }
 
 Page<dynamic> buildSlideFromBottomPage(Widget child, GoRouterState state) {
-  // if (Platform.isIOS) {
-  //   // Use default Cupertino transition on iOS
-  //   return CupertinoPage(key: state.pageKey, child: child);
-  // }
+  if (Platform.isIOS) {
+    // Use default Cupertino transition on iOS
+    return CupertinoPage(key: state.pageKey, child: child);
+  }
   return CustomTransitionPage(
     key: state.pageKey,
     child: child,

@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:app_links/app_links.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -22,8 +24,8 @@ import '../../data/cubit/theme_cubit.dart';
 import '../../main.dart';
 import '../../services/SocketService.dart';
 import '../../theme/ThemeHelper.dart';
+import '../../utils/DeepLinkMapper.dart';
 import 'AddsScreen.dart';
-import 'FavouritesScreen.dart';
 import 'UserListScreen.dart';
 
 class Dashboard extends StatefulWidget {
@@ -38,6 +40,8 @@ class _DashboardState extends State<Dashboard> {
   late PageController pageController;
   int _selectedIndex = 0;
   bool isLocationSheetShown = false;
+  //
+  // StreamSubscription<Uri>? _linkSubscription;
 
   @override
   void initState() {
@@ -47,7 +51,52 @@ class _DashboardState extends State<Dashboard> {
     getData();
     _requestPushPermissions();
     context.read<LocationCubit>().checkLocationPermission();
+
+    // initDeepLinks(); // start deep link handling
   }
+  //
+  // Future<void> initDeepLinks() async {
+  //   final appLinks = AppLinks();
+  //   debugPrint('DeepLink: initDeepLinks started');
+  //
+  //   // 1) Handle initial link (cold start)
+  //   try {
+  //     final initialUri = await appLinks.getInitialLink();
+  //     debugPrint('DeepLink: getInitialLink -> $initialUri');
+  //     final loc = DeepLinkMapper.toLocation(initialUri);
+  //     if (loc != null) {
+  //       debugPrint('DeepLink: navigating to $loc');
+  //       context.push(loc);
+  //     } else {
+  //       debugPrint('DeepLink: no mapped location for $initialUri');
+  //     }
+  //   } catch (e) {
+  //     debugPrint('DeepLink: Initial app link error: $e');
+  //   }
+  //
+  //   // 2) Handle links while the app is running
+  //   _linkSubscription = appLinks.uriLinkStream.listen(
+  //         (uri) {
+  //       debugPrint('DeepLink: uriLinkStream -> $uri');
+  //       final loc = DeepLinkMapper.toLocation(uri);
+  //       if (loc != null) {
+  //         debugPrint('DeepLink: navigating to $loc');
+  //         context.push(loc);
+  //       } else {
+  //         debugPrint('DeepLink: no mapped location for $uri');
+  //       }
+  //     },
+  //     onError: (e) => debugPrint('DeepLink: Link stream error: $e'),
+  //   );
+  // }
+  //
+  // @override
+  // void dispose() {
+  //   debugPrint('DeepLink: dispose, cancelling subscription');
+  //   _linkSubscription?.cancel();
+  //   super.dispose();
+  // }
+
 
   Future<void> _requestPushPermissions() async {
     if (Platform.isIOS) {
