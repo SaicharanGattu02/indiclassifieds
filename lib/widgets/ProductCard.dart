@@ -124,6 +124,8 @@ class ProductCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             products.location ?? "",
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: AppTextStyles.titleMedium(textColor),
                           ),
                         ),

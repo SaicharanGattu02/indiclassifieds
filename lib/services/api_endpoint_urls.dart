@@ -2,8 +2,8 @@ class APIEndpointUrls {
   // static const String baseUrl = 'http://192.168.80.107:8081/';
   // static const String socket_url = 'http://192.168.80.107:8081';
 
-  static const String baseUrl = 'https://ind.ozrit.live/';
-  static const String socket_url = 'https://ind.ozrit.live';
+  static const String baseUrl = 'https://api.indclassifieds.in/';
+  static const String socket_url = 'https://api.indclassifieds.in';
   static const String apiUrl = 'api/app/';
 
   /// Authentiocation Urls

@@ -68,7 +68,7 @@ class _SubCategoriesScreenState extends State<SubCategoriesScreen> {
                                         .subCategoryModel
                                         .sub_category_banner ??
                                     "",
-                                fit: BoxFit.cover,
+                                fit: BoxFit.fill,
                                 placeholder: (context, url) => Center(
                                   child: spinkits.getSpinningLinespinkit(),
                                 ),
@@ -98,53 +98,53 @@ class _SubCategoriesScreenState extends State<SubCategoriesScreen> {
                           );
                         },
                         borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: isDark ? Colors.grey[900] : Colors.grey[100],
-                            borderRadius: BorderRadius.circular(8),
+                        child:Card(
+                          color: ThemeHelper.cardColor(context),
+                          margin: const EdgeInsets.all(0), // small margin for spacing
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
+                          elevation: 2,
+                          clipBehavior: Clip.antiAlias, // ensures smooth rounded clipping
                           child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
+                              // Image / Top Section
                               Expanded(
-                                child: ClipRRect(
-                                  borderRadius: const BorderRadius.only(
-                                    topLeft: Radius.circular(8),
-                                    topRight: Radius.circular(8),
-                                  ),
+                                flex: 2,
+                                child: Container(
+                                  color: ThemeHelper.isDarkMode(context)
+                                      ? const Color(0xFF2A2A2A) // dark mode bg
+                                      : const Color(0xFFEDF3FD), // light mode bg
+                                  padding: EdgeInsets.all(12),
                                   child: CachedNetworkImage(
-                                    width: double.infinity,
                                     imageUrl: item?.image ?? "",
-                                    fit: BoxFit.cover,
+                                    fit: BoxFit.contain,
                                     placeholder: (context, url) => Center(
                                       child: spinkits.getSpinningLinespinkit(),
                                     ),
-                                    errorWidget: (context, url, error) =>
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                const BorderRadius.only(
-                                                  topLeft: Radius.circular(8),
-                                                  topRight: Radius.circular(8),
-                                                ),
-                                            color: Color(0xffF8FAFE),
-                                          ),
-                                          child: Icon(
-                                            Icons.broken_image,
-                                            size: 40,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
+                                    errorWidget: (context, url, error) => const Icon(
+                                      Icons.broken_image,
+                                      size: 50,
+                                      color: Colors.grey,
+                                    ),
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 4),
+                              // Text / Bottom Section
                               Padding(
-                                padding: const EdgeInsets.all(8.0),
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
                                 child: Text(
-                                  item?.name ?? "",
+                                  "${item?.name}",
                                   textAlign: TextAlign.center,
-                                  style: AppTextStyles.bodyMedium(textColor),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTextStyles.bodyMedium(
+                                    ThemeHelper.textColor(context),
+                                  ).copyWith(
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 14,
+                                  ),
                                 ),
                               ),
                             ],
