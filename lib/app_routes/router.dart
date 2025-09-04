@@ -53,6 +53,7 @@ final GoRouter appRouter = GoRouter(
   initialLocation: '/',
   navigatorKey: navigatorKey,
   debugLogDiagnostics: true,
+  overridePlatformDefaultLocation: true,
   routes: [
     GoRoute(
       path: '/',
