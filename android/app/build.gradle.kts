@@ -35,7 +35,7 @@ android {
     defaultConfig {
         applicationId = "com.ind.classifieds"
         // ✅ Explicitly set minSdk to 23 (firebase_messaging requirement)
-        minSdk = 23
+        minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

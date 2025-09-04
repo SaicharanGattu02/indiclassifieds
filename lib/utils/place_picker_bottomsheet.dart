@@ -9,8 +9,8 @@ import '../theme/AppTextStyles.dart'; // adjust path
 
 class PickedPlace {
   final String placeId;
-  final String description; // autocomplete description
-  final String? formattedAddress; // from details
+  final String description;
+  final String? formattedAddress;
   final double lat;
   final double lng;
 
@@ -23,10 +23,7 @@ class PickedPlace {
   });
 }
 
-/// Opens the bottom sheet. Returns the chosen [PickedPlace] or null.
-/// - [controller]: updated (replace or append)
-/// - [appendToExisting]: append address to existing text if true
-/// - [components]: e.g., "country:in"
+
 Future<PickedPlace?> openPlacePickerBottomSheet({
   required BuildContext context,
   required String googleApiKey,

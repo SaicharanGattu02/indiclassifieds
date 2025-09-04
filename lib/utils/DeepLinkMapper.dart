@@ -2,52 +2,82 @@
 import 'package:flutter/cupertino.dart';
 
 class DeepLinkMapper {
-  /// Returns a go_router location (e.g. '/products_details?listingId=130&subcategory_id=175')
-  /// or null if we don't recognize the link.
+  /// Maps an incoming URI to an internal go_router *location* string,
+  /// e.g. '/products_details?listingId=130&subcategory_id=175'.
   static String? toLocation(Uri? uri) {
     if (uri == null) {
-        debugPrint('DeepLinkMapper: received null uri');
+      debugPrint('DeepLinkMapper: received null uri');
       return null;
     }
 
-    debugPrint('DeepLinkMapper: parsing uri -> $uri');
+    debugPrint('DeepLinkMapper: parsing -> $uri');
 
-    final host = uri.host.toLowerCase();
-    final isOurDomain =
-        host == 'indclassifieds.in' || host == 'www.indclassifieds.in';
-    debugPrint('DeepLinkMapper: host=$host isOurDomain=$isOurDomain');
-
-    // Only handle HTTPS links for our domain. (Add custom scheme support if you use one.)
-    if (uri.scheme == 'https' && !isOurDomain) {
-      debugPrint('DeepLinkMapper: not our domain, ignoring');
-      return null;
+    // Allow internal (no-scheme) and explicit https. Reject foreign https hosts.
+    if (uri.hasScheme) {
+      final scheme = uri.scheme.toLowerCase();
+      if (scheme == 'https') {
+        final host = uri.host.toLowerCase();
+        final isOurDomain =
+            host == 'indclassifieds.in' || host == 'www.indclassifieds.in';
+        debugPrint('DeepLinkMapper: https host=$host ours=$isOurDomain');
+        if (!isOurDomain) {
+          debugPrint('DeepLinkMapper: foreign https host, ignore');
+          return null;
+        }
+      } else {
+        // If you also support a custom scheme, whitelist it here.
+        // if (scheme != 'indclassifieds') return null;
+        debugPrint('DeepLinkMapper: non-https scheme "$scheme" allowed');
+      }
     }
 
-    final segs = uri.pathSegments; // e.g. ["singlelistingdetails","130"]
-    debugPrint('DeepLinkMapper: pathSegments=$segs');
+    final segs = uri.pathSegments.where((s) => s.isNotEmpty).map((s) => s.toLowerCase()).toList();
+    debugPrint('DeepLinkMapper: segs=$segs query=${uri.queryParameters}');
 
-    if (segs.isNotEmpty && segs.first == 'singlelistingdetails') {
-      final detailId = (segs.length >= 2) ? segs[1] : null; // "130"
-      debugPrint('DeepLinkMapper: detailId=$detailId');
-      if (detailId == null || detailId.isEmpty) {
-        debugPrint('DeepLinkMapper: detailId missing, ignoring');
+    // --- Single Listing Details ---
+    final isSingle =
+        segs.isNotEmpty && segs.first == 'singlelistingdetails';
+
+    if (isSingle) {
+      // We’ve seen two variants in the wild:
+      // 1) /singlelistingdetails/:subcategoryId?detailId=:listingId
+      // 2) /singlelistingdetails?subcategory_id=:subcategoryId&detailId=:listingId
+
+      // Try to read both ways, with sensible fallbacks.
+      final subcatFromPath = segs.length >= 2 ? segs[1] : null;
+      final listingFromQuery = uri.queryParameters['detailId'];
+
+      // Also accept alternative param names just in case.
+      final subcatFromQuery =
+          uri.queryParameters['subcategory_id'] ?? uri.queryParameters['subCatId'];
+      final listingAlt =
+          uri.queryParameters['listingId'] ?? uri.queryParameters['id'];
+
+      // Decide final values
+      final listingId = listingFromQuery ?? listingAlt;
+      final subcategoryId = subcatFromPath ?? subcatFromQuery;
+
+      if (listingId == null || listingId.isEmpty) {
+        debugPrint('DeepLinkMapper: listingId missing, ignore');
         return null;
       }
 
-      // Web uses ?detailId=175. Your app route expects subcategory_id.
-      final listingId = uri.queryParameters['detailId'] ?? '0';
-      debugPrint('DeepLinkMapper: queryParam.detailId=$listingId');
-
-      // Build your existing in-app location:
-      final location =
-          '/products_details?listingId=$listingId&subcategory_id=$detailId';
-
-      debugPrint('DeepLinkMapper: mapped to location=$location');
-      return location;
+      // Build location safely (properly encoded).
+      final qp = <String, String>{
+        'listingId': listingId,
+        if (subcategoryId != null && subcategoryId.isNotEmpty)
+          'subcategory_id': subcategoryId,
+      };
+      final loc = Uri(path: '/products_details', queryParameters: qp).toString();
+      debugPrint('DeepLinkMapper: mapped -> $loc');
+      return loc;
     }
 
-    debugPrint('DeepLinkMapper: no matching pattern, ignoring');
+    // TODO: Add other patterns here (chat, search, category, etc.)
+
+    debugPrint('DeepLinkMapper: no match, ignore');
     return null;
   }
 }
+
 

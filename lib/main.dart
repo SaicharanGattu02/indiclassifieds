@@ -192,82 +192,76 @@ class MyApp extends StatefulWidget {
 
 
 class _MyAppState extends State<MyApp> {
-  StreamSubscription<Uri>? _linkSubscription;
-  String? _queuedLocation;         // queue if router not ready yet
-  String? _lastHandled;            // de-dupe
-  bool _routerReady = false;
-
-  @override
-  void initState() {
-    super.initState();
-    // Mark router ready after first frame (MaterialApp.router is built)
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _routerReady = true;
-      if (_queuedLocation != null) {
-        appRouter.push(_queuedLocation!);
-        _lastHandled = _queuedLocation;
-        _queuedLocation = null;
-      }
-    });
-    _initDeepLinks();
-  }
-
-  void _navigateSafely(String location) {
-    if (_lastHandled == location) return;
-    final uri = Uri.parse(location);
-
-    if (_routerReady) {
-      appRouter.goNamed(
-        'products_details',
-        queryParameters: {
-          'listingId': uri.queryParameters['listingId'] ?? '0',
-          'subcategory_id': uri.queryParameters['subcategory_id'] ?? '0',
-        },
-      );
-      _lastHandled = location;
-    } else {
-      _queuedLocation = location;
-    }
-  }
-
-
-  Future<void> _initDeepLinks() async {
-    final appLinks = AppLinks();
-    debugPrint('DeepLink: initDeepLinks started');
-
-    // Initial link (cold start)
-    try {
-      final initialUri = await appLinks.getInitialLink();
-      debugPrint('DeepLink: getInitialLink -> $initialUri');
-      final loc = DeepLinkMapper.toLocation(initialUri);
-      if (loc != null) {
-        debugPrint('DeepLink: (initial) navigating to $loc');
-        _navigateSafely(loc);
-      }
-    } catch (e) {
-      debugPrint('DeepLink: Initial app link error: $e');
-    }
-
-    // Stream for runtime links
-    _linkSubscription = appLinks.uriLinkStream.listen(
-          (uri) {
-        debugPrint('DeepLink: uriLinkStream -> $uri');
-        final loc = DeepLinkMapper.toLocation(uri);
-        if (loc != null) {
-          debugPrint('DeepLink: navigating to $loc');
-          _navigateSafely(loc);
-        }
-      },
-      onError: (e) => debugPrint('DeepLink: Link stream error: $e'),
-    );
-  }
-
-  @override
-  void dispose() {
-    debugPrint('DeepLink: dispose, cancelling subscription');
-    _linkSubscription?.cancel();
-    super.dispose();
-  }
+  // StreamSubscription<Uri>? _linkSubscription;
+  // String? _queuedLocation;         // queue if router not ready yet
+  // String? _lastHandled;            // de-dupe
+  // bool _routerReady = false;
+  //
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   // Mark router ready after first frame (MaterialApp.router is built)
+  //   WidgetsBinding.instance.addPostFrameCallback((_) {
+  //     _routerReady = true;
+  //     if (_queuedLocation != null) {
+  //       appRouter.go(_queuedLocation!);
+  //       _lastHandled = _queuedLocation;
+  //       _queuedLocation = null;
+  //     }
+  //   });
+  //   _initDeepLinks();
+  // }
+  //
+  //
+  // void _navigateSafely(String location) {
+  //   if (_lastHandled == location) return;
+  //   if (_routerReady) {
+  //     appRouter.go(location);
+  //     _lastHandled = location;
+  //   } else {
+  //     _queuedLocation = location;
+  //   }
+  // }
+  //
+  //
+  //
+  // Future<void> _initDeepLinks() async {
+  //   final appLinks = AppLinks();
+  //   debugPrint('DeepLink: initDeepLinks started');
+  //
+  //   // Initial link (cold start)
+  //   try {
+  //     final initialUri = await appLinks.getInitialLink();
+  //     debugPrint('DeepLink: getInitialLink -> $initialUri');
+  //     final loc = DeepLinkMapper.toLocation(initialUri);
+  //     if (loc != null) {
+  //       debugPrint('DeepLink: (initial) navigating to $loc');
+  //       _navigateSafely(loc);
+  //     }
+  //   } catch (e) {
+  //     debugPrint('DeepLink: Initial app link error: $e');
+  //   }
+  //
+  //   // Stream for runtime links
+  //   _linkSubscription = appLinks.uriLinkStream.listen(
+  //         (uri) {
+  //       debugPrint('DeepLink: uriLinkStream -> $uri');
+  //       final loc = DeepLinkMapper.toLocation(uri);
+  //       if (loc != null) {
+  //         debugPrint('DeepLink: navigating to $loc');
+  //         _navigateSafely(loc);
+  //       }
+  //     },
+  //     onError: (e) => debugPrint('DeepLink: Link stream error: $e'),
+  //   );
+  // }
+  //
+  // @override
+  // void dispose() {
+  //   debugPrint('DeepLink: dispose, cancelling subscription');
+  //   _linkSubscription?.cancel();
+  //   super.dispose();
+  // }
 
   @override
   Widget build(BuildContext context) {

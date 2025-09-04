@@ -52,6 +52,7 @@ import '../services/AuthService.dart';
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
   navigatorKey: navigatorKey,
+  debugLogDiagnostics: true,
   routes: [
     GoRoute(
       path: '/',
@@ -182,6 +183,20 @@ final GoRouter appRouter = GoRouter(
         );
       },
     ),
+
+    // your existing routes ...
+    GoRoute(
+      // Catch legacy website path
+      path: '/singlelistingdetails/:subId',
+      redirect: (ctx, st) {
+        final subId = st.pathParameters['subId'];                 // 132
+        final listingId = st.uri.queryParameters['detailId'];     // 177
+        if (listingId == null || subId == null) return '/';       // fallback
+        // Redirect to your internal route
+        return '/products_details?listingId=$listingId&subcategory_id=$subId';
+      },
+    ),
+
     GoRoute(
       path: '/products_details',
       pageBuilder: (context, state) {
