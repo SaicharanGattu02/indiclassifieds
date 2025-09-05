@@ -101,7 +101,7 @@ class LocationCubit extends Cubit<LocationState> {
         throw Exception('Invalid coordinates received');
       }
 
-      final latlng = "$latitude,$longitude";
+      final latlng = "$latitude, $longitude";
       final isConnected =
           (await Connectivity().checkConnectivity()) != ConnectivityResult.none;
       final locationName = await _geocode(latitude, longitude, isConnected);
@@ -237,9 +237,68 @@ class LocationCubit extends Cubit<LocationState> {
       emit(
         LocationLoaded(
           locationName: 'Gachibowli, Hyderabad',
-          latlng: '17.4401,78.3489',
+          latlng: '17.4401, 78.3489',
         ),
       );
     }
   }
 }
+
+
+// ---------------- Extra helper for submission ----------------
+extension LocationForSubmit on LocationCubit {
+  Future<({String locationName, String latlng})> getForSubmission() async {
+    try {
+      if (!await _ensureServiceEnabled()) {
+        final saved = await _getSavedOrDefaultPair();
+        emit(LocationLoaded(locationName: saved.$1, latlng: saved.$2));
+        return (locationName: saved.$1, latlng: saved.$2);
+      }
+
+      final permission = await _location.hasPermission();
+      if (permission == loc.PermissionStatus.denied) {
+        final req = await _location.requestPermission();
+        if (req == loc.PermissionStatus.denied ||
+            req == loc.PermissionStatus.deniedForever) {
+          final saved = await _getSavedOrDefaultPair();
+          emit(LocationLoaded(locationName: saved.$1, latlng: saved.$2));
+          return (locationName: saved.$1, latlng: saved.$2);
+        }
+      } else if (permission == loc.PermissionStatus.deniedForever) {
+        final saved = await _getSavedOrDefaultPair();
+        emit(LocationLoaded(locationName: saved.$1, latlng: saved.$2));
+        return (locationName: saved.$1, latlng: saved.$2);
+      }
+
+      final locationData = await _getLocationWithRetry();
+      final lat = locationData.latitude;
+      final lon = locationData.longitude;
+      if (lat == null || lon == null) throw Exception('Invalid coordinates');
+
+      final latlng = "$lat, $lon";
+      final isConnected =
+          (await Connectivity().checkConnectivity()) != ConnectivityResult.none;
+      final name = await _geocode(lat, lon, isConnected);
+
+      await _storage.setString(_kLocNameKey, name);
+      await _storage.setString(_kLatLngKey, latlng);
+
+      emit(LocationLoaded(locationName: name, latlng: latlng));
+      return (locationName: name, latlng: latlng);
+    } catch (_) {
+      final saved = await _getSavedOrDefaultPair();
+      emit(LocationLoaded(locationName: saved.$1, latlng: saved.$2));
+      return (locationName: saved.$1, latlng: saved.$2);
+    }
+  }
+
+  Future<(String, String)> _getSavedOrDefaultPair() async {
+    final name = await _storage.getString(_kLocNameKey);
+    final coords = await _storage.getString(_kLatLngKey);
+    if (name != null && coords != null && name != 'Current location') {
+      return (name, coords);
+    }
+    return ('Gachibowli, Hyderabad', '17.4401,78.3489');
+  }
+}
+

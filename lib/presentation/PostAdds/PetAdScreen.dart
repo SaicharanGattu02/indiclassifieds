@@ -10,6 +10,7 @@ import '../../Components/CustomSnackBar.dart';
 import '../../Components/CutomAppBar.dart';
 import '../../Components/ShakeWidget.dart';
 import '../../data/cubit/Ad/PetsAd/pets_ad_states.dart';
+import '../../data/cubit/Location/location_cubit.dart';
 import '../../data/cubit/MyAds/GetMarkAsListing/get_listing_ad_cubit.dart';
 import '../../data/cubit/MyAds/MarkAsListing/mark_as_listing_cubit.dart';
 import '../../data/cubit/MyAds/MarkAsListing/mark_as_listing_state.dart';
@@ -75,7 +76,7 @@ class _PetAdScreenState extends State<PetAdScreen> {
   final planController = TextEditingController();
   int? planId;
   int? packageId;
-
+  bool _isSubmitting = false; // covers pre-submit work
   bool isLoading = true;
   List<ImageData> _imageDataList = [];
   @override
@@ -496,6 +497,11 @@ class _PetAdScreenState extends State<PetAdScreen> {
                             },
                           ),
                         ],
+                        SizedBox(height: 10,),
+                        Text(
+                          "Note : Upload only proper images that match your ad. Wrong or unrelated pictures may lead to rejection.",
+                          style: AppTextStyles.bodyMedium(textColor),
+                        ),
                       ],
                     ),
                   ),
@@ -533,13 +539,13 @@ class _PetAdScreenState extends State<PetAdScreen> {
                         },
                         builder: (context, state) {
                           return CustomAppButton1(
-                            isLoading: state is PetsAdLoading || updateState is MarkAsListingUpdateLoading,
+                            isLoading: _isSubmitting || state is PetsAdLoading || updateState is MarkAsListingUpdateLoading,
                             text: 'Submit Ad',
                             onPlusTap: isNewUser
                                 ? () {
                               context.push('/register?from=ad');
                             }
-                                : () {
+                                : () async {
                               if (_formKey.currentState?.validate() ?? false) {
                                 bool isValid = true;
                                 bool showStateError = false;
@@ -614,40 +620,56 @@ class _PetAdScreenState extends State<PetAdScreen> {
 
                                 // Proceed with API call only if all fields are valid
                                 if (isValid) {
-                                  final Map<String, dynamic> data = {
-                                    "title": titleController.text,
-                                    "brand": brandController.text,
-                                    "description": descriptionController.text,
-                                    "sub_category_id": widget.subCatId,
-                                    "category_id": widget.catId,
-                                    "location": locationController.text,
-                                    "location_key": latlng,
-                                    "mobile_number": phoneController.text,
-                                    "price": priceController.text,
-                                    "full_name": nameController.text,
-                                    "state_id": selectedStateId,
-                                    // "city_id": selectedCityId,
-                                    "pet_type": breedController.text,
-                                    "age": ageController.text,
-                                    "gender": _selectedGender,
-                                  };
+                                  try{
+                                    setState(() => _isSubmitting = true);
+                                    final locResult = await context
+                                        .read<LocationCubit>()
+                                        .getForSubmission();
+                                    final Map<String, dynamic> data = {
+                                      "title": titleController.text,
+                                      "brand": brandController.text,
+                                      "description": descriptionController.text,
+                                      "sub_category_id": widget.subCatId,
+                                      "category_id": widget.catId,
+                                      "location": locationController.text,
+                                      "location_key": latlng,
+                                      "mobile_number": phoneController.text,
+                                      "price": priceController.text,
+                                      "full_name": nameController.text,
+                                      "state_id": selectedStateId,
+                                      // "city_id": selectedCityId,
+                                      "pet_type": breedController.text,
+                                      "age": ageController.text,
+                                      "gender": _selectedGender,
+                                      "current_address":
+                                      locResult.locationName,
+                                      "current_address_key":
+                                      locResult.latlng,
+                                    };
 
 
-                                  if (widget.editId == null || widget.editId.replaceAll('"', '').trim().isEmpty) {
-                                    data["plan_id"] = planId;
-                                    data["package_id"] = packageId;
+                                    if (widget.editId == null || widget.editId.replaceAll('"', '').trim().isEmpty) {
+                                      data["plan_id"] = planId;
+                                      data["package_id"] = packageId;
+                                    }
+
+                                    if (_images.isNotEmpty) {
+                                      data["images"] = _images.map((file) => file.path).toList();
+                                    }
+
+
+                                    if (widget.editId != null && widget.editId.replaceAll('"', '').trim().isNotEmpty) {
+                                      context.read<MarkAsListingCubit>().markAsUpdate(widget.editId, data);
+                                    } else {
+                                      context.read<PetsAdCubit>().postPetsAd(data);
+                                    }
+                                  }finally{
+                                    if (mounted)
+                                      setState(
+                                            () => _isSubmitting = false,
+                                      );
                                   }
 
-                                  if (_images.isNotEmpty) {
-                                    data["images"] = _images.map((file) => file.path).toList();
-                                  }
-
-
-                                  if (widget.editId != null && widget.editId.replaceAll('"', '').trim().isNotEmpty) {
-                                    context.read<MarkAsListingCubit>().markAsUpdate(widget.editId, data);
-                                  } else {
-                                    context.read<PetsAdCubit>().postPetsAd(data);
-                                  }
                                 }
                               }
                             },

@@ -11,6 +11,7 @@ import '../../Components/CutomAppBar.dart';
 import '../../Components/ShakeWidget.dart';
 import '../../data/cubit/Ad/CarsAd/cars_ad_cubit.dart';
 import '../../data/cubit/Ad/CarsAd/cars_ad_states.dart';
+import '../../data/cubit/Location/location_cubit.dart';
 import '../../data/cubit/MyAds/GetMarkAsListing/get_listing_ad_cubit.dart';
 import '../../data/cubit/MyAds/MarkAsListing/mark_as_listing_cubit.dart';
 import '../../data/cubit/MyAds/MarkAsListing/mark_as_listing_state.dart';
@@ -88,6 +89,8 @@ class _CarsAdState extends State<CarsAd> {
   bool _showKmsError = false;
   bool _showPriceError = false;
 
+  bool _isSubmitting = false; // covers pre-submit work
+
   bool isLoading = true;
   List<ImageData> _imageDataList = [];
   @override
@@ -101,7 +104,7 @@ class _CarsAdState extends State<CarsAd> {
         if (commonAdData != null) {
           descriptionController.text =
               commonAdData.data?.listing?.description ?? '';
-          titleController.text=commonAdData.data?.listing?.title??"";
+          titleController.text = commonAdData.data?.listing?.title ?? "";
           locationController.text = commonAdData.data?.listing?.location ?? '';
           priceController.text = commonAdData.data?.listing?.price ?? '';
           nameController.text = commonAdData.data?.listing?.fullName ?? '';
@@ -147,7 +150,6 @@ class _CarsAdState extends State<CarsAd> {
     String? stateId = await AuthService.getStateId();
     String? cityId = await AuthService.getCityId();
 
-
     if (name != null && name.isNotEmpty) {
       nameController.text = name;
     }
@@ -167,7 +169,8 @@ class _CarsAdState extends State<CarsAd> {
       setState(() {
         selectedStateId = int.tryParse(stateId);
       });
-    }  if (cityId != null && cityId.isNotEmpty) {
+    }
+    if (cityId != null && cityId.isNotEmpty) {
       setState(() {
         selectedCityId = int.tryParse(cityId);
       });
@@ -529,6 +532,11 @@ class _CarsAdState extends State<CarsAd> {
                             },
                           ),
                         ],
+                        SizedBox(height: 10,),
+                        Text(
+                          "Note : Upload only proper images that match your ad. Wrong or unrelated pictures may lead to rejection.",
+                          style: AppTextStyles.bodyMedium(textColor),
+                        ),
                       ],
                     ),
                   ),
@@ -565,6 +573,7 @@ class _CarsAdState extends State<CarsAd> {
                         builder: (context, state) {
                           return CustomAppButton1(
                             isLoading:
+                                _isSubmitting ||
                                 state is CarsAdLoading ||
                                 updateState is MarkAsListingUpdateLoading,
                             text: 'Submit Ad',
@@ -572,7 +581,7 @@ class _CarsAdState extends State<CarsAd> {
                                 ? () {
                                     context.push('/register?from=ad');
                                   }
-                                : () {
+                                : () async {
                                     if (_formKey.currentState?.validate() ??
                                         false) {
                                       bool isValid = true;
@@ -610,11 +619,17 @@ class _CarsAdState extends State<CarsAd> {
                                       // } else {
                                       //   setState(() => _showCityError = false);
                                       // }
-                                      if (descriptionController.text.trim().isEmpty) {
-                                        setState(() => _showDescriptionError = true);
+                                      if (descriptionController.text
+                                          .trim()
+                                          .isEmpty) {
+                                        setState(
+                                          () => _showDescriptionError = true,
+                                        );
                                         isValid = false;
                                       } else {
-                                        setState(() => _showDescriptionError = false);
+                                        setState(
+                                          () => _showDescriptionError = false,
+                                        );
                                       }
                                       if (priceController.text.trim().isEmpty) {
                                         setState(() => _showPriceError = true);
@@ -622,12 +637,19 @@ class _CarsAdState extends State<CarsAd> {
                                       } else {
                                         setState(() => _showPriceError = false);
                                       }
-                                      if (yearOfManufacturingController.text.trim().isEmpty) {
-                                        setState(() => _showManufactureError = true);
+                                      if (yearOfManufacturingController.text
+                                          .trim()
+                                          .isEmpty) {
+                                        setState(
+                                          () => _showManufactureError = true,
+                                        );
                                         isValid = false;
                                       } else {
-                                        setState(() => _showManufactureError = false);
-                                      }if (kmsController.text.trim().isEmpty) {
+                                        setState(
+                                          () => _showManufactureError = false,
+                                        );
+                                      }
+                                      if (kmsController.text.trim().isEmpty) {
                                         setState(() => _showKmsError = true);
                                         isValid = false;
                                       } else {
@@ -643,10 +665,11 @@ class _CarsAdState extends State<CarsAd> {
                                           context,
                                           "Please select atleast 2 images",
                                         );
-                                        setState(() => _showimagesError = true
-                                        );
+                                        setState(() => _showimagesError = true);
                                       } else {
-                                        setState(() => _showimagesError = false);
+                                        setState(
+                                          () => _showimagesError = false,
+                                        );
                                       }
                                       if (fuelType == null ||
                                           fuelType!.isEmpty) {
@@ -684,51 +707,68 @@ class _CarsAdState extends State<CarsAd> {
                                       }
 
                                       if (isValid) {
-                                        final Map<String, dynamic> data = {
-                                          "title": titleController.text,
-                                          "brand": brandController.text,
-                                          "description":
-                                              descriptionController.text,
-                                          "sub_category_id": widget.subCatId,
-                                          "category_id": widget.catId,
-                                          "location": locationController.text,
-                                          "mobile_number": phoneController.text,
-                                          "price": priceController.text,
-                                          "full_name": nameController.text,
-                                          "state_id": selectedStateId,
-                                          // "city_id": selectedCityId,
-                                          "location_key": latlng,
-                                          "year_of_manufacturing":
-                                              yearOfManufacturingController
-                                                  .text,
-                                          "kms_run": kmsController.text,
-                                          "ownership": ownershipType,
-                                          "fuel_type": fuelType,
-                                          "transmission": transmission,
-                                        };
+                                        try {
+                                          setState(() => _isSubmitting = true);
+                                          final locResult = await context
+                                              .read<LocationCubit>()
+                                              .getForSubmission();
 
-                                        final editId = widget.editId
-                                            .replaceAll('"', '')
-                                            .trim();
-                                        if (editId.isEmpty) {
-                                          data["plan_id"] = planId;
-                                          data["package_id"] = packageId;
-                                        }
+                                          final Map<String, dynamic> data = {
+                                            "title": titleController.text,
+                                            "brand": brandController.text,
+                                            "description":
+                                                descriptionController.text,
+                                            "sub_category_id": widget.subCatId,
+                                            "category_id": widget.catId,
+                                            "location": locationController.text,
+                                            "mobile_number":
+                                                phoneController.text,
+                                            "price": priceController.text,
+                                            "full_name": nameController.text,
+                                            "state_id": selectedStateId,
+                                            // "city_id": selectedCityId,
+                                            "location_key": latlng,
+                                            "year_of_manufacturing":
+                                                yearOfManufacturingController
+                                                    .text,
+                                            "kms_run": kmsController.text,
+                                            "ownership": ownershipType,
+                                            "fuel_type": fuelType,
+                                            "transmission": transmission,
+                                            "current_address":
+                                                locResult.locationName,
+                                            "current_address_key":
+                                                locResult.latlng,
+                                          };
 
-                                        if (_images.isNotEmpty) {
-                                          data["images"] = _images
-                                              .map((file) => file.path)
-                                              .toList();
-                                        }
+                                          final editId = widget.editId
+                                              .replaceAll('"', '')
+                                              .trim();
+                                          if (editId.isEmpty) {
+                                            data["plan_id"] = planId;
+                                            data["package_id"] = packageId;
+                                          }
 
-                                        if (editId.isNotEmpty) {
-                                          context
-                                              .read<MarkAsListingCubit>()
-                                              .markAsUpdate(editId, data);
-                                        } else {
-                                          context
-                                              .read<CarsAdCubit>()
-                                              .postCarsAd(data);
+                                          if (_images.isNotEmpty) {
+                                            data["images"] = _images
+                                                .map((file) => file.path)
+                                                .toList();
+                                          }
+
+                                          if (editId.isNotEmpty) {
+                                            context
+                                                .read<MarkAsListingCubit>()
+                                                .markAsUpdate(editId, data);
+                                          } else {
+                                            context
+                                                .read<CarsAdCubit>()
+                                                .postCarsAd(data);
+                                          }
+                                        } finally {
+                                          if (mounted)
+                                            setState(
+                                              () => _isSubmitting = false,
+                                            );
                                         }
                                       }
                                     }

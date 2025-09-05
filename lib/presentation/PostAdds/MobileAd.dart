@@ -13,6 +13,7 @@ import '../../Components/CustomSnackBar.dart';
 import '../../Components/CutomAppBar.dart';
 import '../../Components/ShakeWidget.dart';
 import '../../data/cubit/Ad/MobileAd/mobile_ad_states.dart';
+import '../../data/cubit/Location/location_cubit.dart';
 import '../../data/cubit/MyAds/GetMarkAsListing/get_listing_ad_cubit.dart';
 import '../../data/cubit/MyAds/MarkAsListing/mark_as_listing_cubit.dart';
 import '../../data/cubit/MyAds/MarkAsListing/mark_as_listing_state.dart';
@@ -76,7 +77,7 @@ class _MobileAdState extends State<MobileAd> {
   final nameController = TextEditingController();
   final planController = TextEditingController();
   List<String> selectedConditions = [];
-
+  bool _isSubmitting = false; // covers pre-submit work
   bool isLoading = true;
   List<ImageData> _imageDataList = [];
   @override
@@ -493,6 +494,11 @@ class _MobileAdState extends State<MobileAd> {
                             },
                           ),
                         ],
+                        SizedBox(height: 10,),
+                        Text(
+                          "Note : Upload only proper images that match your ad. Wrong or unrelated pictures may lead to rejection.",
+                          style: AppTextStyles.bodyMedium(textColor),
+                        ),
                       ],
                     ),
                   ),
@@ -508,7 +514,6 @@ class _MobileAdState extends State<MobileAd> {
                 builder: (context, asyncSnapshot) {
                   final isEligible = asyncSnapshot.data?[0] ?? false;
                   final isNewUser = asyncSnapshot.data?[1] ?? false;
-                  AppLogger.info("isEligible: ${isEligible}");
                   final editId = widget.editId.replaceAll('"', '').trim();
 
                   return BlocConsumer<MarkAsListingCubit, MarkAsListingState>(
@@ -535,13 +540,13 @@ class _MobileAdState extends State<MobileAd> {
                         },
                         builder: (context, state) {
                           return CustomAppButton1(
-                            isLoading: state is MobileAdLoading || updateState is MarkAsListingUpdateLoading,
+                            isLoading:  _isSubmitting || state is MobileAdLoading || updateState is MarkAsListingUpdateLoading,
                             text: 'Submit Ad',
                             onPlusTap: isNewUser
                                 ? () {
                               context.push('/register?from=ad');
                             }
-                                : () {
+                                : () async {
                               if (_formKey.currentState?.validate() ?? false) {
                                 bool isValid = true;
                                 if (locationController.text.trim().isEmpty) {
@@ -601,37 +606,53 @@ class _MobileAdState extends State<MobileAd> {
 
                                 // Proceed with API call only if all validations pass
                                 if (isValid) {
-                                  final Map<String, dynamic> data = {
-                                    "title": titleController.text,
-                                    "brand": brandController.text,
-                                    "description": descriptionController.text,
-                                    "sub_category_id": widget.subCatId,
-                                    "category_id": widget.catId,
-                                    "location": locationController.text,
-                                    "location_key": latlng,
-                                    "mobile_number": phoneController.text,
-                                    "price": priceController.text,
-                                    "full_name": nameController.text,
-                                    "state_id": selectedStateId,
-                                    // "city_id": selectedCityId,
-                                    "storage": storageCapacityController.text,
-                                    "ram": ramController.text,
-                                  };
+                                  try{
+                                    setState(() => _isSubmitting = true);
+                                    final locResult = await context
+                                        .read<LocationCubit>()
+                                        .getForSubmission();
+                                    final Map<String, dynamic> data = {
+                                      "title": titleController.text,
+                                      "brand": brandController.text,
+                                      "description": descriptionController.text,
+                                      "sub_category_id": widget.subCatId,
+                                      "category_id": widget.catId,
+                                      "location": locationController.text,
+                                      "location_key": latlng,
+                                      "mobile_number": phoneController.text,
+                                      "price": priceController.text,
+                                      "full_name": nameController.text,
+                                      "state_id": selectedStateId,
+                                      // "city_id": selectedCityId,
+                                      "storage": storageCapacityController.text,
+                                      "ram": ramController.text,
+                                      "current_address":
+                                      locResult.locationName,
+                                      "current_address_key":
+                                      locResult.latlng,
+                                    };
 
-                                  if (widget.editId == null || widget.editId.replaceAll('"', '').trim().isEmpty) {
-                                    data["plan_id"] = planId;
-                                    data["package_id"] = packageId;
+                                    if (widget.editId == null || widget.editId.replaceAll('"', '').trim().isEmpty) {
+                                      data["plan_id"] = planId;
+                                      data["package_id"] = packageId;
+                                    }
+
+                                    if (_images.isNotEmpty) {
+                                      data["images"] = _images.map((file) => file.path).toList();
+                                    }
+
+                                    if (widget.editId != null && widget.editId.replaceAll('"', '').trim().isNotEmpty) {
+                                      context.read<MarkAsListingCubit>().markAsUpdate(widget.editId, data);
+                                    } else {
+                                      context.read<MobileAdCubit>().postMobileAd(data);
+                                    }
+                                  }finally{
+                                    if (mounted)
+                                      setState(
+                                            () => _isSubmitting = false,
+                                      );
                                   }
 
-                                  if (_images.isNotEmpty) {
-                                    data["images"] = _images.map((file) => file.path).toList();
-                                  }
-
-                                  if (widget.editId != null && widget.editId.replaceAll('"', '').trim().isNotEmpty) {
-                                    context.read<MarkAsListingCubit>().markAsUpdate(widget.editId, data);
-                                  } else {
-                                    context.read<MobileAdCubit>().postMobileAd(data);
-                                  }
                                 }
                               }
                             },

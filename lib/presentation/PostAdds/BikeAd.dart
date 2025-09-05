@@ -11,6 +11,7 @@ import '../../Components/ShakeWidget.dart';
 import '../../data/cubit/Ad/BikesAd/bikes_ad_cubit.dart';
 import '../../data/cubit/Ad/BikesAd/bikes_ad_states.dart';
 import '../../data/cubit/City/city_cubit.dart';
+import '../../data/cubit/Location/location_cubit.dart';
 import '../../data/cubit/MyAds/GetMarkAsListing/get_listing_ad_cubit.dart';
 import '../../data/cubit/MyAds/MarkAsListing/mark_as_listing_cubit.dart';
 import '../../data/cubit/MyAds/MarkAsListing/mark_as_listing_state.dart';
@@ -18,6 +19,7 @@ import '../../data/cubit/States/states_cubit.dart';
 import '../../data/cubit/States/states_repository.dart';
 import '../../data/cubit/UserActivePlans/user_active_plans_cubit.dart';
 import '../../data/remote_data_source.dart';
+import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../utils/AppLogger.dart';
 import '../../utils/ImagePickerHelper.dart';
@@ -170,6 +172,7 @@ class _BikeAdState extends State<BikeAd> {
   String? imagePath;
   List<File> _images = [];
   final int _maxImages = 6;
+  bool _isSubmitting = false; // covers pre-submit work
 
   @override
   Widget build(BuildContext context) {
@@ -546,6 +549,11 @@ class _BikeAdState extends State<BikeAd> {
                             },
                           ),
                         ],
+                        SizedBox(height: 10,),
+                        Text(
+                          "Note : Upload only proper images that match your ad. Wrong or unrelated pictures may lead to rejection.",
+                          style: AppTextStyles.bodyMedium(textColor),
+                        ),
                       ],
                     ),
                   ),
@@ -583,6 +591,7 @@ class _BikeAdState extends State<BikeAd> {
                         builder: (context, state) {
                           return CustomAppButton1(
                             isLoading:
+                                _isSubmitting ||
                                 state is BikesAdLoading ||
                                 updateState is MarkAsListingUpdateLoading,
                             text: 'Submit Ad',
@@ -590,7 +599,7 @@ class _BikeAdState extends State<BikeAd> {
                                 ? () {
                                     context.push('/register?from=ad');
                                   }
-                                : () {
+                                : () async {
                                     if (_formKey.currentState?.validate() ??
                                         false) {
                                       bool isValid = true;
@@ -719,55 +728,72 @@ class _BikeAdState extends State<BikeAd> {
                                         );
                                       }
                                       if (isValid) {
-                                        final Map<String, dynamic> data = {
-                                          "title": titleController.text,
-                                          "brand": brandController.text,
-                                          "description":
-                                              descriptionController.text,
-                                          "sub_category_id": widget.subCatId,
-                                          "category_id": widget.catId,
-                                          "location": locationController.text,
-                                          "mobile_number": phoneController.text,
-                                          "price": priceController.text,
-                                          "full_name": nameController.text,
-                                          "state_id": selectedStateId,
-                                          // "city_id": selectedCityId,
-                                          "location_key": latlng,
-                                          "year_of_manufacturing":
-                                              yearOfManufacturingController
-                                                  .text,
-                                          "kms_run": kmsController.text,
-                                          "ownership": ownershipType,
-                                          "fuel_type": fuelType,
-                                        };
+                                        try {
+                                          setState(() => _isSubmitting = true);
+                                          final locResult = await context
+                                              .read<LocationCubit>()
+                                              .getForSubmission();
 
-                                        if (widget.editId == null ||
-                                            widget.editId
-                                                .replaceAll('"', '')
-                                                .trim()
-                                                .isEmpty) {
-                                          data["plan_id"] = planId;
-                                          data["package_id"] = packageId;
-                                        }
-                                        if (_images.isNotEmpty) {
-                                          data["images"] = _images
-                                              .map((file) => file.path)
-                                              .toList();
-                                        }
-                                        if (widget.editId
-                                            .replaceAll('"', '')
-                                            .trim()
-                                            .isNotEmpty) {
-                                          context
-                                              .read<MarkAsListingCubit>()
-                                              .markAsUpdate(
-                                                widget.editId,
-                                                data,
-                                              );
-                                        } else {
-                                          context
-                                              .read<BikesAdCubit>()
-                                              .postBikeAd(data);
+                                          final Map<String, dynamic> data = {
+                                            "title": titleController.text,
+                                            "brand": brandController.text,
+                                            "description":
+                                                descriptionController.text,
+                                            "sub_category_id": widget.subCatId,
+                                            "category_id": widget.catId,
+                                            "location": locationController.text,
+                                            "mobile_number":
+                                                phoneController.text,
+                                            "price": priceController.text,
+                                            "full_name": nameController.text,
+                                            "state_id": selectedStateId,
+                                            "current_address":
+                                                locResult.locationName,
+                                            "current_address_key":
+                                                locResult.latlng,
+                                            // "city_id": selectedCityId,
+                                            "location_key": latlng,
+                                            "year_of_manufacturing":
+                                                yearOfManufacturingController
+                                                    .text,
+                                            "kms_run": kmsController.text,
+                                            "ownership": ownershipType,
+                                            "fuel_type": fuelType,
+                                          };
+
+                                          if (widget.editId == null ||
+                                              widget.editId
+                                                  .replaceAll('"', '')
+                                                  .trim()
+                                                  .isEmpty) {
+                                            data["plan_id"] = planId;
+                                            data["package_id"] = packageId;
+                                          }
+                                          if (_images.isNotEmpty) {
+                                            data["images"] = _images
+                                                .map((file) => file.path)
+                                                .toList();
+                                          }
+                                          if (widget.editId
+                                              .replaceAll('"', '')
+                                              .trim()
+                                              .isNotEmpty) {
+                                            context
+                                                .read<MarkAsListingCubit>()
+                                                .markAsUpdate(
+                                                  widget.editId,
+                                                  data,
+                                                );
+                                          } else {
+                                            context
+                                                .read<BikesAdCubit>()
+                                                .postBikeAd(data);
+                                          }
+                                        } finally {
+                                          if (mounted)
+                                            setState(
+                                              () => _isSubmitting = false,
+                                            );
                                         }
                                       }
                                     }

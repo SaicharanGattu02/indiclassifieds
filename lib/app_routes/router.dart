@@ -52,7 +52,7 @@ import '../services/AuthService.dart';
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
   navigatorKey: navigatorKey,
-  debugLogDiagnostics: true,
+  // debugLogDiagnostics: true,
   overridePlatformDefaultLocation: true,
   routes: [
     GoRoute(

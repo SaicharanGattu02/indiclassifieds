@@ -10,6 +10,7 @@ import '../../Components/ShakeWidget.dart';
 import '../../data/cubit/Ad/AstrologyAd/astrology_ad_cubit.dart';
 import '../../data/cubit/Ad/AstrologyAd/astrology_ad_states.dart';
 import '../../data/cubit/City/city_cubit.dart';
+import '../../data/cubit/Location/location_cubit.dart';
 import '../../data/cubit/MyAds/GetMarkAsListing/get_listing_ad_cubit.dart';
 import '../../data/cubit/MyAds/MarkAsListing/mark_as_listing_cubit.dart';
 import '../../data/cubit/MyAds/MarkAsListing/mark_as_listing_state.dart';
@@ -51,6 +52,7 @@ class AstrologyAd extends StatefulWidget {
 
 class _AstrologyAdState extends State<AstrologyAd> {
   final _formKey = GlobalKey<FormState>();
+  bool _isSubmitting = false; // covers pre-submit work
 
   final locationController = TextEditingController();
   final titleController = TextEditingController();
@@ -531,6 +533,11 @@ class _AstrologyAdState extends State<AstrologyAd> {
                             },
                           ),
                         ],
+                        SizedBox(height: 10,),
+                        Text(
+                          "Note : Upload only proper images that match your ad. Wrong or unrelated pictures may lead to rejection.",
+                          style: AppTextStyles.bodyMedium(textColor),
+                        ),
                       ],
                     ),
                   ),
@@ -567,6 +574,7 @@ class _AstrologyAdState extends State<AstrologyAd> {
                         builder: (context, state) {
                           return CustomAppButton1(
                             isLoading:
+                                _isSubmitting ||
                                 state is AstrologyAdLoading ||
                                 updateState is MarkAsListingUpdateLoading,
                             text: 'Submit Ad',
@@ -574,7 +582,7 @@ class _AstrologyAdState extends State<AstrologyAd> {
                                 ? () {
                                     context.push('/register?from=ad');
                                   }
-                                : () {
+                                : () async {
                                     if (_formKey.currentState?.validate() ??
                                         false) {
                                       bool isValid = true;
@@ -658,52 +666,68 @@ class _AstrologyAdState extends State<AstrologyAd> {
                                         );
                                       }
                                       if (isValid) {
-                                        final Map<String, dynamic> data = {
-                                          "title": titleController.text,
-                                          "description":
-                                              descriptionController.text,
-                                          "sub_category_id": widget.subCatId,
-                                          "category_id": widget.catId,
-                                          "location": locationController.text,
-                                          "mobile_number": phoneController.text,
-                                          "location_key": latlng,
-                                          "languages_spoken": selectedLanguages
-                                              .join(", "),
-                                          "price": priceController.text,
-                                          "full_name": nameController.text,
-                                          "state_id": selectedStateId,
-                                          // "city_id": selectedCityId,
-                                        };
+                                        try {
+                                          setState(() => _isSubmitting = true);
+                                          final locResult = await context
+                                              .read<LocationCubit>()
+                                              .getForSubmission();
+                                          final Map<String, dynamic> data = {
+                                            "title": titleController.text,
+                                            "description":
+                                                descriptionController.text,
+                                            "sub_category_id": widget.subCatId,
+                                            "category_id": widget.catId,
+                                            "location": locationController.text,
+                                            "mobile_number":
+                                                phoneController.text,
+                                            "location_key": latlng,
+                                            "languages_spoken":
+                                                selectedLanguages.join(", "),
+                                            "price": priceController.text,
+                                            "full_name": nameController.text,
+                                            "state_id": selectedStateId,
+                                            "current_address":
+                                                locResult.locationName,
+                                            "current_address_key":
+                                                locResult.latlng,
+                                            // "city_id": selectedCityId,
+                                          };
 
-                                        if (widget.editId == null ||
-                                            widget.editId
-                                                .replaceAll('"', '')
-                                                .trim()
-                                                .isEmpty) {
-                                          data["plan_id"] = planId;
-                                          data["package_id"] = packageId;
-                                        }
+                                          if (widget.editId == null ||
+                                              widget.editId
+                                                  .replaceAll('"', '')
+                                                  .trim()
+                                                  .isEmpty) {
+                                            data["plan_id"] = planId;
+                                            data["package_id"] = packageId;
+                                          }
 
-                                        if (_images.isNotEmpty) {
-                                          data["images"] = _images
-                                              .map((file) => file.path)
-                                              .toList();
-                                        }
+                                          if (_images.isNotEmpty) {
+                                            data["images"] = _images
+                                                .map((file) => file.path)
+                                                .toList();
+                                          }
 
-                                        if (widget.editId
-                                            .replaceAll('"', '')
-                                            .trim()
-                                            .isNotEmpty) {
-                                          context
-                                              .read<MarkAsListingCubit>()
-                                              .markAsUpdate(
-                                                widget.editId,
-                                                data,
-                                              );
-                                        } else {
-                                          context
-                                              .read<AstrologyAdCubit>()
-                                              .postAstrologyAd(data);
+                                          if (widget.editId
+                                              .replaceAll('"', '')
+                                              .trim()
+                                              .isNotEmpty) {
+                                            context
+                                                .read<MarkAsListingCubit>()
+                                                .markAsUpdate(
+                                                  widget.editId,
+                                                  data,
+                                                );
+                                          } else {
+                                            context
+                                                .read<AstrologyAdCubit>()
+                                                .postAstrologyAd(data);
+                                          }
+                                        } finally {
+                                          if (mounted)
+                                            setState(
+                                              () => _isSubmitting = false,
+                                            );
                                         }
                                       }
                                     }

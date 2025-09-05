@@ -12,6 +12,7 @@ import '../../Components/CustomSnackBar.dart';
 import '../../Components/CutomAppBar.dart';
 import '../../Components/ShakeWidget.dart';
 import '../../data/cubit/Ad/CoWorkingAd/co_working_ad_states.dart';
+import '../../data/cubit/Location/location_cubit.dart';
 import '../../data/cubit/MyAds/GetMarkAsListing/get_listing_ad_cubit.dart';
 import '../../data/cubit/MyAds/MarkAsListing/mark_as_listing_cubit.dart';
 import '../../data/cubit/MyAds/MarkAsListing/mark_as_listing_state.dart';
@@ -74,6 +75,8 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
   final stateController = TextEditingController();
   final cityController = TextEditingController();
   final planController = TextEditingController();
+
+  bool _isSubmitting = false; // covers pre-submit work
 
   @override
   void dispose() {
@@ -190,7 +193,7 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
     debugPrint("✅ INFO: state: $stateId");
   }
 
-  void _submitAd(BuildContext context) {
+  Future<void> _submitAd(BuildContext context) async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     bool hasError = false;
@@ -242,37 +245,52 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
     }
 
     if (hasError) {
-      final editId = widget.editId.replaceAll('"', '').trim();
-      final Map<String, dynamic> data = {
-        "title": titleController.text.trim(),
-        "description": descriptionController.text.trim(),
-        "sub_category_id": widget.subCatId,
-        "category_id": widget.catId,
-        "location": locationController.text.trim(),
-        "mobile_number": phoneController.text.trim(),
-        "email": emailController.text.trim(),
-        "location_key": latlng,
-        "price": priceController.text.trim(),
-        "full_name": nameController.text.trim(),
-        "state_id": selectedStateId,
-        // "city_id": selectedCityId,
-        "area_size": "${areaSizeController.text.trim()} sqft",
-        "available_seats": availableSeatsController.text.trim(),
-        "desk_capacity": deskCapacityController.text.trim(),
-        "seat_type": seatTypeOffered,
-      };
-      if (editId.isEmpty) {
-        data["plan_id"] = planId;
-        data["package_id"] = packageId;
-      }
+      try{
+        setState(() => _isSubmitting = true);
+        final locResult = await context
+            .read<LocationCubit>()
+            .getForSubmission();
+        final editId = widget.editId.replaceAll('"', '').trim();
+        final Map<String, dynamic> data = {
+          "title": titleController.text.trim(),
+          "description": descriptionController.text.trim(),
+          "sub_category_id": widget.subCatId,
+          "category_id": widget.catId,
+          "location": locationController.text.trim(),
+          "mobile_number": phoneController.text.trim(),
+          "email": emailController.text.trim(),
+          "location_key": latlng,
+          "price": priceController.text.trim(),
+          "full_name": nameController.text.trim(),
+          "state_id": selectedStateId,
+          // "city_id": selectedCityId,
+          "area_size": "${areaSizeController.text.trim()} sqft",
+          "available_seats": availableSeatsController.text.trim(),
+          "desk_capacity": deskCapacityController.text.trim(),
+          "seat_type": seatTypeOffered,
+          "current_address":
+          locResult.locationName,
+          "current_address_key":
+          locResult.latlng,
+        };
+        if (editId.isEmpty) {
+          data["plan_id"] = planId;
+          data["package_id"] = packageId;
+        }
 
-      if (_images.isNotEmpty) {
-        data["images"] = _images.map((file) => file.path).toList();
-      }
-      if (editId.isNotEmpty) {
-        context.read<MarkAsListingCubit>().markAsUpdate(editId, data);
-      } else {
-        context.read<CoWorkingAdCubit>().postCoWorkingAd(data);
+        if (_images.isNotEmpty) {
+          data["images"] = _images.map((file) => file.path).toList();
+        }
+        if (editId.isNotEmpty) {
+          context.read<MarkAsListingCubit>().markAsUpdate(editId, data);
+        } else {
+          context.read<CoWorkingAdCubit>().postCoWorkingAd(data);
+        }
+      }finally{
+        if (mounted)
+          setState(
+                () => _isSubmitting = false,
+          );
       }
     }
   }
@@ -587,6 +605,11 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
                             },
                           ),
                         ],
+                        SizedBox(height: 10,),
+                        Text(
+                          "Note : Upload only proper images that match your ad. Wrong or unrelated pictures may lead to rejection.",
+                          style: AppTextStyles.bodyMedium(textColor),
+                        ),
                       ],
                     ),
                   ),
@@ -633,7 +656,7 @@ class _CoWorkingSpaceAdState extends State<CoWorkingSpaceAd> {
                         },
                         builder: (context, state) {
                           return CustomAppButton1(
-                            isLoading:
+                            isLoading:      _isSubmitting ||
                                 state is CoWorkingAdLoading ||
                                 updateState is MarkAsListingUpdateLoading,
                             text: 'Submit Ad',

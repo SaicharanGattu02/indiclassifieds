@@ -11,6 +11,7 @@ import '../../Components/CutomAppBar.dart';
 import '../../Components/ShakeWidget.dart';
 import '../../data/cubit/Ad/CityRentalsAd/city_rentals_ad_cubit.dart';
 import '../../data/cubit/Ad/CityRentalsAd/city_rentals_ad_states.dart';
+import '../../data/cubit/Location/location_cubit.dart';
 import '../../data/cubit/MyAds/GetMarkAsListing/get_listing_ad_cubit.dart';
 import '../../data/cubit/MyAds/MarkAsListing/mark_as_listing_cubit.dart';
 import '../../data/cubit/MyAds/MarkAsListing/mark_as_listing_state.dart';
@@ -76,7 +77,7 @@ class _CityRentalsAdState extends State<CityRentalsAd> {
   final stateController = TextEditingController();
   final cityController = TextEditingController();
   final planController = TextEditingController();
-
+  bool _isSubmitting = false; // covers pre-submit work
   List<String> selectedConditions = [];
   List<File> _images = [];
   final int _maxImages = 6;
@@ -98,7 +99,7 @@ class _CityRentalsAdState extends State<CityRentalsAd> {
         if (commonAdData != null) {
           descriptionController.text =
               commonAdData.data?.listing?.description ?? '';
-          titleController.text=commonAdData.data?.listing?.title??"";
+          titleController.text = commonAdData.data?.listing?.title ?? "";
           locationController.text = commonAdData.data?.listing?.location ?? '';
           priceController.text = commonAdData.data?.listing?.price ?? '';
           nameController.text = commonAdData.data?.listing?.fullName ?? '';
@@ -160,7 +161,8 @@ class _CityRentalsAdState extends State<CityRentalsAd> {
       setState(() {
         selectedStateId = int.tryParse(stateId);
       });
-    } if (cityId != null && cityId.isNotEmpty) {
+    }
+    if (cityId != null && cityId.isNotEmpty) {
       setState(() {
         selectedCityId = int.tryParse(cityId);
       });
@@ -179,7 +181,8 @@ class _CityRentalsAdState extends State<CityRentalsAd> {
         AppLogger.info("isEligibleForFree:${isEligibleForFree}");
         return Scaffold(
           appBar: CustomAppBar1(
-            title: (widget.editId.replaceAll('"', '').trim().isNotEmpty ?? false)
+            title:
+                (widget.editId.replaceAll('"', '').trim().isNotEmpty ?? false)
                 ? "Edit ${widget.CatName}"
                 : widget.CatName,
             actions: [],
@@ -287,7 +290,9 @@ class _CityRentalsAdState extends State<CityRentalsAd> {
                             ),
                           ),
                         ),
-                        if (_showStateError) _buildErrorText("Please Select State"),
+                        if (_showStateError)
+                          _buildErrorText("Please Select State"),
+
                         // GestureDetector(
                         //   onTap: () async {
                         //     final selectedCity = await showModalBottomSheet(
@@ -323,7 +328,6 @@ class _CityRentalsAdState extends State<CityRentalsAd> {
                         //   ),
                         // ),
                         // if (_showCityError) _buildErrorText("Please Select City"),
-
                         SizedBox(height: 12),
                         CommonImagePicker(
                           title: "Upload Product Images",
@@ -366,7 +370,11 @@ class _CityRentalsAdState extends State<CityRentalsAd> {
                           ],
                           color: textColor,
                           keyboardType: TextInputType.phone,
-                          prefixIcon: Icon(Icons.call, color: textColor, size: 16),
+                          prefixIcon: Icon(
+                            Icons.call,
+                            color: textColor,
+                            size: 16,
+                          ),
                           validator: (v) => (v == null || v.trim().isEmpty)
                               ? 'Phone required'
                               : null,
@@ -396,7 +404,8 @@ class _CityRentalsAdState extends State<CityRentalsAd> {
                           },
                         ),
                         if (widget.editId == null ||
-                            widget.editId.replaceAll('"', '').trim().isEmpty && !isEligibleForFree) ...[
+                            widget.editId.replaceAll('"', '').trim().isEmpty &&
+                                !isEligibleForFree) ...[
                           CommonTextField1(
                             lable: 'Plan',
                             isRead: true,
@@ -414,7 +423,9 @@ class _CityRentalsAdState extends State<CityRentalsAd> {
                                 context: context,
                                 controller: planController,
                                 onSelectPlan: (selectedPlan) {
-                                  print('Selected plan: ${selectedPlan.planName}');
+                                  print(
+                                    'Selected plan: ${selectedPlan.planName}',
+                                  );
                                   planId = selectedPlan.planId;
                                   packageId = selectedPlan.packageId;
                                 },
@@ -424,6 +435,11 @@ class _CityRentalsAdState extends State<CityRentalsAd> {
                             },
                           ),
                         ],
+                        SizedBox(height: 10,),
+                        Text(
+                          "Note : Upload only proper images that match your ad. Wrong or unrelated pictures may lead to rejection.",
+                          style: AppTextStyles.bodyMedium(textColor),
+                        ),
                       ],
                     ),
                   ),
@@ -433,9 +449,7 @@ class _CityRentalsAdState extends State<CityRentalsAd> {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
               child: FutureBuilder(
-                future: Future.wait([
-                  AuthService.isNewUser,
-                ]),
+                future: Future.wait([AuthService.isNewUser]),
                 builder: (context, asyncSnapshot) {
                   final isNewUser = asyncSnapshot.data?[0] ?? false;
                   return BlocConsumer<MarkAsListingCubit, MarkAsListingState>(
@@ -450,7 +464,10 @@ class _CityRentalsAdState extends State<CityRentalsAd> {
                       }
                     },
                     builder: (context, updateState) {
-                      return BlocConsumer<CityRentalsAdCubit, CityRentalsAdStates>(
+                      return BlocConsumer<
+                        CityRentalsAdCubit,
+                        CityRentalsAdStates
+                      >(
                         listener: (context, state) {
                           if (state is CityRentalsAdSuccess) {
                             context.pushReplacement(
@@ -463,16 +480,15 @@ class _CityRentalsAdState extends State<CityRentalsAd> {
                         builder: (context, state) {
                           return CustomAppButton1(
                             isLoading:
+                                _isSubmitting ||
                                 state is CityRentalsAdLoading ||
                                 updateState is MarkAsListingUpdateLoading,
                             text: 'Submit Ad',
                             onPlusTap: isNewUser
                                 ? () {
-                              context.push(
-                                '/register?from=ad',
-                              );
-                            }
-                                : () {
+                                    context.push('/register?from=ad');
+                                  }
+                                : () async {
                                     if (_formKey.currentState?.validate() ??
                                         false) {
                                       bool isValid = true;
@@ -520,16 +536,23 @@ class _CityRentalsAdState extends State<CityRentalsAd> {
                                           context,
                                           "Please select atleast 2 images",
                                         );
-                                        setState(() => _showimagesError = true
-                                        );
+                                        setState(() => _showimagesError = true);
                                       } else {
-                                        setState(() => _showimagesError = false);
+                                        setState(
+                                          () => _showimagesError = false,
+                                        );
                                       }
-                                      if (descriptionController.text.trim().isEmpty) {
-                                        setState(() => _showDescriptionError = true);
+                                      if (descriptionController.text
+                                          .trim()
+                                          .isEmpty) {
+                                        setState(
+                                          () => _showDescriptionError = true,
+                                        );
                                         isValid = false;
                                       } else {
-                                        setState(() => _showDescriptionError = false);
+                                        setState(
+                                          () => _showDescriptionError = false,
+                                        );
                                       }
                                       if (priceController.text.trim().isEmpty) {
                                         setState(() => _showPriceError = true);
@@ -538,58 +561,84 @@ class _CityRentalsAdState extends State<CityRentalsAd> {
                                         setState(() => _showPriceError = false);
                                       }
                                       if (vechicleNumber.text.trim().isEmpty) {
-                                        setState(() => _showVechicleNumberError = true);
+                                        setState(
+                                          () => _showVechicleNumberError = true,
+                                        );
                                         isValid = false;
                                       } else {
-                                        setState(() => _showVechicleNumberError = false);
+                                        setState(
+                                          () =>
+                                              _showVechicleNumberError = false,
+                                        );
                                       }
                                       if (rentalDuration.text.trim().isEmpty) {
-                                        setState(() => _showDurationError = true);
+                                        setState(
+                                          () => _showDurationError = true,
+                                        );
                                         isValid = false;
                                       } else {
-                                        setState(() => _showDurationError = false);
+                                        setState(
+                                          () => _showDurationError = false,
+                                        );
                                       }
                                       if (isValid) {
-                                        final Map<String, dynamic> data = {
-                                          "title": titleController.text,
-                                          "description": descriptionController
-                                              .text,
-                                          "sub_category_id": widget.subCatId,
-                                          "category_id": widget.catId,
-                                          "location": locationController.text,
-                                          "mobile_number": phoneController.text,
-                                          "vehicle_number": vechicleNumber.text,
-                                          "rental_duration": rentalDuration
-                                              .text,
-                                          "price": priceController.text,
-                                          "full_name": nameController.text,
-                                          "state_id": selectedStateId,
-                                          // "city_id": selectedCityId,
-                                          "location_key": latlng,
-                                        };
+                                        try {
+                                          setState(() => _isSubmitting = true);
+                                          final locResult = await context
+                                              .read<LocationCubit>()
+                                              .getForSubmission();
+                                          final Map<String, dynamic> data = {
+                                            "title": titleController.text,
+                                            "description":
+                                                descriptionController.text,
+                                            "sub_category_id": widget.subCatId,
+                                            "category_id": widget.catId,
+                                            "location": locationController.text,
+                                            "mobile_number":
+                                                phoneController.text,
+                                            "vehicle_number":
+                                                vechicleNumber.text,
+                                            "rental_duration":
+                                                rentalDuration.text,
+                                            "price": priceController.text,
+                                            "full_name": nameController.text,
+                                            "state_id": selectedStateId,
+                                            // "city_id": selectedCityId,
+                                            "location_key": latlng,
+                                            "current_address":
+                                                locResult.locationName,
+                                            "current_address_key":
+                                                locResult.latlng,
+                                          };
 
-                                        final editId = widget.editId
-                                            .replaceAll('"', '')
-                                            .trim();
+                                          final editId = widget.editId
+                                              .replaceAll('"', '')
+                                              .trim();
 
-                                        if (editId.isEmpty) {
-                                          data["plan_id"] = planId;
-                                          data["package_id"] = packageId;
-                                        }
+                                          if (editId.isEmpty) {
+                                            data["plan_id"] = planId;
+                                            data["package_id"] = packageId;
+                                          }
 
-                                        if (_images.isNotEmpty) {
-                                          data["images"] = _images
-                                              .map((file) => file.path)
-                                              .toList();
-                                        }
-                                        if (editId.isNotEmpty) {
-                                          context
-                                              .read<MarkAsListingCubit>()
-                                              .markAsUpdate(editId, data);
-                                        } else {
-                                          context
-                                              .read<CityRentalsAdCubit>()
-                                              .postCityRentalsAd(data);
+                                          if (_images.isNotEmpty) {
+                                            data["images"] = _images
+                                                .map((file) => file.path)
+                                                .toList();
+                                          }
+                                          if (editId.isNotEmpty) {
+                                            context
+                                                .read<MarkAsListingCubit>()
+                                                .markAsUpdate(editId, data);
+                                          } else {
+                                            context
+                                                .read<CityRentalsAdCubit>()
+                                                .postCityRentalsAd(data);
+                                          }
+                                        } finally {
+                                          if (mounted)
+                                            setState(
+                                              () => _isSubmitting = false,
+                                            );
                                         }
                                       }
                                     }
@@ -604,7 +653,7 @@ class _CityRentalsAdState extends State<CityRentalsAd> {
             ),
           ),
         );
-      }
+      },
     );
   }
 

@@ -13,6 +13,7 @@ import '../../data/cubit/Ad/CarsAd/cars_ad_cubit.dart';
 import '../../data/cubit/Ad/CarsAd/cars_ad_states.dart';
 import '../../data/cubit/Ad/CommercialvehicleAd/commercial_vehicle_ad_cubit.dart';
 import '../../data/cubit/Ad/CommercialvehicleAd/commercial_vehicle_ad_states.dart';
+import '../../data/cubit/Location/location_cubit.dart';
 import '../../data/cubit/MyAds/GetMarkAsListing/get_listing_ad_cubit.dart';
 import '../../data/cubit/MyAds/MarkAsListing/mark_as_listing_cubit.dart';
 import '../../data/cubit/MyAds/MarkAsListing/mark_as_listing_state.dart';
@@ -79,6 +80,7 @@ class _CommercialVehicleAdState extends State<CommercialVehicleAd> {
   bool _showVehicleNumberError = false;
   bool _showDescriptionError = false;
   bool _showPriceError = false;
+  bool _isSubmitting = false; // covers pre-submit work
 
   bool isLoading = true;
   List<ImageData> _imageDataList = [];
@@ -469,6 +471,11 @@ class _CommercialVehicleAdState extends State<CommercialVehicleAd> {
                             },
                           ),
                         ],
+                        SizedBox(height: 10,),
+                        Text(
+                          "Note : Upload only proper images that match your ad. Wrong or unrelated pictures may lead to rejection.",
+                          style: AppTextStyles.bodyMedium(textColor),
+                        ),
                       ],
                     ),
                   ),
@@ -507,7 +514,7 @@ class _CommercialVehicleAdState extends State<CommercialVehicleAd> {
                         },
                         builder: (context, state) {
                           return CustomAppButton1(
-                            isLoading:
+                            isLoading:     _isSubmitting ||
                                 state is CommercialVehileAdLoading ||
                                 updateState is MarkAsListingUpdateLoading,
                             text: 'Submit Ad',
@@ -515,7 +522,7 @@ class _CommercialVehicleAdState extends State<CommercialVehicleAd> {
                                 ? () {
                                     context.push('/register?from=ad');
                                   }
-                                : () {
+                                : () async {
 
 
                                     if (_formKey.currentState?.validate() ??
@@ -591,48 +598,64 @@ class _CommercialVehicleAdState extends State<CommercialVehicleAd> {
                                       }
 
                                       if (isValid) {
-                                        final Map<String, dynamic> data = {
-                                          "title": titleController.text,
-                                          "brand": brandController.text,
-                                          "description":
-                                              descriptionController.text,
-                                          "sub_category_id": widget.subCatId,
-                                          "category_id": widget.catId,
-                                          "location": locationController.text,
-                                          "location_key": latlng,
-                                          "mobile_number": phoneController.text,
-                                          "price": priceController.text,
-                                          "full_name": nameController.text,
-                                          "state_id": selectedStateId,
-                                          // "city_id": selectedCityId,
-                                          "vehicle_number":
-                                              vehicleNumberController.text,
-                                        };
+                                        try{
+                                          setState(() => _isSubmitting = true);
+                                          final locResult = await context
+                                              .read<LocationCubit>()
+                                              .getForSubmission();
+                                          final Map<String, dynamic> data = {
+                                            "title": titleController.text,
+                                            "brand": brandController.text,
+                                            "description":
+                                            descriptionController.text,
+                                            "sub_category_id": widget.subCatId,
+                                            "category_id": widget.catId,
+                                            "location": locationController.text,
+                                            "location_key": latlng,
+                                            "mobile_number": phoneController.text,
+                                            "price": priceController.text,
+                                            "full_name": nameController.text,
+                                            "state_id": selectedStateId,
+                                            // "city_id": selectedCityId,
+                                            "vehicle_number":
+                                            vehicleNumberController.text,
+                                            "current_address":
+                                            locResult.locationName,
+                                            "current_address_key":
+                                            locResult.latlng,
+                                          };
 
-                                        final editId = widget.editId
-                                            .replaceAll('"', '')
-                                            .trim();
+                                          final editId = widget.editId
+                                              .replaceAll('"', '')
+                                              .trim();
 
-                                        if (editId.isEmpty) {
-                                          data["plan_id"] = planId;
-                                          data["package_id"] = packageId;
+                                          if (editId.isEmpty) {
+                                            data["plan_id"] = planId;
+                                            data["package_id"] = packageId;
+                                          }
+
+                                          if (_images.isNotEmpty) {
+                                            data["images"] = _images
+                                                .map((file) => file.path)
+                                                .toList();
+                                          }
+
+                                          if (editId.isNotEmpty) {
+                                            context
+                                                .read<MarkAsListingCubit>()
+                                                .markAsUpdate(editId, data);
+                                          } else {
+                                            context
+                                                .read<CommercialVehileAdCubit>()
+                                                .postCommercialVehicleAd(data);
+                                          }
+                                        }finally{
+                                          if (mounted)
+                                            setState(
+                                                  () => _isSubmitting = false,
+                                            );
                                         }
 
-                                        if (_images.isNotEmpty) {
-                                          data["images"] = _images
-                                              .map((file) => file.path)
-                                              .toList();
-                                        }
-
-                                        if (editId.isNotEmpty) {
-                                          context
-                                              .read<MarkAsListingCubit>()
-                                              .markAsUpdate(editId, data);
-                                        } else {
-                                          context
-                                              .read<CommercialVehileAdCubit>()
-                                              .postCommercialVehicleAd(data);
-                                        }
                                       }
                                     }
                                   },

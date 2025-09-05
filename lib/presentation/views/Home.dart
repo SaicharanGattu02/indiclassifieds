@@ -64,47 +64,54 @@ class _HomeScreenState extends State<HomeScreen> {
           appBar: AppBar(
             elevation: 0,
             automaticallyImplyLeading: false,
-            toolbarHeight: 75,
-            title: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 6,
+            title: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                // Left: logo (fixed width)
                 ClipRRect(
-                  borderRadius: BorderRadiusGeometry.circular(4),
+                  borderRadius: BorderRadius.circular(4),
                   child: Image.asset(
                     'assets/images/logo.png',
-                    width: SizeConfig.screenWidth * 0.16,
+                    width: SizeConfig.screenWidth * 0.2,
                     fit: BoxFit.cover,
                   ),
                 ),
-                BlocBuilder<LocationCubit, LocationState>(
-                  builder: (context, state) {
-                    return Visibility(
-                      visible: state is LocationLoaded,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(
-                            Icons.location_on_outlined,
-                            size: 20,
-                            color: textColor,
-                          ),
-                          SizedBox(
-                            width: screenWidth * 0.65,
-                            child: Text(
-                              state is LocationLoaded ? state.locationName : '',
-                              style: AppTextStyles.bodyMedium(textColor),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
+                SizedBox(width: SizeConfig.screenWidth * 0.15),
+                // Right: takes remaining width, content aligned to end
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: BlocBuilder<LocationCubit, LocationState>(
+                      builder: (context, state) {
+                        if (state is! LocationLoaded)
+                          return const SizedBox.shrink();
+                        return Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Image.asset(
+                              "assets/images/location.png",
+                              width: 25,
+                              height: 25,
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+                            const SizedBox(width: 6),
+                            // Text will not push layout; it truncates with …
+                            Flexible(
+                              child: Text(
+                                // "kjsdkjsdn kjsdnks kjbk kjsfb ksjbf kjgdkj kjdgkj jngkjdg",
+                                state.locationName,
+                                style: AppTextStyles.bodyMedium(textColor),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                textAlign: TextAlign.right,
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
                 ),
-                SizedBox(height: 6),
               ],
             ),
             actions: [

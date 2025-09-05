@@ -9,6 +9,7 @@ import '../../Components/CustomAppButton.dart';
 import '../../Components/CustomSnackBar.dart';
 import '../../Components/CutomAppBar.dart';
 import '../../Components/ShakeWidget.dart';
+import '../../data/cubit/Location/location_cubit.dart';
 import '../../data/cubit/MyAds/GetMarkAsListing/get_listing_ad_cubit.dart';
 import '../../data/cubit/MyAds/MarkAsListing/mark_as_listing_cubit.dart';
 import '../../data/cubit/MyAds/MarkAsListing/mark_as_listing_state.dart';
@@ -72,7 +73,7 @@ class _CommunityAdScreenState extends State<CommunityAdScreen> {
   final planController = TextEditingController();
   bool _showPriceError = false;
   bool _showDescriptionError = false;
-
+  bool _isSubmitting = false; // covers pre-submit work
   List<File> _images = [];
   final int _maxImages = 6;
   int? planId;
@@ -428,6 +429,11 @@ class _CommunityAdScreenState extends State<CommunityAdScreen> {
                             },
                           ),
                         ],
+                        SizedBox(height: 10,),
+                        Text(
+                          "Note : Upload only proper images that match your ad. Wrong or unrelated pictures may lead to rejection.",
+                          style: AppTextStyles.bodyMedium(textColor),
+                        ),
                       ],
                     ),
                   ),
@@ -469,7 +475,7 @@ class _CommunityAdScreenState extends State<CommunityAdScreen> {
                         },
                         builder: (context, state) {
                           return CustomAppButton1(
-                            isLoading:
+                            isLoading:  _isSubmitting ||
                                 state is CommunityAdLoading ||
                                 updateState is MarkAsListingUpdateLoading,
                             text: 'Submit Ad',
@@ -477,7 +483,7 @@ class _CommunityAdScreenState extends State<CommunityAdScreen> {
                                 ? () {
                                     context.push('/register?from=ad');
                                   }
-                                : () {
+                                : () async {
                                     if (_formKey.currentState?.validate() ??
                                         false) {
 
@@ -557,44 +563,61 @@ class _CommunityAdScreenState extends State<CommunityAdScreen> {
                                         setState(() => _showPriceError = false);
                                       }
                                       if (isValid) {
-                                        final Map<String, dynamic> data = {
-                                          "title": titleController.text,
-                                          "description":
-                                              descriptionController.text,
-                                          "sub_category_id": widget.subCatId,
-                                          "category_id": widget.catId,
-                                          "location": locationController.text,
-                                          "mobile_number": phoneController.text,
-                                          "email": emailController.text,
-                                          "location_key": latlng,
-                                          "player_slots":
-                                              _availablePlayerSlots.text,
-                                          "price": priceController.text,
-                                          "full_name": nameController.text,
-                                          "state_id": selectedStateId,
-                                          // "city_id": selectedCityId,
-                                        };
+                                        try{
+                                          setState(() => _isSubmitting = true);
+                                          final locResult = await context
+                                              .read<LocationCubit>()
+                                              .getForSubmission();
 
-                                        if (editId.isEmpty) {
-                                          data["plan_id"] = planId;
-                                          data["package_id"] = packageId;
+                                          final Map<String, dynamic> data = {
+                                            "title": titleController.text,
+                                            "description":
+                                            descriptionController.text,
+                                            "sub_category_id": widget.subCatId,
+                                            "category_id": widget.catId,
+                                            "location": locationController.text,
+                                            "mobile_number": phoneController.text,
+                                            "email": emailController.text,
+                                            "location_key": latlng,
+                                            "player_slots":
+                                            _availablePlayerSlots.text,
+                                            "price": priceController.text,
+                                            "full_name": nameController.text,
+                                            "state_id": selectedStateId,
+                                            "current_address":
+                                            locResult.locationName,
+                                            "current_address_key":
+                                            locResult.latlng,
+                                            // "city_id": selectedCityId,
+                                          };
+
+                                          if (editId.isEmpty) {
+                                            data["plan_id"] = planId;
+                                            data["package_id"] = packageId;
+                                          }
+
+                                          if (_images.isNotEmpty) {
+                                            data["images"] = _images
+                                                .map((file) => file.path)
+                                                .toList();
+                                          }
+
+                                          if (editId.isNotEmpty) {
+                                            context
+                                                .read<MarkAsListingCubit>()
+                                                .markAsUpdate(editId, data);
+                                          } else {
+                                            context
+                                                .read<CommunityAdCubit>()
+                                                .postAstrologyAd(data);
+                                          }
+                                        }finally{
+                                          if (mounted)
+                                            setState(
+                                                  () => _isSubmitting = false,
+                                            );
                                         }
 
-                                        if (_images.isNotEmpty) {
-                                          data["images"] = _images
-                                              .map((file) => file.path)
-                                              .toList();
-                                        }
-
-                                        if (editId.isNotEmpty) {
-                                          context
-                                              .read<MarkAsListingCubit>()
-                                              .markAsUpdate(editId, data);
-                                        } else {
-                                          context
-                                              .read<CommunityAdCubit>()
-                                              .postAstrologyAd(data);
-                                        }
                                       }
                                     }
                                   },

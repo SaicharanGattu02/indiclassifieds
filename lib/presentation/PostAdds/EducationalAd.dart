@@ -10,6 +10,7 @@ import '../../Components/CutomAppBar.dart';
 import '../../Components/ShakeWidget.dart';
 import '../../data/cubit/Ad/EducationAd/education_ad_cubit.dart';
 import '../../data/cubit/Ad/EducationAd/education_ad_states.dart';
+import '../../data/cubit/Location/location_cubit.dart';
 import '../../data/cubit/MyAds/GetMarkAsListing/get_listing_ad_cubit.dart';
 import '../../data/cubit/MyAds/MarkAsListing/mark_as_listing_cubit.dart';
 import '../../data/cubit/MyAds/MarkAsListing/mark_as_listing_state.dart';
@@ -75,6 +76,7 @@ class _EducationalAdState extends State<EducationalAd> {
   bool _showDescriptionError = false;
   bool isLoading = true;
   List<ImageData> _imageDataList = [];
+  bool _isSubmitting = false; // covers pre-submit work
   @override
   void initState() {
     super.initState();
@@ -455,6 +457,11 @@ class _EducationalAdState extends State<EducationalAd> {
                             },
                           ),
                         ],
+                        SizedBox(height: 10,),
+                        Text(
+                          "Note : Upload only proper images that match your ad. Wrong or unrelated pictures may lead to rejection.",
+                          style: AppTextStyles.bodyMedium(textColor),
+                        ),
                       ],
                     ),
                   ),
@@ -506,14 +513,14 @@ class _EducationalAdState extends State<EducationalAd> {
                         },
                         builder: (context, state) {
                           return CustomAppButton1(
-                            isLoading:
+                            isLoading:       _isSubmitting ||
                             state is EducationAdLoading || updateState is MarkAsListingUpdateLoading,
                             text: 'Submit Ad',
                             onPlusTap: isNewUser
                                 ? () {
                               context.push('/register?from=ad');
                             }
-                                : () {
+                                : () async {
                               if (_formKey.currentState?.validate() ?? false) {
                                 bool isValid = true;
 
@@ -595,35 +602,51 @@ class _EducationalAdState extends State<EducationalAd> {
 
 
                                 if (isValid) {
-                                  final Map<String, dynamic> data = {
-                                    "title": titleController.text,
-                                    "brand": brandController.text,
-                                    "description": descriptionController.text,
-                                    "sub_category_id": widget.subCatId,
-                                    "category_id": widget.catId,
-                                    "location": locationController.text,
-                                    "location_key": latlng,
-                                    "mobile_number": phoneController.text,
-                                    "price": priceController.text,
-                                    "full_name": nameController.text,
-                                    "state_id": selectedStateId,
-                                    // "city_id": selectedCityId,
-                                    "institute_name": instituteNameController.text,
-                                  };
+                                  try{
+                                    setState(() => _isSubmitting = true);
+                                    final locResult = await context
+                                        .read<LocationCubit>()
+                                        .getForSubmission();
 
-                                  if (editId.isEmpty) {
-                                    data["plan_id"] = planId;
-                                    data["package_id"] = packageId;
-                                  }
+                                    final Map<String, dynamic> data = {
+                                      "title": titleController.text,
+                                      "brand": brandController.text,
+                                      "description": descriptionController.text,
+                                      "sub_category_id": widget.subCatId,
+                                      "category_id": widget.catId,
+                                      "location": locationController.text,
+                                      "location_key": latlng,
+                                      "mobile_number": phoneController.text,
+                                      "price": priceController.text,
+                                      "full_name": nameController.text,
+                                      "state_id": selectedStateId,
+                                      // "city_id": selectedCityId,
+                                      "institute_name": instituteNameController.text,
+                                      "current_address":
+                                      locResult.locationName,
+                                      "current_address_key":
+                                      locResult.latlng,
+                                    };
 
-                                  if (_images.isNotEmpty) {
-                                    data["images"] = _images.map((file) => file.path).toList();
-                                  }
+                                    if (editId.isEmpty) {
+                                      data["plan_id"] = planId;
+                                      data["package_id"] = packageId;
+                                    }
 
-                                  if (editId.isNotEmpty) {
-                                    context.read<MarkAsListingCubit>().markAsUpdate(editId, data);
-                                  } else {
-                                    context.read<EducationAdCubit>().postEducationAd(data);
+                                    if (_images.isNotEmpty) {
+                                      data["images"] = _images.map((file) => file.path).toList();
+                                    }
+
+                                    if (editId.isNotEmpty) {
+                                      context.read<MarkAsListingCubit>().markAsUpdate(editId, data);
+                                    } else {
+                                      context.read<EducationAdCubit>().postEducationAd(data);
+                                    }
+                                  }finally{
+                                    if (mounted)
+                                      setState(
+                                            () => _isSubmitting = false,
+                                      );
                                   }
                                 }
                               }

@@ -40,6 +40,7 @@ class SubCategories {
   String? name;
   String? path;
   String? image;
+  String? description;
   int? noOfCounts;
 
   SubCategories({
@@ -48,6 +49,7 @@ class SubCategories {
     this.image,
     this.noOfCounts,
     this.path,
+    this.description,
   });
 
   SubCategories.fromJson(Map<String, dynamic> json) {
@@ -56,6 +58,7 @@ class SubCategories {
     image = json['image'];
     path = json['path'];
     noOfCounts = json['no_of_counts'];
+    description = json['description'];
   }
 
   Map<String, dynamic> toJson() {
@@ -65,6 +68,7 @@ class SubCategories {
     data['image'] = this.image;
     data['path'] = this.path;
     data['no_of_counts'] = this.noOfCounts;
+    data['description'] = this.description;
     return data;
   }
 }

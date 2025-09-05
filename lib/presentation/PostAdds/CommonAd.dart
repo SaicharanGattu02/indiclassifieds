@@ -10,6 +10,7 @@ import 'package:indiclassifieds/utils/AppLogger.dart';
 import '../../Components/ShakeWidget.dart';
 import '../../data/cubit/Ad/CommonAd/common_ad_cubit.dart';
 import '../../data/cubit/Ad/CommonAd/common_ad_states.dart';
+import '../../data/cubit/Location/location_cubit.dart';
 import '../../data/cubit/MyAds/GetMarkAsListing/get_listing_ad_cubit.dart';
 import '../../data/cubit/MyAds/MarkAsListing/mark_as_listing_cubit.dart';
 import '../../data/cubit/MyAds/MarkAsListing/mark_as_listing_state.dart';
@@ -75,6 +76,7 @@ class _CommonAdState extends State<CommonAd> {
   int? planId;
   int? packageId;
   bool isLoading = true;
+  bool _isSubmitting = false; // covers pre-submit work
 
   List<ImageData> _imageDataList = [];
   @override
@@ -458,6 +460,11 @@ class _CommonAdState extends State<CommonAd> {
                             },
                           ),
                         ],
+                        SizedBox(height: 10,),
+                        Text(
+                          "Note : Upload only proper images that match your ad. Wrong or unrelated pictures may lead to rejection.",
+                          style: AppTextStyles.bodyMedium(textColor),
+                        ),
                       ],
                     ),
                   ),
@@ -493,7 +500,7 @@ class _CommonAdState extends State<CommonAd> {
                         },
                         builder: (context, state) {
                           return CustomAppButton1(
-                            isLoading:
+                            isLoading:       _isSubmitting ||
                                 state is CommonAdLoading ||
                                 updateState is MarkAsListingUpdateLoading,
                             text: 'Submit Ad',
@@ -501,7 +508,7 @@ class _CommonAdState extends State<CommonAd> {
                                 ? () {
                                     context.push('/register?from=ad');
                                   }
-                                : () {
+                                : () async {
                                     if (_formKey.currentState?.validate() ??
                                         false) {
                                       bool isValid = true;
@@ -575,54 +582,70 @@ class _CommonAdState extends State<CommonAd> {
                                         }
                                       }
                                       if (isValid) {
-                                        final Map<String, dynamic> data = {
-                                          "title": titleController.text,
-                                          "description":
-                                              descriptionController.text,
-                                          "sub_category_id": widget.subCatId,
-                                          "category_id": widget.catId,
-                                          "location": locationController.text,
-                                          "location_key": latlng,
-                                          "mobile_number": phoneController.text,
-                                          if (widget.editId == null ||
-                                              widget.editId
-                                                  .replaceAll('"', '')
-                                                  .trim()
-                                                  .isEmpty)
-                                            "plan_id": planId,
-                                          if (widget.editId == null ||
-                                              widget.editId
-                                                  .replaceAll('"', '')
-                                                  .trim()
-                                                  .isEmpty)
-                                            "package_id": packageId,
-                                          "price": priceController.text,
-                                          "full_name": nameController.text,
-                                          "state_id": selectedStateId,
-                                          // "city_id": selectedCityId,
-                                        };
+                                        try {
+                                          setState(() => _isSubmitting = true);
+                                          final locResult = await context
+                                              .read<LocationCubit>()
+                                              .getForSubmission();
+                                          final Map<String, dynamic> data = {
+                                            "title": titleController.text,
+                                            "description":
+                                            descriptionController.text,
+                                            "sub_category_id": widget.subCatId,
+                                            "category_id": widget.catId,
+                                            "location": locationController.text,
+                                            "location_key": latlng,
+                                            "mobile_number": phoneController.text,
+                                            if (widget.editId == null ||
+                                                widget.editId
+                                                    .replaceAll('"', '')
+                                                    .trim()
+                                                    .isEmpty)
+                                              "plan_id": planId,
+                                            if (widget.editId == null ||
+                                                widget.editId
+                                                    .replaceAll('"', '')
+                                                    .trim()
+                                                    .isEmpty)
+                                              "package_id": packageId,
+                                            "price": priceController.text,
+                                            "full_name": nameController.text,
+                                            "state_id": selectedStateId,
+                                            // "city_id": selectedCityId,
+                                            "current_address":
+                                            locResult.locationName,
+                                            "current_address_key":
+                                            locResult.latlng,
+                                          };
 
-                                        if (_images.isNotEmpty) {
-                                          data["images"] = _images
-                                              .map((file) => file.path)
-                                              .toList();
+                                          if (_images.isNotEmpty) {
+                                            data["images"] = _images
+                                                .map((file) => file.path)
+                                                .toList();
+                                          }
+                                          if (widget.editId
+                                              .replaceAll('"', '')
+                                              .trim()
+                                              .isNotEmpty ??
+                                              false) {
+                                            context
+                                                .read<MarkAsListingCubit>()
+                                                .markAsUpdate(
+                                              widget.editId,
+                                              data,
+                                            );
+                                          } else {
+                                            context
+                                                .read<CommonAdCubit>()
+                                                .postCommonAd(data);
+                                          }
+                                        }finally{
+                                          if (mounted)
+                                            setState(
+                                                  () => _isSubmitting = false,
+                                            );
                                         }
-                                        if (widget.editId
-                                                .replaceAll('"', '')
-                                                .trim()
-                                                .isNotEmpty ??
-                                            false) {
-                                          context
-                                              .read<MarkAsListingCubit>()
-                                              .markAsUpdate(
-                                                widget.editId,
-                                                data,
-                                              );
-                                        } else {
-                                          context
-                                              .read<CommonAdCubit>()
-                                              .postCommonAd(data);
-                                        }
+
                                       }
                                     }
                                   },

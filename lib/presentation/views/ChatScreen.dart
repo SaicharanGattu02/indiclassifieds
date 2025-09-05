@@ -57,6 +57,11 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _isLoadingMore = false;
   bool _hasMoreMessages = true;
 
+  bool _showSafetyBanner = true; // always true when screen opens
+  bool _animSafetyBannerIn = false;
+
+  Timer? _safetyAutoHide; // <-- auto-hide timer
+
   // ScrollablePositionedList controls
   final ItemScrollController _itemScrollController = ItemScrollController();
   final ItemPositionsListener _positionsListener =
@@ -139,6 +144,30 @@ class _ChatScreenState extends State<ChatScreen> {
       // Important: do NOT call _onScrollActivity() here,
       // we only want the sticky to appear on *user* scroll via NotificationListener.
     });
+
+    // Animate in after first frame
+    // Show + animate in, then start 1-min auto-hide
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      setState(() => _animSafetyBannerIn = true);
+      _startSafetyAutoHide();
+    });
+  }
+
+
+  void _startSafetyAutoHide() {
+    _safetyAutoHide?.cancel();
+    _safetyAutoHide = Timer(const Duration(seconds: 10), () {
+      if (!mounted) return;
+      if (_showSafetyBanner) _dismissSafetyBanner();
+    });
+  }
+
+  void _dismissSafetyBanner() {
+    setState(() => _animSafetyBannerIn = false);
+    Future.delayed(const Duration(milliseconds: 180), () {
+      if (mounted) setState(() => _showSafetyBanner = false);
+    });
   }
 
   @override
@@ -180,10 +209,14 @@ class _ChatScreenState extends State<ChatScreen> {
 
   bool get _hasReceiverImage =>
       (widget.receiverImage).trim().isNotEmpty &&
-          Uri.tryParse(widget.receiverImage)?.hasAbsolutePath == true;
+      Uri.tryParse(widget.receiverImage)?.hasAbsolutePath == true;
 
   String _initials(String name) {
-    final parts = name.trim().split(RegExp(r'\s+')).where((e) => e.isNotEmpty).toList();
+    final parts = name
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((e) => e.isNotEmpty)
+        .toList();
     if (parts.isEmpty) return '?';
     if (parts.length == 1) return parts.first.characters.first.toUpperCase();
     final first = parts[0].characters.first.toUpperCase();
@@ -228,7 +261,6 @@ class _ChatScreenState extends State<ChatScreen> {
     return _fallbackAvatar(size, initials);
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Builder(
@@ -243,34 +275,41 @@ class _ChatScreenState extends State<ChatScreen> {
             elevation: 0,
             surfaceTintColor: Colors.transparent,
             title: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,   // ← left align
+              crossAxisAlignment: CrossAxisAlignment.start, // ← left align
               mainAxisSize: MainAxisSize.min,
               children: [
                 Row(
                   children: [
-                    _profileAvatar(size: 36),             // ← avatar or initials
+                    _profileAvatar(size: 36), // ← avatar or initials
                     const SizedBox(width: 10),
-                    Expanded( // ← prevent overflow with long names
+                    Expanded(
+                      // ← prevent overflow with long names
                       child: Text(
                         widget.receiverName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: AppTextStyles.titleLarge(textColor)
-                            .copyWith(fontWeight: FontWeight.w600),
+                        style: AppTextStyles.titleLarge(
+                          textColor,
+                        ).copyWith(fontWeight: FontWeight.w600),
                       ),
                     ),
                   ],
                 ),
                 BlocBuilder<PrivateChatCubit, PrivateChatState>(
-                  buildWhen: (p, c) => p.isPeerTyping != c.isPeerTyping, // ← only rebuild this line
+                  buildWhen: (p, c) =>
+                      p.isPeerTyping !=
+                      c.isPeerTyping, // ← only rebuild this line
                   builder: (context, state) {
-                    return AnimatedSwitcher(                 // ← smooth show/hide
+                    return AnimatedSwitcher(
+                      // ← smooth show/hide
                       duration: const Duration(milliseconds: 180),
                       switchInCurve: Curves.easeOut,
                       switchOutCurve: Curves.easeIn,
                       child: state.isPeerTyping
-                          ? _buildTypingIndicator(context)   // visible
-                          : const SizedBox(height: 16),      // ← placeholder height to avoid jump
+                          ? _buildTypingIndicator(context) // visible
+                          : const SizedBox(
+                              height: 16,
+                            ), // ← placeholder height to avoid jump
                     );
                   },
                 ),
@@ -432,6 +471,34 @@ class _ChatScreenState extends State<ChatScreen> {
                                       ThemeHelper.textColor(context),
                                     ),
                                   ),
+
+                                if (_showSafetyBanner)
+                                  Positioned(
+                                    top: 10, // just under AppBar
+                                    left: 12,
+                                    right: 12,
+                                    child: AnimatedSlide(
+                                      duration: const Duration(
+                                        milliseconds: 180,
+                                      ),
+                                      curve: Curves.easeOut,
+                                      offset: _animSafetyBannerIn
+                                          ? Offset.zero
+                                          : const Offset(0, -0.15),
+                                      child: AnimatedOpacity(
+                                        duration: const Duration(
+                                          milliseconds: 180,
+                                        ),
+                                        opacity: _animSafetyBannerIn ? 1 : 0,
+                                        child: _SafetyBanner(
+                                          textColor: ThemeHelper.textColor(
+                                            context,
+                                          ),
+                                          onClose: _dismissSafetyBanner,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                               ],
                             );
                           },
@@ -466,7 +533,6 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
     );
   }
-
 
   String _dateLabel(DateTime day) {
     final now = DateTime.now();
@@ -644,5 +710,58 @@ class _ChatScreenState extends State<ChatScreen> {
     } catch (e) {
       debugPrint('Error accessing PrivateChatCubit in _sendText: $e');
     }
+  }
+}
+
+class _SafetyBanner extends StatelessWidget {
+  final Color textColor;
+  final VoidCallback onClose;
+
+  const _SafetyBanner({
+    Key? key,
+    required this.textColor,
+    required this.onClose,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final bg = ThemeHelper.isDarkMode(context)
+        ? const Color(0xFF2A2E35)
+        : Colors.white;
+
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 6,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.warning_amber_rounded, color: Colors.orange),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                "Please do not share personal details like bank info, OTPs, or passwords in chat. Deal safely.",
+                style: TextStyle(color: textColor, fontSize: 13, height: 1.3),
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.close, size: 18),
+              color: textColor.withOpacity(0.7),
+              onPressed: onClose,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
