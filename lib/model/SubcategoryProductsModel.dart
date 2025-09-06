@@ -53,7 +53,6 @@ class SubcategoryProductsModel {
   }
 }
 
-
 class Products {
   int? id;
   int? userId;
@@ -66,6 +65,7 @@ class Products {
   String? mobileNumber;
   String? status;
   bool? sold;
+  bool? featured_status;
   int? stateId;
   int? cityId;
   String? createdAt;
@@ -89,6 +89,7 @@ class Products {
     this.mobileNumber,
     this.status,
     this.sold,
+    this.featured_status,
     this.stateId,
     this.cityId,
     this.createdAt,
@@ -113,6 +114,7 @@ class Products {
     String? mobileNumber,
     String? status,
     bool? sold,
+    bool? featured_status,
     int? stateId,
     int? cityId,
     String? createdAt,
@@ -136,6 +138,7 @@ class Products {
       mobileNumber: mobileNumber ?? this.mobileNumber,
       status: status ?? this.status,
       sold: sold ?? this.sold,
+      featured_status: featured_status ?? this.featured_status,
       stateId: stateId ?? this.stateId,
       cityId: cityId ?? this.cityId,
       createdAt: createdAt ?? this.createdAt,
@@ -161,17 +164,18 @@ class Products {
     mobileNumber = json['mobile_number'];
     status = json['status'];
     sold = json['sold'];
+    featured_status = json['featured_status'];
     stateId = json['state_id'];
     cityId = json['city_id'];
     createdAt = json['created_at'];
-    category =
-    json['Category'] != null ? Category.fromJson(json['Category']) : null;
+    category = json['Category'] != null
+        ? Category.fromJson(json['Category'])
+        : null;
     subCategory = json['SubCategory'] != null
         ? SubCategory.fromJson(json['SubCategory'])
         : null;
     user = json['User'] != null ? SubCategory.fromJson(json['User']) : null;
-    state =
-    json['state'] != null ? SubCategory.fromJson(json['state']) : null;
+    state = json['state'] != null ? SubCategory.fromJson(json['state']) : null;
     city = json['city'] != null ? SubCategory.fromJson(json['city']) : null;
     postedAt = json['posted_at'];
     isFavorited = json['is_favorited'];
@@ -190,6 +194,7 @@ class Products {
     data['mobile_number'] = mobileNumber;
     data['status'] = status;
     data['sold'] = sold;
+    data['featured_status'] = featured_status;
     data['state_id'] = stateId;
     data['city_id'] = cityId;
     data['created_at'] = createdAt;

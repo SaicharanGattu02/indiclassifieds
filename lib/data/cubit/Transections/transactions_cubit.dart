@@ -25,7 +25,6 @@ class TransactionCubit extends Cubit<TransactionsStates> {
       if (response != null && response.success == true) {
         transectionHistoryModel = response;
         _hasNextPage = response.settings?.nextPage ?? false;
-
         emit(TransactionsLoaded(transectionHistoryModel, _hasNextPage));
       } else {
         emit(TransactionsFailure(response?.message ?? "Failed to load transactions"));

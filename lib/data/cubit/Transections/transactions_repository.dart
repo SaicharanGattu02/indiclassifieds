@@ -7,7 +7,6 @@ import '../../../model/WishlistModel.dart';
 
 abstract class TransactionsRepository {
   Future<TransectionHistoryModel?> getTransactions(int page);
-
 }
 
 class TransactionsImpl implements TransactionsRepository {

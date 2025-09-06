@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:indiclassifieds/theme/app_colors.dart';
 
 import '../theme/AppTextStyles.dart';
 import '../theme/ThemeHelper.dart';
@@ -9,6 +10,7 @@ class SimilarProductCard extends StatelessWidget {
   final String location;
   final String? imageUrl;
   final bool isLiked;
+  final bool isFeatured;
   final VoidCallback onLikeToggle;
   final VoidCallback onTap;
   final Color borderColor;
@@ -20,6 +22,7 @@ class SimilarProductCard extends StatelessWidget {
     required this.location,
     required this.imageUrl,
     required this.isLiked,
+    required this.isFeatured,
     required this.onLikeToggle,
     required this.onTap,
     required this.borderColor,
@@ -49,21 +52,46 @@ class SimilarProductCard extends StatelessWidget {
                   aspectRatio: 16 / 9,
                   child: (imageUrl == null || imageUrl!.isEmpty)
                       ? Container(
-                    color: borderColor.withOpacity(.2),
-                    alignment: Alignment.center,
-                    child: Icon(
-                      Icons.image,
-                      size: 40,
-                      color: textColor.withOpacity(.6),
-                    ),
-                  )
+                          color: borderColor.withOpacity(.2),
+                          alignment: Alignment.center,
+                          child: Icon(
+                            Icons.image,
+                            size: 40,
+                            color: textColor.withOpacity(.6),
+                          ),
+                        )
                       : ClipRRect(
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(8),
-                    ),
-                    child: Image.network(imageUrl!, fit: BoxFit.cover),
-                  ),
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(8),
+                          ),
+                          child: Image.network(imageUrl!, fit: BoxFit.cover),
+                        ),
                 ),
+                // Tagline for featured product
+                if (isFeatured)
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.only(
+                          bottomRight: Radius.circular(8),
+                          topLeft: Radius.circular(8),
+                        ),
+                      ),
+                      child: Text(
+                        "Featured",
+                        style: AppTextStyles.bodySmall(
+                          Colors.white,
+                        ).copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
                 Positioned(
                   top: 8,
                   right: 8,

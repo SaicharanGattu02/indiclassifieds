@@ -6,6 +6,7 @@ import '../model/AdSuccessModel.dart';
 import '../model/AdvertisementDetailsModel.dart';
 import '../model/AdvertisementModel.dart';
 import '../model/BannersModel.dart';
+import '../model/BoostAdModel.dart';
 import '../model/ChatMessagesModel.dart';
 import '../model/ChatUsersModel.dart';
 import '../model/CreatePaymentModel.dart';
@@ -87,6 +88,9 @@ abstract class RemoteDataSource {
   Future<CategoryModel?> getPostCategories();
   Future<AdSuccessModel?> deleteAccount();
   Future<AdSuccessModel?> recoverAccount(String id);
+  Future<CreatePaymentModel?> boostAdCreatePayment(Map<String, dynamic> data);
+  Future<AdSuccessModel?> boostAdVerifyPayment(Map<String, dynamic> data);
+  Future<BoostAdModel?> getBoostAdInfoDetails();
 }
 
 class RemoteDataSourceImpl implements RemoteDataSource {
@@ -122,6 +126,54 @@ class RemoteDataSourceImpl implements RemoteDataSource {
       }
     }
     return FormData.fromMap(formMap);
+  }
+
+  @override
+  Future<BoostAdModel?> getBoostAdInfoDetails() async {
+    try {
+      Response response = await ApiClient.get(
+        "${APIEndpointUrls.get_featured_content}",
+      );
+      AppLogger.log('getBoostAdInfoDetails:${response.data}');
+      return BoostAdModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('getBoostAdInfoDetails :: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<AdSuccessModel?> boostAdVerifyPayment(
+    Map<String, dynamic> data,
+  ) async {
+    try {
+      Response response = await ApiClient.post(
+        "${APIEndpointUrls.verify_payment_for_boost}",
+        data: data,
+      );
+      AppLogger.log('boostAdVerifyPayment:${response.data}');
+      return AdSuccessModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('boostAdVerifyPayment :: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<CreatePaymentModel?> boostAdCreatePayment(
+    Map<String, dynamic> data,
+  ) async {
+    try {
+      Response response = await ApiClient.post(
+        "${APIEndpointUrls.create_payment_order_for_boost}",
+        data: data,
+      );
+      AppLogger.log('boostAdCreatePayment:${response.data}');
+      return CreatePaymentModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('boostAdCreatePayment :: $e');
+      return null;
+    }
   }
 
   @override
@@ -227,7 +279,7 @@ class RemoteDataSourceImpl implements RemoteDataSource {
   Future<TransectionHistoryModel?> getTransections(int page) async {
     try {
       Response response = await ApiClient.get(
-        "${APIEndpointUrls.get_transection_history}",
+        "${APIEndpointUrls.get_transection_history}?page=$page",
       );
       AppLogger.log('getTransections :${response.data}');
       return TransectionHistoryModel.fromJson(response.data);

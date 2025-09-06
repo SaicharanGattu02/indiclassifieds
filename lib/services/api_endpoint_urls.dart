@@ -1,9 +1,9 @@
 class APIEndpointUrls {
-  // static const String baseUrl = 'http://192.168.80.107:8081/';
-  // static const String socket_url = 'http://192.168.80.107:8081';
+  static const String baseUrl = 'http://192.168.80.107:8081/';
+  static const String socket_url = 'http://192.168.80.107:8081';
 
-  static const String baseUrl = 'https://api.indclassifieds.in/';
-  static const String socket_url = 'https://api.indclassifieds.in';
+  // static const String baseUrl = 'https://api.indclassifieds.in/';
+  // static const String socket_url = 'https://api.indclassifieds.in';
   static const String apiUrl = 'api/app/';
 
   /// Authentiocation Urls
@@ -78,4 +78,12 @@ class APIEndpointUrls {
       '${apiUrl}get-my-friend-messages';
   static const String get_transection_history =
       '${apiUrl}get-payments-transactions';
+
+  static const String create_payment_order_for_boost =
+      '${apiUrl}create-payment-order-for-boost';
+
+  static const String verify_payment_for_boost =
+      '${apiUrl}verify-payment-for-boost';
+
+  static const String get_featured_content = '${apiUrl}get-featured-content';
 }

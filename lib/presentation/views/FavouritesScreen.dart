@@ -140,8 +140,8 @@ class _WishlistListScreenState extends State<WishlistListScreen> {
                         AppLogger.info("${product.location}");
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 16),
-                          child: ProductCard1(
-                            productsList: product,
+                          child: ProductCard(
+                            products: product,
                             onWishlistToggle: () {
                               if (product.id != null) {
                                 context

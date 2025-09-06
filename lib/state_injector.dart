@@ -5,6 +5,10 @@ import 'package:indiclassifieds/data/cubit/Advertisement/advertisement_repo.dart
 import 'package:indiclassifieds/data/cubit/AdvertisementDetails/advertisement_details_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Banners/banner_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Banners/banner_repository.dart';
+import 'package:indiclassifieds/data/cubit/BoostAd/BoostAdCubit.dart';
+import 'package:indiclassifieds/data/cubit/BoostAd/BoostAdRepo.dart';
+import 'package:indiclassifieds/data/cubit/BoostAdInfo/BoostAdInfoCubit.dart';
+import 'package:indiclassifieds/data/cubit/BoostAdInfo/BoostAdInfoRepo.dart';
 import 'package:indiclassifieds/data/cubit/Categories/categories_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Categories/categories_repository.dart';
 import 'package:indiclassifieds/data/cubit/ChatMessages/ChatMessagesCubit.dart';
@@ -246,6 +250,16 @@ class StateInjector {
         remoteDataSource: context.read<RemoteDataSource>(),
       ),
     ),
+    RepositoryProvider<BoostAdRepository>(
+      create: (context) => BoostAdRepositoryImpl(
+        remoteDataSource: context.read<RemoteDataSource>(),
+      ),
+    ),
+    RepositoryProvider<BoostAdInfoRepo>(
+      create: (context) => BoostAdInfoRepoImpl(
+        remoteDataSource: context.read<RemoteDataSource>(),
+      ),
+    ),
   ];
 
   static List<BlocProvider> blocProviders(ThemeCubit themeCubit) => [
@@ -408,6 +422,12 @@ class StateInjector {
     BlocProvider<RecoverAccountCubit>(
       create: (context) =>
           RecoverAccountCubit(context.read<RecoverAccountRepo>()),
+    ),
+    BlocProvider<BoostAdCubit>(
+      create: (context) => BoostAdCubit(context.read<BoostAdRepository>()),
+    ),
+    BlocProvider<BoostAdInfoCubit>(
+      create: (context) => BoostAdInfoCubit(context.read<BoostAdInfoRepo>()),
     ),
     BlocProvider<DashboardCubit>(
       create: (context) => DashboardCubit(

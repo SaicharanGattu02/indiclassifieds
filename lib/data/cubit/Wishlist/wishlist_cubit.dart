@@ -53,7 +53,7 @@ class WishlistCubit extends Cubit<WishlistStates> {
       );
 
       if (newData != null && newData.productslist?.isNotEmpty == true) {
-        final combinedData = List<ProductsList>.from(
+        final combinedData = List<Products>.from(
           wishlistModel.productslist ?? [],
         )..addAll(newData.productslist!);
 

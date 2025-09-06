@@ -4,11 +4,13 @@ import 'package:indiclassifieds/Components/CutomAppBar.dart';
 import 'package:indiclassifieds/services/AuthService.dart';
 import 'package:indiclassifieds/utils/AppLogger.dart';
 import 'package:indiclassifieds/utils/media_query_helper.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 import '../../data/cubit/MyAds/my_ads_cubit.dart';
 import '../../data/cubit/MyAds/my_ads_states.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/ThemeHelper.dart';
+import '../../widgets/AdBoostDialog.dart';
 import '../../widgets/AdCardDynamic.dart';
 import '../../widgets/CommonLoader.dart';
 
@@ -48,7 +50,6 @@ class AdsScreen extends StatefulWidget {
 class _AdsScreenState extends State<AdsScreen> {
   AdStatus selectedStatus = AdStatus.approved;
   bool? isGuestUser; // <-- track guest state
-
   @override
   void initState() {
     super.initState();
@@ -59,7 +60,6 @@ class _AdsScreenState extends State<AdsScreen> {
     final isGuest = await AuthService.isGuest;
     AppLogger.info("isGuest: $isGuest");
     setState(() => isGuestUser = isGuest);
-
     if (!isGuest) {
       context.read<MyAdsCubit>().getMyAds(selectedStatus.apiParam);
     }
@@ -237,6 +237,14 @@ class _AdsScreenState extends State<AdsScreen> {
                               ad: ad,
                               isDark: isDark,
                               textColor: textColor,
+                              boostAdCallback: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => AdBoostDialog(
+                                    listing_id: ad.id.toString(),
+                                  ),
+                                );
+                              },
                             );
                           },
                         ),

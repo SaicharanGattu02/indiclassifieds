@@ -62,30 +62,45 @@ class Data {
 
 class FormattedRows {
   int? id;
+  String? type;
+  String? userName;
+  String? mobile;
+  String? email;
+  String? listingTitle;
   String? planName;
-  Null? packageName;
+  String? packageName;
+  String? amountPaid;
   String? paymentStatus;
-  int? amountPaid;
   String? paidOn;
   String? startDate;
   String? endDate;
 
   FormattedRows(
       {this.id,
+        this.type,
+        this.userName,
+        this.mobile,
+        this.email,
+        this.listingTitle,
         this.planName,
         this.packageName,
-        this.paymentStatus,
         this.amountPaid,
+        this.paymentStatus,
         this.paidOn,
         this.startDate,
         this.endDate});
 
   FormattedRows.fromJson(Map<String, dynamic> json) {
     id = json['id'];
+    type = json['type'];
+    userName = json['user_name'];
+    mobile = json['mobile'];
+    email = json['email'];
+    listingTitle = json['listing_title'];
     planName = json['plan_name'];
     packageName = json['package_name'];
-    paymentStatus = json['payment_status'];
     amountPaid = json['amount_paid'];
+    paymentStatus = json['payment_status'];
     paidOn = json['paid_on'];
     startDate = json['start_date'];
     endDate = json['end_date'];
@@ -94,10 +109,15 @@ class FormattedRows {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
+    data['type'] = this.type;
+    data['user_name'] = this.userName;
+    data['mobile'] = this.mobile;
+    data['email'] = this.email;
+    data['listing_title'] = this.listingTitle;
     data['plan_name'] = this.planName;
     data['package_name'] = this.packageName;
-    data['payment_status'] = this.paymentStatus;
     data['amount_paid'] = this.amountPaid;
+    data['payment_status'] = this.paymentStatus;
     data['paid_on'] = this.paidOn;
     data['start_date'] = this.startDate;
     data['end_date'] = this.endDate;
@@ -110,6 +130,7 @@ class Settings {
   int? count;
   int? page;
   int? rowsPerPage;
+  int? totalPages;
   bool? nextPage;
   bool? prevPage;
 
@@ -118,6 +139,7 @@ class Settings {
         this.count,
         this.page,
         this.rowsPerPage,
+        this.totalPages,
         this.nextPage,
         this.prevPage});
 
@@ -126,6 +148,7 @@ class Settings {
     count = json['count'];
     page = json['page'];
     rowsPerPage = json['rows_per_page'];
+    totalPages = json['total_pages'];
     nextPage = json['next_page'];
     prevPage = json['prev_page'];
   }
@@ -136,6 +159,7 @@ class Settings {
     data['count'] = this.count;
     data['page'] = this.page;
     data['rows_per_page'] = this.rowsPerPage;
+    data['total_pages'] = this.totalPages;
     data['next_page'] = this.nextPage;
     data['prev_page'] = this.prevPage;
     return data;

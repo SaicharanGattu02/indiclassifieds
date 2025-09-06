@@ -153,6 +153,7 @@ class _SimilarProductsSection1State extends State<SimilarProductsSection1> {
 
             return SimilarProductCard(
               title: title,
+              isFeatured:p.featured_status??false,
               price: price,
               location: location,
               imageUrl: img,

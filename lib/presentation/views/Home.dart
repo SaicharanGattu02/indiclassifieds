@@ -107,7 +107,6 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                           ],
-
                         );
                       },
                     ),
@@ -581,6 +580,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                             },
                                             child: SimilarProductCard(
                                               title: p.title ?? "—",
+                                              isFeatured:
+                                                  p.featured_status ?? false,
                                               price: "₹${_formatINR(p.price)}",
                                               location: p.location ?? "",
                                               imageUrl: p.image,

@@ -21,13 +21,12 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   void initState() {
     super.initState();
     context.read<TransactionCubit>().getTransactions();
+
     _scrollController.addListener(() {
-      if (_scrollController.position.pixels >=
-          _scrollController.position.maxScrollExtent - 200) {
-        context.read<TransactionCubit>().getMoreTransactions();
-      }
+      // Optionally use the scroll controller here if needed for any logic
     });
   }
+
   @override
   void dispose() {
     _scrollController.dispose();
@@ -39,146 +38,157 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     return Scaffold(
       backgroundColor: ThemeHelper.backgroundColor(context),
       appBar: CustomAppBar1(title: "Transaction History", actions: []),
-      body: BlocBuilder<TransactionCubit, TransactionsStates>(
-        builder: (context, state) {
-          if (state is TransactionsLoading) {
-            return const Center(child: DottedProgressWithLogo());
-          } else if (state is TransactionsFailure) {
-            return Center(child: Text(state.error));
-          } else if (state is TransactionsLoaded ||
-              state is TransactionsLoadingMore) {
-            final model = (state as dynamic).transactionModel;
-            final rows = model.data?.formattedRows ?? [];
-            final hasNextPage = (state as dynamic).hasNextPage;
+      body: NotificationListener<ScrollNotification>(
+        onNotification: (scrollNotification) {
+          // Check if we've reached the bottom
+          if (scrollNotification is ScrollEndNotification &&
+              _scrollController.position.pixels ==
+                  _scrollController.position.maxScrollExtent) {
+            // Call the method to load more transactions
+            context.read<TransactionCubit>().getMoreTransactions();
+          }
+          return false; // Return false so that other notifications can be processed
+        },
+        child: BlocBuilder<TransactionCubit, TransactionsStates>(
+          builder: (context, state) {
+            if (state is TransactionsLoading) {
+              return const Center(child: DottedProgressWithLogo());
+            } else if (state is TransactionsFailure) {
+              return Center(child: Text(state.error));
+            } else if (state is TransactionsLoaded ||
+                state is TransactionsLoadingMore) {
+              final model = (state as dynamic).transactionModel;
+              final rows = model.data?.formattedRows ?? [];
+              final hasNextPage = (state as dynamic).hasNextPage;
 
-            if (rows.isEmpty) {
-              return const Center(child: Text("No transactions found"));
-            }
+              if (rows.isEmpty) {
+                return const Center(child: Text("No transactions found"));
+              }
 
-            return CustomScrollView(
-              controller: _scrollController,
-              slivers: [
-                SliverPadding(
-                  padding: const EdgeInsets.all(12),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                        if (index == rows.length) {
-                          return hasNextPage
-                              ? const Padding(
-                            padding: EdgeInsets.all(16),
-                            child: Center(
-                              child: CircularProgressIndicator(),
+              return CustomScrollView(
+                controller: _scrollController,
+                slivers: [
+                  SliverPadding(
+                    padding: const EdgeInsets.all(12),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                            (context, index) {
+                          if (index == rows.length) {
+                            return hasNextPage
+                                ? const Padding(
+                              padding: EdgeInsets.all(16),
+                              child: Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            )
+                                : const SizedBox.shrink();
+                          }
+                          final FormattedRows tx = rows[index];
+                          final bool isSuccess =
+                              (tx.paymentStatus ?? "").toLowerCase() == "success";
+
+                          return Card(
+                            color: ThemeHelper.cardColor(context),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
                             ),
-                          )
-                              : const SizedBox.shrink();
-                        }
-                        final FormattedRows tx = rows[index];
-                        if (rows.isEmpty) {
-                          return Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Image.asset(
-                                  'assets/nodata/no_data.png',
-                                  width: MediaQuery.of(context).size.width * 0.22,
-                                  height: MediaQuery.of(context).size.height * 0.12,
+                            margin: const EdgeInsets.only(bottom: 12),
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.all(12),
+                              title: Text(
+                                // Only show planName if it's available and not for 'boost' type
+                                tx.type != 'boost' && tx.planName != null
+                                    ? tx.planName ?? "Unknown Plan"
+                                    : "Boost Plan", // Use this for boost or handle empty cases
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: ThemeHelper.textColor(context),
                                 ),
-                                const SizedBox(height: 12),
-                                Text(
-                                  'No Transactions Found!',
+                              ),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    "Amount: \₹${tx.amountPaid ?? 0}",
+                                    style: TextStyle(fontWeight: FontWeight.w700,
+                                      color: ThemeHelper.textColor(context)
+                                          .withOpacity(0.8),
+                                    ),
+                                  ),
+                                  if (tx.paidOn != null)
+                                    Text(
+                                      "Paid on: ${tx.paidOn!.split("T").first}",
+                                      style: TextStyle(
+                                        color: ThemeHelper.textColor(context)
+                                            .withOpacity(0.6),
+                                      ),
+                                    ),
+                                  if (tx.startDate != null && tx.endDate != null)
+                                    Text(
+                                      "Valid: ${tx.startDate} → ${tx.endDate}",
+                                      style: TextStyle(
+                                        color: ThemeHelper.textColor(context)
+                                            .withOpacity(0.6),
+                                      ),
+                                    ),
+                                  // Additional details based on type
+                                  if (tx.type == 'boost')
+                                    Text(
+                                      "Boost Type: ${tx.listingTitle ?? 'N/A'}",
+                                      style: TextStyle(
+                                        color: ThemeHelper.textColor(context)
+                                            .withOpacity(0.6),
+                                      ),
+                                    ),
+                                  if (tx.type == 'package')
+                                    Text(
+                                      "Package: ${tx.packageName ?? 'N/A'}",
+                                      style: TextStyle(
+                                        color: ThemeHelper.textColor(context)
+                                            .withOpacity(0.6),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              trailing: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isSuccess
+                                      ? Colors.green.withOpacity(0.2)
+                                      : Colors.orange.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  (tx.paymentStatus ?? "").toUpperCase(),
                                   style: TextStyle(
-                                    color: ThemeHelper.textColor(context),
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 16,
+                                    color:
+                                    isSuccess ? Colors.green : Colors.orange,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
                                   ),
                                 ),
-                              ],
+                              ),
                             ),
                           );
-                        }
-                        final bool isSuccess =
-                            (tx.paymentStatus ?? "").toLowerCase() == "success";
-
-                        return Card(
-                          color: ThemeHelper.cardColor(context),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          margin: const EdgeInsets.only(bottom: 12),
-                          child: ListTile(
-                            contentPadding: const EdgeInsets.all(12),
-                            title: Text(
-                              tx.planName ?? "Unknown Plan",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: ThemeHelper.textColor(context),
-                              ),
-                            ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const SizedBox(height: 6),
-                                Text(
-                                  "Amount: \₹${tx.amountPaid ?? 0}",
-                                  style: TextStyle(fontWeight: FontWeight.w700,
-                                    color: ThemeHelper.textColor(context)
-                                        .withOpacity(0.8),
-                                  ),
-                                ),
-                                if (tx.paidOn != null)
-                                  Text(
-                                    "Paid on: ${tx.paidOn!.split("T").first}",
-                                    style: TextStyle(
-                                      color: ThemeHelper.textColor(context)
-                                          .withOpacity(0.6),
-                                    ),
-                                  ),
-                                if (tx.startDate != null && tx.endDate != null)
-                                  Text(
-                                    "Valid: ${tx.startDate} → ${tx.endDate}",
-                                    style: TextStyle(
-                                      color: ThemeHelper.textColor(context)
-                                          .withOpacity(0.6),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                            trailing: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: isSuccess
-                                    ? Colors.green.withOpacity(0.2)
-                                    : Colors.orange.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                (tx.paymentStatus ?? "").toUpperCase(),
-                                style: TextStyle(
-                                  color:
-                                  isSuccess ? Colors.green : Colors.orange,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                      childCount: rows.length + 1,
+                        },
+                        childCount: rows.length + 1, // Add 1 for the loading indicator
+                      ),
                     ),
                   ),
-                ),
-              ],
-            );
-          }
+                ],
+              );
+            }
 
-          return const SizedBox();
-        },
+            return const SizedBox();
+          },
+        ),
       ),
     );
   }
 }
+
+

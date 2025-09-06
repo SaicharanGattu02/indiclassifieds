@@ -16,11 +16,13 @@ class AdCardDynamic extends StatelessWidget {
   final Data ad;
   final bool isDark;
   final Color textColor;
+  final VoidCallback boostAdCallback; // Callback to show the dialog
 
   const AdCardDynamic({
     required this.ad,
     required this.isDark,
     required this.textColor,
+    required this.boostAdCallback, // Added to constructor
     Key? key,
   }) : super(key: key);
 
@@ -172,6 +174,14 @@ class AdCardDynamic extends StatelessWidget {
                       },
                     ),
                   ],
+                  if (ad.featuredStatus != true && ad.sold!=true && (ad.status ?? '').toLowerCase() == "approved") ...[
+                    ActionButton(
+                      icon: Icons.rocket_launch_outlined,
+                      label: 'Boost Your Ad',
+                      onTap: boostAdCallback, // Call the callback directly here
+                    ),
+                  ],
+
                   if ((ad.status ?? '').toLowerCase() == "pending") ...[
                     ActionButton(
                       icon: Icons.delete_outline,
@@ -267,11 +277,6 @@ class AdCardDynamic extends StatelessWidget {
                     ),
                   ],
 
-                  // ActionButton(
-                  //   icon: Icons.campaign_outlined,
-                  //   label: 'Promote',
-                  //   onTap: () {},
-                  // ),
                   if ((ad.status ?? '').toLowerCase() == "approved") ...[
                     if (ad.sold == true)
                       const Text(
