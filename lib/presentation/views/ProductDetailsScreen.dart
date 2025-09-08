@@ -57,7 +57,8 @@ class ProductDetailsScreen extends StatefulWidget {
 class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   final _pgCtrl = PageController();
   int _page = 0;
-  final ValueNotifier<String?> mobileNotifier = ValueNotifier<String?>(null);
+  bool _didInitFromBloc = false; // prevents repeated side-effects
+  String? mobile_number;
 
   final Completer<GoogleMapController> _mapCtrl = Completer();
   LatLng? _listingLatLng;
@@ -185,64 +186,66 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         return Scaffold(
           backgroundColor: bgColor,
           appBar: CustomAppBar1(title: 'Details', actions: []),
-          bottomNavigationBar: FutureBuilder(
-            future: AuthService.getId(),
-            builder: (context, asyncSnapshot) {
-              if(asyncSnapshot.data == receiverId){
-                SizedBox.shrink();
-              }
-              return ValueListenableBuilder<String?>(
-                valueListenable: mobileNotifier,
-                builder: (context, mobile, _) {
-                  return _BottomCtaBar(
-                    onContact: isGuest
-                        ? () {
-                            context.push("/login");
-                          }
-                        : () async {
-                            final mobile = mobileNotifier.value;
-                            if (mobile != null && mobile.isNotEmpty) {
-                              AppLauncher.call(mobile);
-                            } else {
-                              showDialog(
-                                context: context,
-                                barrierDismissible: false,
-                                builder: (_) => const Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                              );
+          bottomNavigationBar: _BottomCtaBar(
+            onContact: isGuest
+                ? () {
+                    context.push("/login");
+                  }
+                : () async {
+                    if (mobile_number != null) {
+                      AppLauncher.call(mobile_number ?? "");
+                    } else {
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (_) =>
+                            const Center(child: CircularProgressIndicator()),
+                      );
 
-                              await Future.delayed(const Duration(seconds: 2));
+                      await Future.delayed(const Duration(seconds: 2));
 
-                              if (context.mounted) Navigator.of(context).pop();
+                      if (context.mounted) Navigator.of(context).pop();
 
-                              final updatedMobile = mobileNotifier.value;
-                              if (updatedMobile != null &&
-                                  updatedMobile.isNotEmpty) {
-                                AppLauncher.call(updatedMobile);
-                              } else {
-                                CustomSnackBar1.show(
-                                  context,
-                                  "Mobile number not available",
-                                );
-                              }
-                            }
-                          },
-                    onChat: isGuest
-                        ? () {
-                            context.push("/login");
-                          }
-                        : () {
-                            context.push(
-                              '/chat?receiverId=$receiverId&receiverName=$receiverName&receiverImage=$receiverImage',
-                            );
-                          },
-                  );
-                },
-              );
-            }
+                      final updatedMobile = mobile_number;
+                      if (updatedMobile != null && updatedMobile.isNotEmpty) {
+                        AppLauncher.call(updatedMobile);
+                      } else {
+                        CustomSnackBar1.show(
+                          context,
+                          "Mobile number not available",
+                        );
+                      }
+                    }
+                  },
+            onChat: isGuest
+                ? () {
+                    context.push("/login");
+                  }
+                : () {
+                    context.push('/chat?receiverId=$receiverId');
+                  },
           ),
-          body: BlocBuilder<ProductDetailsCubit, ProductDetailsStates>(
+          body: BlocConsumer<ProductDetailsCubit, ProductDetailsStates>(
+            listenWhen: (prev, curr) => curr is ProductDetailsLoaded,
+            listener: (context, state) async {
+              final s = state as ProductDetailsLoaded;
+              final data = s.productDetailsModel.data!;
+              final listing = data.listing!;
+
+              // Set one-time fields without scheduling from build()
+              if (!_didInitFromBloc) {
+                _didInitFromBloc = true;
+
+                receiverId = data.postedBy?.id.toString() ?? "";
+                receiverName = data.postedBy?.name ?? "";
+                receiverImage = data.postedBy?.image ?? "";
+                mobile_number = listing.mobileNumber ?? "";
+
+                // Initialize map position once
+                await _prepareMap(listing);
+                if (mounted) setState(() {}); // reflect _listingLatLng/_markers
+              }
+            },
             builder: (context, state) {
               if (state is ProductDetailsLoading ||
                   state is ProductDetailsInitially) {
@@ -270,14 +273,6 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               final location =
                   "${listing.location},${listing.city_name},${listing.state_name}" ??
                   "—";
-
-              receiverId = data.postedBy?.id.toString() ?? "";
-              receiverName = data.postedBy?.name ?? "";
-              receiverImage = data.postedBy?.image ?? "";
-              mobileNotifier.value = listing.mobileNumber ?? "";
-              _prepareMap(listing); // safe: it no-ops if already resolving
-              AppLogger.info("✅ mobileNotifier.value: ${mobileNotifier.value}");
-
               return CustomScrollView(
                 slivers: [
                   SliverToBoxAdapter(
@@ -288,11 +283,11 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           aspectRatio: 16 / 9,
                           child: Stack(
                             children: [
-                              // Images
+                              // 1) Images
                               PageView.builder(
                                 controller: _pgCtrl,
                                 onPageChanged: (i) => setState(() => _page = i),
-                                itemCount: (images.isEmpty ? 1 : images.length),
+                                itemCount: images.isEmpty ? 1 : images.length,
                                 itemBuilder: (_, i) {
                                   final url = images.isNotEmpty
                                       ? images[i].image
@@ -316,6 +311,23 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                   );
                                 },
                               ),
+
+                              // 2) Watermark (bottom-right)
+                              Positioned(
+                                right: 0,
+                                bottom: 0, // keep above the dots
+                                child: IgnorePointer(
+                                  ignoring: true,
+                                  child: Image.asset(
+                                    'assets/images/watermark.png', // <-- your watermark image
+                                    width: 110, // tweak as needed
+                                    fit: BoxFit.contain,
+                                    filterQuality: FilterQuality.high,
+                                  ),
+                                ),
+                              ),
+
+                              // 3) Top-right actions
                               Positioned(
                                 top: 12,
                                 right: 12,
@@ -328,7 +340,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                       onTap: () {
                                         final shareUrl =
                                             'https://indclassifieds.in/singlelistingdetails/${data.listing?.subCategoryId}?detailId=${data.listing?.id}';
-                                        AppLogger.info("shareUrl:${shareUrl}");
+                                        AppLogger.info("shareUrl:$shareUrl");
                                         Share.share(
                                           shareUrl,
                                           subject:
@@ -359,7 +371,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                 ),
                               ),
 
-                              // Bottom dots
+                              // 4) Dots
                               Positioned(
                                 left: 0,
                                 right: 0,

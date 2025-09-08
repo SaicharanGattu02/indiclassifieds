@@ -199,11 +199,11 @@ class _MobileAdState extends State<MobileAd> {
                               ? 'Required title'
                               : null,
                         ),
-                        CommonTextField1(
-                          lable: 'Brand',
-                          controller: brandController,
-                          color: textColor,
-                        ),
+                        // CommonTextField1(
+                        //   lable: 'Brand',
+                        //   controller: brandController,
+                        //   color: textColor,
+                        // ),
 
                         CommonTextField1(
                           lable: 'Description',

@@ -196,11 +196,11 @@ class _JobsAdState extends State<JobsAd> {
                               ? 'Required title'
                               : null,
                         ),
-                        CommonTextField1(
-                          lable: 'Brand',
-                          controller: brandController,
-                          color: textColor,
-                        ),
+                        // CommonTextField1(
+                        //   lable: 'Brand',
+                        //   controller: brandController,
+                        //   color: textColor,
+                        // ),
                         CommonTextField1(
                           lable: 'Salary Range',
                           hint: 'Eg. 7-10 LPA',

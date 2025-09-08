@@ -198,11 +198,11 @@ class _PetAdScreenState extends State<PetAdScreen> {
                               : null,
                         ),
 
-                        CommonTextField1(
-                          lable: 'Brand',
-                          controller: brandController,
-                          color: textColor,
-                        ),
+                        // CommonTextField1(
+                        //   lable: 'Brand',
+                        //   controller: brandController,
+                        //   color: textColor,
+                        // ),
 
                         CommonTextField1(
                           lable: 'Pet Type/ Bread',

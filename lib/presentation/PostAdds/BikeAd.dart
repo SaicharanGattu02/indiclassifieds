@@ -203,11 +203,11 @@ class _BikeAdState extends State<BikeAd> {
                               ? 'Required title'
                               : null,
                         ),
-                        CommonTextField1(
-                          lable: 'Brand',
-                          controller: brandController,
-                          color: textColor,
-                        ),
+                        // CommonTextField1(
+                        //   lable: 'Brand',
+                        //   controller: brandController,
+                        //   color: textColor,
+                        // ),
 
                         CommonTextField1(
                           lable: 'Year of Manufacturing',

@@ -64,8 +64,6 @@ final GoRouter appRouter = GoRouter(
       path: '/chat',
       builder: (context, state) {
         final receiverId = state.uri.queryParameters['receiverId']!;
-        final receiverName = state.uri.queryParameters['receiverName'] ?? '';
-        final receiverImage = state.uri.queryParameters['receiverImage'] ?? '';
         return FutureBuilder<String?>(
           future: AuthService.getId(),
           builder: (context, snapshot) {
@@ -80,8 +78,6 @@ final GoRouter appRouter = GoRouter(
               child: ChatScreen(
                 currentUserId: currentUserId,
                 receiverId: receiverId,
-                receiverName: receiverName,
-                receiverImage: receiverImage,
               ),
             );
           },
@@ -189,9 +185,9 @@ final GoRouter appRouter = GoRouter(
       // Catch legacy website path
       path: '/singlelistingdetails/:subId',
       redirect: (ctx, st) {
-        final subId = st.pathParameters['subId'];                 // 132
-        final listingId = st.uri.queryParameters['detailId'];     // 177
-        if (listingId == null || subId == null) return '/';       // fallback
+        final subId = st.pathParameters['subId']; // 132
+        final listingId = st.uri.queryParameters['detailId']; // 177
+        if (listingId == null || subId == null) return '/'; // fallback
         // Redirect to your internal route
         return '/products_details?listingId=$listingId&subcategory_id=$subId';
       },
@@ -223,7 +219,7 @@ final GoRouter appRouter = GoRouter(
         final nextRoute = state.uri.queryParameters['next'] ?? "";
         final title = state.uri.queryParameters['title'] ?? "";
         return buildSlideTransitionPage(
-          SuccessScreen(title: title,nextRoute: nextRoute,),
+          SuccessScreen(title: title, nextRoute: nextRoute),
           state,
         );
       },

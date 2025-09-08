@@ -203,11 +203,11 @@ class _CommercialVehicleAdState extends State<CommercialVehicleAd> {
                               : null,
                         ),
 
-                        CommonTextField1(
-                          lable: 'Brand',
-                          controller: brandController,
-                          color: textColor,
-                        ),
+                        // CommonTextField1(
+                        //   lable: 'Brand',
+                        //   controller: brandController,
+                        //   color: textColor,
+                        // ),
 
                         CommonTextField1(
                           lable: 'Vehicle Number',

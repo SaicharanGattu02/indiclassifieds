@@ -40,15 +40,11 @@ class _ListItem {
 class ChatScreen extends StatefulWidget {
   final String currentUserId;
   final String receiverId;
-  final String receiverName;
-  final String receiverImage;
 
   const ChatScreen({
     super.key,
     required this.currentUserId,
     required this.receiverId,
-    required this.receiverName,
-    required this.receiverImage,
   });
 
   @override
@@ -79,6 +75,8 @@ class _ChatScreenState extends State<ChatScreen> {
   List<_ListItem> _lastItems = const [];
 
   final ValueNotifier<String?> mobileNotifier = ValueNotifier<String?>(null);
+  final ValueNotifier<String?> receiverName = ValueNotifier<String?>("User");
+  final ValueNotifier<String?> receiverImage = ValueNotifier<String?>(null);
 
   // "show while scrolling" state
   Timer? _scrollIdleTimer;
@@ -221,8 +219,8 @@ class _ChatScreenState extends State<ChatScreen> {
       ThemeHelper.textColor(context).withOpacity(.6);
 
   bool get _hasReceiverImage =>
-      (widget.receiverImage).trim().isNotEmpty &&
-      Uri.tryParse(widget.receiverImage)?.hasAbsolutePath == true;
+      (receiverImage.value ?? "").trim().isNotEmpty &&
+      Uri.tryParse(receiverImage.value ?? "")?.hasAbsolutePath == true;
 
   String _initials(String name) {
     final parts = name
@@ -258,11 +256,11 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget _profileAvatar({double size = 36}) {
-    final initials = _initials(widget.receiverName);
+    final initials = _initials(receiverImage.value ?? "");
     if (_hasReceiverImage) {
       return ClipOval(
         child: Image.network(
-          widget.receiverImage,
+          receiverImage.value ?? "",
           width: size,
           height: size,
           fit: BoxFit.cover,
@@ -296,7 +294,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        widget.receiverName,
+                        receiverName.value ?? "",
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: AppTextStyles.titleLarge(
@@ -336,9 +334,8 @@ class _ChatScreenState extends State<ChatScreen> {
                         showDialog(
                           context: context,
                           barrierDismissible: false,
-                          builder: (_) => const Center(
-                            child: CircularProgressIndicator(),
-                          ),
+                          builder: (_) =>
+                              const Center(child: CircularProgressIndicator()),
                         );
 
                         await Future.delayed(const Duration(seconds: 2));
@@ -346,8 +343,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         if (context.mounted) Navigator.of(context).pop();
 
                         final updatedMobile = mobileNotifier.value;
-                        if (updatedMobile != null &&
-                            updatedMobile.isNotEmpty) {
+                        if (updatedMobile != null && updatedMobile.isNotEmpty) {
                           AppLauncher.call(updatedMobile);
                         } else {
                           CustomSnackBar1.show(
@@ -358,7 +354,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       }
                     },
                   );
-                }
+                },
               ),
               PopupMenuButton<_MenuAction>(
                 icon: Icon(
@@ -480,7 +476,15 @@ class _ChatScreenState extends State<ChatScreen> {
                             historyState.chatMessages.data?.messages ??
                                 const [],
                           );
-                          mobileNotifier.value = historyState.chatMessages.data?.friend?.mobile??"";
+                          mobileNotifier.value =
+                              historyState.chatMessages.data?.friend?.mobile ??
+                              "";
+                          receiverName.value =
+                              historyState.chatMessages.data?.friend?.name ??
+                              "";
+                          receiverImage.value =
+                              historyState.chatMessages.data?.friend?.image ??
+                              "";
                         } else if (historyState is ChatMessagesLoadingMore) {
                           history.addAll(
                             historyState.chatMessages.data?.messages ??

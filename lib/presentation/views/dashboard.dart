@@ -11,6 +11,7 @@ import 'package:go_router/go_router.dart';
 import 'package:indiclassifieds/presentation/views/Home.dart';
 import 'package:indiclassifieds/presentation/views/ProfileScreen.dart';
 import 'package:indiclassifieds/services/AuthService.dart';
+import 'package:indiclassifieds/theme/AppTextStyles.dart';
 import 'package:indiclassifieds/theme/app_colors.dart';
 import 'package:indiclassifieds/utils/AppLogger.dart';
 import 'package:indiclassifieds/utils/color_constants.dart';
@@ -25,6 +26,7 @@ import '../../main.dart';
 import '../../services/SocketService.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../utils/DeepLinkMapper.dart';
+import '../../utils/NotificationIntent.dart';
 import 'AddsScreen.dart';
 import 'UserListScreen.dart';
 
@@ -51,8 +53,13 @@ class _DashboardState extends State<Dashboard> {
     getData();
     _requestPushPermissions();
     context.read<LocationCubit>().checkLocationPermission();
-
     initDeepLinks(); // start deep link handling
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final toChat = NotificationIntent.consumePendingChat();
+      if (toChat != null && toChat.isNotEmpty && mounted) {
+        context.push('/chat?receiverId=$toChat');
+      }
+    });
   }
 
   Future<void> initDeepLinks() async {
@@ -73,16 +80,17 @@ class _DashboardState extends State<Dashboard> {
     }
 
     // 2) Handle links while the app is running
-    _linkSubscription = appLinks.uriLinkStream.listen((uri) {
-      debugPrint('DeepLink: uriLinkStream -> $uri');
-      final loc = DeepLinkMapper.toLocation(uri);
-      if (loc != null) {
-        debugPrint('DeepLink: navigating to $loc');
-        context.push(loc);
-      } else {
-        debugPrint('DeepLink: no mapped location for $uri');
-      }
-    }, onError: (e) => debugPrint('DeepLink: Link stream error: $e'));
+    // _linkSubscription = appLinks.uriLinkStream.listen((uri) {
+    //   debugPrint('DeepLink: uriLinkStream -> $uri');
+    //   final loc = DeepLinkMapper.toLocation(uri);
+    //   if (loc != null) {
+    //     debugPrint('DeepLink: navigating to $loc');
+    //     context.push(loc);
+    //   } else {
+    //     debugPrint('DeepLink: no mapped location for $uri');
+    //   }
+    // }, onError: (e) => debugPrint('DeepLink: Link stream error: $e'));
+
   }
 
   @override
@@ -183,34 +191,53 @@ class _DashboardState extends State<Dashboard> {
               removeBottom: true,
               child: Container(
                 width: 50,
-                height: 50,
+                height: 65,
                 margin: const EdgeInsets.only(top: 40),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.blue.withOpacity(0.4),
-                      blurRadius: 5,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
                 ),
-                child: FloatingActionButton(
-                  backgroundColor: AppColors.primary,
-                  onPressed: () {
-                    context.push("/category");
-                    // context.read<LocationCubit>().checkLocationPermission();
-                  },
-                  child: const Icon(Icons.add, size: 32, color: Colors.white),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  spacing: 6,
+                  children: [
+                    SizedBox(
+                      height: 40,
+                      width: 40,
+                      child: FloatingActionButton(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(10)),
+                        elevation: 0,
+                        backgroundColor: AppColors.primary,
+                        onPressed: () {
+                          context.push("/category");
+                          // context.read<LocationCubit>().checkLocationPermission();
+                        },
+                        child: const Icon(Icons.add, size: 32, color: Colors.white),
+                      ),
+                    ),
+                    Text("Sell",style: AppTextStyles.titleSmall(AppColors.unselect),)
+                  ],
                 ),
               ),
             ),
             bottomNavigationBar: SafeArea(
               child: AnimatedContainer(
-                // smooth color transition
                 duration: const Duration(milliseconds: 200),
                 height: 65,
-                color: cardColor,
+                decoration: BoxDecoration(
+                  color: cardColor,
+                  boxShadow: [
+                    BoxShadow(
+                      // subtle top shadow
+                      color: Colors.black.withOpacity(
+                        Theme.of(context).brightness == Brightness.dark ? 0.35 : 0.08,
+                      ),
+                      blurRadius: 12,
+                      spreadRadius: 0,
+                      offset: const Offset(0, -4), // cast UPWARDS
+                    ),
+                  ],
+                ),
+
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [

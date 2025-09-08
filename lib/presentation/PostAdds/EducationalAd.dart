@@ -196,11 +196,11 @@ class _EducationalAdState extends State<EducationalAd> {
                               : null,
                         ),
 
-                        CommonTextField1(
-                          lable: 'Brand',
-                          controller: brandController,
-                          color: textColor,
-                        ),
+                        // CommonTextField1(
+                        //   lable: 'Brand',
+                        //   controller: brandController,
+                        //   color: textColor,
+                        // ),
 
                         CommonTextField1(
                           lable: 'Institute Name',

@@ -211,11 +211,11 @@ class _CarsAdState extends State<CarsAd> {
                               ? 'Required title'
                               : null,
                         ),
-                        CommonTextField1(
-                          lable: 'Brand',
-                          controller: brandController,
-                          color: textColor,
-                        ),
+                        // CommonTextField1(
+                        //   lable: 'Brand',
+                        //   controller: brandController,
+                        //   color: textColor,
+                        // ),
 
                         CommonTextField1(
                           lable: 'Year of Manufacturing',

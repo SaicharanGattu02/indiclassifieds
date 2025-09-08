@@ -262,7 +262,7 @@ class _UserListScreenState extends State<UserListScreen>
                                 imageUrl: imageUrl,
                                 onTap: () {
                                   context.push(
-                                    '/chat?receiverId=$id&receiverName=$name&receiverImage=${user.profileImage}',
+                                    '/chat?receiverId=$id',
                                   );
                                 },
                                 card: card,

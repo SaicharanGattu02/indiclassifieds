@@ -15,6 +15,8 @@ import 'package:indiclassifieds/services/SecureStorageService.dart';
 import 'package:indiclassifieds/state_injector.dart';
 import 'package:indiclassifieds/theme/AppTheme.dart';
 import 'package:indiclassifieds/utils/DeepLinkMapper.dart';
+import 'package:indiclassifieds/utils/NotificationIntent.dart';
+import 'package:indiclassifieds/utils/constants.dart';
 import 'app_routes/router.dart';
 import 'data/cubit/theme_cubit.dart';
 import 'firebase_options.dart';
@@ -36,17 +38,15 @@ Future<void> main() async {
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   final storage = SecureStorageService.instance;
   final themeCubit = ThemeCubit(storage);
-  // Hydrate from secure storage before the UI builds
   await themeCubit.hydrate();
-
 
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    print("Firebase initialized");
+    print("✅ Firebase initialized");
   } catch (e) {
-    print("Error initializing Firebase: $e");
+    print("❌ Error initializing Firebase: $e");
   }
 
   await _requestPushPermissions();
@@ -57,16 +57,14 @@ Future<void> main() async {
     sound: true,
     provisional: false,
   );
-  //
-  // Get the APNs token (iOS)
+
   if (Platform.isIOS) {
     String? apnsToken = await messaging.getAPNSToken();
-    AppLogger.log("APNs Token: $apnsToken");
+    AppLogger.log("📱 APNs Token: $apnsToken");
   }
 
-  // Get the FCM token
   String? fcmToken = await messaging.getToken();
-  AppLogger.log("FCM Token: $fcmToken");
+  AppLogger.log("🔥 FCM Token: $fcmToken");
   if (fcmToken != null) {
     SecureStorageService.instance.setString("fb_token", fcmToken);
   }
@@ -77,7 +75,6 @@ Future<void> main() async {
     sound: true,
   );
 
-  // Create notification channel (Android)
   await flutterLocalNotificationsPlugin
       .resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin
@@ -98,12 +95,22 @@ Future<void> main() async {
 
   flutterLocalNotificationsPlugin.initialize(
     initializationSettings,
-    onDidReceiveNotificationResponse: (NotificationResponse response) async {
-      // Handle notification tapped logic
+    onDidReceiveNotificationResponse: (resp) async {
+      final p = resp.payload;
+      if (p?.isNotEmpty == true) {
+        final data = jsonDecode(p!) as Map<String, dynamic>;
+        _navigateFromPushData(data);
+      }
     },
   );
 
+  // Foreground messages
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    print("📥 Foreground message received:");
+    print("  ▶ Title: ${message.notification?.title}");
+    print("  ▶ Body: ${message.notification?.body}");
+    print("  ▶ Data: ${message.data}");
+
     RemoteNotification? notification = message.notification;
     AndroidNotification? android = message.notification?.android;
 
@@ -112,22 +119,72 @@ Future<void> main() async {
     }
   });
 
+  // 1) Background → user tapped push and app was in background
   FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-    // Handle notification opened when app was in background
+    print("📲 Notification opened (background): ${message.data}");
+    _navigateFromPushData(message.data);
   });
 
+  // 2) Killed → user tapped push and app cold-started
+  final initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+  if (initialMessage != null) {
+    print(
+      "🧊 App opened from terminated state via notif: ${initialMessage.data}",
+    );
+    // Schedule navigation after first frame so context is ready
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _navigateFromPushData(initialMessage.data);
+    });
+  }
+
+  // Background handler
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   runApp(
     MultiRepositoryProvider(
       providers: StateInjector.repositoryProviders,
       child: MultiBlocProvider(
-        providers: StateInjector.blocProviders(themeCubit), // 👈 pass it in
-        child: MyApp(
-        ),
+        providers: StateInjector.blocProviders(themeCubit),
+        child: MyApp(),
       ),
     ),
   );
+}
+
+// Extract and navigate
+void _navigateFromPushData(Map<String, dynamic> data) {
+  final receiverId =
+      (data['receiverId'] ??
+              data['receiver_id'] ??
+              data['senderId'] ??
+              data['rid'])
+          ?.toString();
+  if (receiverId == null || receiverId.isEmpty) {
+    print("ℹ️ No receiverId/senderId in payload: $data");
+    return;
+  }
+
+  final ctx = navigatorKey.currentContext;
+  if (ctx != null && GoRouter.of(ctx).canPop()) {
+    // App already has a stack → push directly
+    GoRouter.of(ctx).push('/chat?receiverId=${data['senderId']}');
+    return;
+  }
+
+  // Cold start / no stack → remember intent and land on Dashboard first
+  NotificationIntent.setPendingChat(data['senderId']);
+  // If you use splash, ensure splash does a `context.go('/dashboard')` (not push)
+  final router = GoRouter.of(navigatorKey.currentContext!);
+  router.go('/');
+}
+
+/// Background handler (must be a top-level function or static)
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  print("🌙 Background message received:");
+  print("  ▶ Title: ${message.notification?.title}");
+  print("  ▶ Body: ${message.notification?.body}");
+  print("  ▶ Data: ${message.data}");
 }
 
 Future<void> _requestPushPermissions() async {
@@ -146,11 +203,6 @@ Future<void> _requestPushPermissions() async {
         >();
     await plugin?.requestNotificationsPermission();
   }
-}
-
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
-  //  AppLogger.log('A Background message just showed up :  ${message.data}');
 }
 
 // Function to display local notifications
@@ -182,14 +234,11 @@ void showNotification(
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({
-    super.key,
-  });
+  const MyApp({super.key});
 
   @override
   State<MyApp> createState() => _MyAppState();
 }
-
 
 class _MyAppState extends State<MyApp> {
   // StreamSubscription<Uri>? _linkSubscription;
@@ -284,5 +333,3 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
-
-
