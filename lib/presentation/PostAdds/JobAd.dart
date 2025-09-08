@@ -196,9 +196,7 @@ class _JobsAdState extends State<JobsAd> {
                               ? 'Required title'
                               : null,
                         ),
-
                         CommonTextField1(
-                          isRead: true,
                           lable: 'Brand',
                           controller: brandController,
                           color: textColor,
@@ -447,7 +445,7 @@ class _JobsAdState extends State<JobsAd> {
                         ],
                         SizedBox(height: 10,),
                         Text(
-                          "Note : Upload only proper images that match your ad. Wrong or unrelated pictures may lead to rejection.",
+                          "Note : Upload only proper images that match your Ad. Wrong or unrelated pictures may lead to rejection.",
                           style: AppTextStyles.bodyMedium(textColor),
                         ),
                       ],

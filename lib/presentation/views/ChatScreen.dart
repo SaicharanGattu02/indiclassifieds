@@ -5,11 +5,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:indiclassifieds/data/cubit/ChatMessages/ChatMessagesCubit.dart';
+import '../../Components/CustomSnackBar.dart';
 import '../../data/cubit/Chat/private_chat_cubit.dart';
 import '../../data/cubit/ChatMessages/ChatMessagesStates.dart';
 import '../../model/ChatMessagesModel.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
+import '../../utils/AppLauncher.dart';
+import '../../widgets/SafeDealDialog.dart';
+import 'ReportBottomSheet.dart';
 
 extension ChatScreenMessagesX on Messages {
   DateTime get createdAtDate {
@@ -51,6 +55,8 @@ class ChatScreen extends StatefulWidget {
   State<ChatScreen> createState() => _ChatScreenState();
 }
 
+enum _MenuAction { report, safetyTips }
+
 class _ChatScreenState extends State<ChatScreen> {
   final _controller = TextEditingController();
 
@@ -71,6 +77,8 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _showStickyHeader = true;
   String _stickyDateLabel = '';
   List<_ListItem> _lastItems = const [];
+
+  final ValueNotifier<String?> mobileNotifier = ValueNotifier<String?>(null);
 
   // "show while scrolling" state
   Timer? _scrollIdleTimer;
@@ -148,12 +156,17 @@ class _ChatScreenState extends State<ChatScreen> {
     // Animate in after first frame
     // Show + animate in, then start 1-min auto-hide
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (context) => const SafeDealBottomSheet(),
+      );
       if (!mounted) return;
       setState(() => _animSafetyBannerIn = true);
       _startSafetyAutoHide();
     });
   }
-
 
   void _startSafetyAutoHide() {
     _safetyAutoHide?.cancel();
@@ -267,7 +280,6 @@ class _ChatScreenState extends State<ChatScreen> {
       builder: (BuildContext newContext) {
         final bg = ThemeHelper.backgroundColor(newContext);
         final textColor = ThemeHelper.textColor(newContext);
-
         return Scaffold(
           backgroundColor: bg,
           appBar: AppBar(
@@ -275,15 +287,14 @@ class _ChatScreenState extends State<ChatScreen> {
             elevation: 0,
             surfaceTintColor: Colors.transparent,
             title: Column(
-              crossAxisAlignment: CrossAxisAlignment.start, // ← left align
+              crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
                 Row(
                   children: [
-                    _profileAvatar(size: 36), // ← avatar or initials
+                    _profileAvatar(size: 36),
                     const SizedBox(width: 10),
                     Expanded(
-                      // ← prevent overflow with long names
                       child: Text(
                         widget.receiverName,
                         maxLines: 1,
@@ -296,25 +307,138 @@ class _ChatScreenState extends State<ChatScreen> {
                   ],
                 ),
                 BlocBuilder<PrivateChatCubit, PrivateChatState>(
-                  buildWhen: (p, c) =>
-                      p.isPeerTyping !=
-                      c.isPeerTyping, // ← only rebuild this line
+                  buildWhen: (p, c) => p.isPeerTyping != c.isPeerTyping,
                   builder: (context, state) {
                     return AnimatedSwitcher(
-                      // ← smooth show/hide
                       duration: const Duration(milliseconds: 180),
                       switchInCurve: Curves.easeOut,
                       switchOutCurve: Curves.easeIn,
                       child: state.isPeerTyping
-                          ? _buildTypingIndicator(context) // visible
-                          : const SizedBox(
-                              height: 16,
-                            ), // ← placeholder height to avoid jump
+                          ? _buildTypingIndicator(context)
+                          : const SizedBox(height: 16),
                     );
                   },
                 ),
               ],
             ),
+            actions: [
+              ValueListenableBuilder(
+                valueListenable: mobileNotifier,
+                builder: (context, value, child) {
+                  return IconButton(
+                    icon: const Icon(Icons.call),
+                    color: textColor,
+                    onPressed: () async {
+                      final mobile = mobileNotifier.value;
+                      if (mobile != null && mobile.isNotEmpty) {
+                        AppLauncher.call(mobile);
+                      } else {
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (_) => const Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+
+                        await Future.delayed(const Duration(seconds: 2));
+
+                        if (context.mounted) Navigator.of(context).pop();
+
+                        final updatedMobile = mobileNotifier.value;
+                        if (updatedMobile != null &&
+                            updatedMobile.isNotEmpty) {
+                          AppLauncher.call(updatedMobile);
+                        } else {
+                          CustomSnackBar1.show(
+                            context,
+                            "Mobile number not available",
+                          );
+                        }
+                      }
+                    },
+                  );
+                }
+              ),
+              PopupMenuButton<_MenuAction>(
+                icon: Icon(
+                  Icons.more_vert,
+                  color: ThemeHelper.textColor(context), // theme-aware
+                  size: 28,
+                ),
+                onSelected: (value) {
+                  switch (value) {
+                    case _MenuAction.report:
+                      openReportSheetForChat(
+                        context,
+                        userId: int.parse(widget.receiverId),
+                      );
+                      break;
+                    case _MenuAction.safetyTips:
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (context) => const SafeDealBottomSheet(),
+                      );
+                      break;
+                  }
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem<_MenuAction>(
+                    value: _MenuAction.report,
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.flag_outlined,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.error, // error color from theme
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Report user',
+                          style: AppTextStyles.bodyMedium(
+                            ThemeHelper.textColor(context),
+                          ).copyWith(fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem<_MenuAction>(
+                    value: _MenuAction.safetyTips,
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.shield_outlined,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.primary, // primary color
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Safety tips',
+                          style: AppTextStyles.bodyMedium(
+                            ThemeHelper.textColor(context),
+                          ).copyWith(fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                color: ThemeHelper.cardColor(
+                  context,
+                ), // card color based on theme
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 2,
+                tooltip: 'More options',
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              ),
+            ],
             iconTheme: IconThemeData(color: textColor),
           ),
           body: Padding(
@@ -356,6 +480,7 @@ class _ChatScreenState extends State<ChatScreen> {
                             historyState.chatMessages.data?.messages ??
                                 const [],
                           );
+                          mobileNotifier.value = historyState.chatMessages.data?.friend?.mobile??"";
                         } else if (historyState is ChatMessagesLoadingMore) {
                           history.addAll(
                             historyState.chatMessages.data?.messages ??
@@ -513,6 +638,30 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
         );
       },
+    );
+  }
+
+  void openReportSheetForChat(BuildContext context, {required int userId}) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => DraggableScrollableSheet(
+        initialChildSize: 0.86,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        expand: false,
+        builder: (ctx, scrollController) {
+          return Material(
+            color: ThemeHelper.backgroundColor(ctx),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: ReportBottomSheet.chat(userId: userId),
+            ),
+          );
+        },
+      ),
     );
   }
 

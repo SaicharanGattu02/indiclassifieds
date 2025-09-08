@@ -16,8 +16,8 @@ final ThemeData darkTheme = ThemeData(
   inputDecorationTheme: InputDecorationTheme(
     filled: true,
     fillColor: Colors.black,
-    labelStyle: AppTextStyles.titleMedium(Colors.black.withOpacity(0.25)),
-    hintStyle: AppTextStyles.titleMedium(Colors.black.withOpacity(0.25)),
+    labelStyle: AppTextStyles.titleMedium(Colors.white.withOpacity(0.35)),
+    hintStyle: AppTextStyles.titleSmall(Colors.white.withOpacity(0.55)),
     contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(7),

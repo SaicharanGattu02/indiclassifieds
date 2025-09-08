@@ -17,7 +17,7 @@ final ThemeData lightTheme = ThemeData(
     filled: true,
     fillColor: Colors.white,
     labelStyle: AppTextStyles.titleMedium(Colors.black.withOpacity(0.25)),
-    hintStyle: AppTextStyles.titleMedium(Colors.black.withOpacity(0.25)),
+    hintStyle: AppTextStyles.titleSmall(Colors.black.withOpacity(0.35)),
     contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(7),

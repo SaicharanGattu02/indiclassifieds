@@ -91,6 +91,7 @@ abstract class RemoteDataSource {
   Future<CreatePaymentModel?> boostAdCreatePayment(Map<String, dynamic> data);
   Future<AdSuccessModel?> boostAdVerifyPayment(Map<String, dynamic> data);
   Future<BoostAdModel?> getBoostAdInfoDetails();
+  Future<AdSuccessModel?> reportAd(Map<String, dynamic> data);
 }
 
 class RemoteDataSourceImpl implements RemoteDataSource {
@@ -126,6 +127,21 @@ class RemoteDataSourceImpl implements RemoteDataSource {
       }
     }
     return FormData.fromMap(formMap);
+  }
+
+  @override
+  Future<AdSuccessModel?> reportAd(Map<String, dynamic> data) async {
+    try {
+      Response response = await ApiClient.post(
+        "${APIEndpointUrls.report}",
+        data: data,
+      );
+      AppLogger.log('reportAd:${response.data}');
+      return AdSuccessModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('reportAd :: $e');
+      return null;
+    }
   }
 
   @override

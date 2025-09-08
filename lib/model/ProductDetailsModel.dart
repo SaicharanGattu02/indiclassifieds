@@ -74,6 +74,7 @@ class Listing {
   int? categoryId;
   String? price;
   String? location;
+  String? location_key;
   String? fullName;
   String? mobileNumber;
   bool? featuredStatus;
@@ -98,6 +99,7 @@ class Listing {
     this.categoryId,
     this.price,
     this.location,
+    this.location_key,
     this.fullName,
     this.mobileNumber,
     this.featuredStatus,
@@ -123,6 +125,7 @@ class Listing {
     categoryId = json['category_id'];
     price = json['price'];
     location = json['location'];
+    location_key = json['location_key'];
     fullName = json['full_name'];
     mobileNumber = json['mobile_number'];
     featuredStatus = json['featured_status'];
@@ -151,6 +154,7 @@ class Listing {
     data['category_id'] = this.categoryId;
     data['price'] = this.price;
     data['location'] = this.location;
+    data['location_key'] = this.location_key;
     data['full_name'] = this.fullName;
     data['mobile_number'] = this.mobileNumber;
     data['featured_status'] = this.featuredStatus;

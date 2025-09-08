@@ -66,13 +66,15 @@ class Friend {
   int? id;
   String? name;
   String? image;
+  String? mobile;
 
-  Friend({this.id, this.name, this.image});
+  Friend({this.id, this.name, this.image,this.mobile});
 
   Friend.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     name = json['name'];
     image = json['image'];
+    mobile = json['mobile'];
   }
 
   Map<String, dynamic> toJson() {
@@ -80,6 +82,7 @@ class Friend {
     data['id'] = this.id;
     data['name'] = this.name;
     data['image'] = this.image;
+    data['mobile'] = this.mobile;
     return data;
   }
 }

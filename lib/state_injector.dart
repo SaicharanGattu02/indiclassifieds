@@ -39,6 +39,8 @@ import 'package:indiclassifieds/data/cubit/RecoverAccount/recover_account_cubit.
 import 'package:indiclassifieds/data/cubit/RecoverAccount/recover_account_repository.dart';
 import 'package:indiclassifieds/data/cubit/Register/register_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Register/register_repo.dart';
+import 'package:indiclassifieds/data/cubit/ReportAd/ReportAdCubit.dart';
+import 'package:indiclassifieds/data/cubit/ReportAd/ReportAdRepo.dart';
 import 'package:indiclassifieds/data/cubit/Transections/transactions_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Transections/transactions_repository.dart';
 import 'package:indiclassifieds/data/cubit/UpdateProfile/update_profile_cubit.dart';
@@ -260,6 +262,11 @@ class StateInjector {
         remoteDataSource: context.read<RemoteDataSource>(),
       ),
     ),
+    RepositoryProvider<ReportAdRepo>(
+      create: (context) => ReportAdRepoImpl(
+        remoteDataSource: context.read<RemoteDataSource>(),
+      ),
+    ),
   ];
 
   static List<BlocProvider> blocProviders(ThemeCubit themeCubit) => [
@@ -428,6 +435,9 @@ class StateInjector {
     ),
     BlocProvider<BoostAdInfoCubit>(
       create: (context) => BoostAdInfoCubit(context.read<BoostAdInfoRepo>()),
+    ),
+    BlocProvider<ReportAdCubit>(
+      create: (context) => ReportAdCubit(context.read<ReportAdRepo>()),
     ),
     BlocProvider<DashboardCubit>(
       create: (context) => DashboardCubit(

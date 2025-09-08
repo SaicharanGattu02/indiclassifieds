@@ -86,4 +86,5 @@ class APIEndpointUrls {
       '${apiUrl}verify-payment-for-boost';
 
   static const String get_featured_content = '${apiUrl}get-featured-content';
+  static const String report = '${apiUrl}report';
 }

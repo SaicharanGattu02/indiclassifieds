@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geocoding/geocoding.dart' as geo;
 import 'package:go_router/go_router.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:indiclassifieds/Components/CustomAppButton.dart';
 import 'package:indiclassifieds/Components/CustomSnackBar.dart';
 import 'package:indiclassifieds/Components/CutomAppBar.dart';
@@ -10,10 +14,12 @@ import 'package:indiclassifieds/services/AuthService.dart';
 import 'package:indiclassifieds/utils/AppLogger.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../data/cubit/ProductDetails/product_details_cubit.dart';
 import '../../data/cubit/ProductDetails/product_details_states.dart';
 import '../../data/cubit/Products/Product_cubit1.dart';
+import '../../data/cubit/ReportAd/ReportAdCubit.dart';
 import '../../model/ProductDetailsModel.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
@@ -22,6 +28,7 @@ import '../../widgets/CommonLoader.dart';
 import '../../widgets/SimilarProducts.dart';
 import '../../widgets/SimilarProductsSection.dart';
 import 'PhotoViewScreen.dart';
+import 'ReportBottomSheet.dart';
 
 extension DetailsX on Details {
   Map<String, dynamic> merged() {
@@ -52,6 +59,11 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   int _page = 0;
   final ValueNotifier<String?> mobileNotifier = ValueNotifier<String?>(null);
 
+  final Completer<GoogleMapController> _mapCtrl = Completer();
+  LatLng? _listingLatLng;
+  Set<Marker> _markers = {};
+  bool _isResolvingLocation = false;
+
   @override
   void initState() {
     super.initState();
@@ -59,6 +71,96 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     context.read<ProductsCubit1>().getProducts(
       subCategoryId: widget.subcategory_id.toString(),
     );
+  }
+
+  LatLng? _parseLatLngFromString(String? raw) {
+    if (raw == null) return null;
+    final s = raw.trim();
+
+    // Common shapes handled:
+    // "17.3850,78.4867"
+    // "lat=17.3850,lng=78.4867"
+    // "lat: 17.3850, lon: 78.4867"
+    // "17.3850 , 78.4867"
+    final re = RegExp(r'(-?\d+(?:\.\d+)?)\D+(-?\d+(?:\.\d+)?)');
+    final m = re.firstMatch(s);
+    if (m != null && m.groupCount >= 2) {
+      final lat = double.tryParse(m.group(1)!);
+      final lng = double.tryParse(m.group(2)!);
+      if (lat != null && lng != null) {
+        return LatLng(lat, lng);
+      }
+    }
+
+    // Super-simple fallback: pure "a,b"
+    final parts = s.split(',').map((e) => e.trim()).toList();
+    if (parts.length >= 2) {
+      final lat = double.tryParse(parts[0]);
+      final lng = double.tryParse(parts[1]);
+      if (lat != null && lng != null) {
+        return LatLng(lat, lng);
+      }
+    }
+    return null;
+  }
+
+  Future<void> _prepareMap(Listing listing) async {
+    if (_isResolvingLocation) return;
+    _isResolvingLocation = true;
+
+    try {
+      LatLng? pos;
+
+      // 1) Try to parse from location_key (preferred) or location (fallback)
+      pos = _parseLatLngFromString(listing.location_key);
+
+      // 2) If still null, try geocoding from address
+      if (pos == null) {
+        final String addr = [
+          listing.location,
+          listing.city_name,
+          listing.state_name,
+        ].where((e) => (e ?? '').trim().isNotEmpty).join(', ');
+
+        if (addr.trim().isNotEmpty) {
+          final results = await geo.locationFromAddress(addr);
+          if (results.isNotEmpty) {
+            pos = LatLng(results.first.latitude, results.first.longitude);
+          }
+        }
+      }
+
+      if (!mounted) return;
+      if (pos != null) {
+        setState(() {
+          _listingLatLng = pos;
+          _markers = {
+            Marker(
+              markerId: const MarkerId('listing'),
+              position: pos!, // force non-null
+              infoWindow: InfoWindow(
+                title: listing.title ?? 'Listing',
+                snippet:
+                    '${listing.location ?? ''}${listing.city_name != null ? ', ${listing.city_name}' : ''}',
+              ),
+            ),
+          };
+        });
+      }
+    } catch (e) {
+      // log if you want: AppLogger.error("Map error: $e");
+    } finally {
+      _isResolvingLocation = false;
+    }
+  }
+
+  Future<void> _openInGoogleMaps(LatLng pos) async {
+    final uri = Uri.parse(
+      'https://www.google.com/maps/search/?api=1&query=${pos.latitude},${pos.longitude}',
+    );
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 
   String? receiverId;
@@ -83,55 +185,62 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         return Scaffold(
           backgroundColor: bgColor,
           appBar: CustomAppBar1(title: 'Details', actions: []),
-          bottomNavigationBar: ValueListenableBuilder<String?>(
-            valueListenable: mobileNotifier,
-            builder: (context, mobile, _) {
-              return _BottomCtaBar(
-                onContact: isGuest
-                    ? () {
-                        context.push("/login");
-                      }
-                    : () async {
-                        final mobile = mobileNotifier.value;
-                        if (mobile != null && mobile.isNotEmpty) {
-                          AppLauncher.call(mobile);
-                        } else {
-                          showDialog(
-                            context: context,
-                            barrierDismissible: false,
-                            builder: (_) => const Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                          );
-
-                          await Future.delayed(const Duration(seconds: 2));
-
-                          if (context.mounted)
-                            Navigator.of(context).pop(); // close dialog
-
-                          final updatedMobile = mobileNotifier.value;
-                          if (updatedMobile != null &&
-                              updatedMobile.isNotEmpty) {
-                            AppLauncher.call(updatedMobile);
-                          } else {
-                            CustomSnackBar1.show(
-                              context,
-                              "Mobile number not available",
-                            );
+          bottomNavigationBar: FutureBuilder(
+            future: AuthService.getId(),
+            builder: (context, asyncSnapshot) {
+              if(asyncSnapshot.data == receiverId){
+                SizedBox.shrink();
+              }
+              return ValueListenableBuilder<String?>(
+                valueListenable: mobileNotifier,
+                builder: (context, mobile, _) {
+                  return _BottomCtaBar(
+                    onContact: isGuest
+                        ? () {
+                            context.push("/login");
                           }
-                        }
-                      },
-                onChat: isGuest
-                    ? () {
-                        context.push("/login");
-                      }
-                    : () {
-                        context.push(
-                          '/chat?receiverId=$receiverId&receiverName=$receiverName&receiverImage=$receiverImage',
-                        );
-                      },
+                        : () async {
+                            final mobile = mobileNotifier.value;
+                            if (mobile != null && mobile.isNotEmpty) {
+                              AppLauncher.call(mobile);
+                            } else {
+                              showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (_) => const Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              );
+
+                              await Future.delayed(const Duration(seconds: 2));
+
+                              if (context.mounted) Navigator.of(context).pop();
+
+                              final updatedMobile = mobileNotifier.value;
+                              if (updatedMobile != null &&
+                                  updatedMobile.isNotEmpty) {
+                                AppLauncher.call(updatedMobile);
+                              } else {
+                                CustomSnackBar1.show(
+                                  context,
+                                  "Mobile number not available",
+                                );
+                              }
+                            }
+                          },
+                    onChat: isGuest
+                        ? () {
+                            context.push("/login");
+                          }
+                        : () {
+                            context.push(
+                              '/chat?receiverId=$receiverId&receiverName=$receiverName&receiverImage=$receiverImage',
+                            );
+                          },
+                  );
+                },
               );
-            },
+            }
           ),
           body: BlocBuilder<ProductDetailsCubit, ProductDetailsStates>(
             builder: (context, state) {
@@ -166,6 +275,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               receiverName = data.postedBy?.name ?? "";
               receiverImage = data.postedBy?.image ?? "";
               mobileNotifier.value = listing.mobileNumber ?? "";
+              _prepareMap(listing); // safe: it no-ops if already resolving
               AppLogger.info("✅ mobileNotifier.value: ${mobileNotifier.value}");
 
               return CustomScrollView(
@@ -304,7 +414,6 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     ),
                   ),
                   const SliverToBoxAdapter(child: SizedBox(height: 12)),
-
                   // Chips (Posted + Location)
                   SliverToBoxAdapter(
                     child: Padding(
@@ -352,8 +461,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       ),
                     ),
                   ),
-                  const SliverToBoxAdapter(child: SizedBox(height: 20)),
-
+                  const SliverToBoxAdapter(child: SizedBox(height: 10)),
                   // ===== Specifications (Dynamic via Map) =====
                   if (details != null) ...[
                     SliverToBoxAdapter(
@@ -375,6 +483,105 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     ),
                     const SliverToBoxAdapter(child: SizedBox(height: 20)),
                   ],
+                  // ===== AD ID =====
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "AD ID ${listing.id.toString()}",
+                            style: AppTextStyles.bodyLarge(
+                              textColor,
+                            ).copyWith(fontWeight: FontWeight.w700),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              openReportSheetForListing(
+                                context,
+                                listingId: widget.listingId,
+                              );
+                            },
+                            child: Text("REPORT THIS AD"),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SliverToBoxAdapter(child: SizedBox(height: 10)),
+
+                  // ===== Location Map =====
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Location",
+                            style: AppTextStyles.headlineSmall(
+                              textColor,
+                            ).copyWith(fontWeight: FontWeight.w700),
+                          ),
+                          const SizedBox(height: 8),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: Container(
+                              height: 180,
+                              color: ThemeHelper.cardColor(context),
+                              child: _listingLatLng == null
+                                  ? Center(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(12),
+                                        child: Text(
+                                          _isResolvingLocation
+                                              ? "Loading map…"
+                                              : "Location unavailable",
+                                          style: AppTextStyles.bodySmall(
+                                            textColor,
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                  : GoogleMap(
+                                      initialCameraPosition: CameraPosition(
+                                        target: _listingLatLng!,
+                                        zoom: 14.5,
+                                      ),
+                                      zoomGesturesEnabled:
+                                          false, // ← disables double-tap & pinch zoom
+                                      myLocationButtonEnabled: false,
+                                      zoomControlsEnabled: false,
+                                      rotateGesturesEnabled: false, // optional
+                                      tiltGesturesEnabled: false, // optional
+                                      markers: _markers,
+                                      onMapCreated: (c) => _mapCtrl.complete(c),
+                                      // Important: don't pass an empty set here; use null (default) unless you have a specific need
+                                      // gestureRecognizers: {},
+                                    ),
+                            ),
+                          ),
+                          if (_listingLatLng != null) ...[
+                            const SizedBox(height: 8),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton.icon(
+                                onPressed: () =>
+                                    _openInGoogleMaps(_listingLatLng!),
+                                icon: const Icon(Icons.directions),
+                                label: const Text("Open in Google Maps"),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SliverToBoxAdapter(child: SizedBox(height: 10)),
+
+                  // ===== Posted By =====
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -387,57 +594,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       ),
                     ),
                   ),
-                  const SliverToBoxAdapter(child: SizedBox(height: 20)),
-                  // // ===== Location =====
-                  // SliverToBoxAdapter(
-                  //   child: Padding(
-                  //     padding: const EdgeInsets.symmetric(horizontal: 16),
-                  //     child: Text(
-                  //       "Location",
-                  //       style: AppTextStyles.headlineSmall(textColor).copyWith(fontWeight: FontWeight.w700),
-                  //     ),
-                  //   ),
-                  // ),
-                  // SliverToBoxAdapter(
-                  //   child: Padding(
-                  //     padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                  //     child: Row(
-                  //       children: [
-                  //         Icon(Icons.radio_button_checked, size: 18, color: ThemeHelper.textColor(context).withOpacity(.5)),
-                  //         const SizedBox(width: 6),
-                  //         Expanded(child: Text(location, style: AppTextStyles.bodyMedium(textColor))),
-                  //       ],
-                  //     ),
-                  //   ),
-                  // ),
-                  // SliverToBoxAdapter(
-                  //   child: Padding(
-                  //     padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                  //     child: ClipRRect(
-                  //       borderRadius: BorderRadius.circular(16),
-                  //       child: Container(
-                  //         height: 170,
-                  //         color: ThemeHelper.cardColor(context),
-                  //         alignment: Alignment.center,
-                  //         child: Text("Map preview here", style: AppTextStyles.bodySmall(textColor)),
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ),
-                  // const SliverToBoxAdapter(child: SizedBox(height: 24)),
 
-                  // ===== Similar Items (demo) =====
-                  // SliverToBoxAdapter(
-                  //   child: Padding(
-                  //     padding: const EdgeInsets.symmetric(horizontal: 16),
-                  //     child: Text(
-                  //       "Similar Items",
-                  //       style: AppTextStyles.headlineSmall(
-                  //         textColor,
-                  //       ).copyWith(fontWeight: FontWeight.w700),
-                  //     ),
-                  //   ),
-                  // ),
                   SliverToBoxAdapter(
                     child: SizedBox(
                       height: 280,
@@ -459,6 +616,33 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           ),
         );
       },
+    );
+  }
+
+  void openReportSheetForListing(
+    BuildContext context, {
+    required int listingId,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => DraggableScrollableSheet(
+        initialChildSize: 0.86,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        expand: false,
+        builder: (ctx, scrollController) {
+          return Material(
+            color: ThemeHelper.backgroundColor(ctx),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: ReportBottomSheet.listing(listingId: listingId),
+            ),
+          );
+        },
+      ),
     );
   }
 

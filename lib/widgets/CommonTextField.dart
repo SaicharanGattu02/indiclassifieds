@@ -186,7 +186,6 @@ class _CommonTextField1State extends State<CommonTextField1> {
           },
           decoration: InputDecoration(
             hintText: widget.hint,
-            hintStyle: TextStyle(color: textColor),
             prefixIcon: widget.prefixIcon,
             suffixIcon: widget.suffixIcon,
           ),
