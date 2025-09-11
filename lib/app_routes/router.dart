@@ -180,9 +180,7 @@ final GoRouter appRouter = GoRouter(
       },
     ),
 
-    // your existing routes ...
     GoRoute(
-      // Catch legacy website path
       path: '/singlelistingdetails/:subId',
       redirect: (ctx, st) {
         final subId = st.pathParameters['subId']; // 132

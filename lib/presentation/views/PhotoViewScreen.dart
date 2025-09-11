@@ -17,11 +17,8 @@ class PhotoViewScreen extends StatelessWidget {
         itemCount: images.length,
         builder: (context, index) {
           return PhotoViewGalleryPageOptions(
-            imageProvider: NetworkImage(
-              images[index].image ?? "",
-            ),
-            minScale:
-                PhotoViewComputedScale.contained, // Allows zoom-in and zoom-out
+            imageProvider: NetworkImage(images[index].image ?? ""),
+            minScale: PhotoViewComputedScale.contained,
             maxScale: PhotoViewComputedScale.covered,
           );
         },

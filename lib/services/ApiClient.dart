@@ -153,7 +153,6 @@ class ApiClient {
             // success
             return handler.next(response);
           }
-
           // 4xx arrive here because validateStatus(<500) returns true
           if (status == 401) {
             debugPrint('❌ 401 Unauthorized, logging out...');
