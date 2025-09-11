@@ -496,13 +496,13 @@ class _OtpscreenState extends State<Otpscreen> {
                                                     onPressed: loading
                                                         ? null
                                                         : () async {
-                                                            FirebaseMessaging
-                                                            messaging =
-                                                                FirebaseMessaging
-                                                                    .instance;
-                                                            String? fcmToken =
-                                                                await messaging
-                                                                    .getToken();
+                                                            // FirebaseMessaging
+                                                            // messaging =
+                                                            //     FirebaseMessaging
+                                                            //         .instance;
+                                                            // String? fcmToken =
+                                                            //     await messaging
+                                                            //         .getToken();
 
                                                             final otp =
                                                                 _otpController
@@ -521,18 +521,18 @@ class _OtpscreenState extends State<Otpscreen> {
                                                             }
 
                                                             // ✅ handle null fcm token gracefully
-                                                            if (fcmToken ==
-                                                                    null ||
-                                                                fcmToken
-                                                                    .isEmpty) {
-                                                              debugPrint(
-                                                                "⚠️ FCM token is null/empty, sending without it",
-                                                              );
-                                                              CustomSnackBar.show(
-                                                                context,
-                                                                '⚠️ FCM token is null/empty, sending without it',
-                                                              );
-                                                            }
+                                                            // if (fcmToken ==
+                                                            //         null ||
+                                                            //     fcmToken
+                                                            //         .isEmpty) {
+                                                            //   debugPrint(
+                                                            //     "⚠️ FCM token is null/empty, sending without it",
+                                                            //   );
+                                                            //   CustomSnackBar.show(
+                                                            //     context,
+                                                            //     '⚠️ FCM token is null/empty, sending without it',
+                                                            //   );
+                                                            // }
 
                                                             context
                                                                 .read<
@@ -542,9 +542,10 @@ class _OtpscreenState extends State<Otpscreen> {
                                                                   "mobile": widget
                                                                       .mobile,
                                                                   "otp": otp,
-                                                                  "fcm_token":
-                                                                      fcmToken ??
-                                                                      "", // fallback empty string
+                                                              "fcm_token": "kjhgiufdghdsiu", // fallback empty string
+                                                                  // "fcm_token":
+                                                                  //     fcmToken ??
+                                                                  //     "", // fallback empty string
                                                                   "fcm_type":
                                                                       "app", // or "ios" depending on platform
                                                                 });

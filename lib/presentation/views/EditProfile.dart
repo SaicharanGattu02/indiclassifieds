@@ -365,13 +365,7 @@ class _EditProfileState extends State<EditProfile> {
                             String? imageToSend;
                             if (_image != null && _image!.path.isNotEmpty) {
                               imageToSend = _image!.path;
-                            } else if (imagePath != null) {
-                              imageToSend = imagePath;
-                            } else {
-                              imageToSend =
-                                  ""; // or leave null if no image is selected
                             }
-
                             final data = {
                               "name": _nameController.text.trim(),
                               "email": _emailController.text.trim(),
