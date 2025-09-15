@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:indiclassifieds/services/SecureStorageService.dart';
+import 'package:indiclassifieds/utils/AppLogger.dart';
 import 'package:permission_handler/permission_handler.dart' as OpenAppSettings;
 
 import 'package:flutter/foundation.dart';
@@ -152,10 +153,16 @@ class LocationCubit extends Cubit<LocationState> {
 
         if (placemarks.isNotEmpty) {
           final p = placemarks.first;
+          // AppLogger.info("placemark: ${p}");
           final address = [
             p.street,
             p.subLocality,
+            p.locality,
+            p.subAdministrativeArea,
+            p.administrativeArea,
+            p.postalCode,
           ].where((e) => e != null && e.isNotEmpty).join(', ');
+          // AppLogger.info("Address: ${address}");
           return address.isEmpty ? 'Current location' : address;
         }
       } catch (e) {
@@ -244,7 +251,6 @@ class LocationCubit extends Cubit<LocationState> {
   }
 }
 
-
 // ---------------- Extra helper for submission ----------------
 extension LocationForSubmit on LocationCubit {
   Future<({String locationName, String latlng})> getForSubmission() async {
@@ -301,4 +307,3 @@ extension LocationForSubmit on LocationCubit {
     return ('Gachibowli, Hyderabad', '17.4401,78.3489');
   }
 }
-

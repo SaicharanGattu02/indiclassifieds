@@ -97,17 +97,28 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
   bool _isSubmitting = false; // covers pre-submit work
   List<File> _images = [];
   final int _maxImages = 6;
+  List<ImageData> _imageDataList = [];
 
   bool isLoading = true;
-  List<ImageData> _imageDataList = [];
+
   @override
   void initState() {
     super.initState();
-    final id = widget.editId.replaceAll('"', '').trim();
-    if (id != null && id.isNotEmpty) {
-      context.read<GetListingAdCubit>().getListingAd(widget.editId).then((
-        commonAdData,
-      ) {
+    brandController.text = widget.SubCatName ?? "";
+    // titleController.text = widget.CatName ?? "";
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    setState(() => isLoading = true); // Start loader
+
+    try {
+      // Step 1: Fetch API data from GetListingAdCubit (if editId is provided)
+      final id = widget.editId.replaceAll('"', '').trim();
+      if (id != null && id.isNotEmpty) {
+        final commonAdData = await context
+            .read<GetListingAdCubit>()
+            .getListingAd(widget.editId);
         if (commonAdData != null) {
           descriptionController.text =
               commonAdData.data?.listing?.description ?? '';
@@ -130,6 +141,7 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
               commonAdData.data?.listing?.floorNo.toString() ?? '';
           roomNoController.text =
               commonAdData.data?.listing?.roomNo.toString() ?? '';
+
           if (commonAdData.data?.listing?.stateId != null) {
             selectedStateId = commonAdData.data?.listing?.stateId;
             stateController.text = commonAdData.data?.listing?.stateName ?? '';
@@ -138,44 +150,59 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
             selectedCityId = commonAdData.data?.listing?.cityId;
             cityController.text = commonAdData.data?.listing?.cityName ?? '';
           }
-
           if (commonAdData.data?.listing?.images != null) {
             _imageDataList = commonAdData.data!.listing!.images!
-                .where((img) => (img.image ?? "").isNotEmpty)
-                .map((img) => ImageData(id: img.id ?? 0, url: img.image ?? ""))
+                .where((img) => (img.image ?? '').isNotEmpty)
+                .map((img) => ImageData(id: img.id ?? 0, url: img.image ?? ''))
                 .toList();
           }
         }
-        setState(() => isLoading = false);
-      });
-    } else {
-      setState(() => isLoading = false);
+      }
+
+      // Step 2: Fetch additional data from fetchData
+      await fetchData();
+    } catch (e) {
+      // Handle errors (optional, but recommended)
+      print('Error loading data: $e');
+      // Optionally show an error message to the user
+    } finally {
+      setState(() => isLoading = false); // Stop loader after all data is loaded
     }
-    // titleController.text = widget.CatName ?? "";
-    brandController.text = widget.SubCatName ?? "";
-    fetchData();
   }
 
-  void fetchData() async {
-    String? name = await AuthService.getName();
-    String? phone = await AuthService.getMobile();
-    String? stateIdStr = await AuthService.getState();
-    String? cityIdStr = await AuthService.getCity();
-    String? stateId = await AuthService.getStateId();
-    String? cityId = await AuthService.getCityId();
+  Future<void> fetchData() async {
+    // Use Future.wait to run all async calls concurrently
+    final results = await Future.wait([
+      AuthService.getName(),
+      AuthService.getMobile(),
+      AuthService.getState(),
+      AuthService.getCity(),
+      AuthService.getStateId(),
+      AuthService.getCityId(),
+      context.read<LocationCubit>().getForSubmission(),
+    ]);
 
+    final String? name = results[0] as String?;
+    final String? phone = results[1] as String?;
+    final String? stateIdStr = results[2] as String?;
+    final String? cityIdStr = results[3] as String?;
+    final String? stateId = results[4] as String?;
+    final String? cityId = results[5] as String?;
+    final ({String locationName, String latlng}) locResult =
+        results[6] as ({String locationName, String latlng});
+
+    if (locResult.locationName.isNotEmpty) {
+      locationController.text = locResult.locationName;
+    }
     if (name != null && name.isNotEmpty) {
       nameController.text = name;
     }
-
     if (phone != null && phone.isNotEmpty) {
       phoneController.text = phone;
     }
-
     if (stateIdStr != null && stateIdStr.isNotEmpty) {
       stateController.text = stateIdStr;
     }
-
     if (cityIdStr != null && cityIdStr.isNotEmpty) {
       cityController.text = cityIdStr;
     }
@@ -246,12 +273,12 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
                           ? 'Required title'
                           : null,
                     ),
+
                     // CommonTextField1(
                     //   lable: 'Brand',
                     //   controller: brandController,
                     //   color: textColor,
                     // ),
-
                     CommonTextField1(
                       lable: 'BHK Type',
                       hint: 'EX: 2bhk ,3bh',
@@ -632,7 +659,7 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
                         },
                       ),
                     ],
-                    SizedBox(height: 10,),
+                    SizedBox(height: 10),
                     Text(
                       "Note : Upload only proper images that match your Ad. Wrong or unrelated pictures may lead to rejection.",
                       style: AppTextStyles.bodyMedium(textColor),
@@ -737,19 +764,43 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
                                     isValid = false;
                                   }
 
-                                  if (_images.isEmpty &&
-                                      (widget.editId == null ||
-                                          widget.editId
-                                              .replaceAll('"', '')
-                                              .trim()
-                                              .isEmpty)) {
-                                    CustomSnackBar1.show(
-                                      context,
-                                      "Please select atleast 2 images",
-                                    );
-                                    setState(() => _showimagesError = true);
+                                  final editIdClean = widget.editId
+                                      .replaceAll('"', '')
+                                      .trim();
+                                  final isEdit = editIdClean.isNotEmpty;
+                                  // IMAGE VALIDATION: consider both existing images and newly picked images
+                                  final int existingCount = _imageDataList
+                                      .length; // already uploaded images
+                                  final int newCount =
+                                      _images.length; // newly picked files
+                                  final int totalCount =
+                                      existingCount + newCount;
+                                  const int minRequiredImages = 2;
+
+                                  if (isEdit) {
+                                    // For updates, total (existing + new) must be >= minRequiredImages
+                                    if (totalCount < minRequiredImages) {
+                                      CustomSnackBar1.show(
+                                        context,
+                                        "Please select at least $minRequiredImages images",
+                                      );
+                                      setState(() => _showimagesError = true);
+                                      isValid = false;
+                                    } else {
+                                      setState(() => _showimagesError = false);
+                                    }
                                   } else {
-                                    setState(() => _showimagesError = false);
+                                    // For new listing, require at least minRequiredImages new images
+                                    if (newCount < minRequiredImages) {
+                                      CustomSnackBar1.show(
+                                        context,
+                                        "Please select at least $minRequiredImages images",
+                                      );
+                                      setState(() => _showimagesError = true);
+                                      isValid = false;
+                                    } else {
+                                      setState(() => _showimagesError = false);
+                                    }
                                   }
 
                                   if (facingDirection == null ||
@@ -852,7 +903,7 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
 
                                   // Proceed with API call only if all validations pass
                                   if (isValid) {
-                                    try{
+                                    try {
                                       setState(() => _isSubmitting = true);
                                       final locResult = await context
                                           .read<LocationCubit>()
@@ -861,7 +912,8 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
                                       final Map<String, dynamic> data = {
                                         "title": titleController.text,
                                         "brand": brandController.text,
-                                        "description": descriptionController.text,
+                                        "description":
+                                            descriptionController.text,
                                         "sub_category_id": widget.subCatId,
                                         "category_id": widget.catId,
                                         "location": locationController.text,
@@ -869,15 +921,15 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
                                         "price": totelPriceController.text,
                                         if (widget.SubCatName == "For Sale")
                                           "squre_pt":
-                                          priceSquareFeetController.text,
+                                              priceSquareFeetController.text,
                                         "full_name": nameController.text,
                                         "state_id": selectedStateId,
                                         // "city_id": selectedCityId,
                                         "bhk_type": "${bhkController.text} BHK",
                                         "no_of_bathrooms":
-                                        noOfBathroomsController.text,
+                                            noOfBathroomsController.text,
                                         "no_of_carparking_spaces":
-                                        parkingController.text,
+                                            parkingController.text,
                                         "facing_direction": facingDirection,
                                         "furnishing_status": furnishingStatus,
                                         "project_status": projectStatus,
@@ -887,9 +939,8 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
                                         "location_key": latlng,
                                         "property_type": propertyType,
                                         "current_address":
-                                        locResult.locationName,
-                                        "current_address_key":
-                                        locResult.latlng,
+                                            locResult.locationName,
+                                        "current_address_key": locResult.latlng,
                                       };
 
                                       if (widget.editId == null ||
@@ -920,11 +971,9 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
                                             .read<PropertyAdCubit>()
                                             .postPropertyAd(data);
                                       }
-                                    }finally{
+                                    } finally {
                                       if (mounted)
-                                        setState(
-                                              () => _isSubmitting = false,
-                                        );
+                                        setState(() => _isSubmitting = false);
                                     }
                                   }
                                 }

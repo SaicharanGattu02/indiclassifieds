@@ -6,7 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:indiclassifieds/presentation/authentication/RegisterUserDetailsScreen.dart';
+import 'package:indiclassifieds/presentation/views/ActivePlansScreen.dart';
 import 'package:indiclassifieds/presentation/views/AdvertisementScreen.dart';
+import 'package:indiclassifieds/presentation/views/ContactSupportScreen.dart';
 import 'package:indiclassifieds/presentation/views/PlansScreen.dart';
 import 'package:indiclassifieds/presentation/PostAdds/CommunityAdScreen.dart';
 import 'package:indiclassifieds/presentation/PostAdds/EducationalAd.dart';
@@ -17,6 +19,7 @@ import 'package:indiclassifieds/presentation/views/SplashScreen.dart';
 import 'package:indiclassifieds/presentation/views/SubCategoriesScreen.dart';
 import 'package:indiclassifieds/presentation/views/SuccessScreen1.dart';
 import 'package:indiclassifieds/utils/constants.dart';
+import '../Components/NoInternet.dart';
 import '../data/cubit/Chat/private_chat_cubit.dart';
 import '../model/CategoryModel.dart';
 import '../presentation/PostAdds/AstrologyAd.dart';
@@ -59,6 +62,24 @@ final GoRouter appRouter = GoRouter(
       path: '/',
       pageBuilder: (context, state) =>
           buildSlideTransitionPage(Splashscreen(), state),
+    ),
+    GoRoute(
+      path: '/no_internet',
+      pageBuilder: (context, state) {
+        return buildSlideTransitionPage(Nointernet(), state);
+      },
+    ),
+    GoRoute(
+      path: '/contact_support',
+      pageBuilder: (context, state) {
+        return buildSlideTransitionPage(ContactSupportScreen(), state);
+      },
+    ),
+    GoRoute(
+      path: '/active_plans',
+      pageBuilder: (context, state) {
+        return buildSlideTransitionPage(ActivePlansScreen(), state);
+      },
     ),
     GoRoute(
       path: '/chat',

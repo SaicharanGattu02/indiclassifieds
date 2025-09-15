@@ -90,7 +90,6 @@ class _DashboardState extends State<Dashboard> {
     //     debugPrint('DeepLink: no mapped location for $uri');
     //   }
     // }, onError: (e) => debugPrint('DeepLink: Link stream error: $e'));
-
   }
 
   @override
@@ -127,6 +126,7 @@ class _DashboardState extends State<Dashboard> {
       if (plan != null) {
         AuthService.setPlanStatus(plan.goToPlansPage.toString() ?? "");
         AuthService.setFreePlanStatus(plan.isFree.toString() ?? "");
+        AuthService.setSubscribeStatus(plan.plans?.length != 0 ? "true" : "false" ?? "");
       }
       final userId = await AuthService.getId();
       SocketService.connect(userId ?? "");
@@ -193,9 +193,7 @@ class _DashboardState extends State<Dashboard> {
                 width: 50,
                 height: 65,
                 margin: const EdgeInsets.only(top: 40),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                ),
+                decoration: BoxDecoration(shape: BoxShape.circle),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   spacing: 6,
@@ -204,17 +202,26 @@ class _DashboardState extends State<Dashboard> {
                       height: 40,
                       width: 40,
                       child: FloatingActionButton(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(10)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadiusGeometry.circular(10),
+                        ),
                         elevation: 0,
                         backgroundColor: AppColors.primary,
                         onPressed: () {
                           context.push("/category");
                           // context.read<LocationCubit>().checkLocationPermission();
                         },
-                        child: const Icon(Icons.add, size: 32, color: Colors.white),
+                        child: const Icon(
+                          Icons.add,
+                          size: 32,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
-                    Text("Sell",style: AppTextStyles.titleSmall(AppColors.unselect),)
+                    Text(
+                      "Sell",
+                      style: AppTextStyles.titleSmall(AppColors.unselect),
+                    ),
                   ],
                 ),
               ),
@@ -229,7 +236,9 @@ class _DashboardState extends State<Dashboard> {
                     BoxShadow(
                       // subtle top shadow
                       color: Colors.black.withOpacity(
-                        Theme.of(context).brightness == Brightness.dark ? 0.35 : 0.08,
+                        Theme.of(context).brightness == Brightness.dark
+                            ? 0.35
+                            : 0.08,
                       ),
                       blurRadius: 12,
                       spreadRadius: 0,

@@ -21,6 +21,7 @@ class AuthService {
   static const String _isStateId = "stateId";
   static const String _isCityId = "cityId";
   static const String _isCity = "city";
+  static const String _isSubscribed = "isSubscribed";
 
   static final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
@@ -47,6 +48,9 @@ class AuthService {
   static Future<void> setPlanStatus(String status) async =>
       await _storage.write(key: _plan_status, value: status);
 
+  static Future<void> setSubscribeStatus(String status) async =>
+      await _storage.write(key: _isSubscribed, value: status);
+
   static Future<void> setFreePlanStatus(String status) async =>
       await _storage.write(key: _free_plan_status, value: status);
 
@@ -58,6 +62,9 @@ class AuthService {
 
   static Future<String?> getPlanStatus() async =>
       await _storage.read(key: _plan_status);
+
+  static Future<String?> getSubscriptionStatus() async =>
+      await _storage.read(key: _isSubscribed);
 
   static Future<String?> getUserStatus() async =>
       await _storage.read(key: _isNewUser);
@@ -73,6 +80,15 @@ class AuthService {
 
   static Future<bool> get isEligibleForFree async {
     final status = await getFreePlanStatus();
+    if (status == "false") {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  static Future<bool> get isSubscribedUser async {
+    final status = await getSubscriptionStatus();
     if (status == "false") {
       return false;
     } else {

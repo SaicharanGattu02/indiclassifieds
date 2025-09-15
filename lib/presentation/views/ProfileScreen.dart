@@ -34,7 +34,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _init() async {
     final isGuest = await AuthService.isGuest;
     setState(() => _isGuestUser = isGuest);
-
     // fetch profile ONLY if not guest
     if (!isGuest) {
       // ignore: use_build_context_synchronously
@@ -88,50 +87,120 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Center(
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              CachedNetworkImage(
-                                imageUrl: user_data?.image ?? "",
-                                imageBuilder: (context, imageProvider) =>
-                                    Container(
-                                      padding: const EdgeInsets.all(12),
-                                      width: 120,
-                                      height: 120,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        image: DecorationImage(
-                                          image: imageProvider,
-                                          fit: BoxFit.cover,
+                          child: FutureBuilder(
+                            future: AuthService.isSubscribedUser,
+                            builder: (context, asyncSnapshot) {
+                              final isSubscribedUser =
+                                  asyncSnapshot.data ?? false;
+                              return Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  // Outer circular frame with specific gradient (purple to blue)
+                                  Container(
+                                    width: 160,
+                                    height: 160,
+                                    padding: isSubscribedUser
+                                        ? EdgeInsets.all(5)
+                                        : EdgeInsets.all(0),
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          const Color(0xFF1677FF), // Purple
+                                          const Color(0xFFFF16FB), // Blue
+                                        ],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      ),
+                                    ),
+                                    child: ClipOval(
+                                      child: CachedNetworkImage(
+                                        imageUrl: user_data?.image ?? "",
+                                        imageBuilder:
+                                            (context, imageProvider) =>
+                                                Container(
+                                                  padding: const EdgeInsets.all(
+                                                    12,
+                                                  ),
+                                                  width: 120,
+                                                  height: 120,
+                                                  decoration: BoxDecoration(
+                                                    shape: BoxShape.circle,
+                                                    image: DecorationImage(
+                                                      image: imageProvider,
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                                  ),
+                                                ),
+                                        placeholder: (context, url) =>
+                                            Container(
+                                              width: 120,
+                                              height: 120,
+                                              alignment: Alignment.center,
+                                              decoration: const BoxDecoration(
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: Center(
+                                                child: spinkits
+                                                    .getSpinningLinespinkit(),
+                                              ),
+                                            ),
+                                        errorWidget: (context, url, error) =>
+                                            Container(
+                                              width: 120,
+                                              height: 120,
+                                              decoration: const BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                image: DecorationImage(
+                                                  image: AssetImage(
+                                                    "assets/images/profile.png",
+                                                  ),
+                                                  fit: BoxFit.cover,
+                                                ),
+                                              ),
+                                            ),
+                                      ),
+                                    ),
+                                  ),
+                                  // Subscribed user badge with specific gradient (pink to orange)
+                                  if (isSubscribedUser) ...[
+                                    Positioned(
+                                      bottom: 0,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 6,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          // color: Colors.transparent,
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
+                                          gradient: LinearGradient(
+                                            colors: [
+                                              const Color(
+                                                0xFFFF1493,
+                                              ), // Deep Pink
+                                              const Color(0xFFFFA500), // Orange
+                                            ],
+                                            begin: Alignment.centerLeft,
+                                            end: Alignment.centerRight,
+                                          ),
+                                        ),
+                                        child: const Text(
+                                          "Subscribed User",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 10,
+                                          ),
                                         ),
                                       ),
                                     ),
-                                placeholder: (context, url) => Container(
-                                  width: 120,
-                                  height: 120,
-                                  alignment: Alignment.center,
-                                  decoration: const BoxDecoration(
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Center(
-                                    child: spinkits.getSpinningLinespinkit(),
-                                  ),
-                                ),
-                                errorWidget: (context, url, error) => Container(
-                                  width: 120,
-                                  height: 120,
-                                  decoration: const BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    image: DecorationImage(
-                                      image: AssetImage(
-                                        "assets/images/profile.png",
-                                      ),
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
+                                  ],
+                                ],
+                              );
+                            },
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -170,6 +239,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           onTap: () => context.push("/plans"),
                         ),
                         _settingsTile(
+                          Icons.subscriptions,
+                          Colors.blue.shade100,
+                          'Active Subscription Plans',
+                          isDark,
+                          textColor,
+                          trailing: Icons.arrow_forward_ios,
+                          onTap: () => context.push("/active_plans"),
+                        ),
+
+                        _settingsTile(
                           Icons.favorite,
                           Colors.red.shade100,
                           'Wishlist',
@@ -187,7 +266,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           trailing: Icons.arrow_forward_ios,
                           onTap: () => context.push('/transactions'),
                         ),
-
                         _settingsTile(
                           Icons.dark_mode_outlined,
                           Colors.blue.shade100,
@@ -591,19 +669,11 @@ class _GuestProfilePlaceholder extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
-            SizedBox(
-              width: 180,
-              child: ElevatedButton(
-                onPressed: () => context.push('/login'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: card,
-                  foregroundColor: textColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text('Go to Login'),
-              ),
+            CustomAppButton1(
+              text: 'Go to Login',
+              onPlusTap: () {
+                context.push('/login');
+              },
             ),
           ],
         ),

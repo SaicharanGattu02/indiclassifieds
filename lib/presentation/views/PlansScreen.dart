@@ -233,7 +233,7 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      // TODO: implement support navigation
+                      context.push("/contact_support");
                     },
                     child: Text(
                       "Contact Support",
