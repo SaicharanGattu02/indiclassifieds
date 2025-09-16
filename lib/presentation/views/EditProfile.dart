@@ -254,10 +254,6 @@ class _EditProfileState extends State<EditProfile> {
                           );
                           // Navigate to next screen if needed
                         } else if (state is VerifyOTPFailure) {
-                          // Failed to verify OTP
-                          ScaffoldMessenger.of(
-                            context,
-                          ).showSnackBar(SnackBar(content: Text(state.error)));
                           CustomSnackBar1.show(context, "${state.error}");
                         }
                       },
@@ -306,7 +302,7 @@ class _EditProfileState extends State<EditProfile> {
                             ),
 
                             // OTP input field (show only after OTP is sent)
-                            if (otpSent)...[
+                            if (otpSent) ...[
                               SizedBox(height: 25),
                               PinCodeTextField(
                                 autoUnfocus: true,
@@ -381,7 +377,9 @@ class _EditProfileState extends State<EditProfile> {
                                               .read<EmailVerificationCubit>()
                                               .verifyOTP({
                                                 "email": _emailController.text,
-                                                "otp": int.parse(_otpController.text),
+                                                "otp": int.parse(
+                                                  _otpController.text,
+                                                ),
                                               });
                                         },
                                   child: isVerifying

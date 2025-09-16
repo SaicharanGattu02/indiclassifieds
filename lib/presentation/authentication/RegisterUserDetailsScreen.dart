@@ -286,12 +286,6 @@ class _RegisterUserDetailsScreenState extends State<RegisterUserDetailsScreen> {
                                       );
                                       // Navigate to next screen if needed
                                     } else if (state is VerifyOTPFailure) {
-                                      // Failed to verify OTP
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        SnackBar(content: Text(state.error)),
-                                      );
                                       CustomSnackBar1.show(
                                         context,
                                         "${state.error}",
