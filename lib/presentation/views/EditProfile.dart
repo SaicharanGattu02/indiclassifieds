@@ -238,21 +238,17 @@ class _EditProfileState extends State<EditProfile> {
                     >(
                       listener: (context, state) {
                         if (state is SendOTPSuccess) {
-                          // OTP sent successfully
                           CustomSnackBar1.show(
                             context,
                             "OTP sent to ${_emailController.text}",
                           );
                         } else if (state is SendOTPFailure) {
-                          // Failed to send OTP
                           CustomSnackBar1.show(context, "${state.error}");
                         } else if (state is VerifyOTPSuccess) {
-                          // OTP verified successfully
                           CustomSnackBar1.show(
                             context,
                             "OTP Verified Successfully!",
                           );
-                          // Navigate to next screen if needed
                         } else if (state is VerifyOTPFailure) {
                           CustomSnackBar1.show(context, "${state.error}");
                         }
