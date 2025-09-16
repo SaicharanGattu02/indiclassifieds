@@ -92,6 +92,10 @@ abstract class RemoteDataSource {
   Future<AdSuccessModel?> boostAdVerifyPayment(Map<String, dynamic> data);
   Future<BoostAdModel?> getBoostAdInfoDetails();
   Future<AdSuccessModel?> reportAd(Map<String, dynamic> data);
+  Future<SendOtpModel?> SendEmailOtp(Map<String, dynamic> data);
+  Future<VerifyOtpModel?> verifyEmailOtp(Map<String, dynamic> data);
+  Future<AdSuccessModel?> sendOTP(Map<String, dynamic> data);
+  Future<AdSuccessModel?> verifyOTP(Map<String, dynamic> data);
 }
 
 class RemoteDataSourceImpl implements RemoteDataSource {
@@ -127,6 +131,66 @@ class RemoteDataSourceImpl implements RemoteDataSource {
       }
     }
     return FormData.fromMap(formMap);
+  }
+
+  @override
+  Future<AdSuccessModel?> verifyOTP(Map<String, dynamic> data) async {
+    try {
+      Response response = await ApiClient.post(
+        "${APIEndpointUrls.verify_email_otp_for_verification}",
+        data: data,
+      );
+      AppLogger.log('verifyOTP:${response.data}');
+      return AdSuccessModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('verifyOTP :: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<AdSuccessModel?> sendOTP(Map<String, dynamic> data) async {
+    try {
+      Response response = await ApiClient.post(
+        "${APIEndpointUrls.send_otp_email_for_verify}",
+        data: data,
+      );
+      AppLogger.log('sendOTP:${response.data}');
+      return AdSuccessModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('sendOTP :: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<VerifyOtpModel?> verifyEmailOtp(Map<String, dynamic> data) async {
+    try {
+      Response response = await ApiClient.post(
+        "${APIEndpointUrls.verify_email_otp}",
+        data: data,
+      );
+      AppLogger.log('verifyEmailOtp:${response.data}');
+      return VerifyOtpModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('verifyEmailOtp :: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<SendOtpModel?> SendEmailOtp(Map<String, dynamic> data) async {
+    try {
+      Response response = await ApiClient.post(
+        "${APIEndpointUrls.send_otp_email}",
+        data: data,
+      );
+      AppLogger.log('SendEmailOtp:${response.data}');
+      return SendOtpModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('SendEmailOtp :: $e');
+      return null;
+    }
   }
 
   @override

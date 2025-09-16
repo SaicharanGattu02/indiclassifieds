@@ -19,7 +19,8 @@ import '../../theme/ThemeHelper.dart';
 
 class Otpscreen extends StatefulWidget {
   final String mobile;
-  const Otpscreen({super.key, required this.mobile});
+  final String email;
+  const Otpscreen({super.key, required this.email, required this.mobile});
 
   @override
   State<Otpscreen> createState() => _OtpscreenState();
@@ -208,7 +209,9 @@ class _OtpscreenState extends State<Otpscreen> {
                                             ),
                                           ),
                                           Text(
-                                            "+91 ${widget.mobile}",
+                                            widget.mobile.isNotEmpty
+                                                ? "+91 ${widget.mobile}"
+                                                : widget.email,
                                             style: TextStyle(
                                               color: textColor,
                                               fontSize: 16,
@@ -231,7 +234,9 @@ class _OtpscreenState extends State<Otpscreen> {
                                               : gradStart,
                                         ),
                                         label: Text(
-                                          "Change number",
+                                          widget.mobile.isNotEmpty
+                                              ? "Change number"
+                                              : "Change Email",
                                           style: TextStyle(
                                             color: isDark
                                                 ? Colors.white70
@@ -455,6 +460,41 @@ class _OtpscreenState extends State<Otpscreen> {
                                               }
                                             }
                                           } else if (state
+                                              is verifyEmailSuccess) {
+                                            final data = state.verifyOtpModel;
+                                            if (data.success == true) {
+                                              await AuthService.saveTokens(
+                                                data.accessToken ?? "",
+                                                data.user?.name ?? "",
+                                                data.user?.email ?? "",
+                                                data.user?.mobile ?? "",
+                                                data.user?.id ?? 0,
+                                                data.refreshToken ?? "",
+                                                data.accessTokenExpiry ?? 0,
+                                                data.newUser ?? false,
+                                                data.user?.state,
+                                                data.user?.city,
+                                                data.user?.stateId,
+                                                data.user?.cityId,
+                                              );
+                                              if (data.newUser == true) {
+                                                context.pushReplacement(
+                                                  '/register?from=otp',
+                                                );
+                                              } else {
+                                                context.pushReplacement(
+                                                  '/dashboard',
+                                                );
+                                              }
+                                            } else {
+                                              if (data.code ==
+                                                  "ACCOUNT_DELETED") {
+                                                context.push(
+                                                  "/recover_account?user_id=${data.id.toString()}",
+                                                );
+                                              }
+                                            }
+                                          } else if (state
                                               is OtpVerifyFailure) {
                                             CustomSnackBar1.show(
                                               context,
@@ -465,7 +505,6 @@ class _OtpscreenState extends State<Otpscreen> {
                                         builder: (context, state) {
                                           final loading =
                                               state is verifyWithMobileLoading;
-
                                           return SizedBox(
                                             width: double.infinity,
                                             height: 52,
@@ -496,13 +535,13 @@ class _OtpscreenState extends State<Otpscreen> {
                                                     onPressed: loading
                                                         ? null
                                                         : () async {
-                                                            // FirebaseMessaging
-                                                            // messaging =
-                                                            //     FirebaseMessaging
-                                                            //         .instance;
-                                                            // String? fcmToken =
-                                                            //     await messaging
-                                                            //         .getToken();
+                                                            FirebaseMessaging
+                                                            messaging =
+                                                                FirebaseMessaging
+                                                                    .instance;
+                                                            String? fcmToken =
+                                                                await messaging
+                                                                    .getToken();
 
                                                             final otp =
                                                                 _otpController
@@ -521,34 +560,54 @@ class _OtpscreenState extends State<Otpscreen> {
                                                             }
 
                                                             // ✅ handle null fcm token gracefully
-                                                            // if (fcmToken ==
-                                                            //         null ||
-                                                            //     fcmToken
-                                                            //         .isEmpty) {
-                                                            //   debugPrint(
-                                                            //     "⚠️ FCM token is null/empty, sending without it",
-                                                            //   );
-                                                            //   CustomSnackBar.show(
-                                                            //     context,
-                                                            //     '⚠️ FCM token is null/empty, sending without it',
-                                                            //   );
-                                                            // }
-
-                                                            context
-                                                                .read<
-                                                                  LogInwithMobileCubit
-                                                                >()
-                                                                .verifyLoginOtp({
-                                                                  "mobile": widget
-                                                                      .mobile,
-                                                                  "otp": otp,
-                                                              "fcm_token": "kjhgiufdghdsiu", // fallback empty string
-                                                                  // "fcm_token":
-                                                                  //     fcmToken ??
-                                                                  //     "", // fallback empty string
-                                                                  "fcm_type":
-                                                                      "app", // or "ios" depending on platform
-                                                                });
+                                                            if (fcmToken ==
+                                                                    null ||
+                                                                fcmToken
+                                                                    .isEmpty) {
+                                                              debugPrint(
+                                                                "⚠️ FCM token is null/empty, sending without it",
+                                                              );
+                                                              CustomSnackBar.show(
+                                                                context,
+                                                                '⚠️ FCM token is null/empty, sending without it',
+                                                              );
+                                                            }
+                                                            if (widget
+                                                                .mobile
+                                                                .isNotEmpty) {
+                                                              context
+                                                                  .read<
+                                                                    LogInwithMobileCubit
+                                                                  >()
+                                                                  .verifyLoginOtp({
+                                                                    "mobile": widget
+                                                                        .mobile,
+                                                                    "otp": otp,
+                                                                    "fcm_token":
+                                                                        fcmToken ??
+                                                                        "",
+                                                                    "fcm_type":
+                                                                        "app",
+                                                                  });
+                                                            } else {
+                                                              context
+                                                                  .read<
+                                                                    LogInwithMobileCubit
+                                                                  >()
+                                                                  .verifyEmailLoginOtp({
+                                                                    "email": widget
+                                                                        .email,
+                                                                    "otp":
+                                                                        int.parse(
+                                                                          otp,
+                                                                        ),
+                                                                    "fcm_token":
+                                                                        fcmToken ??
+                                                                        "",
+                                                                    "fcm_type":
+                                                                        "app",
+                                                                  });
+                                                            }
                                                           },
                                                     style: ElevatedButton.styleFrom(
                                                       backgroundColor:

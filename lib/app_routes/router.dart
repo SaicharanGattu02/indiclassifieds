@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:indiclassifieds/presentation/authentication/EmailLoginscreen.dart';
 import 'package:indiclassifieds/presentation/authentication/RegisterUserDetailsScreen.dart';
 import 'package:indiclassifieds/presentation/views/ActivePlansScreen.dart';
 import 'package:indiclassifieds/presentation/views/AdvertisementScreen.dart';
@@ -126,10 +127,19 @@ final GoRouter appRouter = GoRouter(
           buildSlideTransitionPage(Loginscreen(), state),
     ),
     GoRoute(
+      path: '/email_login',
+      pageBuilder: (context, state) =>
+          buildSlideTransitionPage(EmailLoginscreen(), state),
+    ),
+    GoRoute(
       path: '/otp',
       pageBuilder: (context, state) {
         final mobile = state.uri.queryParameters['mobile'] ?? "";
-        return buildSlideTransitionPage(Otpscreen(mobile: mobile), state);
+        final email = state.uri.queryParameters['email'] ?? "";
+        return buildSlideTransitionPage(
+          Otpscreen(mobile: mobile, email: email),
+          state,
+        );
       },
     ),
     GoRoute(

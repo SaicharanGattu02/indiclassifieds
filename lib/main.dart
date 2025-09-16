@@ -58,16 +58,16 @@ Future<void> main() async {
     provisional: false,
   );
 
-  // if (Platform.isIOS) {
-  //   String? apnsToken = await messaging.getAPNSToken();
-  //   AppLogger.log("📱 APNs Token: $apnsToken");
-  // }
-  //
-  // String? fcmToken = await messaging.getToken();
-  // AppLogger.log("🔥 FCM Token: $fcmToken");
-  // if (fcmToken != null) {
-  //   SecureStorageService.instance.setString("fb_token", fcmToken);
-  // }
+  if (Platform.isIOS) {
+    String? apnsToken = await messaging.getAPNSToken();
+    AppLogger.log("📱 APNs Token: $apnsToken");
+  }
+
+  String? fcmToken = await messaging.getToken();
+  AppLogger.log("🔥 FCM Token: $fcmToken");
+  if (fcmToken != null) {
+    SecureStorageService.instance.setString("fb_token", fcmToken);
+  }
 
   await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
     alert: true,

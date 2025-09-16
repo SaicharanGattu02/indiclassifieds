@@ -19,6 +19,8 @@ import 'package:indiclassifieds/data/cubit/City/city_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Dashboard/DashboardCubit.dart';
 import 'package:indiclassifieds/data/cubit/DeleteAccount/DeleteAccountCubit.dart';
 import 'package:indiclassifieds/data/cubit/DeleteAccount/DeleteAccountRepository.dart';
+import 'package:indiclassifieds/data/cubit/EmailVerification/EmailVerificationCubit.dart';
+import 'package:indiclassifieds/data/cubit/EmailVerification/EmailVerificationRepo.dart';
 import 'package:indiclassifieds/data/cubit/Location/location_cubit.dart';
 import 'package:indiclassifieds/data/cubit/MyAds/MarkAsListing/mark_as_listing_cubit.dart';
 import 'package:indiclassifieds/data/cubit/MyAds/my_ads_cubit.dart';
@@ -263,7 +265,11 @@ class StateInjector {
       ),
     ),
     RepositoryProvider<ReportAdRepo>(
-      create: (context) => ReportAdRepoImpl(
+      create: (context) =>
+          ReportAdRepoImpl(remoteDataSource: context.read<RemoteDataSource>()),
+    ),
+    RepositoryProvider<EmailVerificationRepo>(
+      create: (context) => EmailVerificationRepoImpl(
         remoteDataSource: context.read<RemoteDataSource>(),
       ),
     ),
@@ -276,6 +282,10 @@ class StateInjector {
     BlocProvider<LogInwithMobileCubit>(
       create: (context) =>
           LogInwithMobileCubit(context.read<LogInWithMobileRepository>()),
+    ),
+    BlocProvider<EmailVerificationCubit>(
+      create: (context) =>
+          EmailVerificationCubit(context.read<EmailVerificationRepo>()),
     ),
     BlocProvider<RegisterCubit>(
       create: (context) => RegisterCubit(context.read<RegisterRepo>()),

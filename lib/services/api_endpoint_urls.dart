@@ -1,9 +1,9 @@
 class APIEndpointUrls {
-  // static const String baseUrl = 'http://192.168.80.107:8081/';
-  // static const String socket_url = 'http://192.168.80.107:8081';
+  static const String baseUrl = 'http://192.168.80.107:8081/';
+  static const String socket_url = 'http://192.168.80.107:8081';
 
-  static const String baseUrl = 'https://api.indclassifieds.in/';
-  static const String socket_url = 'https://api.indclassifieds.in';
+  // static const String baseUrl = 'https://api.indclassifieds.in/';
+  // static const String socket_url = 'https://api.indclassifieds.in';
   static const String apiUrl = 'api/app/';
 
   /// Authentiocation Urls
@@ -12,6 +12,10 @@ class APIEndpointUrls {
   static const String send_login_otp = '${apiUrl}send-otp';
   static const String resend_login_otp = '${apiUrl}resend-login-otp';
   static const String verify_login_otp = '${apiUrl}verify-otp';
+  static const String send_otp_email = '${apiUrl}send-otp-email';
+  static const String verify_email_otp = '${apiUrl}verify-email-otp';
+  static const String send_otp_email_for_verify = '${apiUrl}send-otp-email-for-verify';
+  static const String verify_email_otp_for_verification = '${apiUrl}verify-email-otp-for-verification';
   static const String get_my_profile_details =
       '${apiUrl}get-my-profile-details';
   static const String update_user_details_by_user =

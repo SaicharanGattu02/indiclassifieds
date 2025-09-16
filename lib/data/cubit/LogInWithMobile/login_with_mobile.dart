@@ -14,11 +14,7 @@ class LogInwithMobileCubit extends Cubit<LogInWithMobileState> {
       if (response != null && response.success == true) {
         emit(LogInwithMobileSuccess(response));
       } else {
-        emit(
-          LogInwithMobileFailure(
-            "${response?.message ?? ''} ${response?.message ?? ""}",
-          ),
-        );
+        emit(LogInwithMobileFailure("${response?.message ?? ''}"));
       }
     } catch (e) {
       emit(LogInwithMobileFailure(e.toString()));
@@ -31,6 +27,34 @@ class LogInwithMobileCubit extends Cubit<LogInWithMobileState> {
       final response = await logInWithMobileRepository.verifyMobileOtp(data);
       if (response != null) {
         emit(verifyMobileSuccess(response));
+      } else {
+        emit(OtpVerifyFailure("${response?.message ?? ''}"));
+      }
+    } catch (e) {
+      emit(OtpVerifyFailure(e.toString()));
+    }
+  }
+
+  Future<void> postLogInWithEmail(Map<String, dynamic> data) async {
+    emit(LogInwithMobileLoading());
+    try {
+      final response = await logInWithMobileRepository.SendEmailOtp(data);
+      if (response != null && response.success == true) {
+        emit(LogInwithEmailSuccess(response));
+      } else {
+        emit(LogInwithMobileFailure("${response?.message ?? ''}"));
+      }
+    } catch (e) {
+      emit(LogInwithMobileFailure(e.toString()));
+    }
+  }
+
+  Future<void> verifyEmailLoginOtp(Map<String, dynamic> data) async {
+    emit(verifyWithMobileLoading());
+    try {
+      final response = await logInWithMobileRepository.verifyEmailOtp(data);
+      if (response != null) {
+        emit(verifyEmailSuccess(response));
       } else {
         emit(OtpVerifyFailure("${response?.message ?? ''}"));
       }

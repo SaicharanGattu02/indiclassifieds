@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:indiclassifieds/Components/CustomAppButton.dart';
@@ -6,6 +9,9 @@ import 'package:indiclassifieds/Components/CustomSnackBar.dart';
 import 'package:indiclassifieds/data/cubit/Register/register_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Register/register_states.dart';
 import 'package:indiclassifieds/services/AuthService.dart';
+import 'package:pin_code_fields/pin_code_fields.dart';
+import '../../data/cubit/EmailVerification/EmailVerificationCubit.dart';
+import '../../data/cubit/EmailVerification/EmailVerificationStates.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 
@@ -23,6 +29,7 @@ class _RegisterUserDetailsScreenState extends State<RegisterUserDetailsScreen> {
   final _emailCtrl = TextEditingController(text: '');
   final _nameFocus = FocusNode();
   final _emailFocus = FocusNode();
+  final TextEditingController _otpController = TextEditingController();
 
   bool _submitting = false;
 
@@ -75,6 +82,13 @@ class _RegisterUserDetailsScreenState extends State<RegisterUserDetailsScreen> {
         ? const Color(0xFF1F2937)
         : const Color(0xFF8B5CF6); // slate-800 vs violet-500
     final accent = isDark ? const Color(0xFF8B5CF6) : const Color(0xFF3B82F6);
+
+    final accentSoft = isDark
+        ? const Color(0xFF60A5FA)
+        : const Color(0xFF0EA5E9);
+    final pinIdleBorder = isDark ? Colors.white24 : const Color(0xFFE5E7EB);
+    final pinActiveBorder = accent;
+    final pinSelectedBorder = accentSoft;
 
     // Borders for inputs
     OutlineInputBorder _outline(Color c) => OutlineInputBorder(
@@ -246,6 +260,205 @@ class _RegisterUserDetailsScreenState extends State<RegisterUserDetailsScreen> {
                                     ),
                                     onFieldSubmitted: (_) => _submit(),
                                   ),
+                                ),
+                                BlocConsumer<
+                                  EmailVerificationCubit,
+                                  EmailVerificationStates
+                                >(
+                                  listener: (context, state) {
+                                    if (state is SendOTPSuccess) {
+                                      // OTP sent successfully
+                                      CustomSnackBar1.show(
+                                        context,
+                                        "OTP sent to ${_emailCtrl.text}",
+                                      );
+                                    } else if (state is SendOTPFailure) {
+                                      // Failed to send OTP
+                                      CustomSnackBar1.show(
+                                        context,
+                                        "${state.error}",
+                                      );
+                                    } else if (state is VerifyOTPSuccess) {
+                                      // OTP verified successfully
+                                      CustomSnackBar1.show(
+                                        context,
+                                        "OTP Verified Successfully!",
+                                      );
+                                      // Navigate to next screen if needed
+                                    } else if (state is VerifyOTPFailure) {
+                                      // Failed to verify OTP
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(content: Text(state.error)),
+                                      );
+                                      CustomSnackBar1.show(
+                                        context,
+                                        "${state.error}",
+                                      );
+                                    }
+                                  },
+                                  builder: (context, state) {
+                                    final isSending = state is SendOTPLoading;
+                                    final isVerifying =
+                                        state is VerifyOTPLoading;
+
+                                    // Determine if OTP has been sent
+                                    final otpSent =
+                                        state is SendOTPSuccess ||
+                                        state is VerifyOTPLoading ||
+                                        state is VerifyOTPFailure;
+
+                                    return Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: [
+                                        // Send OTP button (hide after OTP is sent)
+                                        // if (!otpSent)
+                                        Align(
+                                          alignment: Alignment.topRight,
+                                          child: TextButton(
+                                            onPressed: isSending
+                                                ? null
+                                                : () {
+                                                    context
+                                                        .read<
+                                                          EmailVerificationCubit
+                                                        >()
+                                                        .sendOTP({
+                                                          "email":
+                                                              _emailCtrl.text,
+                                                        });
+                                                  },
+                                            child: isSending
+                                                ? const SizedBox(
+                                                    width: 16,
+                                                    height: 16,
+                                                    child:
+                                                        CircularProgressIndicator(
+                                                          strokeWidth: 2,
+                                                        ),
+                                                  )
+                                                : Text(
+                                                    "Send OTP",
+                                                    style:
+                                                        AppTextStyles.titleMedium(
+                                                          textColor,
+                                                        ),
+                                                  ),
+                                          ),
+                                        ),
+
+                                        // OTP input field (show only after OTP is sent)
+                                        if (otpSent) ...[
+                                          SizedBox(height: 25),
+                                          PinCodeTextField(
+                                            autoUnfocus: true,
+                                            appContext: context,
+                                            controller: _otpController,
+                                            backgroundColor: Colors.transparent,
+                                            length: 6,
+                                            animationType: AnimationType.fade,
+                                            hapticFeedbackTypes:
+                                                HapticFeedbackTypes.heavy,
+                                            cursorColor: isDark
+                                                ? Colors.white70
+                                                : Colors.grey[700],
+                                            keyboardType: TextInputType.number,
+                                            enableActiveFill: true,
+                                            useExternalAutoFillGroup: true,
+                                            beforeTextPaste: (text) => true,
+                                            autoFocus: true,
+                                            autoDismissKeyboard: false,
+                                            showCursor: true,
+                                            pastedTextStyle: TextStyle(
+                                              color: textColor,
+                                              fontWeight: FontWeight.w700,
+                                              fontFamily: 'Roboto',
+                                            ),
+                                            pinTheme: PinTheme(
+                                              shape: PinCodeFieldShape.box,
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              fieldHeight: 40,
+                                              fieldWidth: 40,
+                                              fieldOuterPadding:
+                                                  const EdgeInsets.only(
+                                                    right: 2,
+                                                  ),
+                                              activeFillColor: isDark
+                                                  ? const Color(0xFF131A22)
+                                                  : Colors.white,
+                                              selectedFillColor: isDark
+                                                  ? const Color(0xFF131A22)
+                                                  : Colors.white,
+                                              inactiveFillColor: isDark
+                                                  ? const Color(0xFF0D141B)
+                                                  : Colors.white,
+                                              activeColor: pinActiveBorder,
+                                              selectedColor: pinSelectedBorder,
+                                              inactiveColor: pinIdleBorder,
+                                              activeBorderWidth: 1.6,
+                                              selectedBorderWidth: 1.6,
+                                              inactiveBorderWidth: 1.1,
+                                            ),
+                                            textStyle: TextStyle(
+                                              color: textColor,
+                                              fontSize: 17,
+                                              fontFamily: 'Inter',
+                                              fontWeight: FontWeight.w400,
+                                            ),
+                                            inputFormatters: [
+                                              FilteringTextInputFormatter
+                                                  .digitsOnly,
+                                            ],
+                                            textInputAction: Platform.isAndroid
+                                                ? TextInputAction.none
+                                                : TextInputAction.done,
+                                          ),
+                                        ],
+                                        // Verify OTP button (show only after OTP is sent)
+                                        if (otpSent)
+                                          Align(
+                                            alignment: Alignment.topRight,
+                                            child: TextButton(
+                                              onPressed: isVerifying
+                                                  ? null
+                                                  : () {
+                                                      context
+                                                          .read<
+                                                            EmailVerificationCubit
+                                                          >()
+                                                          .verifyOTP({
+                                                            "email":
+                                                                _emailCtrl.text,
+                                                            "otp": int.parse(
+                                                              _otpController
+                                                                  .text,
+                                                            ),
+                                                          });
+                                                    },
+                                              child: isVerifying
+                                                  ? const SizedBox(
+                                                      width: 16,
+                                                      height: 16,
+                                                      child:
+                                                          CircularProgressIndicator(
+                                                            strokeWidth: 2,
+                                                          ),
+                                                    )
+                                                  : Text(
+                                                      "Verify OTP",
+                                                      style:
+                                                          AppTextStyles.titleMedium(
+                                                            textColor,
+                                                          ),
+                                                    ),
+                                            ),
+                                          ),
+                                      ],
+                                    );
+                                  },
                                 ),
                                 const SizedBox(height: 24),
                                 BlocConsumer<RegisterCubit, RegisterStates>(

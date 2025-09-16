@@ -1,24 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:indiclassifieds/Components/CustomSnackBar.dart';
-import 'package:indiclassifieds/data/cubit/LogInWithMobile/login_with_mobile.dart';
-import 'package:indiclassifieds/data/cubit/LogInWithMobile/login_with_mobile_state.dart';
-import 'package:indiclassifieds/widgets/CommonTextField.dart';
-import '../../Components/CustomAppButton.dart';
+
+import '../../Components/CustomSnackBar.dart';
+import '../../data/cubit/LogInWithMobile/login_with_mobile.dart';
+import '../../data/cubit/LogInWithMobile/login_with_mobile_state.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
+import '../../widgets/CommonTextField.dart';
 
-class Loginscreen extends StatefulWidget {
-  const Loginscreen({super.key});
+class EmailLoginscreen extends StatefulWidget {
+  const EmailLoginscreen({super.key});
 
   @override
-  State<Loginscreen> createState() => _LoginscreenState();
+  State<EmailLoginscreen> createState() => _EmailLoginscreenState();
 }
 
-class _LoginscreenState extends State<Loginscreen> {
-  final TextEditingController _phoneController = TextEditingController();
+class _EmailLoginscreenState extends State<EmailLoginscreen> {
+  final TextEditingController _emailController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -28,7 +27,6 @@ class _LoginscreenState extends State<Loginscreen> {
     final bgColor = ThemeHelper.backgroundColor(context);
     final cardColor = ThemeHelper.cardColor(context);
 
-    // Brand-ish accents
     final gradStart = isDark
         ? const Color(0xFF111827)
         : const Color(0xFF1677FF);
@@ -124,116 +122,49 @@ class _LoginscreenState extends State<Loginscreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // Phone field
+                                // Email field
                                 CommonTextField1(
-                                  lable: "Mobile Number",
-                                  hint: "Enter 10-digit number",
-                                  controller: _phoneController,
+                                  lable: "Email",
+                                  hint: "Enter your Email",
+                                  controller: _emailController,
                                   color: textColor,
-                                  keyboardType: TextInputType.phone,
-                                  inputFormatters: [
-                                    FilteringTextInputFormatter.digitsOnly,
-                                    LengthLimitingTextInputFormatter(10),
-                                  ],
-                                  validator: (v) =>
-                                      (v == null || v.trim().isEmpty)
-                                      ? 'Phone required'
-                                      : (!RegExp(
-                                              r'^[0-9]{10}$',
-                                            ).hasMatch(v.trim())
-                                            ? 'Enter a valid 10-digit phone number'
-                                            : null),
-                                  prefixIcon: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 10,
-                                            vertical: 6,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: isDark
-                                                ? Colors.white.withOpacity(0.06)
-                                                : const Color(0xFFF1F5F9),
-                                            borderRadius: BorderRadius.circular(
-                                              999,
-                                            ),
-                                            border: Border.all(
-                                              color: isDark
-                                                  ? Colors.white24
-                                                  : const Color(0xFFE2E8F0),
-                                            ),
-                                          ),
-                                          child: Text(
-                                            "+91",
-                                            style:
-                                                AppTextStyles.bodyMedium(
-                                                  textColor,
-                                                ).copyWith(
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-
-                                const SizedBox(height: 10),
-                                // Helper/info
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.info_outline,
-                                      size: 16,
-                                      color: isDark
-                                          ? Colors.white70
-                                          : Colors.grey[700],
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Expanded(
-                                      child: Text(
-                                        "We’ll send a 6-digit OTP to this number.",
-                                        style: AppTextStyles.bodySmall(
-                                          isDark
-                                              ? Colors.white70
-                                              : Colors.grey[700]!,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                                  keyboardType: TextInputType.emailAddress,
+                                  validator: (v) {
+                                    if (v == null || v.trim().isEmpty) {
+                                      return 'Email required';
+                                    } else if (!RegExp(
+                                      r'^[\w-\.]+@([\w-]+\.)+[\w]{2,4}$',
+                                    ).hasMatch(v.trim())) {
+                                      return 'Enter a valid email';
+                                    }
+                                    return null;
+                                  },
                                 ),
 
                                 const SizedBox(height: 18),
 
-                                // Send OTP button with Bloc
                                 BlocConsumer<
                                   LogInwithMobileCubit,
                                   LogInWithMobileState
                                 >(
                                   listener: (context, state) {
-                                    if (state is LogInwithMobileSuccess) {
+                                    if (state is LogInwithEmailSuccess) {
                                       context.pushReplacement(
-                                        '/otp?mobile=${_phoneController.text}',
+                                        '/otp?email=${_emailController.text}',
                                       );
                                     } else if (state
                                         is LogInwithMobileFailure) {
-                                      // Prefer showing backend message if available
-                                      CustomSnackBar.show(
-                                        context,
-                                        state.error ??
-                                            "Failed to send OTP. Try again.",
-                                      );
+                                      // CustomSnackBar.show(
+                                      //   context,
+                                      //   state.error ??
+                                      //       "Failed to send OTP. Try again.",
+                                      // );
+                                      showNotRegisteredDialog(context);
                                     }
                                   },
                                   builder: (context, state) {
                                     final bool loading =
                                         state is LogInwithMobileLoading;
-
                                     return SizedBox(
                                       width: double.infinity,
                                       height: 52,
@@ -252,28 +183,28 @@ class _LoginscreenState extends State<Loginscreen> {
                                           onPressed: loading
                                               ? null
                                               : () {
-                                                  final phone = _phoneController
+                                                  final email = _emailController
                                                       .text
                                                       .trim();
-                                                  if (phone.isEmpty) {
+                                                  if (email.isEmpty) {
                                                     CustomSnackBar.show(
                                                       context,
-                                                      "Phone number is required",
+                                                      "Email is required",
                                                     );
                                                   } else if (!RegExp(
-                                                    r'^[0-9]{10}$',
-                                                  ).hasMatch(phone)) {
+                                                    r'^[\w-\.]+@([\w-]+\.)+[\w]{2,4}$',
+                                                  ).hasMatch(email)) {
                                                     CustomSnackBar.show(
                                                       context,
-                                                      "Enter a valid 10-digit phone number",
+                                                      "Enter a valid email",
                                                     );
                                                   } else {
                                                     context
                                                         .read<
                                                           LogInwithMobileCubit
                                                         >()
-                                                        .postLogInWithMobile({
-                                                          "mobile": phone,
+                                                        .postLogInWithEmail({
+                                                          "email": email,
                                                         });
                                                   }
                                                 },
@@ -287,7 +218,9 @@ class _LoginscreenState extends State<Loginscreen> {
                                                         color: Colors.white,
                                                       ),
                                                 )
-                                              : const Icon(Icons.sms_outlined),
+                                              : const Icon(
+                                                  Icons.email_outlined,
+                                                ),
                                           label: Text(
                                             loading
                                                 ? "Sending OTP..."
@@ -322,10 +255,10 @@ class _LoginscreenState extends State<Loginscreen> {
                                 Center(
                                   child: TextButton(
                                     onPressed: () {
-                                      context.pushReplacement("/email_login");
+                                      context.pushReplacement("/login");
                                     },
                                     child: Text(
-                                      "Login With Email",
+                                      "Login With Mobile Number",
                                       style: AppTextStyles.titleSmall(textColor)
                                           .copyWith(
                                             decoration:
@@ -371,6 +304,73 @@ class _LoginscreenState extends State<Loginscreen> {
           ),
         ],
       ),
+    );
+  }
+
+  void showNotRegisteredDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          backgroundColor: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.error_outline,
+                  color: Colors.redAccent,
+                  size: 60,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  "Email Not Registered",
+                  style: AppTextStyles.titleLarge(
+                    Colors.black,
+                  ).copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  "We couldn’t find an account with this email.\n"
+                  "But don’t worry! You can log in easily using your mobile number.",
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.bodyMedium(Colors.grey[700]!),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  height: 48,
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      context.pushReplacement("/login");
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text(
+                      "Login with Mobile",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
