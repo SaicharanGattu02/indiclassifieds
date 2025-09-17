@@ -20,7 +20,7 @@ import 'package:indiclassifieds/utils/constants.dart';
 import 'app_routes/router.dart';
 import 'data/cubit/theme_cubit.dart';
 import 'firebase_options.dart';
-
+import 'package:indiclassifieds/utils/AppLogger.dart';
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
