@@ -54,7 +54,17 @@ class ProductsCubit extends Cubit<ProductsStates> {
   }
 
 
-  Future<void> getMoreProducts(String subCategoryId) async {
+  Future<void> getMoreProducts({
+    String? categoryId,
+    String? subCategoryId,
+    String? search,
+    String? state_id,
+    String? city_id,
+    String? sort_by,
+    String? minPrice,
+    String? maxPrice,
+
+  }) async {
     if (_isLoadingMore || !_hasNextPage) return;
 
     _isLoadingMore = true;
@@ -64,8 +74,15 @@ class ProductsCubit extends Cubit<ProductsStates> {
 
     try {
       final newData = await productsRepo.getProducts(
+        categoryId: categoryId,
         subCategoryId: subCategoryId,
-        page: _currentPage, // 👈 pass next page
+        search: search,
+        state_id: state_id,
+        city_id: city_id,
+        sort_by: sort_by,
+        minPrice: minPrice,
+        maxPrice: maxPrice,
+        page: _currentPage,
       );
 
       if (newData != null && newData.products?.isNotEmpty == true) {

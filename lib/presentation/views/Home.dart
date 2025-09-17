@@ -33,6 +33,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final ScrollController _scrollController = ScrollController();
   int currentIndex = 0;
 
   @override
@@ -41,6 +42,13 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         context.read<DashboardCubit>().fetchDashboard();
+      }
+    });
+
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 200) {
+        context.read<ProductsCubit>().getMoreProducts();
       }
     });
   }
@@ -487,13 +495,19 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         SizedBox(height: 8),
                         BlocBuilder<ProductsCubit, ProductsStates>(
-                          builder: (context, productState) {
-                            if (productState is ProductsLoaded) {
-                              final products =
-                                  productState.productsModel.products ?? [];
-                              if (products.length == 0) {
+                          builder: (context, state) {
+                            if (state is ProductsLoaded ||
+                                state is ProductsLoadingMore) {
+                              final productsModel =
+                                  (state as dynamic).productsModel;
+                              final products = productsModel.products ?? [];
+                              final hasNextPage =
+                                  (state as dynamic).hasNextPage;
+
+                              if (products.isEmpty) {
                                 return SizedBox.shrink();
                               }
+
                               return Column(
                                 children: [
                                   Row(
@@ -548,83 +562,96 @@ class _HomeScreenState extends State<HomeScreen> {
                                               crossAxisSpacing: 12,
                                               childAspectRatio: 0.95,
                                             ),
-                                        delegate: SliverChildBuilderDelegate((
-                                          context,
-                                          index,
-                                        ) {
-                                          final p = products[index];
-
-                                          return BlocListener<
-                                            AddToWishlistCubit,
-                                            AddToWishlistStates
-                                          >(
-                                            listener: (context, state) {
-                                              if (state
-                                                  is AddToWishlistLoaded) {
-                                                context
-                                                    .read<ProductsCubit>()
-                                                    .updateWishlistStatus(
-                                                      state.product_id,
-                                                      state
-                                                              .addToWishlistModel
-                                                              .liked ??
-                                                          false,
-                                                    );
-                                              } else if (state
-                                                  is AddToWishlistFailure) {
-                                                CustomSnackBar1.show(
-                                                  context,
-                                                  state.error,
+                                        delegate: SliverChildBuilderDelegate(
+                                          (context, index) {
+                                            if (index == products.length) {
+                                              if (hasNextPage) {
+                                                context.read<ProductsCubit>().getMoreProducts();
+                                                return const Padding(
+                                                  padding: EdgeInsets.all(16.0),
+                                                  child: Center(child: CircularProgressIndicator()),
                                                 );
+                                              } else {
+                                                return const SizedBox.shrink();
                                               }
-                                            },
-                                            child: SimilarProductCard(
-                                              title: p.title ?? "—",
-                                              isFeatured:
-                                                  p.featured_status ?? false,
-                                              price: "₹${_formatINR(p.price)}",
-                                              location: p.location ?? "",
-                                              imageUrl: p.image,
-                                              isLiked: p.isFavorited ?? false,
-                                              onLikeToggle: isGuest
-                                                  ? () {
-                                                      context.push("/login");
-                                                    }
-                                                  : () {
-                                                      if (p.id != null) {
-                                                        context
-                                                            .read<
-                                                              AddToWishlistCubit
-                                                            >()
-                                                            .addToWishlist(
-                                                              p.id!,
-                                                            );
-                                                      }
-                                                    },
-                                              onTap: () async {
-                                                final shouldRefresh =
-                                                    await context.push<bool>(
-                                                      "/products_details?listingId=${p.id}&subcategory_id=${p.subCategory?.id}",
-                                                    );
-                                                if (shouldRefresh == true) {
+                                            }
+                                            final p = products[index];
+                                            return BlocListener<
+                                              AddToWishlistCubit,
+                                              AddToWishlistStates
+                                            >(
+                                              listener: (context, wishlistState) {
+                                                if (wishlistState
+                                                    is AddToWishlistLoaded) {
                                                   context
-                                                      .read<DashboardCubit>()
-                                                      .fetchDashboard();
+                                                      .read<ProductsCubit>()
+                                                      .updateWishlistStatus(
+                                                        wishlistState
+                                                            .product_id,
+                                                        wishlistState
+                                                                .addToWishlistModel
+                                                                .liked ??
+                                                            false,
+                                                      );
+                                                } else if (wishlistState
+                                                    is AddToWishlistFailure) {
+                                                  CustomSnackBar1.show(
+                                                    context,
+                                                    wishlistState.error,
+                                                  );
                                                 }
                                               },
-
-                                              borderColor: borderColor,
-                                            ),
-                                          );
-                                        }, childCount: products.length),
+                                              child: SimilarProductCard(
+                                                title: p.title ?? "—",
+                                                isFeatured:
+                                                    p.featured_status ?? false,
+                                                price:
+                                                    "₹${_formatINR(p.price)}",
+                                                location: p.location ?? "",
+                                                imageUrl: p.image,
+                                                isLiked: p.isFavorited ?? false,
+                                                onLikeToggle: isGuest
+                                                    ? () {
+                                                        context.push("/login");
+                                                      }
+                                                    : () {
+                                                        if (p.id != null) {
+                                                          context
+                                                              .read<
+                                                                AddToWishlistCubit
+                                                              >()
+                                                              .addToWishlist(
+                                                                p.id!,
+                                                              );
+                                                        }
+                                                      },
+                                                onTap: () async {
+                                                  final shouldRefresh =
+                                                      await context.push<bool>(
+                                                        "/products_details?listingId=${p.id}&subcategory_id=${p.subCategory?.id}",
+                                                      );
+                                                  if (shouldRefresh == true) {
+                                                    context
+                                                        .read<DashboardCubit>()
+                                                        .fetchDashboard();
+                                                  }
+                                                },
+                                                borderColor: borderColor,
+                                              ),
+                                            );
+                                          },
+                                          // 🔹 +1 for loader slot
+                                          childCount: products.length + 1,
+                                        ),
                                       ),
                                     ],
                                   ),
                                 ],
                               );
                             }
-
-                            return Center(child: CircularProgressIndicator());
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
                           },
                         ),
                         SizedBox(height: 18),

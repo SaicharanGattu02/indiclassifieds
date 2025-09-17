@@ -393,7 +393,6 @@ class _ProductsListScreenState extends State<ProductsListScreen> {
                       ),
                     );
                   }
-
                   return CustomScrollView(
                     controller: _scrollController,
                     slivers: [
@@ -414,7 +413,6 @@ class _ProductsListScreenState extends State<ProductsListScreen> {
                                     )
                                   : const SizedBox.shrink();
                             }
-
                             final product = products[index];
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 16),

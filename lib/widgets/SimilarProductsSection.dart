@@ -48,7 +48,7 @@ class _SimilarProductsSection1State extends State<SimilarProductsSection1> {
     _scrollCtrl.addListener(() {
       if (_scrollCtrl.position.pixels >=
           _scrollCtrl.position.maxScrollExtent - 200) {
-        _cubit.getMoreProducts(widget.subCategoryId);
+        _cubit.getMoreProducts(subCategoryId: widget.subCategoryId);
       }
     });
   }
@@ -153,7 +153,7 @@ class _SimilarProductsSection1State extends State<SimilarProductsSection1> {
 
             return SimilarProductCard(
               title: title,
-              isFeatured:p.featured_status??false,
+              isFeatured: p.featured_status ?? false,
               price: price,
               location: location,
               imageUrl: img,
