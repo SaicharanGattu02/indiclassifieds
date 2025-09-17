@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "84273076690",
-    "project_id": "indclassifieds-ac8a0",
-    "storage_bucket": "indclassifieds-ac8a0.firebasestorage.app"
+    "project_number": "427341683657",
+    "project_id": "ind-classifieds-45f12",
+    "storage_bucket": "ind-classifieds-45f12.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:84273076690:android:b4faee763d721695c1100b",
+        "mobilesdk_app_id": "1:427341683657:android:5f0f082c22efedb6d3e618",
         "android_client_info": {
           "package_name": "com.ind.classifieds"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAWGfhFYpm5UaI2A8NOlMsXBA3D8_3rNZc"
+          "current_key": "AIzaSyDQHqlkSmxN2atip2uR2XWZTvHg5QwLH7w"
         }
       ],
       "services": {
