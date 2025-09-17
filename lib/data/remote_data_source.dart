@@ -96,6 +96,7 @@ abstract class RemoteDataSource {
   Future<VerifyOtpModel?> verifyEmailOtp(Map<String, dynamic> data);
   Future<AdSuccessModel?> sendOTP(Map<String, dynamic> data);
   Future<AdSuccessModel?> verifyOTP(Map<String, dynamic> data);
+  Future<VerifyOtpModel?> byPassLogin(Map<String, dynamic> data);
 }
 
 class RemoteDataSourceImpl implements RemoteDataSource {
@@ -131,6 +132,21 @@ class RemoteDataSourceImpl implements RemoteDataSource {
       }
     }
     return FormData.fromMap(formMap);
+  }
+
+  @override
+  Future<VerifyOtpModel?> byPassLogin(Map<String, dynamic> data) async {
+    try {
+      Response response = await ApiClient.post(
+        "${APIEndpointUrls.bypass_login}",
+        data: data,
+      );
+      AppLogger.log('byPassLogin:${response.data}');
+      return VerifyOtpModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('byPassLogin :: $e');
+      return null;
+    }
   }
 
   @override

@@ -154,12 +154,10 @@ class _EmailLoginscreenState extends State<EmailLoginscreen> {
                                       );
                                     } else if (state
                                         is LogInwithMobileFailure) {
-                                      // CustomSnackBar.show(
-                                      //   context,
-                                      //   state.error ??
-                                      //       "Failed to send OTP. Try again.",
-                                      // );
-                                      showNotRegisteredDialog(context);
+                                      showNotRegisteredDialog(
+                                        context,
+                                        state.error,
+                                      );
                                     }
                                   },
                                   builder: (context, state) {
@@ -307,7 +305,7 @@ class _EmailLoginscreenState extends State<EmailLoginscreen> {
     );
   }
 
-  void showNotRegisteredDialog(BuildContext context) {
+  void showNotRegisteredDialog(BuildContext context, String error) {
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -329,14 +327,14 @@ class _EmailLoginscreenState extends State<EmailLoginscreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  "Email Not Registered",
+                  error,
                   style: AppTextStyles.titleLarge(
                     Colors.black,
                   ).copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  "We couldn’t find an account with this email.\n"
+                  "We couldn’t find an account with this email or not verified yet.\n"
                   "But don’t worry! You can log in easily using your mobile number.",
                   textAlign: TextAlign.center,
                   style: AppTextStyles.bodyMedium(Colors.grey[700]!),

@@ -16,6 +16,7 @@ class APIEndpointUrls {
   static const String verify_email_otp = '${apiUrl}verify-email-otp';
   static const String send_otp_email_for_verify = '${apiUrl}send-otp-email-for-verify';
   static const String verify_email_otp_for_verification = '${apiUrl}verify-email-otp-for-verification';
+  static const String bypass_login = '${apiUrl}bypass-login';
   static const String get_my_profile_details =
       '${apiUrl}get-my-profile-details';
   static const String update_user_details_by_user =

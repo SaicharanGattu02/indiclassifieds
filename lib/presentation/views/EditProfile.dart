@@ -232,172 +232,172 @@ class _EditProfileState extends State<EditProfile> {
                           ? "Email required"
                           : null,
                     ),
-                    BlocConsumer<
-                      EmailVerificationCubit,
-                      EmailVerificationStates
-                    >(
-                      listener: (context, state) {
-                        if (state is SendOTPSuccess) {
-                          CustomSnackBar1.show(
-                            context,
-                            "OTP sent to ${_emailController.text}",
-                          );
-                        } else if (state is SendOTPFailure) {
-                          CustomSnackBar1.show(context, "${state.error}");
-                        } else if (state is VerifyOTPSuccess) {
-                          CustomSnackBar1.show(
-                            context,
-                            "OTP Verified Successfully!",
-                          );
-                        } else if (state is VerifyOTPFailure) {
-                          CustomSnackBar1.show(context, "${state.error}");
-                        }
-                      },
-                      builder: (context, state) {
-                        final isSending = state is SendOTPLoading;
-                        final isVerifying = state is VerifyOTPLoading;
-
-                        // Determine if OTP has been sent
-                        final otpSent =
-                            state is SendOTPSuccess ||
-                            state is VerifyOTPLoading ||
-                            state is VerifyOTPFailure;
-
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            // Send OTP button (hide after OTP is sent)
-                            // if (!otpSent)
-                            Align(
-                              alignment: Alignment.topRight,
-                              child: TextButton(
-                                onPressed: isSending
-                                    ? null
-                                    : () {
-                                        context
-                                            .read<EmailVerificationCubit>()
-                                            .sendOTP({
-                                              "email": _emailController.text,
-                                            });
-                                      },
-                                child: isSending
-                                    ? const SizedBox(
-                                        width: 16,
-                                        height: 16,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                        ),
-                                      )
-                                    : Text(
-                                        "Send OTP",
-                                        style: AppTextStyles.titleMedium(
-                                          textColor,
-                                        ),
-                                      ),
-                              ),
-                            ),
-
-                            // OTP input field (show only after OTP is sent)
-                            if (otpSent) ...[
-                              SizedBox(height: 25),
-                              PinCodeTextField(
-                                autoUnfocus: true,
-                                appContext: context,
-                                controller: _otpController,
-                                backgroundColor: Colors.transparent,
-                                length: 6,
-                                animationType: AnimationType.fade,
-                                hapticFeedbackTypes: HapticFeedbackTypes.heavy,
-                                cursorColor: isDark
-                                    ? Colors.white70
-                                    : Colors.grey[700],
-                                keyboardType: TextInputType.number,
-                                enableActiveFill: true,
-                                useExternalAutoFillGroup: true,
-                                beforeTextPaste: (text) => true,
-                                autoFocus: true,
-                                autoDismissKeyboard: false,
-                                showCursor: true,
-                                pastedTextStyle: TextStyle(
-                                  color: textColor,
-                                  fontWeight: FontWeight.w700,
-                                  fontFamily: 'Roboto',
-                                ),
-                                pinTheme: PinTheme(
-                                  shape: PinCodeFieldShape.box,
-                                  borderRadius: BorderRadius.circular(12),
-                                  fieldHeight: 40,
-                                  fieldWidth: 40,
-                                  fieldOuterPadding: const EdgeInsets.only(
-                                    right: 2,
-                                  ),
-                                  activeFillColor: isDark
-                                      ? const Color(0xFF131A22)
-                                      : Colors.white,
-                                  selectedFillColor: isDark
-                                      ? const Color(0xFF131A22)
-                                      : Colors.white,
-                                  inactiveFillColor: isDark
-                                      ? const Color(0xFF0D141B)
-                                      : Colors.white,
-                                  activeColor: pinActiveBorder,
-                                  selectedColor: pinSelectedBorder,
-                                  inactiveColor: pinIdleBorder,
-                                  activeBorderWidth: 1.6,
-                                  selectedBorderWidth: 1.6,
-                                  inactiveBorderWidth: 1.1,
-                                ),
-                                textStyle: TextStyle(
-                                  color: textColor,
-                                  fontSize: 17,
-                                  fontFamily: 'Inter',
-                                  fontWeight: FontWeight.w400,
-                                ),
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.digitsOnly,
-                                ],
-                                textInputAction: Platform.isAndroid
-                                    ? TextInputAction.none
-                                    : TextInputAction.done,
-                              ),
-                            ],
-                            // Verify OTP button (show only after OTP is sent)
-                            if (otpSent)
-                              Align(
-                                alignment: Alignment.topRight,
-                                child: TextButton(
-                                  onPressed: isVerifying
-                                      ? null
-                                      : () {
-                                          context
-                                              .read<EmailVerificationCubit>()
-                                              .verifyOTP({
-                                                "email": _emailController.text,
-                                                "otp": int.parse(
-                                                  _otpController.text,
-                                                ),
-                                              });
-                                        },
-                                  child: isVerifying
-                                      ? const SizedBox(
-                                          width: 16,
-                                          height: 16,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                          ),
-                                        )
-                                      : Text(
-                                          "Verify OTP",
-                                          style: AppTextStyles.titleMedium(
-                                            textColor,
-                                          ),
-                                        ),
-                                ),
-                              ),
-                          ],
-                        );
-                      },
-                    ),
+                    // BlocConsumer<
+                    //   EmailVerificationCubit,
+                    //   EmailVerificationStates
+                    // >(
+                    //   listener: (context, state) {
+                    //     if (state is SendOTPSuccess) {
+                    //       CustomSnackBar1.show(
+                    //         context,
+                    //         "OTP sent to ${_emailController.text}",
+                    //       );
+                    //     } else if (state is SendOTPFailure) {
+                    //       CustomSnackBar1.show(context, "${state.error}");
+                    //     } else if (state is VerifyOTPSuccess) {
+                    //       CustomSnackBar1.show(
+                    //         context,
+                    //         "OTP Verified Successfully!",
+                    //       );
+                    //     } else if (state is VerifyOTPFailure) {
+                    //       CustomSnackBar1.show(context, "${state.error}");
+                    //     }
+                    //   },
+                    //   builder: (context, state) {
+                    //     final isSending = state is SendOTPLoading;
+                    //     final isVerifying = state is VerifyOTPLoading;
+                    //
+                    //     // Determine if OTP has been sent
+                    //     final otpSent =
+                    //         state is SendOTPSuccess ||
+                    //         state is VerifyOTPLoading ||
+                    //         state is VerifyOTPFailure;
+                    //
+                    //     return Column(
+                    //       crossAxisAlignment: CrossAxisAlignment.end,
+                    //       children: [
+                    //         // Send OTP button (hide after OTP is sent)
+                    //         // if (!otpSent)
+                    //         Align(
+                    //           alignment: Alignment.topRight,
+                    //           child: TextButton(
+                    //             onPressed: isSending
+                    //                 ? null
+                    //                 : () {
+                    //                     context
+                    //                         .read<EmailVerificationCubit>()
+                    //                         .sendOTP({
+                    //                           "email": _emailController.text,
+                    //                         });
+                    //                   },
+                    //             child: isSending
+                    //                 ? const SizedBox(
+                    //                     width: 16,
+                    //                     height: 16,
+                    //                     child: CircularProgressIndicator(
+                    //                       strokeWidth: 2,
+                    //                     ),
+                    //                   )
+                    //                 : Text(
+                    //                     "Send OTP",
+                    //                     style: AppTextStyles.titleMedium(
+                    //                       textColor,
+                    //                     ),
+                    //                   ),
+                    //           ),
+                    //         ),
+                    //
+                    //         // OTP input field (show only after OTP is sent)
+                    //         if (otpSent) ...[
+                    //           SizedBox(height: 25),
+                    //           PinCodeTextField(
+                    //             autoUnfocus: true,
+                    //             appContext: context,
+                    //             controller: _otpController,
+                    //             backgroundColor: Colors.transparent,
+                    //             length: 6,
+                    //             animationType: AnimationType.fade,
+                    //             hapticFeedbackTypes: HapticFeedbackTypes.heavy,
+                    //             cursorColor: isDark
+                    //                 ? Colors.white70
+                    //                 : Colors.grey[700],
+                    //             keyboardType: TextInputType.number,
+                    //             enableActiveFill: true,
+                    //             useExternalAutoFillGroup: true,
+                    //             beforeTextPaste: (text) => true,
+                    //             autoFocus: true,
+                    //             autoDismissKeyboard: false,
+                    //             showCursor: true,
+                    //             pastedTextStyle: TextStyle(
+                    //               color: textColor,
+                    //               fontWeight: FontWeight.w700,
+                    //               fontFamily: 'Roboto',
+                    //             ),
+                    //             pinTheme: PinTheme(
+                    //               shape: PinCodeFieldShape.box,
+                    //               borderRadius: BorderRadius.circular(12),
+                    //               fieldHeight: 40,
+                    //               fieldWidth: 40,
+                    //               fieldOuterPadding: const EdgeInsets.only(
+                    //                 right: 2,
+                    //               ),
+                    //               activeFillColor: isDark
+                    //                   ? const Color(0xFF131A22)
+                    //                   : Colors.white,
+                    //               selectedFillColor: isDark
+                    //                   ? const Color(0xFF131A22)
+                    //                   : Colors.white,
+                    //               inactiveFillColor: isDark
+                    //                   ? const Color(0xFF0D141B)
+                    //                   : Colors.white,
+                    //               activeColor: pinActiveBorder,
+                    //               selectedColor: pinSelectedBorder,
+                    //               inactiveColor: pinIdleBorder,
+                    //               activeBorderWidth: 1.6,
+                    //               selectedBorderWidth: 1.6,
+                    //               inactiveBorderWidth: 1.1,
+                    //             ),
+                    //             textStyle: TextStyle(
+                    //               color: textColor,
+                    //               fontSize: 17,
+                    //               fontFamily: 'Inter',
+                    //               fontWeight: FontWeight.w400,
+                    //             ),
+                    //             inputFormatters: [
+                    //               FilteringTextInputFormatter.digitsOnly,
+                    //             ],
+                    //             textInputAction: Platform.isAndroid
+                    //                 ? TextInputAction.none
+                    //                 : TextInputAction.done,
+                    //           ),
+                    //         ],
+                    //         // Verify OTP button (show only after OTP is sent)
+                    //         if (otpSent)
+                    //           Align(
+                    //             alignment: Alignment.topRight,
+                    //             child: TextButton(
+                    //               onPressed: isVerifying
+                    //                   ? null
+                    //                   : () {
+                    //                       context
+                    //                           .read<EmailVerificationCubit>()
+                    //                           .verifyOTP({
+                    //                             "email": _emailController.text,
+                    //                             "otp": int.parse(
+                    //                               _otpController.text,
+                    //                             ),
+                    //                           });
+                    //                     },
+                    //               child: isVerifying
+                    //                   ? const SizedBox(
+                    //                       width: 16,
+                    //                       height: 16,
+                    //                       child: CircularProgressIndicator(
+                    //                         strokeWidth: 2,
+                    //                       ),
+                    //                     )
+                    //                   : Text(
+                    //                       "Verify OTP",
+                    //                       style: AppTextStyles.titleMedium(
+                    //                         textColor,
+                    //                       ),
+                    //                     ),
+                    //             ),
+                    //           ),
+                    //       ],
+                    //     );
+                    //   },
+                    // ),
                     CommonTextField1(
                       lable: "Phone",
                       hint: 'Enter Phone',

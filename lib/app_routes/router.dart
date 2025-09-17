@@ -111,7 +111,7 @@ final GoRouter appRouter = GoRouter(
       pageBuilder: (context, state) =>
           buildSlideTransitionPage(Dashboard(), state),
     ),
-    GoRoute(
+    GoRoute(  
       path: '/plans',
       pageBuilder: (context, state) =>
           buildSlideTransitionPage(PlansScreen(), state),

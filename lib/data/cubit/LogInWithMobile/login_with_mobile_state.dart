@@ -29,6 +29,11 @@ class verifyEmailSuccess extends LogInWithMobileState {
   verifyEmailSuccess(this.verifyOtpModel);
 }
 
+class TestLoginSuccessState extends LogInWithMobileState {
+  final VerifyOtpModel verifyOtpModel;
+  TestLoginSuccessState(this.verifyOtpModel);
+}
+
 class LogInwithMobileFailure extends LogInWithMobileState {
   final String error;
   LogInwithMobileFailure(this.error);

@@ -9,6 +9,7 @@ import 'package:indiclassifieds/Components/CustomSnackBar.dart';
 import 'package:indiclassifieds/data/cubit/Register/register_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Register/register_states.dart';
 import 'package:indiclassifieds/services/AuthService.dart';
+import 'package:indiclassifieds/theme/app_colors.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import '../../data/cubit/EmailVerification/EmailVerificationCubit.dart';
 import '../../data/cubit/EmailVerification/EmailVerificationStates.dart';
@@ -32,6 +33,7 @@ class _RegisterUserDetailsScreenState extends State<RegisterUserDetailsScreen> {
   final TextEditingController _otpController = TextEditingController();
 
   bool _submitting = false;
+  bool _isOtpVerified = false;
 
   @override
   void dispose() {
@@ -267,29 +269,29 @@ class _RegisterUserDetailsScreenState extends State<RegisterUserDetailsScreen> {
                                 >(
                                   listener: (context, state) {
                                     if (state is SendOTPSuccess) {
-                                      // OTP sent successfully
                                       CustomSnackBar1.show(
                                         context,
                                         "OTP sent to ${_emailCtrl.text}",
                                       );
                                     } else if (state is SendOTPFailure) {
-                                      // Failed to send OTP
                                       CustomSnackBar1.show(
                                         context,
                                         "${state.error}",
                                       );
                                     } else if (state is VerifyOTPSuccess) {
-                                      // OTP verified successfully
                                       CustomSnackBar1.show(
                                         context,
                                         "OTP Verified Successfully!",
                                       );
-                                      // Navigate to next screen if needed
+                                      _isOtpVerified =
+                                          true; // <-- mark OTP as verified
                                     } else if (state is VerifyOTPFailure) {
                                       CustomSnackBar1.show(
                                         context,
                                         "${state.error}",
                                       );
+                                      _isOtpVerified =
+                                          false; // OTP not verified
                                     }
                                   },
                                   builder: (context, state) {
@@ -336,7 +338,7 @@ class _RegisterUserDetailsScreenState extends State<RegisterUserDetailsScreen> {
                                                 : Text(
                                                     "Send OTP",
                                                     style:
-                                                        AppTextStyles.titleMedium(
+                                                        AppTextStyles.titleSmall(
                                                           textColor,
                                                         ),
                                                   ),
@@ -345,7 +347,7 @@ class _RegisterUserDetailsScreenState extends State<RegisterUserDetailsScreen> {
 
                                         // OTP input field (show only after OTP is sent)
                                         if (otpSent) ...[
-                                          SizedBox(height: 25),
+                                          SizedBox(height: 16),
                                           PinCodeTextField(
                                             autoUnfocus: true,
                                             appContext: context,
@@ -444,7 +446,7 @@ class _RegisterUserDetailsScreenState extends State<RegisterUserDetailsScreen> {
                                                   : Text(
                                                       "Verify OTP",
                                                       style:
-                                                          AppTextStyles.titleMedium(
+                                                          AppTextStyles.titleSmall(
                                                             textColor,
                                                           ),
                                                     ),
@@ -476,9 +478,19 @@ class _RegisterUserDetailsScreenState extends State<RegisterUserDetailsScreen> {
                                     return CustomAppButton1(
                                       text: "Submit",
                                       isLoading: isLoading,
-                                      onPlusTap: () {
-                                        _submit();
-                                      },
+                                      color: _isOtpVerified
+                                          ? AppColors.primary
+                                          : Colors.grey,
+                                      onPlusTap: _isOtpVerified
+                                          ? () {
+                                              _submit();
+                                            }
+                                          : () {
+                                              CustomSnackBar1.show(
+                                                context,
+                                                "OTP Not yet Verified!",
+                                              );
+                                            },
                                     );
                                   },
                                 ),
