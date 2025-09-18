@@ -111,7 +111,7 @@ final GoRouter appRouter = GoRouter(
       pageBuilder: (context, state) =>
           buildSlideTransitionPage(Dashboard(), state),
     ),
-    GoRoute(  
+    GoRoute(
       path: '/plans',
       pageBuilder: (context, state) =>
           buildSlideTransitionPage(PlansScreen(), state),
@@ -212,12 +212,19 @@ final GoRouter appRouter = GoRouter(
     ),
 
     GoRoute(
-      path: '/singlelistingdetails/:subId',
+      path: '/category/:slug',
       redirect: (ctx, st) {
-        final subId = st.pathParameters['subId']; // 132
-        final listingId = st.uri.queryParameters['detailId']; // 177
-        if (listingId == null || subId == null) return '/'; // fallback
-        // Redirect to your internal route
+        final slug = st.pathParameters['slug'];
+        final listingId = st.uri.queryParameters['detailId'];
+
+        if (listingId == null || slug == null) return null;
+
+        String? subId;
+        final match = RegExp(r'-(\d+)$').firstMatch(slug);
+        if (match != null) subId = match.group(1);
+
+        if (subId == null) return null;
+
         return '/products_details?listingId=$listingId&subcategory_id=$subId';
       },
     ),

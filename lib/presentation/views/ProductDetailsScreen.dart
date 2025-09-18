@@ -164,6 +164,26 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     }
   }
 
+  String generateListingUrl(Listing listing) {
+    final title = listing.title ?? '';
+    final location = listing.location ?? '';
+    final subCategoryId = listing.subCategoryId;
+    final detailId = listing.id;
+
+    // Create slug (convert spaces to hyphens, lowercase, remove special chars)
+    String slugify(String text) {
+      return text
+          .toLowerCase()
+          .replaceAll(RegExp(r'[^a-z0-9\s-]'), '') // remove special chars
+          .replaceAll(RegExp(r'\s+'), '-') // replace spaces with -
+          .replaceAll(RegExp(r'-+'), '-'); // remove multiple dashes
+    }
+
+    final slugTitle = slugify('$title in $location');
+
+    return 'https://indclassifieds.in/category/$slugTitle-$subCategoryId?detailId=$detailId';
+  }
+
   String? receiverId;
   String? receiverName;
   String? receiverImage;
@@ -201,11 +221,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         builder: (_) =>
                             const Center(child: CircularProgressIndicator()),
                       );
-
                       await Future.delayed(const Duration(seconds: 2));
-
                       if (context.mounted) Navigator.of(context).pop();
-
                       final updatedMobile = mobile_number;
                       if (updatedMobile != null && updatedMobile.isNotEmpty) {
                         AppLauncher.call(updatedMobile);
@@ -338,13 +355,16 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                       icon: Icons.ios_share_rounded,
                                       tooltip: 'Share',
                                       onTap: () {
-                                        final shareUrl =
-                                            'https://indclassifieds.in/singlelistingdetails/${data.listing?.subCategoryId}?detailId=${data.listing?.id}';
+                                        final shareUrl = generateListingUrl(
+                                          data.listing!,
+                                        );
                                         AppLogger.info("shareUrl:$shareUrl");
+
                                         Share.share(
                                           shareUrl,
                                           subject:
-                                              title ?? 'Check this listing',
+                                              data.listing?.title ??
+                                              'Check this listing',
                                         );
                                       },
                                     ),

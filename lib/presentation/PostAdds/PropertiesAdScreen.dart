@@ -529,16 +529,16 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
                           ? 'Required Floor Number'
                           : null,
                     ),
-                    CommonTextField1(
-                      lable: 'Room Number',
-                      hint: 'Enter Room Number',
-                      controller: roomNoController,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      color: textColor,
-                      validator: (v) => (v == null || v.trim().isEmpty)
-                          ? 'Required Room Number'
-                          : null,
-                    ),
+                    // CommonTextField1(
+                    //   lable: 'Room Number',
+                    //   hint: 'Enter Room Number',
+                    //   controller: roomNoController,
+                    //   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    //   color: textColor,
+                    //   validator: (v) => (v == null || v.trim().isEmpty)
+                    //       ? 'Required Room Number'
+                    //       : null,
+                    // ),
                     if (widget.SubCatName == "For Sale") ...[
                       CommonTextField1(
                         lable: 'Price For Sq.ft',
@@ -751,18 +751,18 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
                                   }
 
                                   // Check for plan selection (only for new ads, not edits)
-                                  if ((widget.editId == null ||
-                                          widget.editId
-                                              .replaceAll('"', '')
-                                              .trim()
-                                              .isEmpty) &&
-                                      (planId == null || packageId == null)) {
-                                    CustomSnackBar1.show(
-                                      context,
-                                      "Please select a plan",
-                                    );
-                                    isValid = false;
-                                  }
+                                  // if ((widget.editId == null ||
+                                  //         widget.editId
+                                  //             .replaceAll('"', '')
+                                  //             .trim()
+                                  //             .isEmpty) &&
+                                  //     (planId == null || packageId == null)) {
+                                  //   CustomSnackBar1.show(
+                                  //     context,
+                                  //     "Please select a plan",
+                                  //   );
+                                  //   isValid = false;
+                                  // }
 
                                   final editIdClean = widget.editId
                                       .replaceAll('"', '')
@@ -881,14 +881,14 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
                                     isValid = false;
                                   }
 
-                                  // Check for room number
-                                  if (roomNoController.text.trim().isEmpty) {
-                                    CustomSnackBar1.show(
-                                      context,
-                                      "Please enter room number",
-                                    );
-                                    isValid = false;
-                                  }
+                                  // // Check for room number
+                                  // if (roomNoController.text.trim().isEmpty) {
+                                  //   CustomSnackBar1.show(
+                                  //     context,
+                                  //     "Please enter room number",
+                                  //   );
+                                  //   isValid = false;
+                                  // }
 
                                   // Check for price
                                   if (totelPriceController.text
@@ -935,7 +935,7 @@ class _PropertiesAdScreenState extends State<PropertiesAdScreen> {
                                         "project_status": projectStatus,
                                         "listed_by": listedBy,
                                         "floor_number": floorNoController.text,
-                                        "room_no": roomNoController.text,
+                                        // "room_no": roomNoController.text,
                                         "location_key": latlng,
                                         "property_type": propertyType,
                                         "current_address":
