@@ -14,7 +14,7 @@ import '../../widgets/AdBoostDialog.dart';
 import '../../widgets/AdCardDynamic.dart';
 import '../../widgets/CommonLoader.dart';
 
-enum AdStatus { approved, pending, expired }
+enum AdStatus { approved, pending, expired, rejected }
 
 extension AdStatusLabel on AdStatus {
   String get label {
@@ -24,7 +24,9 @@ extension AdStatusLabel on AdStatus {
       case AdStatus.pending:
         return 'Pending';
       case AdStatus.expired:
-        return 'Expired';
+        return 'expired';
+      case AdStatus.rejected:
+        return 'rejected';
     }
   }
 
@@ -36,6 +38,8 @@ extension AdStatusLabel on AdStatus {
         return 'pending';
       case AdStatus.expired:
         return 'expired';
+      case AdStatus.rejected:
+        return 'rejected';
     }
   }
 }
