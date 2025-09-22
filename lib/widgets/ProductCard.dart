@@ -58,11 +58,11 @@ class ProductCard extends StatelessWidget {
                     height: 120,
                     imageUrl: products.image ?? "",
                     fit: BoxFit.cover,
-                    placeholder: (context, url) => SizedBox(
-                      width: 120,
-                      height: 120,
-                      child: Center(child: spinkits.getSpinningLinespinkit()),
-                    ),
+                    // placeholder: (context, url) => SizedBox(
+                    //   width: 120,
+                    //   height: 120,
+                    //   child: Center(child: spinkits.getSpinningLinespinkit()),
+                    // ),
                     errorWidget: (context, url, error) => Container(
                       width: 120,
                       height: 120,

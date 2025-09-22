@@ -69,9 +69,9 @@ class _SubCategoriesScreenState extends State<SubCategoriesScreen> {
                                         .sub_category_banner ??
                                     "",
                                 fit: BoxFit.fill,
-                                placeholder: (context, url) => Center(
-                                  child: spinkits.getSpinningLinespinkit(),
-                                ),
+                                // placeholder: (context, url) => Center(
+                                //   child: spinkits.getSpinningLinespinkit(),
+                                // ),
                                 errorWidget: (context, url, error) => Center(
                                   child: Icon(
                                     Icons.broken_image,
@@ -98,14 +98,17 @@ class _SubCategoriesScreenState extends State<SubCategoriesScreen> {
                           );
                         },
                         borderRadius: BorderRadius.circular(12),
-                        child:Card(
+                        child: Card(
                           color: ThemeHelper.cardColor(context),
-                          margin: const EdgeInsets.all(0), // small margin for spacing
+                          margin: const EdgeInsets.all(
+                            0,
+                          ), // small margin for spacing
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                           elevation: 2,
-                          clipBehavior: Clip.antiAlias, // ensures smooth rounded clipping
+                          clipBehavior:
+                              Clip.antiAlias, // ensures smooth rounded clipping
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
@@ -115,36 +118,43 @@ class _SubCategoriesScreenState extends State<SubCategoriesScreen> {
                                 child: Container(
                                   color: ThemeHelper.isDarkMode(context)
                                       ? const Color(0xFF2A2A2A) // dark mode bg
-                                      : const Color(0xFFEDF3FD), // light mode bg
+                                      : const Color(
+                                          0xFFEDF3FD,
+                                        ), // light mode bg
                                   padding: EdgeInsets.all(12),
                                   child: CachedNetworkImage(
                                     imageUrl: item?.image ?? "",
                                     fit: BoxFit.contain,
-                                    placeholder: (context, url) => Center(
-                                      child: spinkits.getSpinningLinespinkit(),
-                                    ),
-                                    errorWidget: (context, url, error) => const Icon(
-                                      Icons.broken_image,
-                                      size: 50,
-                                      color: Colors.grey,
-                                    ),
+                                    // placeholder: (context, url) => Center(
+                                    //   child: spinkits.getSpinningLinespinkit(),
+                                    // ),
+                                    errorWidget: (context, url, error) =>
+                                        const Icon(
+                                          Icons.broken_image,
+                                          size: 50,
+                                          color: Colors.grey,
+                                        ),
                                   ),
                                 ),
                               ),
                               // Text / Bottom Section
                               Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 10,
+                                ),
                                 child: Text(
                                   "${item?.name}",
                                   textAlign: TextAlign.center,
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
-                                  style: AppTextStyles.bodyMedium(
-                                    ThemeHelper.textColor(context),
-                                  ).copyWith(
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 14,
-                                  ),
+                                  style:
+                                      AppTextStyles.bodyMedium(
+                                        ThemeHelper.textColor(context),
+                                      ).copyWith(
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 14,
+                                      ),
                                 ),
                               ),
                             ],

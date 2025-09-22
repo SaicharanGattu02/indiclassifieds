@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:indiclassifieds/Components/CutomAppBar.dart';
 import 'package:indiclassifieds/services/AuthService.dart';
 import 'package:indiclassifieds/utils/AppLogger.dart';
 import 'package:indiclassifieds/utils/media_query_helper.dart';
-import 'package:razorpay_flutter/razorpay_flutter.dart';
 import '../../data/cubit/MyAds/my_ads_cubit.dart';
 import '../../data/cubit/MyAds/my_ads_states.dart';
 import '../../theme/AppTextStyles.dart';

@@ -238,10 +238,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                     child: CachedNetworkImage(
                                       imageUrl: banner.image ?? "",
                                       fit: BoxFit.cover,
-                                      placeholder: (context, url) => Center(
-                                        child: spinkits
-                                            .getSpinningLinespinkit(),
-                                      ),
+                                      // placeholder: (context, url) => Center(
+                                      //   child: spinkits
+                                      //       .getSpinningLinespinkit(),
+                                      // ),
                                       errorWidget: (context, url, error) =>
                                           Center(
                                             child: Icon(
@@ -339,11 +339,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                               imageUrl:
                                                   new_categoryItem?.image ?? "",
                                               fit: BoxFit.cover,
-                                              placeholder: (context, url) =>
-                                                  Center(
-                                                    child: spinkits
-                                                        .getSpinningLinespinkit(),
-                                                  ),
+                                              // placeholder: (context, url) =>
+                                              //     Center(
+                                              //       child: spinkits
+                                              //           .getSpinningLinespinkit(),
+                                              //     ),
                                               errorWidget:
                                                   (context, url, error) =>
                                                       Center(
@@ -440,11 +440,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                               imageUrl:
                                                   categoryItem?.image ?? "",
                                               fit: BoxFit.contain,
-                                              placeholder: (context, url) =>
-                                                  Center(
-                                                    child: spinkits
-                                                        .getSpinningLinespinkit(),
-                                                  ),
+                                              // placeholder: (context, url) =>
+                                              //     Center(
+                                              //       child: spinkits
+                                              //           .getSpinningLinespinkit(),
+                                              //     ),
                                               errorWidget:
                                                   (context, url, error) =>
                                                       Center(

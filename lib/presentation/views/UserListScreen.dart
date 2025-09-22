@@ -7,6 +7,7 @@ import 'package:shimmer/shimmer.dart';
 import '../../data/cubit/Chat/private_chat_cubit.dart';
 import '../../data/cubit/ChatUsers/ChatUsersCubit.dart';
 import '../../data/cubit/ChatUsers/ChatUsersStates.dart';
+import '../../services/SocketService.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../utils/media_query_helper.dart';
@@ -56,6 +57,8 @@ class _UserListScreenState extends State<UserListScreen>
     final isGuest = await AuthService.isGuest;
     setState(() => _isGuestUser = isGuest);
 
+    final userId = await AuthService.getId();
+    SocketService.connect(userId ?? "");
     // only fetch if NOT guest
     if (!isGuest) {
       context.read<ChatUsersCubit>().fetchChatUsers("");
@@ -261,9 +264,7 @@ class _UserListScreenState extends State<UserListScreen>
                                 name: name,
                                 imageUrl: imageUrl,
                                 onTap: () {
-                                  context.push(
-                                    '/chat?receiverId=$id',
-                                  );
+                                  context.push('/chat?receiverId=$id');
                                 },
                                 card: card,
                                 textColor: textColor,
