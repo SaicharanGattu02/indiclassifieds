@@ -542,7 +542,6 @@ class _OtpscreenState extends State<Otpscreen> {
                                                             String? fcmToken =
                                                                 await messaging
                                                                     .getToken();
-
                                                             final otp =
                                                                 _otpController
                                                                     .text
