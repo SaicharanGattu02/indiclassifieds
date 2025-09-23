@@ -14,6 +14,8 @@ class LocationLoaded extends LocationState {
   final String latlng;
   LocationLoaded({required this.locationName, required this.latlng});
 }
+
+class LocationPermissionDeniedForever extends LocationState {}
 class LocationSavedAvailable extends LocationState {
   final String locationName;
   final String latlng;

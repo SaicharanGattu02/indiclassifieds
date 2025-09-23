@@ -294,7 +294,7 @@ class _DashboardState extends State<Dashboard> {
   }
 
   void showLocationBottomSheet(BuildContext context) {
-    if (isLocationSheetShown) return; // Avoid multiple sheets
+    if (isLocationSheetShown) return;
 
     isLocationSheetShown = true;
 
@@ -312,24 +312,26 @@ class _DashboardState extends State<Dashboard> {
             bool isLoading = state is LocationLoading;
             bool isServiceDisabled = state is LocationServiceDisabled;
             bool isDenied = state is LocationPermissionDenied;
+            bool isForeverDenied = state is LocationPermissionDeniedForever;
 
             String title;
             String description;
 
             if (isServiceDisabled) {
               title = 'Location Services Disabled';
+              description = 'Please enable location services on your device to see listings near you.';
+            } else if (isForeverDenied) {
+              title = 'Permission Denied Permanently';
               description =
-              'Please enable location services on your device to see listings near you.';
+              'To show listings near you, please enable location access from device settings.';
             } else if (isDenied) {
               title = 'Location Access Needed';
               description =
-              'IND Classifieds uses your location to show listings near you. '
-                  'You can continue using the app without enabling location, but nearby listings may not be shown.';
+              'IND Classifieds uses your location to show listings near you. You can continue using the app without enabling location, but nearby listings may not be shown.';
             } else {
               title = 'Allow Location Access';
               description =
-              'IND Classifieds uses your location to show listings near you. '
-                  'This helps you discover items, services, and deals in your area for a personalized experience.';
+              'IND Classifieds uses your location to show listings near you. This helps you discover items, services, and deals in your area for a personalized experience.';
             }
 
             return Container(
@@ -399,42 +401,64 @@ class _DashboardState extends State<Dashboard> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      ElevatedButton(
-                        onPressed: isLoading
-                            ? null
-                            : () {
-                          context
-                              .read<LocationCubit>()
-                              .requestLocationPermission();
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                      if (isForeverDenied)
+                        ElevatedButton(
+                          onPressed: () async {
+                            await OpenAppSettings.openAppSettings(); // Open system settings
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 0,
                           ),
-                          elevation: 0,
-                        ),
-                        child: isLoading
-                            ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation(Colors.white),
+                          child: const Text(
+                            'Open Settings',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                              fontFamily: "lexend",
+                            ),
                           ),
                         )
-                            : const Text(
-                          'Continue',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                            fontFamily: "lexend",
-                            color: Colors.white,
+                      else
+                        ElevatedButton(
+                          onPressed: isLoading
+                              ? null
+                              : () {
+                            context.read<LocationCubit>().requestLocationPermission();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: isLoading
+                              ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation(Colors.white),
+                            ),
+                          )
+                              : const Text(
+                            'Continue',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                              fontFamily: "lexend",
+                              color: Colors.white,
+                            ),
                           ),
                         ),
-                      ),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -448,5 +472,6 @@ class _DashboardState extends State<Dashboard> {
       isLocationSheetShown = false;
     });
   }
+
 
 }

@@ -34,9 +34,7 @@ class LocationCubit extends Cubit<LocationState> {
       if (permission == loc.PermissionStatus.denied) {
         emit(LocationPermissionDenied());
       } else if (permission == loc.PermissionStatus.deniedForever) {
-        await _emitSavedOrError(
-          "Location permissions are permanently denied. Please enable them in Settings.",
-        );
+        emit(LocationPermissionDeniedForever());
       } else {
         await getLatLong();
       }
@@ -46,6 +44,7 @@ class LocationCubit extends Cubit<LocationState> {
     }
   }
 
+
   /// Request permission & handle result
   Future<void> requestLocationPermission() async {
     emit(LocationLoading());
@@ -54,6 +53,7 @@ class LocationCubit extends Cubit<LocationState> {
         emit(LocationServiceDisabled());
         return;
       }
+
       var permission = await _location.hasPermission();
       if (permission == loc.PermissionStatus.denied) {
         permission = await _location.requestPermission();
@@ -61,15 +61,11 @@ class LocationCubit extends Cubit<LocationState> {
           await _emitSavedOrDenied();
           return;
         } else if (permission == loc.PermissionStatus.deniedForever) {
-          await _emitSavedOrError(
-            "Location permissions are permanently denied. Please enable them in Settings.",
-          );
+          emit(LocationPermissionDeniedForever());
           return;
         }
       } else if (permission == loc.PermissionStatus.deniedForever) {
-        await _emitSavedOrError(
-          "Location permissions are permanently denied. Please enable them in Settings.",
-        );
+        emit(LocationPermissionDeniedForever());
         return;
       }
 
@@ -79,6 +75,7 @@ class LocationCubit extends Cubit<LocationState> {
       await _emitSavedOrError("Failed to request location.");
     }
   }
+
 
   /// Fetch current lat/lng & reverse geocode
   Future<void> getLatLong() async {
