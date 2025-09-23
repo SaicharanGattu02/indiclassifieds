@@ -52,10 +52,11 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>IND Classifieds needs access to your camera to take product images and for profile verification.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>IND Classifieds uses your location to display your current position on the dashboard for a personalized experience.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>IND Classifieds uses your location to display your current position on the dashboard for a personalized experience.</string>
+    <string>IND Classifieds uses your location to display your current position on the dashboard and to attach location data when posting ads near you.</string>
+
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>IND Classifieds uses your location to display your position on the dashboard and show location-specific ads and listings, even when the app is in the background.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>IND Classifieds needs access to your photos to upload product images and for profile verification.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>

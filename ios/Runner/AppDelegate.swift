@@ -11,7 +11,7 @@ import UserNotifications
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
     // Firebase config
-//     FirebaseApp.configure()
+    FirebaseApp.configure()
 
     // Flutter plugin registration
     GeneratedPluginRegistrant.register(with: self)

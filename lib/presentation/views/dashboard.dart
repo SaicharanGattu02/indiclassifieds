@@ -229,22 +229,22 @@ class _DashboardState extends State<Dashboard> {
             bottomNavigationBar: SafeArea(
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                height: 65,
+                height: 60,
                 decoration: BoxDecoration(
                   color: cardColor,
-                  boxShadow: [
-                    BoxShadow(
-                      // subtle top shadow
-                      color: Colors.black.withOpacity(
-                        Theme.of(context).brightness == Brightness.dark
-                            ? 0.35
-                            : 0.08,
-                      ),
-                      blurRadius: 12,
-                      spreadRadius: 0,
-                      offset: const Offset(0, -4), // cast UPWARDS
-                    ),
-                  ],
+                  // boxShadow: [
+                  //   BoxShadow(
+                  //     // subtle top shadow
+                  //     color: Colors.black.withOpacity(
+                  //       Theme.of(context).brightness == Brightness.dark
+                  //           ? 0.35
+                  //           : 0.08,
+                  //     ),
+                  //     blurRadius: 12,
+                  //     spreadRadius: 0,
+                  //     offset: const Offset(0, -4), // cast UPWARDS
+                  //   ),
+                  // ],
                 ),
 
                 child: Row(
@@ -290,21 +290,19 @@ class _DashboardState extends State<Dashboard> {
       ),
     );
   }
-
   void showLocationBottomSheet(BuildContext context) {
-    if (isLocationSheetShown) return; // Avoid opening another sheet
+    if (isLocationSheetShown) return;
 
     isLocationSheetShown = true;
-    bool hasRequestedPermission = false; // Prevent multiple requests
 
     showModalBottomSheet(
       context: context,
       isDismissible: true,
       enableDrag: true,
+      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      backgroundColor: Colors.white,
       builder: (BuildContext bottomSheetContext) {
         return BlocConsumer<LocationCubit, LocationState>(
           listener: (context, state) {
@@ -312,33 +310,38 @@ class _DashboardState extends State<Dashboard> {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 Navigator.of(bottomSheetContext).pop();
               });
-            } else if (state is LocationPermissionDenied ||
-                state is LocationError ||
-                state is LocationServiceDisabled) {
-              // Reset hasRequestedPermission when permission request fails
-              hasRequestedPermission = false;
             }
           },
           builder: (context, state) {
             bool isLoading = state is LocationLoading;
-            bool isServiceDisabled = state is LocationServiceDisabled;
-            bool isPermanentlyDenied =
-                state is LocationError &&
-                state.message.contains("permanently denied");
             bool isDenied = state is LocationPermissionDenied;
+            bool isServiceDisabled = state is LocationServiceDisabled;
+            bool isPermanentlyDenied = state is LocationError &&
+                state.message.toLowerCase().contains("permanently denied");
+
+            String title;
+            String message;
+
+            if (isServiceDisabled) {
+              title = 'Location Services Disabled';
+              message =
+              'Please enable location services to show your position on the dashboard.';
+            } else if (isPermanentlyDenied) {
+              title = 'Location Permission Denied';
+              message =
+              'To use features like showing your area on the dashboard or posting nearby ads, you can enable location access in device settings.';
+            } else if (isDenied) {
+              title = 'Location Permission Needed';
+              message =
+              'We use your location to show nearby listings and your position on the dashboard.';
+            } else {
+              title = 'Allow Location Access';
+              message =
+              'Granting location access helps us personalize your dashboard and ads by showing your current area.';
+            }
 
             return Container(
               padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Colors.white, Colors.grey[50]!],
-                ),
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(24),
-                ),
-              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -359,25 +362,15 @@ class _DashboardState extends State<Dashboard> {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: primarycolor.withOpacity(0.5),
+                          color: Colors.blue.withOpacity(0.2),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(
-                          Icons.location_on,
-                          color: primarycolor,
-                          size: 24,
-                        ),
+                        child: const Icon(Icons.location_on, color: Colors.blue),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          isServiceDisabled
-                              ? 'Location Services Disabled'
-                              : isPermanentlyDenied
-                              ? 'Location Permissions Denied'
-                              : isDenied
-                              ? 'Location Access Needed'
-                              : 'Allow Location Access',
+                          title,
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
@@ -389,161 +382,109 @@ class _DashboardState extends State<Dashboard> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    isServiceDisabled
-                        ? 'Please enable location services to show your current location on the dashboard.'
-                        : isPermanentlyDenied
-                        ? 'Location permissions are permanently denied. To show your location on the dashboard, please enable them in Settings.'
-                        : isDenied
-                        ? 'We need your location to display your current position on the dashboard.'
-                        : 'Allow access to your location to display your current position on the dashboard for a personalized experience.',
+                    message,
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.grey[600],
+                      color: Colors.grey[700],
                       height: 1.5,
                     ),
                   ),
                   const SizedBox(height: 24),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(bottomSheetContext).pop(); // Skip
+                        },
+                        child: const Text(
+                          'Not Now',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ),
                       SizedBox(
                         height: 48,
-                        width: 120,
                         child: ElevatedButton(
                           onPressed: isLoading
                               ? null
                               : () {
-                                  hasRequestedPermission = true;
-                                  if (isPermanentlyDenied) {
-                                    context.pop();
-                                    showDialog(
-                                      context: context,
-                                      builder: (ctx) => AlertDialog(
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            16,
-                                          ),
-                                        ),
-                                        titlePadding: const EdgeInsets.fromLTRB(
-                                          24,
-                                          24,
-                                          24,
-                                          8,
-                                        ),
-                                        contentPadding:
-                                            const EdgeInsets.fromLTRB(
-                                              24,
-                                              8,
-                                              24,
-                                              0,
-                                            ),
-                                        actionsPadding:
-                                            const EdgeInsets.fromLTRB(
-                                              16,
-                                              0,
-                                              16,
-                                              16,
-                                            ),
-                                        title: Row(
-                                          children: [
-                                            const Expanded(
-                                              child: Text(
-                                                'Permission Required',
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.w700,
-                                                  fontSize: 18,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        content: const Text(
-                                          'Location access has been permanently denied. To use this feature, please enable location permissions in the device settings.',
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            height: 1.5,
-                                          ),
-                                        ),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () =>
-                                                Navigator.of(ctx).pop(),
-                                            child: const Text(
-                                              'Cancel',
-                                              style: TextStyle(
-                                                color: Colors.grey,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                          ),
-                                          ElevatedButton(
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: primarycolor,
-                                              foregroundColor: primarycolor,
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-                                              ),
-                                            ),
-                                            onPressed: () {
-                                              Navigator.of(ctx).pop();
-                                              OpenAppSettings.openAppSettings();
-                                            },
-                                            child: const Text(
-                                              'Open Settings',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
+                            Navigator.of(bottomSheetContext).pop();
+
+                            if (isPermanentlyDenied) {
+                              // Show dialog to redirect to Settings
+                              showDialog(
+                                context: context,
+                                builder: (_) => AlertDialog(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  title: const Text(
+                                    'Enable Location in Settings',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  content: const Text(
+                                    'Location access is needed to use location-based features. Would you like to open Settings now?',
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.of(context).pop(),
+                                      child: const Text(
+                                        'Cancel',
+                                        style: TextStyle(color: Colors.grey),
                                       ),
-                                    );
-                                  } else {
-                                    context
-                                        .read<LocationCubit>()
-                                        .requestLocationPermission();
-                                  }
-                                },
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                        OpenAppSettings.openAppSettings();
+                                      },
+                                      child: const Text('Open Settings'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            } else {
+                              // Request permission again if not permanently denied
+                              context.read<LocationCubit>().requestLocationPermission();
+                            }
+                          },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: primarycolor,
-                            foregroundColor: primarycolor,
-                            disabledForegroundColor: primarycolor,
-                            disabledBackgroundColor: primarycolor,
+                            backgroundColor: Colors.blue,
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 0,
+                              horizontal: 24,
+                              vertical: 12,
                             ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            elevation: 0,
                           ),
                           child: isLoading
                               ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation(
-                                      Colors.white,
-                                    ),
-                                  ),
-                                )
-                              : Text(
-                                  'Continue',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 14,
-                                    color: Colors.white,
-                                  ),
-                                ),
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          )
+                              : const Text(
+                            'Continue',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                              color: Colors.white,
+                            ),
+                          ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
                 ],
               ),
             );
@@ -551,8 +492,8 @@ class _DashboardState extends State<Dashboard> {
         );
       },
     ).whenComplete(() {
-      // Reset flag when the bottom sheet is dismissed
       isLocationSheetShown = false;
     });
   }
+
 }
