@@ -126,7 +126,9 @@ class _DashboardState extends State<Dashboard> {
       if (plan != null) {
         AuthService.setPlanStatus(plan.goToPlansPage.toString() ?? "");
         AuthService.setFreePlanStatus(plan.isFree.toString() ?? "");
-        AuthService.setSubscribeStatus(plan.plans?.length != 0 ? "true" : "false" ?? "");
+        AuthService.setSubscribeStatus(
+          plan.plans?.length != 0 ? "true" : "false" ?? "",
+        );
       }
       final userId = await AuthService.getId();
       SocketService.connect(userId ?? "");
@@ -290,8 +292,9 @@ class _DashboardState extends State<Dashboard> {
       ),
     );
   }
+
   void showLocationBottomSheet(BuildContext context) {
-    if (isLocationSheetShown) return;
+    if (isLocationSheetShown) return; // Avoid multiple sheets
 
     isLocationSheetShown = true;
 
@@ -299,49 +302,46 @@ class _DashboardState extends State<Dashboard> {
       context: context,
       isDismissible: true,
       enableDrag: true,
-      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
+      backgroundColor: Colors.white,
       builder: (BuildContext bottomSheetContext) {
-        return BlocConsumer<LocationCubit, LocationState>(
-          listener: (context, state) {
-            if (state is LocationLoaded) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                Navigator.of(bottomSheetContext).pop();
-              });
-            }
-          },
+        return BlocBuilder<LocationCubit, LocationState>(
           builder: (context, state) {
             bool isLoading = state is LocationLoading;
-            bool isDenied = state is LocationPermissionDenied;
             bool isServiceDisabled = state is LocationServiceDisabled;
-            bool isPermanentlyDenied = state is LocationError &&
-                state.message.toLowerCase().contains("permanently denied");
+            bool isDenied = state is LocationPermissionDenied;
 
             String title;
-            String message;
+            String description;
 
             if (isServiceDisabled) {
               title = 'Location Services Disabled';
-              message =
-              'Please enable location services to show your position on the dashboard.';
-            } else if (isPermanentlyDenied) {
-              title = 'Location Permission Denied';
-              message =
-              'To use features like showing your area on the dashboard or posting nearby ads, you can enable location access in device settings.';
+              description =
+              'Please enable location services on your device to see listings near you.';
             } else if (isDenied) {
-              title = 'Location Permission Needed';
-              message =
-              'We use your location to show nearby listings and your position on the dashboard.';
+              title = 'Location Access Needed';
+              description =
+              'IND Classifieds uses your location to show listings near you. '
+                  'You can continue using the app without enabling location, but nearby listings may not be shown.';
             } else {
               title = 'Allow Location Access';
-              message =
-              'Granting location access helps us personalize your dashboard and ads by showing your current area.';
+              description =
+              'IND Classifieds uses your location to show listings near you. '
+                  'This helps you discover items, services, and deals in your area for a personalized experience.';
             }
 
             return Container(
               padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.white, Colors.grey[50]!],
+                ),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -362,10 +362,14 @@ class _DashboardState extends State<Dashboard> {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: Colors.blue.withOpacity(0.2),
+                          color: AppColors.primary.withOpacity(0.5),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.location_on, color: Colors.blue),
+                        child: Icon(
+                          Icons.location_on,
+                          color: AppColors.primary,
+                          size: 24,
+                        ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -375,6 +379,7 @@ class _DashboardState extends State<Dashboard> {
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
                             color: Colors.black87,
+                            fontFamily: "lexend",
                           ),
                         ),
                       ),
@@ -382,109 +387,57 @@ class _DashboardState extends State<Dashboard> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    message,
+                    description,
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.grey[700],
+                      color: Colors.grey[600],
                       height: 1.5,
+                      fontFamily: "lexend",
                     ),
                   ),
                   const SizedBox(height: 24),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(bottomSheetContext).pop(); // Skip
+                      ElevatedButton(
+                        onPressed: isLoading
+                            ? null
+                            : () {
+                          context
+                              .read<LocationCubit>()
+                              .requestLocationPermission();
                         },
-                        child: const Text(
-                          'Not Now',
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: isLoading
+                            ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation(Colors.white),
+                          ),
+                        )
+                            : const Text(
+                          'Continue',
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        height: 48,
-                        child: ElevatedButton(
-                          onPressed: isLoading
-                              ? null
-                              : () {
-                            Navigator.of(bottomSheetContext).pop();
-
-                            if (isPermanentlyDenied) {
-                              // Show dialog to redirect to Settings
-                              showDialog(
-                                context: context,
-                                builder: (_) => AlertDialog(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  title: const Text(
-                                    'Enable Location in Settings',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  content: const Text(
-                                    'Location access is needed to use location-based features. Would you like to open Settings now?',
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.of(context).pop(),
-                                      child: const Text(
-                                        'Cancel',
-                                        style: TextStyle(color: Colors.grey),
-                                      ),
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                        OpenAppSettings.openAppSettings();
-                                      },
-                                      child: const Text('Open Settings'),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            } else {
-                              // Request permission again if not permanently denied
-                              context.read<LocationCubit>().requestLocationPermission();
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 12,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: isLoading
-                              ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.white),
-                            ),
-                          )
-                              : const Text(
-                            'Continue',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                              color: Colors.white,
-                            ),
+                            fontSize: 14,
+                            fontFamily: "lexend",
+                            color: Colors.white,
                           ),
                         ),
                       ),
                     ],
                   ),
+                  const SizedBox(height: 16),
                 ],
               ),
             );

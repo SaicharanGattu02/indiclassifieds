@@ -1,4 +1,3 @@
-import 'dart:developer' as AppLogger;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -17,7 +16,10 @@ import '../../data/cubit/UserActivePlans/user_active_plans_cubit.dart';
 import '../../model/PlansModel.dart';
 import '../../services/AuthService.dart';
 import '../../theme/AppTextStyles.dart';
+import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
+import '../../utils/AppLogger.dart';
+import 'dart:io' show Platform;
 
 class PlansScreen extends StatefulWidget {
   const PlansScreen({super.key});
@@ -93,6 +95,10 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
     }
   }
 
+  String getPlatformText({required String ios, required String android}) {
+    return Platform.isIOS ? ios : android;
+  }
+
   @override
   Widget build(BuildContext context) {
     final textColor = ThemeHelper.textColor(context);
@@ -105,7 +111,7 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
         elevation: 0,
         leading: const BackButton(color: Colors.white),
         title: Text(
-          "Boost Your Sales",
+          getPlatformText(ios: "Post Your Ad", android: "Boost Your Sales"),
           style: AppTextStyles.headlineSmall(
             Colors.white,
           ).copyWith(fontWeight: FontWeight.w600),
@@ -134,14 +140,21 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
                 children: [
                   const SizedBox(height: 10),
                   Text(
-                    "Choose Your Plan",
+                    getPlatformText(
+                      ios: "Select an Ad Posting Package",
+                      android: "Choose Your Plan",
+                    ),
                     style: AppTextStyles.headlineMedium(
                       textColor,
                     ).copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    "Select the perfect package to boost your sales",
+                    getPlatformText(
+                      ios:
+                          "Choose a package to list your physical product for sale.",
+                      android: "Select the perfect package to boost your sales",
+                    ),
                     style: AppTextStyles.bodyMedium(textColor.withOpacity(0.7)),
                   ),
                   const SizedBox(height: 20),
@@ -177,7 +190,10 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
                           imageUrl: plan.image,
                           features: features,
                           tag: (plan.features?.type == true)
-                              ? "MOST POPULAR"
+                              ? getPlatformText(
+                                  ios: "POPULAR PACKAGE",
+                                  android: "MOST POPULAR",
+                                )
                               : null,
                         ),
                       );
@@ -228,7 +244,10 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    "Need help choosing?",
+                    getPlatformText(
+                      ios: "Need help choosing a package?",
+                      android: "Need help choosing?",
+                    ),
                     style: AppTextStyles.bodyMedium(textColor),
                   ),
                   GestureDetector(
@@ -271,7 +290,6 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
     String? tag,
   }) {
     final textColor = ThemeHelper.textColor(context);
-
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -719,7 +737,10 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
                                       builder: (context, state) {
                                         return CustomAppButton1(
                                           isLoading: state is PaymentLoading,
-                                          text: 'Submit',
+                                          text: getPlatformText(
+                                            ios: "Pay & Post Ad",
+                                            android: "Submit",
+                                          ),
                                           onPlusTap: () {
                                             if (selected == null) {
                                               CustomSnackBar1.show(
