@@ -199,455 +199,467 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     final textColor = ThemeHelper.textColor(context);
     final bgColor = ThemeHelper.backgroundColor(context);
 
-    return FutureBuilder(
-      future: AuthService.isGuest,
-      builder: (context, asyncSnapshot) {
-        final isGuest = asyncSnapshot.data ?? false;
-        return Scaffold(
-          backgroundColor: bgColor,
-          appBar: CustomAppBar1(title: 'Details', actions: []),
-          bottomNavigationBar: _BottomCtaBar(
-            onContact: isGuest
-                ? () {
-                    context.push("/login");
-                  }
-                : () async {
-                    if (mobile_number != null) {
-                      AppLauncher.call(mobile_number ?? "");
-                    } else {
-                      showDialog(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (_) =>
-                            const Center(child: CircularProgressIndicator()),
-                      );
-                      await Future.delayed(const Duration(seconds: 2));
-                      if (context.mounted) Navigator.of(context).pop();
-                      final updatedMobile = mobile_number;
-                      if (updatedMobile != null && updatedMobile.isNotEmpty) {
-                        AppLauncher.call(updatedMobile);
-                      } else {
-                        CustomSnackBar1.show(
-                          context,
-                          "Mobile number not available",
-                        );
-                      }
-                    }
-                  },
-            onChat: isGuest
-                ? () {
-                    context.push("/login");
-                  }
-                : () {
-                    context.push('/chat?receiverId=$receiverId');
-                  },
-          ),
-          body: BlocConsumer<ProductDetailsCubit, ProductDetailsStates>(
-            listenWhen: (prev, curr) => curr is ProductDetailsLoaded,
-            listener: (context, state) async {
-              final s = state as ProductDetailsLoaded;
-              final data = s.productDetailsModel.data!;
-              final listing = data.listing!;
+    return Scaffold(
+      backgroundColor: bgColor,
+      appBar: CustomAppBar1(title: 'Details', actions: []),
+      bottomNavigationBar: FutureBuilder(
+        future: Future.wait([AuthService.isGuest, AuthService.getId()]),
+        builder: (context, asyncSnapshot) {
+          if (asyncSnapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-              // Set one-time fields without scheduling from build()
-              if (!_didInitFromBloc) {
-                _didInitFromBloc = true;
+          if (asyncSnapshot.hasError) {
+            return Center(child: Text('Error: ${asyncSnapshot.error}'));
+          }
 
-                receiverId = data.postedBy?.id.toString() ?? "";
-                receiverName = data.postedBy?.name ?? "";
-                receiverImage = data.postedBy?.image ?? "";
-                mobile_number = listing.mobileNumber ?? "";
+          if (!asyncSnapshot.hasData) {
+            return const Center(child: Text('No data available'));
+          }
 
-                // Initialize map position once
-                await _prepareMap(listing);
-                if (mounted) setState(() {}); // reflect _listingLatLng/_markers
-              }
-            },
-            builder: (context, state) {
-              if (state is ProductDetailsLoading ||
-                  state is ProductDetailsInitially) {
-                return Center(child: DottedProgressWithLogo());
-              }
-              if (state is ProductDetailsFailure) {
-                return _ErrorView(
-                  message: state.error.isNotEmpty
-                      ? state.error
-                      : "Failed to load.",
-                  onRetry: () => context
-                      .read<ProductDetailsCubit>()
-                      .getProductDetails(widget.listingId),
-                );
-              }
-              final model = (state as ProductDetailsLoaded).productDetailsModel;
-              final data = model.data!;
-              final listing = data.listing!;
-              final images = data.images ?? const [];
-              final details = data.details;
-              final posted = data.postedBy;
+          final results = asyncSnapshot.data!;
+          final isGuest = results[0] as bool;
+          final userId = results[1] as String;
 
-              final title = listing.title ?? "Check this Listing";
-              final priceStr = _formatINR(listing.price);
-              final location =
-                  "${listing.location},${listing.city_name},${listing.state_name}" ??
-                  "—";
-              return CustomScrollView(
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        AspectRatio(
-                          aspectRatio: 16 / 9,
-                          child: Stack(
-                            children: [
-                              // 1) Images
-                              PageView.builder(
-                                controller: _pgCtrl,
-                                onPageChanged: (i) => setState(() => _page = i),
-                                itemCount: images.isEmpty ? 1 : images.length,
-                                itemBuilder: (_, i) {
-                                  final url = images.isNotEmpty
-                                      ? images[i].image
-                                      : null;
-                                  return GestureDetector(
-                                    onTap: () {
-                                      if (images.isNotEmpty) {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                PhotoViewScreen(
-                                                  images: images,
-                                                  initialIndex: i,
-                                                ),
-                                          ),
-                                        );
-                                      }
-                                    },
-                                    child: _ImageHero(url: url),
-                                  );
-                                },
+          AppLogger.info("receiverId: ${receiverId} and userid:${userId}");
+          return (userId == receiverId)
+              ? SizedBox.shrink()
+              : _BottomCtaBar(
+                  onContact: isGuest
+                      ? () {
+                          context.push("/login");
+                        }
+                      : () async {
+                          if (mobile_number != null) {
+                            AppLauncher.call(mobile_number ?? "");
+                          } else {
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (_) => const Center(
+                                child: CircularProgressIndicator(),
                               ),
-
-                              // 2) Watermark (bottom-right)
-                              Positioned(
-                                right: 0,
-                                bottom: 0, // keep above the dots
-                                child: IgnorePointer(
-                                  ignoring: true,
-                                  child: Image.asset(
-                                    'assets/images/watermark.png', // <-- your watermark image
-                                    width: 110, // tweak as needed
-                                    fit: BoxFit.contain,
-                                    filterQuality: FilterQuality.high,
-                                  ),
-                                ),
-                              ),
-
-                              // 3) Top-right actions
-                              Positioned(
-                                top: 12,
-                                right: 12,
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    _RoundIconButton(
-                                      icon: Icons.ios_share_rounded,
-                                      tooltip: 'Share',
-                                      onTap: () {
-                                        final shareUrl = generateListingUrl(
-                                          data.listing!,
-                                        );
-                                        AppLogger.info("shareUrl:$shareUrl");
-
-                                        Share.share(
-                                          shareUrl,
-                                          subject:
-                                              data.listing?.title ??
-                                              'Check this listing',
-                                        );
-                                      },
-                                    ),
-                                    const SizedBox(height: 8),
-                                    _RoundIconButton(
-                                      icon: Icons.fullscreen_rounded,
-                                      tooltip: 'View',
-                                      onTap: () {
-                                        if (images.isNotEmpty) {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  PhotoViewScreen(
-                                                    images: images,
-                                                    initialIndex: _page,
-                                                  ),
-                                            ),
-                                          );
-                                        }
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                              // 4) Dots
-                              Positioned(
-                                left: 0,
-                                right: 0,
-                                bottom: 12,
-                                child: Center(
-                                  child: _Dots(
-                                    count: images.isEmpty ? 1 : images.length,
-                                    index: _page,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                      ],
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            title,
-                            style: AppTextStyles.headlineSmall(textColor),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            "₹$priceStr",
-                            style: AppTextStyles.headlineMedium(
-                              textColor,
-                            ).copyWith(fontWeight: FontWeight.w800),
-                          ),
-                          const SizedBox(height: 20),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  // ===== Item Information =====
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        "Item Information",
-                        style: AppTextStyles.headlineSmall(
-                          textColor,
-                        ).copyWith(fontWeight: FontWeight.w700),
-                      ),
-                    ),
-                  ),
-                  const SliverToBoxAdapter(child: SizedBox(height: 12)),
-                  // Chips (Posted + Location)
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Wrap(
-                        spacing: 16,
-                        runSpacing: 12,
-                        children: [
-                          if (listing.createdAt != null)
-                            _InfoChip(
-                              icon: Icons.calendar_today_rounded,
-                              label: "Posted At",
-                              value: _shortDate(listing.createdAt),
-                            ),
-                          if (location.isNotEmpty)
-                            _InfoChip(
-                              icon: Icons.place_rounded,
-                              label: "",
-                              value: location,
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SliverToBoxAdapter(child: SizedBox(height: 20)),
-
-                  // ===== Description =====
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        "Description",
-                        style: AppTextStyles.headlineSmall(
-                          textColor,
-                        ).copyWith(fontWeight: FontWeight.w700),
-                      ),
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-                      child: Text(
-                        (listing.description ?? "—").trim(),
-                        style: AppTextStyles.bodyMedium(textColor),
-                      ),
-                    ),
-                  ),
-                  const SliverToBoxAdapter(child: SizedBox(height: 10)),
-                  // ===== Specifications (Dynamic via Map) =====
-                  if (details != null) ...[
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Text(
-                          "Specifications",
-                          style: AppTextStyles.headlineSmall(
-                            textColor,
-                          ).copyWith(fontWeight: FontWeight.w700),
-                        ),
-                      ),
-                    ),
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(16, 10, 16, 0),
-                        child: buildSpecifications(details),
-                      ),
-                    ),
-                    const SliverToBoxAdapter(child: SizedBox(height: 20)),
-                  ],
-                  // ===== AD ID =====
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "AD ID ${listing.id.toString()}",
-                            style: AppTextStyles.bodyLarge(
-                              textColor,
-                            ).copyWith(fontWeight: FontWeight.w700),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              openReportSheetForListing(
+                            );
+                            await Future.delayed(const Duration(seconds: 2));
+                            if (context.mounted) Navigator.of(context).pop();
+                            final updatedMobile = mobile_number;
+                            if (updatedMobile != null &&
+                                updatedMobile.isNotEmpty) {
+                              AppLauncher.call(updatedMobile);
+                            } else {
+                              CustomSnackBar1.show(
                                 context,
-                                listingId: widget.listingId,
+                                "Mobile number not available",
                               );
-                            },
-                            child: Text("REPORT THIS AD"),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SliverToBoxAdapter(child: SizedBox(height: 10)),
+                            }
+                          }
+                        },
+                  onChat: isGuest
+                      ? () {
+                          context.push("/login");
+                        }
+                      : () {
+                          context.push('/chat?receiverId=$receiverId');
+                        },
+                );
+        },
+      ),
+      body: BlocConsumer<ProductDetailsCubit, ProductDetailsStates>(
+        listenWhen: (prev, curr) => curr is ProductDetailsLoaded,
+        listener: (context, state) async {
+          final s = state as ProductDetailsLoaded;
+          final data = s.productDetailsModel.data!;
+          final listing = data.listing!;
 
-                  // ===== Location Map =====
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+          // Set one-time fields without scheduling from build()
+          if (!_didInitFromBloc) {
+            _didInitFromBloc = true;
+
+            receiverId = data.postedBy?.id.toString() ?? "";
+            receiverName = data.postedBy?.name ?? "";
+            receiverImage = data.postedBy?.image ?? "";
+            mobile_number = listing.mobileNumber ?? "";
+
+            // Initialize map position once
+            await _prepareMap(listing);
+            if (mounted) setState(() {}); // reflect _listingLatLng/_markers
+          }
+        },
+        builder: (context, state) {
+          if (state is ProductDetailsLoading ||
+              state is ProductDetailsInitially) {
+            return Center(child: DottedProgressWithLogo());
+          }
+          if (state is ProductDetailsFailure) {
+            return _ErrorView(
+              message: state.error.isNotEmpty ? state.error : "Failed to load.",
+              onRetry: () => context
+                  .read<ProductDetailsCubit>()
+                  .getProductDetails(widget.listingId),
+            );
+          }
+          final model = (state as ProductDetailsLoaded).productDetailsModel;
+          final data = model.data!;
+          final listing = data.listing!;
+          final images = data.images ?? const [];
+          final details = data.details;
+          final posted = data.postedBy;
+
+          final title = listing.title ?? "Check this Listing";
+          final priceStr = _formatINR(listing.price);
+          final location =
+              "${listing.location},${listing.city_name},${listing.state_name}" ??
+              "—";
+          return CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AspectRatio(
+                      aspectRatio: 16 / 9,
+                      child: Stack(
                         children: [
-                          Text(
-                            "Location",
-                            style: AppTextStyles.headlineSmall(
-                              textColor,
-                            ).copyWith(fontWeight: FontWeight.w700),
-                          ),
-                          const SizedBox(height: 8),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(16),
-                            child: Container(
-                              height: 180,
-                              color: ThemeHelper.cardColor(context),
-                              child: _listingLatLng == null
-                                  ? Center(
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(12),
-                                        child: Text(
-                                          _isResolvingLocation
-                                              ? "Loading map…"
-                                              : "Location unavailable",
-                                          style: AppTextStyles.bodySmall(
-                                            textColor,
-                                          ),
+                          // 1) Images
+                          PageView.builder(
+                            controller: _pgCtrl,
+                            onPageChanged: (i) => setState(() => _page = i),
+                            itemCount: images.isEmpty ? 1 : images.length,
+                            itemBuilder: (_, i) {
+                              final url = images.isNotEmpty
+                                  ? images[i].image
+                                  : null;
+                              return GestureDetector(
+                                onTap: () {
+                                  if (images.isNotEmpty) {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => PhotoViewScreen(
+                                          images: images,
+                                          initialIndex: i,
                                         ),
                                       ),
-                                    )
-                                  : GoogleMap(
-                                      initialCameraPosition: CameraPosition(
-                                        target: _listingLatLng!,
-                                        zoom: 14.5,
-                                      ),
-                                      zoomGesturesEnabled:
-                                          false, // ← disables double-tap & pinch zoom
-                                      myLocationButtonEnabled: false,
-                                      zoomControlsEnabled: false,
-                                      rotateGesturesEnabled: false, // optional
-                                      tiltGesturesEnabled: false, // optional
-                                      markers: _markers,
-                                      onMapCreated: (c) => _mapCtrl.complete(c),
-                                      // Important: don't pass an empty set here; use null (default) unless you have a specific need
-                                      // gestureRecognizers: {},
-                                    ),
-                            ),
+                                    );
+                                  }
+                                },
+                                child: _ImageHero(url: url),
+                              );
+                            },
                           ),
-                          if (_listingLatLng != null) ...[
-                            const SizedBox(height: 8),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: TextButton.icon(
-                                onPressed: () =>
-                                    _openInGoogleMaps(_listingLatLng!),
-                                icon: const Icon(Icons.directions),
-                                label: const Text("Open in Google Maps"),
+
+                          // 2) Watermark (bottom-right)
+                          Positioned(
+                            right: 0,
+                            bottom: 0, // keep above the dots
+                            child: IgnorePointer(
+                              ignoring: true,
+                              child: Image.asset(
+                                'assets/images/watermark.png', // <-- your watermark image
+                                width: 110, // tweak as needed
+                                fit: BoxFit.contain,
+                                filterQuality: FilterQuality.high,
                               ),
                             ),
-                          ],
+                          ),
+
+                          // 3) Top-right actions
+                          Positioned(
+                            top: 12,
+                            right: 12,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                _RoundIconButton(
+                                  icon: Icons.ios_share_rounded,
+                                  tooltip: 'Share',
+                                  onTap: () {
+                                    final shareUrl = generateListingUrl(
+                                      data.listing!,
+                                    );
+                                    AppLogger.info("shareUrl:$shareUrl");
+
+                                    Share.share(
+                                      shareUrl,
+                                      subject:
+                                          data.listing?.title ??
+                                          'Check this listing',
+                                    );
+                                  },
+                                ),
+                                const SizedBox(height: 8),
+                                _RoundIconButton(
+                                  icon: Icons.fullscreen_rounded,
+                                  tooltip: 'View',
+                                  onTap: () {
+                                    if (images.isNotEmpty) {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => PhotoViewScreen(
+                                            images: images,
+                                            initialIndex: _page,
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          // 4) Dots
+                          Positioned(
+                            left: 0,
+                            right: 0,
+                            bottom: 12,
+                            child: Center(
+                              child: _Dots(
+                                count: images.isEmpty ? 1 : images.length,
+                                index: _page,
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
-                  ),
-
-                  const SliverToBoxAdapter(child: SizedBox(height: 10)),
-
-                  // ===== Posted By =====
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: _PostedByCard(
-                        avatarUrl: posted?.image,
-                        name: posted?.name ?? "—",
-                        postedOn:
-                            posted?.postedAt ?? _shortDate(listing.createdAt),
-                        onViewProfile: () {},
+                    const SizedBox(height: 16),
+                  ],
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: AppTextStyles.headlineSmall(textColor),
                       ),
+                      const SizedBox(height: 6),
+                      Text(
+                        "₹$priceStr",
+                        style: AppTextStyles.headlineMedium(
+                          textColor,
+                        ).copyWith(fontWeight: FontWeight.w800),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                  ),
+                ),
+              ),
+
+              // ===== Item Information =====
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    "Item Information",
+                    style: AppTextStyles.headlineSmall(
+                      textColor,
+                    ).copyWith(fontWeight: FontWeight.w700),
+                  ),
+                ),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 12)),
+              // Chips (Posted + Location)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Wrap(
+                    spacing: 16,
+                    runSpacing: 12,
+                    children: [
+                      if (listing.createdAt != null)
+                        _InfoChip(
+                          icon: Icons.calendar_today_rounded,
+                          label: "Posted At",
+                          value: _shortDate(listing.createdAt),
+                        ),
+                      if (location.isNotEmpty)
+                        _InfoChip(
+                          icon: Icons.place_rounded,
+                          label: "",
+                          value: location,
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 20)),
+
+              // ===== Description =====
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    "Description",
+                    style: AppTextStyles.headlineSmall(
+                      textColor,
+                    ).copyWith(fontWeight: FontWeight.w700),
+                  ),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+                  child: Text(
+                    (listing.description ?? "—").trim(),
+                    style: AppTextStyles.bodyMedium(textColor),
+                  ),
+                ),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 10)),
+              // ===== Specifications (Dynamic via Map) =====
+              if (details != null) ...[
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      "Specifications",
+                      style: AppTextStyles.headlineSmall(
+                        textColor,
+                      ).copyWith(fontWeight: FontWeight.w700),
                     ),
                   ),
-
-                  SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: 280,
-                      child: SimilarProductsSection(
-                        subCategoryId: listing.subCategoryId!.toString(),
-                        excludeId: listing.id,
-                        onTap: (prod) {
-                          context.pushReplacement(
-                            "/products_details?listingId=${listing.id}&subcategory_id=${listing.subCategoryId}",
+                ),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(16, 10, 16, 0),
+                    child: buildSpecifications(details),
+                  ),
+                ),
+                const SliverToBoxAdapter(child: SizedBox(height: 20)),
+              ],
+              // ===== AD ID =====
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "AD ID ${listing.id.toString()}",
+                        style: AppTextStyles.bodyLarge(
+                          textColor,
+                        ).copyWith(fontWeight: FontWeight.w700),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          openReportSheetForListing(
+                            context,
+                            listingId: widget.listingId,
                           );
                         },
+                        child: Text("REPORT THIS AD"),
                       ),
-                    ),
+                    ],
                   ),
-                  const SliverToBoxAdapter(child: SizedBox(height: 24)),
-                ],
-              );
-            },
-          ),
-        );
-      },
+                ),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 10)),
+
+              // ===== Location Map =====
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Location",
+                        style: AppTextStyles.headlineSmall(
+                          textColor,
+                        ).copyWith(fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(height: 8),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Container(
+                          height: 180,
+                          color: ThemeHelper.cardColor(context),
+                          child: _listingLatLng == null
+                              ? Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12),
+                                    child: Text(
+                                      _isResolvingLocation
+                                          ? "Loading map…"
+                                          : "Location unavailable",
+                                      style: AppTextStyles.bodySmall(textColor),
+                                    ),
+                                  ),
+                                )
+                              : GoogleMap(
+                                  initialCameraPosition: CameraPosition(
+                                    target: _listingLatLng!,
+                                    zoom: 14.5,
+                                  ),
+                                  zoomGesturesEnabled:
+                                      false, // ← disables double-tap & pinch zoom
+                                  myLocationButtonEnabled: false,
+                                  zoomControlsEnabled: false,
+                                  rotateGesturesEnabled: false, // optional
+                                  tiltGesturesEnabled: false, // optional
+                                  markers: _markers,
+                                  onMapCreated: (c) => _mapCtrl.complete(c),
+                                  // Important: don't pass an empty set here; use null (default) unless you have a specific need
+                                  // gestureRecognizers: {},
+                                ),
+                        ),
+                      ),
+                      if (_listingLatLng != null) ...[
+                        const SizedBox(height: 8),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton.icon(
+                            onPressed: () => _openInGoogleMaps(_listingLatLng!),
+                            icon: const Icon(Icons.directions),
+                            label: const Text("Open in Google Maps"),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+
+              const SliverToBoxAdapter(child: SizedBox(height: 10)),
+
+              // ===== Posted By =====
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: _PostedByCard(
+                    avatarUrl: posted?.image,
+                    name: posted?.name ?? "—",
+                    postedOn: posted?.postedAt ?? _shortDate(listing.createdAt),
+                    onViewProfile: () {},
+                  ),
+                ),
+              ),
+
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 280,
+                  child: SimilarProductsSection(
+                    subCategoryId: listing.subCategoryId!.toString(),
+                    excludeId: listing.id,
+                    onTap: (prod) {
+                      context.pushReplacement(
+                        "/products_details?listingId=${listing.id}&subcategory_id=${listing.subCategoryId}",
+                      );
+                    },
+                  ),
+                ),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 24)),
+            ],
+          );
+        },
+      ),
     );
   }
 
