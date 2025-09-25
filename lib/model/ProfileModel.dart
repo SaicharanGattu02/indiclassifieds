@@ -32,6 +32,7 @@ class Data {
   String? state_name;
   int? state_id;
   int? city_id;
+  int? email_verified;
   String? createdAt;
   String? updatedAt;
 
@@ -42,6 +43,7 @@ class Data {
     this.mobile,
     this.image,
     this.city_id,
+    this.email_verified,
     this.city_name,
     this.state_id,
     this.state_name,
@@ -61,6 +63,7 @@ class Data {
     image = json['image'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
+    email_verified = json['email_verified'];
   }
 
   Map<String, dynamic> toJson() {
@@ -76,6 +79,7 @@ class Data {
     data['city_id'] = this.city_id;
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
+    data['email_verified'] = this.email_verified;
     return data;
   }
 }

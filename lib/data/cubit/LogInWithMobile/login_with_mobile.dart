@@ -25,7 +25,7 @@ class LogInwithMobileCubit extends Cubit<LogInWithMobileState> {
     emit(verifyWithMobileLoading());
     try {
       final response = await logInWithMobileRepository.verifyMobileOtp(data);
-      if (response != null && response.success == true) {
+      if (response != null) {
         emit(verifyMobileSuccess(response));
       } else {
         emit(OtpVerifyFailure("${response?.message ?? ''}"));

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:indiclassifieds/Components/CustomSnackBar.dart';
 import '../../data/cubit/RecoverAccount/recover_account_cubit.dart';
 import '../../data/cubit/RecoverAccount/recover_account_states.dart';
 import '../../theme/AppTextStyles.dart';
@@ -56,7 +57,7 @@ class _RecoverAccountScreenState extends State<RecoverAccountScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  "Your account was deleted earlier. Don’t worry — you can easily recover it by entering your registered ID or email.",
+                  "Your account was deleted earlier. Don’t worry — you can easily recover by just tapping on Recover Account Button.",
                   style: AppTextStyles.bodyMedium(
                     textColor,
                   ).copyWith(height: 1.5, color: textColor.withOpacity(0.8)),
@@ -83,21 +84,15 @@ class _RecoverAccountScreenState extends State<RecoverAccountScreen> {
                       BlocConsumer<RecoverAccountCubit, RecoverAccountStates>(
                         listener: (context, state) {
                           if (state is RecoverAccountLoaded) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  state.adSuccessModel.message ?? "Recovered!",
-                                ),
-                                backgroundColor: Colors.green,
-                              ),
+                            CustomSnackBar1.show(
+                              context,
+                              state.adSuccessModel.message ?? "Recovered!",
                             );
                             context.push("/login");
                           } else if (state is RecoverAccountFailure) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(state.error ?? "Failed"),
-                                backgroundColor: Colors.red,
-                              ),
+                            CustomSnackBar1.show(
+                              context,
+                              state.error ?? "Failed",
                             );
                           }
                         },

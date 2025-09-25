@@ -268,7 +268,9 @@ class _RegisterUserDetailsScreenState extends State<RegisterUserDetailsScreen> {
                                   EmailVerificationStates
                                 >(
                                   listener: (context, state) {
+                                    if (!mounted) return;
                                     if (state is SendOTPSuccess) {
+                                      _otpController.clear();
                                       CustomSnackBar1.show(
                                         context,
                                         "OTP sent to ${_emailCtrl.text}",
@@ -279,19 +281,19 @@ class _RegisterUserDetailsScreenState extends State<RegisterUserDetailsScreen> {
                                         "${state.error}",
                                       );
                                     } else if (state is VerifyOTPSuccess) {
+                                      _isOtpVerified = true;
+                                      setState(() {});
                                       CustomSnackBar1.show(
                                         context,
                                         "OTP Verified Successfully!",
                                       );
-                                      _isOtpVerified =
-                                          true; // <-- mark OTP as verified
                                     } else if (state is VerifyOTPFailure) {
+                                      _isOtpVerified = false;
+                                      setState(() {});
                                       CustomSnackBar1.show(
                                         context,
                                         "${state.error}",
                                       );
-                                      _isOtpVerified =
-                                          false; // OTP not verified
                                     }
                                   },
                                   builder: (context, state) {
@@ -311,45 +313,51 @@ class _RegisterUserDetailsScreenState extends State<RegisterUserDetailsScreen> {
                                       children: [
                                         // Send OTP button (hide after OTP is sent)
                                         // if (!otpSent)
-                                        Align(
-                                          alignment: Alignment.topRight,
-                                          child: TextButton(
-                                            onPressed: isSending
-                                                ? null
-                                                : () {
-                                                    context
-                                                        .read<
-                                                          EmailVerificationCubit
-                                                        >()
-                                                        .sendOTP({
-                                                          "email":
-                                                              _emailCtrl.text,
-                                                        });
-                                                  },
-                                            child: isSending
-                                                ? const SizedBox(
-                                                    width: 16,
-                                                    height: 16,
-                                                    child:
-                                                        CircularProgressIndicator(
-                                                          strokeWidth: 2,
-                                                        ),
-                                                  )
-                                                : Text(
-                                                    "Send OTP",
-                                                    style:
-                                                        AppTextStyles.titleSmall(
-                                                          textColor,
-                                                        ),
-                                                  ),
+                                        if (!_isOtpVerified) ...[
+                                          Align(
+                                            alignment: Alignment.topRight,
+                                            child: TextButton(
+                                              onPressed: isSending
+                                                  ? null
+                                                  : () {
+                                                      _otpController.clear();
+                                                      _isOtpVerified =
+                                                          false; // reset verification
+                                                      setState(() {});
+                                                      context
+                                                          .read<
+                                                            EmailVerificationCubit
+                                                          >()
+                                                          .sendOTP({
+                                                            "email":
+                                                                _emailCtrl.text,
+                                                          });
+                                                    },
+                                              child: isSending
+                                                  ? const SizedBox(
+                                                      width: 16,
+                                                      height: 16,
+                                                      child:
+                                                          CircularProgressIndicator(
+                                                            strokeWidth: 2,
+                                                          ),
+                                                    )
+                                                  : Text(
+                                                      "Send OTP",
+                                                      style:
+                                                          AppTextStyles.titleSmall(
+                                                            textColor,
+                                                          ),
+                                                    ),
+                                            ),
                                           ),
-                                        ),
-
+                                        ],
                                         // OTP input field (show only after OTP is sent)
                                         if (otpSent) ...[
                                           SizedBox(height: 16),
                                           PinCodeTextField(
                                             autoUnfocus: true,
+                                            autoDisposeControllers: false,
                                             appContext: context,
                                             controller: _otpController,
                                             backgroundColor: Colors.transparent,
@@ -411,6 +419,42 @@ class _RegisterUserDetailsScreenState extends State<RegisterUserDetailsScreen> {
                                             textInputAction: Platform.isAndroid
                                                 ? TextInputAction.none
                                                 : TextInputAction.done,
+                                            onCompleted: (value) {
+                                              final otp = int.tryParse(
+                                                _otpController.text,
+                                              );
+                                              if (otp != null &&
+                                                  _otpController.text.length ==
+                                                      6) {
+                                                context
+                                                    .read<
+                                                      EmailVerificationCubit
+                                                    >()
+                                                    .verifyOTP({
+                                                      "email": _emailCtrl.text
+                                                          .trim(),
+                                                      "otp": otp,
+                                                    });
+                                              }
+                                            },
+                                            onSubmitted: (value) {
+                                              final otp = int.tryParse(
+                                                _otpController.text,
+                                              );
+                                              if (otp != null &&
+                                                  _otpController.text.length ==
+                                                      6) {
+                                                context
+                                                    .read<
+                                                      EmailVerificationCubit
+                                                    >()
+                                                    .verifyOTP({
+                                                      "email": _emailCtrl.text
+                                                          .trim(),
+                                                      "otp": otp,
+                                                    });
+                                              }
+                                            },
                                           ),
                                         ],
                                         // Verify OTP button (show only after OTP is sent)

@@ -79,7 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(4),
                   child: Image.asset(
-                    'assets/images/logo.png',
+                    'assets/images/applogonew.png',
                     width: SizeConfig.screenWidth * 0.2,
                     fit: BoxFit.cover,
                   ),
@@ -106,7 +106,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             // Text will not push layout; it truncates with …
                             Flexible(
                               child: Text(
-                                // "kjsdkjsdn kjsdnks kjbk kjsfb ksjbf kjgdkj kjdgkj jngkjdg",
                                 state.locationName,
                                 style: AppTextStyles.bodyMedium(textColor),
                                 overflow: TextOverflow.ellipsis,
@@ -566,10 +565,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                           (context, index) {
                                             if (index == products.length) {
                                               if (hasNextPage) {
-                                                context.read<ProductsCubit>().getMoreProducts();
+                                                context
+                                                    .read<ProductsCubit>()
+                                                    .getMoreProducts();
                                                 return const Padding(
                                                   padding: EdgeInsets.all(16.0),
-                                                  child: Center(child: CircularProgressIndicator()),
+                                                  child: Center(
+                                                    child:
+                                                        CircularProgressIndicator(),
+                                                  ),
                                                 );
                                               } else {
                                                 return const SizedBox.shrink();

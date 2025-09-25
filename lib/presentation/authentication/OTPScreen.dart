@@ -453,11 +453,16 @@ class _OtpscreenState extends State<Otpscreen> {
                                                 context.push(
                                                   "/recover_account?user_id=${data.id.toString()}",
                                                 );
-                                              } else {
+                                              } else if (data.code ==
+                                                  "ACCOUNT_BLOCKED") {
                                                 context.push(
                                                   "/blocked_account",
                                                 );
                                               }
+                                              CustomSnackBar1.show(
+                                                context,
+                                                data.message ?? "",
+                                              );
                                             }
                                           } else if (state
                                               is verifyEmailSuccess) {
@@ -492,7 +497,16 @@ class _OtpscreenState extends State<Otpscreen> {
                                                 context.push(
                                                   "/recover_account?user_id=${data.id.toString()}",
                                                 );
+                                              } else if (data.code ==
+                                                  "ACCOUNT_BLOCKED") {
+                                                context.push(
+                                                  "/blocked_account",
+                                                );
                                               }
+                                              CustomSnackBar1.show(
+                                                context,
+                                                data.message ?? "",
+                                              );
                                             }
                                           } else if (state
                                               is OtpVerifyFailure) {
