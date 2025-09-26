@@ -6,6 +6,7 @@ import 'package:indiclassifieds/data/cubit/Plans/plans_cubit.dart';
 import 'package:indiclassifieds/utils/color_constants.dart';
 import 'package:indiclassifieds/widgets/CommonLoader.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../Components/CustomSnackBar.dart';
 import '../../data/cubit/Packages/packages_cubit.dart';
 import '../../data/cubit/Packages/packages_states.dart';
@@ -697,73 +698,82 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
                             return SafeArea(
                               child: Padding(
                                 padding: EdgeInsets.fromLTRB(16, 0, 16, 20),
-                                child:
-                                    BlocConsumer<PaymentCubit, PaymentStates>(
-                                      listener: (context, state) async {
-                                        isLoadingNotifier.value =
-                                            state is PaymentLoading;
-                                        if (state is PaymentCreated) {
-                                          final payment_created_data =
-                                              state.createPaymentModel;
-                                          _openCheckout(
-                                            payment_created_data.razorpayKey ??
-                                                "",
-                                            payment_created_data.amount ?? 0,
-                                            payment_created_data.orderId ?? "",
-                                          );
-                                        } else if (state is PaymentVerified) {
-                                          context.pushReplacement(
-                                            '/successfully1',
-                                          );
-                                          final plan = await context
-                                              .read<UserActivePlanCubit>()
-                                              .getUserActivePlansData();
-                                          if (plan != null) {
-                                            AuthService.setPlanStatus(
-                                              plan.goToPlansPage.toString() ??
-                                                  "",
-                                            );
-                                            AuthService.setFreePlanStatus(
-                                              plan.isFree.toString() ?? "",
-                                            );
-                                          }
-                                        } else if (state is PaymentFailure) {
+                                child: BlocConsumer<PaymentCubit, PaymentStates>(
+                                  listener: (context, state) async {
+                                    isLoadingNotifier.value =
+                                        state is PaymentLoading;
+                                    if (state is PaymentCreated) {
+                                      final payment_created_data =
+                                          state.createPaymentModel;
+                                      _openCheckout(
+                                        payment_created_data.razorpayKey ?? "",
+                                        payment_created_data.amount ?? 0,
+                                        payment_created_data.orderId ?? "",
+                                      );
+                                    } else if (state is PaymentVerified) {
+                                      context.pushReplacement('/successfully1');
+                                      final plan = await context
+                                          .read<UserActivePlanCubit>()
+                                          .getUserActivePlansData();
+                                      if (plan != null) {
+                                        AuthService.setPlanStatus(
+                                          plan.goToPlansPage.toString() ?? "",
+                                        );
+                                        AuthService.setFreePlanStatus(
+                                          plan.isFree.toString() ?? "",
+                                        );
+                                      }
+                                    } else if (state is PaymentFailure) {
+                                      CustomSnackBar1.show(
+                                        context,
+                                        state.error,
+                                      );
+                                    }
+                                  },
+                                  builder: (context, state) {
+                                    return CustomAppButton1(
+                                      isLoading: state is PaymentLoading,
+                                      text: getPlatformText(
+                                        ios: "Pay & Post Ad",
+                                        android: "Submit",
+                                      ),
+                                      onPlusTap: () async {
+                                        if (selected == null) {
                                           CustomSnackBar1.show(
                                             context,
-                                            state.error,
+                                            "Please select a pack",
                                           );
+                                          return;
+                                        } else {
+                                          if (userMobileNotifier.value ==
+                                                  "9999999999" &&
+                                              Platform.isIOS) {
+                                            CustomSnackBar1.show(
+                                              context,
+                                              "You can Buy a Subscription plan from Website",
+                                            );
+                                            await launchUrl(
+                                              Uri.parse(
+                                                "https://indclassifieds.in/",
+                                              ),
+                                              mode: LaunchMode
+                                                  .externalApplication,
+                                            );
+                                          } else {
+                                            final Map<String, dynamic> data = {
+                                              "plan_id": plan_id.value,
+                                              "package_id": packageId.value,
+                                              "price": price.value,
+                                            };
+                                            context
+                                                .read<PaymentCubit>()
+                                                .createPayment(data);
+                                          }
                                         }
                                       },
-                                      builder: (context, state) {
-                                        return CustomAppButton1(
-                                          isLoading: state is PaymentLoading,
-                                          text: getPlatformText(
-                                            ios: "Pay & Post Ad",
-                                            android: "Submit",
-                                          ),
-                                          onPlusTap: () {
-                                            if (selected == null) {
-                                              CustomSnackBar1.show(
-                                                context,
-                                                "Please select a pack",
-                                              );
-                                              return;
-                                            } else {
-                                              final Map<String, dynamic> data =
-                                                  {
-                                                    "plan_id": plan_id.value,
-                                                    "package_id":
-                                                        packageId.value,
-                                                    "price": price.value,
-                                                  };
-                                              context
-                                                  .read<PaymentCubit>()
-                                                  .createPayment(data);
-                                            }
-                                          },
-                                        );
-                                      },
-                                    ),
+                                    );
+                                  },
+                                ),
                               ),
                             );
                           },
