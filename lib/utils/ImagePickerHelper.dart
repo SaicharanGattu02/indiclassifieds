@@ -81,7 +81,6 @@ class ImagePickerHelper {
                   title:  Text(
                     'Choose from Gallery',
                     style: TextStyle(
-
                       fontSize: 16,
                       color: textColor,
                       fontWeight: FontWeight.w400,
@@ -338,7 +337,6 @@ class _CommonImagePickerState extends State<CommonImagePicker> {
                             Text(
                               'Add Photo',
                               style: TextStyle(
-
                                 fontSize: 12,
                                 color: widget.textColor.withOpacity(0.6),
                               ),

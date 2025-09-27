@@ -33,8 +33,8 @@ const AndroidNotificationChannel channel = AndroidNotificationChannel(
 );
 
 Future<void> main() async {
-  ApiClient.setupInterceptors();
   WidgetsFlutterBinding.ensureInitialized();
+  ApiClient.setupInterceptors();
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   final storage = SecureStorageService.instance;
   final themeCubit = ThemeCubit(storage);

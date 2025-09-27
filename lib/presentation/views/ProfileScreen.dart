@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -163,7 +165,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     ),
                                   ),
                                   // Subscribed user badge with specific gradient (pink to orange)
-                                  if (isSubscribedUser) ...[
+                                  if (isSubscribedUser && Platform.isAndroid) ...[
                                     Positioned(
                                       bottom: 0,
                                       child: Container(
@@ -232,7 +234,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         _settingsTile(
                           Icons.unsubscribe_outlined,
                           Colors.blue.shade100,
-                          'Subscription',
+                          Platform.isAndroid ? 'Subscription' : "Buy Packages",
                           isDark,
                           textColor,
                           trailing: Icons.arrow_forward_ios,
@@ -241,7 +243,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         _settingsTile(
                           Icons.subscriptions,
                           Colors.blue.shade100,
-                          'Active Subscription Plans',
+                          Platform.isAndroid ? 'Active Subscription Plans' : "My Orders (Active, Scheduled, Expired)",
                           isDark,
                           textColor,
                           trailing: Icons.arrow_forward_ios,
