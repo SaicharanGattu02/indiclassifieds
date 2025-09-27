@@ -15,6 +15,7 @@ import 'package:indiclassifieds/theme/AppTextStyles.dart';
 import 'package:indiclassifieds/theme/app_colors.dart';
 import 'package:indiclassifieds/utils/AppLogger.dart';
 import 'package:indiclassifieds/utils/color_constants.dart';
+import 'package:indiclassifieds/utils/constants.dart';
 import 'package:permission_handler/permission_handler.dart' as OpenAppSettings;
 
 import '../../data/bloc/internet_status/internet_status_bloc.dart';
@@ -168,6 +169,8 @@ class _DashboardState extends State<Dashboard> {
                   if (state is LocationPermissionDenied ||
                       state is LocationServiceDisabled) {
                     showLocationBottomSheet(context);
+                  } else if (state is LocationLoaded) {
+                    address = state.locationName;
                   }
                 },
                 child: PageView(
@@ -319,19 +322,20 @@ class _DashboardState extends State<Dashboard> {
 
             if (isServiceDisabled) {
               title = 'Location Services Disabled';
-              description = 'Please enable location services on your device to see listings near you.';
+              description =
+                  'Please enable location services on your device to see listings near you.';
             } else if (isForeverDenied) {
               title = 'Permission Denied Permanently';
               description =
-              'To show listings near you, please enable location access from device settings.';
+                  'To show listings near you, please enable location access from device settings.';
             } else if (isDenied) {
               title = 'Location Access Needed';
               description =
-              'IND Classifieds uses your location to show listings near you. You can continue using the app without enabling location, but nearby listings may not be shown.';
+                  'IND Classifieds uses your location to show listings near you. You can continue using the app without enabling location, but nearby listings may not be shown.';
             } else {
               title = 'Allow Location Access';
               description =
-              'IND Classifieds uses your location to show listings near you. This helps you discover items, services, and deals in your area for a personalized experience.';
+                  'IND Classifieds uses your location to show listings near you. This helps you discover items, services, and deals in your area for a personalized experience.';
             }
 
             return Container(
@@ -342,7 +346,9 @@ class _DashboardState extends State<Dashboard> {
                   end: Alignment.bottomCenter,
                   colors: [Colors.white, Colors.grey[50]!],
                 ),
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(24),
+                ),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -409,7 +415,10 @@ class _DashboardState extends State<Dashboard> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary,
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -429,12 +438,17 @@ class _DashboardState extends State<Dashboard> {
                           onPressed: isLoading
                               ? null
                               : () {
-                            context.read<LocationCubit>().requestLocationPermission();
-                          },
+                                  context
+                                      .read<LocationCubit>()
+                                      .requestLocationPermission();
+                                },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary,
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -442,22 +456,24 @@ class _DashboardState extends State<Dashboard> {
                           ),
                           child: isLoading
                               ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation(Colors.white),
-                            ),
-                          )
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation(
+                                      Colors.white,
+                                    ),
+                                  ),
+                                )
                               : const Text(
-                            'Continue',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                              fontFamily: "lexend",
-                              color: Colors.white,
-                            ),
-                          ),
+                                  'Continue',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14,
+                                    fontFamily: "lexend",
+                                    color: Colors.white,
+                                  ),
+                                ),
                         ),
                     ],
                   ),
@@ -472,6 +488,4 @@ class _DashboardState extends State<Dashboard> {
       isLocationSheetShown = false;
     });
   }
-
-
 }

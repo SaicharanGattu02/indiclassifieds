@@ -13,6 +13,7 @@ import '../../data/cubit/Location/location_cubit.dart';
 import '../../data/cubit/MyAds/GetMarkAsListing/get_listing_ad_cubit.dart';
 import '../../data/cubit/MyAds/MarkAsListing/mark_as_listing_cubit.dart';
 import '../../data/cubit/MyAds/MarkAsListing/mark_as_listing_state.dart';
+import '../../data/cubit/Profile/profile_cubit.dart';
 import '../../data/cubit/States/states_cubit.dart';
 import '../../data/cubit/States/states_repository.dart';
 import '../../data/cubit/UserActivePlans/user_active_plans_cubit.dart';
@@ -135,51 +136,43 @@ class _CommunityAdScreenState extends State<CommunityAdScreen> {
   }
 
   Future<void> fetchData() async {
-    // Use Future.wait to run all async calls concurrently
-    final results = await Future.wait([
-      AuthService.getName(),
-      AuthService.getMobile(),
-      AuthService.getState(),
-      AuthService.getCity(),
-      AuthService.getStateId(),
-      AuthService.getCityId(),
-      context.read<LocationCubit>().getForSubmission(),
-    ]);
+    try {
+      // Fetch profile details
+      final userData = await context.read<ProfileCubit>().getProfileDetails();
+      if (userData != null && userData.data != null) {
+        final data = userData.data!;
+        debugPrint("userData: ${data.email ?? 'No email'}");
 
-    final String? name = results[0] as String?;
-    final String? phone = results[1] as String?;
-    final String? stateIdStr = results[2] as String?;
-    final String? cityIdStr = results[3] as String?;
-    final String? stateId = results[4] as String?;
-    final String? cityId = results[5] as String?;
-    final ({String locationName, String latlng}) locResult = results[6] as ({String locationName, String latlng});
+        setState(() {
+          nameController.text = data.name ?? "";
+          emailController.text = data.email ?? "";
+          phoneController.text = data.mobile?.toString() ?? "";
+          stateController.text = data.state_name ?? "";
+          selectedStateId = data.state_id ?? 0;
+          selectedCityId = data.city_id ?? 0;
+          cityController.text = data.city_name ?? "";
+        });
+      } else {
+        debugPrint("No user data available");
+      }
 
-    if (locResult.locationName.isNotEmpty) {
-      locationController.text = locResult.locationName;
-    }
-    if (name != null && name.isNotEmpty) {
-      nameController.text = name;
-    }
-    if (phone != null && phone.isNotEmpty) {
-      phoneController.text = phone;
-    }
-    if (stateIdStr != null && stateIdStr.isNotEmpty) {
-      stateController.text = stateIdStr;
-    }
-    if (cityIdStr != null && cityIdStr.isNotEmpty) {
-      cityController.text = cityIdStr;
-    }
-    if (stateId != null && stateId.isNotEmpty) {
-      setState(() {
-        selectedStateId = int.tryParse(stateId);
-      });
-    }
-    if (cityId != null && cityId.isNotEmpty) {
-      setState(() {
-        selectedCityId = int.tryParse(cityId);
-      });
-    }
-    debugPrint("✅ INFO: state: $stateId");
+      locationController.text = address;
+
+      // // Fetch location data
+      // final locationResult = await context
+      //     .read<LocationCubit>()
+      //     .getForSubmission();
+      //
+      // if (locationResult.locationName != null) {
+      //   setState(() {
+      //     locationController.text = locationResult.locationName;
+      //   });
+      // }
+    } catch (e, stackTrace) {
+      debugPrint("Error fetching data: $e");
+      debugPrint("Stack trace: $stackTrace");
+      CustomSnackBar1.show(context, 'Failed to load profile data: $e');
+    } finally {}
   }
 
   @override
