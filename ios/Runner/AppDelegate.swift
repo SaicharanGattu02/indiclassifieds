@@ -2,6 +2,7 @@ import UIKit
 import Flutter
 import FirebaseCore
 import UserNotifications
+import GoogleMaps  // 👈 Required import
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
@@ -10,13 +11,17 @@ import UserNotifications
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    // Firebase config
+
+    // ✅ Provide Google Maps API key
+    GMSServices.provideAPIKey("AIzaSyD0-eauuJ1zBrknaL4uNexkR21cYVOkj7k")  // 🔁 Replace with your real API key
+
+    // ✅ Firebase config
     FirebaseApp.configure()
 
-    // Flutter plugin registration
+    // ✅ Flutter plugin registration
     GeneratedPluginRegistrant.register(with: self)
 
-    // Request push notification permissions
+    // ✅ Request push notification permissions
     UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
       if granted {
         DispatchQueue.main.async {
@@ -34,12 +39,11 @@ import UserNotifications
     continue userActivity: NSUserActivity,
     restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void
   ) -> Bool {
-
     if userActivity.activityType == NSUserActivityTypeBrowsingWeb,
        let incomingURL = userActivity.webpageURL {
+        // You can add logic to inspect incomingURL if needed
     }
 
-    // Required for Flutter to handle the link in Dart
     return super.application(application, continue: userActivity, restorationHandler: restorationHandler)
   }
 }

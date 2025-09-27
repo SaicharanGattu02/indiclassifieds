@@ -745,21 +745,21 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
                                           );
                                           return;
                                         } else {
-                                          if (userMobileNotifier.value ==
-                                                  "9999999999" &&
-                                              Platform.isIOS) {
-                                            CustomSnackBar1.show(
-                                              context,
-                                              "You can Buy a Subscription plan from Website",
-                                            );
-                                            await launchUrl(
-                                              Uri.parse(
-                                                "https://indclassifieds.in/",
-                                              ),
-                                              mode: LaunchMode
-                                                  .externalApplication,
-                                            );
-                                          } else {
+                                          // if (userMobileNotifier.value ==
+                                          //         "9999999999" &&
+                                          //     Platform.isIOS) {
+                                          //   CustomSnackBar1.show(
+                                          //     context,
+                                          //     "You can Buy a Subscription plan from Website",
+                                          //   );
+                                          //   await launchUrl(
+                                          //     Uri.parse(
+                                          //       "https://indclassifieds.in/",
+                                          //     ),
+                                          //     mode: LaunchMode
+                                          //         .externalApplication,
+                                          //   );
+                                          // } else {
                                             final Map<String, dynamic> data = {
                                               "plan_id": plan_id.value,
                                               "package_id": packageId.value,
@@ -768,7 +768,7 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
                                             context
                                                 .read<PaymentCubit>()
                                                 .createPayment(data);
-                                          }
+                                          // }
                                         }
                                       },
                                     );
