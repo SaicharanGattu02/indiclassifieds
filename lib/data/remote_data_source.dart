@@ -9,6 +9,7 @@ import '../model/BannersModel.dart';
 import '../model/BoostAdModel.dart';
 import '../model/ChatMessagesModel.dart';
 import '../model/ChatUsersModel.dart';
+import '../model/ContactInfoModel.dart';
 import '../model/CreatePaymentModel.dart';
 import '../model/MarkAsListingModel.dart';
 import '../model/MyAdsModel.dart';
@@ -97,6 +98,7 @@ abstract class RemoteDataSource {
   Future<AdSuccessModel?> sendOTP(Map<String, dynamic> data);
   Future<AdSuccessModel?> verifyOTP(Map<String, dynamic> data);
   Future<VerifyOtpModel?> byPassLogin(Map<String, dynamic> data);
+  Future<ContactInfoModel?> getContactInfo();
 }
 
 class RemoteDataSourceImpl implements RemoteDataSource {
@@ -132,6 +134,20 @@ class RemoteDataSourceImpl implements RemoteDataSource {
       }
     }
     return FormData.fromMap(formMap);
+  }
+
+  @override
+  Future<ContactInfoModel?> getContactInfo() async {
+    try {
+      Response response = await ApiClient.get(
+        "${APIEndpointUrls.all_contact_info}"
+      );
+      AppLogger.log('getContactInfo:${response.data}');
+      return ContactInfoModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('getContactInfo :: $e');
+      return null;
+    }
   }
 
   @override

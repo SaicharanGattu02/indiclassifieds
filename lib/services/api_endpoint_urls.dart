@@ -93,4 +93,5 @@ class APIEndpointUrls {
 
   static const String get_featured_content = '${apiUrl}get-featured-content';
   static const String report = '${apiUrl}report';
+  static const String all_contact_info = '${apiUrl}all-contact-info';
 }

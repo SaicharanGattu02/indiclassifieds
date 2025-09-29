@@ -26,6 +26,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   bool? _isGuestUser; // ← track guest
+  String mobile_number = "";
 
   @override
   void initState() {
@@ -76,7 +77,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
           // ── Logged-in view: original BlocBuilder flow
           : SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: BlocBuilder<ProfileCubit, ProfileStates>(
+              child: BlocConsumer<ProfileCubit, ProfileStates>(
+                listener: (context, state) {
+                  if (state is ProfileLoaded) {
+                    mobile_number = state.profileModel.data?.mobile ?? "";
+                  }
+                },
                 builder: (context, state) {
                   if (state is ProfileLoading) {
                     return SizedBox(
@@ -165,7 +171,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     ),
                                   ),
                                   // Subscribed user badge with specific gradient (pink to orange)
-                                  if (isSubscribedUser && Platform.isAndroid) ...[
+                                  if (isSubscribedUser &&
+                                      Platform.isAndroid) ...[
                                     Positioned(
                                       bottom: 0,
                                       child: Container(
@@ -230,26 +237,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ),
                         const SizedBox(height: 20),
-
-                        _settingsTile(
-                          Icons.unsubscribe_outlined,
-                          Colors.blue.shade100,
-                          Platform.isAndroid ? 'Subscription' : "Buy Packages",
-                          isDark,
-                          textColor,
-                          trailing: Icons.arrow_forward_ios,
-                          onTap: () => context.push("/plans"),
-                        ),
-                        _settingsTile(
-                          Icons.subscriptions,
-                          Colors.blue.shade100,
-                          Platform.isAndroid ? 'Active Subscription Plans' : "My Orders (Active, Scheduled, Expired)",
-                          isDark,
-                          textColor,
-                          trailing: Icons.arrow_forward_ios,
-                          onTap: () => context.push("/active_plans"),
-                        ),
-
+                        if (!(mobile_number == "9999999999" &&
+                            Platform.isIOS)) ...[
+                          _settingsTile(
+                            Icons.unsubscribe_outlined,
+                            Colors.blue.shade100,
+                            Platform.isAndroid
+                                ? 'Subscription'
+                                : "Buy Packages",
+                            isDark,
+                            textColor,
+                            trailing: Icons.arrow_forward_ios,
+                            onTap: () => context.push("/plans"),
+                          ),
+                          _settingsTile(
+                            Icons.subscriptions,
+                            Colors.blue.shade100,
+                            Platform.isAndroid
+                                ? 'Active Subscription Plans'
+                                : "My Orders (Active, Scheduled, Expired)",
+                            isDark,
+                            textColor,
+                            trailing: Icons.arrow_forward_ios,
+                            onTap: () => context.push("/active_plans"),
+                          ),
+                        ],
                         _settingsTile(
                           Icons.favorite,
                           Colors.red.shade100,
@@ -259,15 +271,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           trailing: Icons.arrow_forward_ios,
                           onTap: () => context.push('/wish_list'),
                         ),
-                        _settingsTile(
-                          Icons.receipt_long,
-                          Colors.blue.shade100,
-                          'Transaction History',
-                          isDark,
-                          textColor,
-                          trailing: Icons.arrow_forward_ios,
-                          onTap: () => context.push('/transactions'),
-                        ),
+                        if (!(mobile_number == "9999999999" &&
+                            Platform.isIOS)) ...[
+                          _settingsTile(
+                            Icons.receipt_long,
+                            Colors.blue.shade100,
+                            'Transaction History',
+                            isDark,
+                            textColor,
+                            trailing: Icons.arrow_forward_ios,
+                            onTap: () => context.push('/transactions'),
+                          ),
+                        ],
                         _settingsTile(
                           Icons.dark_mode_outlined,
                           Colors.blue.shade100,

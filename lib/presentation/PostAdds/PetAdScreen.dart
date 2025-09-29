@@ -147,6 +147,7 @@ class _PetAdScreenState extends State<PetAdScreen> {
         setState(() {
           nameController.text = data.name ?? "";
           phoneController.text = data.mobile?.toString() ?? "";
+          mobile_no = data.mobile??"";
           stateController.text = data.state_name ?? "";
           selectedStateId = data.state_id ?? 0;
           selectedCityId = data.city_id ?? 0;

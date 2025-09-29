@@ -159,6 +159,7 @@ class _AstrologyAdState extends State<AstrologyAd> {
           nameController.text = data.name ?? "";
           emailController.text = data.email ?? "";
           phoneController.text = data.mobile?.toString() ?? "";
+          mobile_no = data.mobile??"";
           stateController.text = data.state_name ?? "";
           selectedStateId = data.state_id ?? 0;
           selectedCityId = data.city_id ?? 0;

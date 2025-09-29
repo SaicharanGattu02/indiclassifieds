@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:indiclassifieds/Components/CustomAppButton.dart';
+import 'package:indiclassifieds/utils/constants.dart';
 
 import '../data/cubit/UserActivePlans/user_active_plans_cubit.dart';
 import '../data/cubit/UserActivePlans/user_active_plans_states.dart';
@@ -130,15 +133,18 @@ void showPlanBottomSheet({
                               onSelectPlan,
                             ),
                             SizedBox(height: 15),
-                            Text(
-                              "Your Free Ad allows you to post only one listing. "
-                              "To continue posting more ads and access extra features, "
-                              "please subscribe to one of our premium options.",
-                              textAlign: TextAlign.center,
-                              style: AppTextStyles.bodyMedium(textColor),
-                            ),
-                            SizedBox(height: 24),
-                            _buildSubscribeButton(context, textColor),
+                            if (!(mobile_no == "9999999999" &&
+                                Platform.isIOS)) ...[
+                              Text(
+                                "Your Free Ad allows you to post only one listing. "
+                                "To continue posting more ads and access extra features, "
+                                "please subscribe to one of our premium options.",
+                                textAlign: TextAlign.center,
+                                style: AppTextStyles.bodyMedium(textColor),
+                              ),
+                              SizedBox(height: 24),
+                              _buildSubscribeButton(context, textColor),
+                            ],
                           ],
                         ),
                       ),
@@ -227,13 +233,16 @@ void showPlanBottomSheet({
                               ).copyWith(fontWeight: FontWeight.bold),
                             ),
                             SizedBox(height: 8),
-                            Text(
-                              'Subscribe to a plan to get started and unlock amazing features!',
-                              style: AppTextStyles.bodyMedium(textColor),
-                              textAlign: TextAlign.center,
-                            ),
-                            SizedBox(height: 24),
-                            _buildSubscribeButton(context, textColor),
+                            if (!(mobile_no == "9999999999" &&
+                                Platform.isIOS)) ...[
+                              Text(
+                                'Subscribe to a plan to get started and unlock amazing features!',
+                                style: AppTextStyles.bodyMedium(textColor),
+                                textAlign: TextAlign.center,
+                              ),
+                              SizedBox(height: 24),
+                              _buildSubscribeButton(context, textColor),
+                            ],
                           ],
                         ),
                       ),

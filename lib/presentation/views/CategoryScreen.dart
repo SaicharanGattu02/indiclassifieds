@@ -31,7 +31,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
     final isDark = ThemeHelper.isDarkMode(context);
     final bgColor = ThemeHelper.backgroundColor(context);
     final textColor = ThemeHelper.textColor(context);
-
+    var height = MediaQuery.sizeOf(context).height;
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
@@ -57,7 +57,9 @@ class _CategoryScreenState extends State<CategoryScreen> {
             BlocBuilder<PostCategoriesCubit, PostCategoriesStates>(
               builder: (context, state) {
                 if (state is PostCategoriesLoading) {
-                  return Center(child: DottedProgressWithLogo());
+                  return SizedBox(
+                    height: height*0.55,
+                      child: Center(child: DottedProgressWithLogo()));
                 } else if (state is PostCategoriesLoaded) {
                   final categories = state.categoryModel.categoriesList;
                   return Expanded(

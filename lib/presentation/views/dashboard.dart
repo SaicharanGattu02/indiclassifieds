@@ -164,13 +164,18 @@ class _DashboardState extends State<Dashboard> {
                   // AppLogger.info("called this");
                 }
               },
-              child: BlocListener<LocationCubit, LocationState>(
+              child:BlocListener<LocationCubit, LocationState>(
                 listener: (context, state) {
                   if (state is LocationPermissionDenied ||
                       state is LocationServiceDisabled) {
                     showLocationBottomSheet(context);
                   } else if (state is LocationLoaded) {
                     address = state.locationName;
+                    // ✅ Close bottom sheet if showing
+                    if (isLocationSheetShown) {
+                      Navigator.of(context).pop(); // closes the bottom sheet
+                      isLocationSheetShown = false; // reset flag
+                    }
                   }
                 },
                 child: PageView(

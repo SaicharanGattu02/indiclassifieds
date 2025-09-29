@@ -1,51 +1,69 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:indiclassifieds/Components/CutomAppBar.dart';
 import 'package:indiclassifieds/theme/app_colors.dart';
+import 'package:indiclassifieds/widgets/CommonLoader.dart';
 import 'package:lottie/lottie.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../data/cubit/ContactInfo/ContactInfoCubit.dart';
+import '../../data/cubit/ContactInfo/ContactInfoStates.dart';
+import '../../model/ContactInfoModel.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 
-class ContactSupportScreen extends StatelessWidget {
+class ContactSupportScreen extends StatefulWidget {
   const ContactSupportScreen({Key? key}) : super(key: key);
 
-  // Function to launch email
-  Future<void> _launchEmail() async {
+  @override
+  State<ContactSupportScreen> createState() => _ContactSupportScreenState();
+}
+
+class _ContactSupportScreenState extends State<ContactSupportScreen> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<ContactInfoCubit>().getContactInfo();
+  }
+
+  // Helper to extract dynamic value by key name
+  String? _getValue(List<Data>? data, String key) {
+    return data
+        ?.firstWhere(
+          (item) => item.name?.toLowerCase() == key.toLowerCase(),
+          orElse: () => Data(value: null),
+        )
+        .value;
+  }
+
+  // --- Launch functions ---
+  Future<void> _launchEmail(String email) async {
     final Uri emailUri = Uri(
       scheme: 'mailto',
-      path: 'support@indclassifieds.in',
+      path: email,
       query: 'subject=Support Request for IND Classifieds',
     );
     if (await canLaunchUrl(emailUri)) {
       await launchUrl(emailUri);
-    } else {
-      // Handle error (e.g., show a snackbar)
     }
   }
 
-  // Function to launch phone call
-  Future<void> _launchPhone() async {
-    final Uri phoneUri = Uri(scheme: 'tel', path: '+91 83091 63721');
+  Future<void> _launchPhone(String phone) async {
+    final Uri phoneUri = Uri(scheme: 'tel', path: phone);
     if (await canLaunchUrl(phoneUri)) {
       await launchUrl(phoneUri);
-    } else {
-      // Handle error
     }
   }
 
-  // Function to launch WhatsApp
-  Future<void> _launchWhatsApp() async {
+  Future<void> _launchWhatsApp(String phone) async {
     final Uri whatsappUri = Uri(
       scheme: 'https',
       host: 'wa.me',
-      path: '/+91 83091 63721',
+      path: '/$phone',
       query: 'text=Hello, I need support with IND Classifieds',
     );
     if (await canLaunchUrl(whatsappUri)) {
       await launchUrl(whatsappUri, mode: LaunchMode.externalApplication);
-    } else {
-      // Handle error
     }
   }
 
@@ -53,79 +71,100 @@ class ContactSupportScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final textColor = ThemeHelper.textColor(context);
     final backgroundColor = ThemeHelper.backgroundColor(context);
+
     return Scaffold(
       appBar: CustomAppBar1(title: 'Contact Support', actions: []),
       body: SafeArea(
-        child: Container(
-          color: backgroundColor,
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                // Header Image or Illustration
-                Lottie.asset(
-                  'assets/lottie/Support.json',
-                  width: 200,
-                  height: 200,
-                  repeat: true,
+        child: BlocBuilder<ContactInfoCubit, ContactInfoStates>(
+          builder: (context, state) {
+            if (state is ContactInfoLoading) {
+              return const Center(child: DottedProgressWithLogo());
+            } else if (state is ContactInfoFailure) {
+              return Center(child: Text("Error: ${state.error}"));
+            } else if (state is ContactInfoLoaded) {
+              final data = state.contactInfoModel.data;
+
+              final email =
+                  _getValue(data, "email") ?? "support@indclassifieds.in";
+              final phone = _getValue(data, "phone") ?? "+91 83091 63721";
+              final whatsapp = _getValue(data, "whatsapp") ?? "+91 83091 63721";
+
+              return Container(
+                color: backgroundColor,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Lottie.asset(
+                        'assets/lottie/Support.json',
+                        width: 200,
+                        height: 200,
+                        repeat: true,
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        'We’re Here to Help!',
+                        style: AppTextStyles.headlineMedium(textColor),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Reach out to us via Email, Phone, or WhatsApp. Our team responds within 24 hours.',
+                        style: AppTextStyles.bodyMedium(textColor),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 32),
+
+                      // Email
+                      _buildContactOption(
+                        context,
+                        icon: Icons.email_rounded,
+                        title: 'Email Us',
+                        subtitle: email,
+                        onTap: () => _launchEmail(email),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Phone
+                      _buildContactOption(
+                        context,
+                        icon: Icons.phone_rounded,
+                        title: 'Call Us',
+                        subtitle: phone,
+                        onTap: () => _launchPhone(phone),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // WhatsApp
+                      _buildContactOption(
+                        context,
+                        icon: Icons.chat_bubble_rounded,
+                        title: 'WhatsApp Us',
+                        subtitle: 'Chat with us instantly',
+                        onTap: () => _launchWhatsApp(whatsapp),
+                      ),
+
+                      const Spacer(),
+                      Text(
+                        'IND Classifieds - Buy, Sell, Connect!',
+                        style: AppTextStyles.bodySmall(textColor),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 24),
-                // Title
-                Text(
-                  'We’re Here to Help!',
-                  style: AppTextStyles.headlineMedium(textColor),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 12),
-                // Subtitle
-                Text(
-                  'Reach out to us via Email, Phone, or WhatsApp. Our team responds within 24 hours.',
-                  style: AppTextStyles.bodyMedium(textColor),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 32),
-                // Contact Options
-                _buildContactOption(
-                  context,
-                  icon: Icons.email_rounded,
-                  title: 'Email Us',
-                  subtitle: 'support@indclassifieds.in',
-                  onTap: _launchEmail,
-                ),
-                const SizedBox(height: 16),
-                _buildContactOption(
-                  context,
-                  icon: Icons.phone_rounded,
-                  title: 'Call Us',
-                  subtitle: '+91 83091 63721',
-                  onTap: _launchPhone,
-                ),
-                const SizedBox(height: 16),
-                _buildContactOption(
-                  context,
-                  icon: Icons.chat_bubble_rounded,
-                  title: 'WhatsApp Us',
-                  subtitle: 'Chat with us instantly',
-                  onTap: _launchWhatsApp,
-                ),
-                const Spacer(),
-                // Footer
-                Text(
-                  'IND Classifieds - Buy, Sell, Connect!',
-                  style: AppTextStyles.bodySmall(textColor),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
+              );
+            }
+            return const SizedBox();
+          },
         ),
       ),
     );
   }
 
-  // Helper method to build contact option cards
+  // Reusable card widget
   Widget _buildContactOption(
     BuildContext context, {
     required IconData icon,
