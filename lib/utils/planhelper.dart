@@ -107,18 +107,21 @@ void showPlanBottomSheet({
                           crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 16.0),
-                              child: Text(
-                                "You have 1 Free Ad to post!",
-                                textAlign: TextAlign.center,
-                                style: AppTextStyles.headlineSmall(textColor)
-                                    .copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 0.5,
-                                    ),
+                            if (!(mobile_no == "9999999999" &&
+                                Platform.isIOS)) ...[
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 16.0),
+                                child: Text(
+                                  "You have 1 Free Ad to post!",
+                                  textAlign: TextAlign.center,
+                                  style: AppTextStyles.headlineSmall(textColor)
+                                      .copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 0.5,
+                                      ),
+                                ),
                               ),
-                            ),
+                            ],
                             _buildPlanCard(
                               context,
                               Plans(

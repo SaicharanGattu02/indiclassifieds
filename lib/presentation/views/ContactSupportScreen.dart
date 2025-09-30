@@ -85,9 +85,9 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
               final data = state.contactInfoModel.data;
 
               final email =
-                  _getValue(data, "email") ?? "support@indclassifieds.in";
-              final phone = _getValue(data, "phone") ?? "+91 83091 63721";
-              final whatsapp = _getValue(data, "whatsapp") ?? "+91 83091 63721";
+                  _getValue(data, "Mail") ?? "support@indclassifieds.in";
+              final phone =
+                  _getValue(data, "Admin Mobile") ?? "+91 83091 63721";
 
               return Container(
                 color: backgroundColor,
@@ -135,17 +135,17 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
                         subtitle: phone,
                         onTap: () => _launchPhone(phone),
                       ),
-                      const SizedBox(height: 16),
 
-                      // WhatsApp
-                      _buildContactOption(
-                        context,
-                        icon: Icons.chat_bubble_rounded,
-                        title: 'WhatsApp Us',
-                        subtitle: 'Chat with us instantly',
-                        onTap: () => _launchWhatsApp(whatsapp),
-                      ),
-
+                      // const SizedBox(height: 16),
+                      //
+                      // // WhatsApp
+                      // _buildContactOption(
+                      //   context,
+                      //   icon: Icons.chat_bubble_rounded,
+                      //   title: 'WhatsApp Us',
+                      //   subtitle: 'Chat with us instantly',
+                      //   onTap: () => _launchWhatsApp(whatsapp),
+                      // ),
                       const Spacer(),
                       Text(
                         'IND Classifieds - Buy, Sell, Connect!',

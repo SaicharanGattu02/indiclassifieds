@@ -103,16 +103,20 @@ class _CityRentalsAdState extends State<CityRentalsAd> {
       // Step 1: Fetch API data from GetListingAdCubit (if editId is provided)
       final id = widget.editId.replaceAll('"', '').trim();
       if (id != null && id.isNotEmpty) {
-        final commonAdData = await context.read<GetListingAdCubit>().getListingAd(widget.editId);
+        final commonAdData = await context
+            .read<GetListingAdCubit>()
+            .getListingAd(widget.editId);
         if (commonAdData != null) {
-          descriptionController.text = commonAdData.data?.listing?.description ?? '';
+          descriptionController.text =
+              commonAdData.data?.listing?.description ?? '';
           titleController.text = commonAdData.data?.listing?.title ?? '';
           locationController.text = commonAdData.data?.listing?.location ?? '';
           priceController.text = commonAdData.data?.listing?.price ?? '';
           nameController.text = commonAdData.data?.listing?.fullName ?? '';
           phoneController.text = commonAdData.data?.listing?.mobileNumber ?? '';
           vechicleNumber.text = commonAdData.data?.listing?.vechileNumber ?? '';
-          rentalDuration.text = commonAdData.data?.listing?.rentalDuration ?? '';
+          rentalDuration.text =
+              commonAdData.data?.listing?.rentalDuration ?? '';
 
           if (commonAdData.data?.listing?.stateId != null) {
             selectedStateId = commonAdData.data?.listing?.stateId;
@@ -154,10 +158,10 @@ class _CityRentalsAdState extends State<CityRentalsAd> {
           nameController.text = data.name ?? "";
           emailController.text = data.email ?? "";
           phoneController.text = data.mobile?.toString() ?? "";
-          mobile_no = data.mobile??"";
+          mobile_no = data.mobile ?? "";
           stateController.text = data.state_name ?? "";
-          selectedStateId = data.state_id ?? 0;
-          selectedCityId = data.city_id ?? 0;
+          selectedStateId = data.state_id;
+          selectedCityId = data.city_id;
           cityController.text = data.city_name ?? "";
         });
       } else {
@@ -401,24 +405,39 @@ class _CityRentalsAdState extends State<CityRentalsAd> {
                               ? 'Required Location'
                               : null,
                           isRead: true,
-                          onTap: () async {
-                            FocusScope.of(context).unfocus();
-                            final picked = await openPlacePickerBottomSheet(
-                              context: context,
-                              googleApiKey: google_map_key,
-                              controller: locationController,
-                              appendToExisting: false,
-                              components: 'country:in',
-                              language: 'en',
-                            );
-                            if (picked != null) {
-                              latlng = "${picked.lat}, ${picked.lng}";
-                            }
-                          },
+                          onTap: selectedStateId == null
+                              ? () {
+                                  CustomSnackBar1.show(
+                                    context,
+                                    "Please select a state first",
+                                  );
+                                }
+                              : () async {
+                                  FocusScope.of(context).unfocus();
+                                  final picked = await openPlacePickerBottomSheet(
+                                    context: context,
+                                    googleApiKey: google_map_key,
+                                    controller: locationController,
+                                    appendToExisting: false,
+                                    components: 'country:in',
+                                    language: 'en',
+                                    stateName: stateController
+                                        .text, // Pass the state name
+                                    initialQuery:
+                                        stateController.text.isNotEmpty
+                                        ? "${locationController.text}, ${stateController.text}"
+                                        : locationController.text,
+                                  );
+                                  if (picked != null) {
+                                    latlng = "${picked.lat}, ${picked.lng}";
+                                  }
+                                },
                         ),
                         if (widget.editId == null ||
-                            widget.editId.replaceAll('"', '').trim().isEmpty &&
-                                !isEligibleForFree) ...[
+                            widget.editId
+                                .replaceAll('"', '')
+                                .trim()
+                                .isEmpty) ...[
                           CommonTextField1(
                             lable: 'Plan',
                             isRead: true,
@@ -448,7 +467,7 @@ class _CityRentalsAdState extends State<CityRentalsAd> {
                             },
                           ),
                         ],
-                        SizedBox(height: 10,),
+                        SizedBox(height: 10),
                         Text(
                           "Note : Upload only proper images that match your Ad. Wrong or unrelated pictures may lead to rejection.",
                           style: AppTextStyles.bodyMedium(textColor),
@@ -539,31 +558,50 @@ class _CityRentalsAdState extends State<CityRentalsAd> {
                                       // } else {
                                       //   setState(() => _showCityError = false);
                                       // }
-                                      final editIdClean = widget.editId.replaceAll('"', '').trim();
+                                      final editIdClean = widget.editId
+                                          .replaceAll('"', '')
+                                          .trim();
                                       final isEdit = editIdClean.isNotEmpty;
                                       // IMAGE VALIDATION: consider both existing images and newly picked images
-                                      final int existingCount = _imageDataList.length; // already uploaded images
-                                      final int newCount = _images.length; // newly picked files
-                                      final int totalCount = existingCount + newCount;
+                                      final int existingCount = _imageDataList
+                                          .length; // already uploaded images
+                                      final int newCount =
+                                          _images.length; // newly picked files
+                                      final int totalCount =
+                                          existingCount + newCount;
                                       const int minRequiredImages = 2;
 
                                       if (isEdit) {
                                         // For updates, total (existing + new) must be >= minRequiredImages
                                         if (totalCount < minRequiredImages) {
-                                          CustomSnackBar1.show(context, "Please select at least $minRequiredImages images");
-                                          setState(() => _showimagesError = true);
+                                          CustomSnackBar1.show(
+                                            context,
+                                            "Please select at least $minRequiredImages images",
+                                          );
+                                          setState(
+                                            () => _showimagesError = true,
+                                          );
                                           isValid = false;
                                         } else {
-                                          setState(() => _showimagesError = false);
+                                          setState(
+                                            () => _showimagesError = false,
+                                          );
                                         }
                                       } else {
                                         // For new listing, require at least minRequiredImages new images
                                         if (newCount < minRequiredImages) {
-                                          CustomSnackBar1.show(context, "Please select at least $minRequiredImages images");
-                                          setState(() => _showimagesError = true);
+                                          CustomSnackBar1.show(
+                                            context,
+                                            "Please select at least $minRequiredImages images",
+                                          );
+                                          setState(
+                                            () => _showimagesError = true,
+                                          );
                                           isValid = false;
                                         } else {
-                                          setState(() => _showimagesError = false);
+                                          setState(
+                                            () => _showimagesError = false,
+                                          );
                                         }
                                       }
                                       if (descriptionController.text

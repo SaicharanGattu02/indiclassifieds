@@ -23,7 +23,6 @@ class PickedPlace {
   });
 }
 
-
 Future<PickedPlace?> openPlacePickerBottomSheet({
   required BuildContext context,
   required String googleApiKey,
@@ -32,6 +31,7 @@ Future<PickedPlace?> openPlacePickerBottomSheet({
   String? initialQuery,
   String? components,
   String language = 'en',
+  String? stateName, // New parameter
 }) {
   return showModalBottomSheet<PickedPlace>(
     context: context,
@@ -44,6 +44,7 @@ Future<PickedPlace?> openPlacePickerBottomSheet({
       initialQuery: initialQuery ?? controller.text.trim(),
       components: components,
       language: language,
+      stateName: stateName, // Pass stateNam
     ),
   );
 }
@@ -55,6 +56,7 @@ class _PlacePickerSheet extends StatefulWidget {
   final String initialQuery;
   final String? components;
   final String language;
+  final String? stateName; // New parameter for state name
 
   const _PlacePickerSheet({
     required this.apiKey,
@@ -63,6 +65,7 @@ class _PlacePickerSheet extends StatefulWidget {
     required this.initialQuery,
     this.components,
     required this.language,
+    this.stateName, // Add stateName
   });
 
   @override
@@ -135,7 +138,9 @@ class _PlacePickerSheetState extends State<_PlacePickerSheet> {
 
     const url = 'https://maps.googleapis.com/maps/api/place/autocomplete/json';
     final params = <String, dynamic>{
-      'input': query,
+      'input': widget.stateName != null && widget.stateName!.isNotEmpty
+          ? '$query, ${widget.stateName}' // Append state name to query
+          : query,
       'key': widget.apiKey,
       'sessiontoken': _sessionToken,
       'language': widget.language,
@@ -158,17 +163,27 @@ class _PlacePickerSheetState extends State<_PlacePickerSheet> {
         throw Exception(data['error_message'] ?? status);
       }
 
-      final preds = (data['predictions'] as List<dynamic>? ?? [])
+      var preds = (data['predictions'] as List<dynamic>? ?? [])
           .map((e) => _Prediction.fromJson(e as Map<String, dynamic>))
           .toList();
 
+      // Filter predictions by state name if provided
+      if (widget.stateName != null && widget.stateName!.isNotEmpty) {
+        final stateNameLower = widget.stateName!.toLowerCase();
+        preds = preds.where((p) {
+          final descriptionLower = p.description.toLowerCase();
+          final secondaryTextLower = p.secondaryText?.toLowerCase() ?? '';
+          return descriptionLower.contains(stateNameLower) ||
+              secondaryTextLower.contains(stateNameLower);
+        }).toList();
+      }
       setState(() {
         _predictions = preds;
         _loading = false;
         _error = (status == 'ZERO_RESULTS') ? 'No places found' : null;
       });
     } on DioException catch (e) {
-      if (CancelToken.isCancel(e)) return; // now correct
+      if (CancelToken.isCancel(e)) return;
       setState(() {
         _loading = false;
         _error = e.message ?? 'Network error';

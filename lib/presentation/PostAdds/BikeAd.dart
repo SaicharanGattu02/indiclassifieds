@@ -161,8 +161,8 @@ class _BikeAdState extends State<BikeAd> {
           phoneController.text = data.mobile?.toString() ?? "";
           mobile_no = data.mobile??"";
           stateController.text = data.state_name ?? "";
-          selectedStateId = data.state_id ?? 0;
-          selectedCityId = data.city_id ?? 0;
+          selectedStateId = data.state_id;
+          selectedCityId = data.city_id;
           cityController.text = data.city_name ?? "";
         });
       } else {
@@ -518,7 +518,14 @@ class _BikeAdState extends State<BikeAd> {
                               ? 'Required Location'
                               : null,
                           isRead: true,
-                          onTap: () async {
+                          onTap: selectedStateId == null
+                              ? () {
+                            CustomSnackBar1.show(
+                              context,
+                              "Please select a state first",
+                            );
+                          }
+                              : () async {
                             FocusScope.of(context).unfocus();
                             final picked = await openPlacePickerBottomSheet(
                               context: context,
@@ -527,6 +534,12 @@ class _BikeAdState extends State<BikeAd> {
                               appendToExisting: false,
                               components: 'country:in',
                               language: 'en',
+                              stateName: stateController
+                                  .text, // Pass the state name
+                              initialQuery:
+                              stateController.text.isNotEmpty
+                                  ? "${locationController.text}, ${stateController.text}"
+                                  : locationController.text,
                             );
                             if (picked != null) {
                               latlng = "${picked.lat}, ${picked.lng}";
