@@ -301,7 +301,7 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  void showLocationBottomSheet(BuildContext context) {
+  void showLocationBottomSheet(BuildContext context, {bool userInitiated = false}) {
     if (isLocationSheetShown) return;
 
     isLocationSheetShown = true;
@@ -327,20 +327,16 @@ class _DashboardState extends State<Dashboard> {
 
             if (isServiceDisabled) {
               title = 'Location Services Disabled';
-              description =
-                  'Please enable location services on your device to see listings near you.';
-            } else if (isForeverDenied) {
+              description = 'Please enable location services to see nearby listings.';
+            } else if (isForeverDenied && userInitiated) {
               title = 'Permission Denied Permanently';
-              description =
-                  'To show listings near you, please enable location access from device settings.';
+              description = 'To show listings near you, please enable location access from your device settings.';
             } else if (isDenied) {
               title = 'Location Access Needed';
-              description =
-                  'IND Classifieds uses your location to show listings near you. You can continue using the app without enabling location, but nearby listings may not be shown.';
+              description = 'You can continue without enabling location, but nearby listings may not be shown.';
             } else {
               title = 'Allow Location Access';
-              description =
-                  'IND Classifieds uses your location to show listings near you. This helps you discover items, services, and deals in your area for a personalized experience.';
+              description = 'IND Classifieds uses your location to show listings near you for a personalized experience.';
             }
 
             return Container(
@@ -351,9 +347,7 @@ class _DashboardState extends State<Dashboard> {
                   end: Alignment.bottomCenter,
                   colors: [Colors.white, Colors.grey[50]!],
                 ),
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(24),
-                ),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -412,10 +406,10 @@ class _DashboardState extends State<Dashboard> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      if (isForeverDenied)
+                      if (isForeverDenied && userInitiated)
                         ElevatedButton(
                           onPressed: () async {
-                            await OpenAppSettings.openAppSettings(); // Open system settings
+                            await OpenAppSettings.openAppSettings();
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary,
@@ -443,10 +437,8 @@ class _DashboardState extends State<Dashboard> {
                           onPressed: isLoading
                               ? null
                               : () {
-                                  context
-                                      .read<LocationCubit>()
-                                      .requestLocationPermission();
-                                },
+                            context.read<LocationCubit>().requestLocationPermission();
+                          },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary,
                             foregroundColor: Colors.white,
@@ -461,24 +453,22 @@ class _DashboardState extends State<Dashboard> {
                           ),
                           child: isLoading
                               ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation(
-                                      Colors.white,
-                                    ),
-                                  ),
-                                )
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation(Colors.white),
+                            ),
+                          )
                               : const Text(
-                                  'Continue',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 14,
-                                    fontFamily: "lexend",
-                                    color: Colors.white,
-                                  ),
-                                ),
+                            'Continue',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                              fontFamily: "lexend",
+                              color: Colors.white,
+                            ),
+                          ),
                         ),
                     ],
                   ),
@@ -493,4 +483,198 @@ class _DashboardState extends State<Dashboard> {
       isLocationSheetShown = false;
     });
   }
+
+
+// void showLocationBottomSheet(BuildContext context) {
+  //   if (isLocationSheetShown) return;
+  //
+  //   isLocationSheetShown = true;
+  //
+  //   showModalBottomSheet(
+  //     context: context,
+  //     isDismissible: true,
+  //     enableDrag: true,
+  //     shape: const RoundedRectangleBorder(
+  //       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+  //     ),
+  //     backgroundColor: Colors.white,
+  //     builder: (BuildContext bottomSheetContext) {
+  //       return BlocBuilder<LocationCubit, LocationState>(
+  //         builder: (context, state) {
+  //           bool isLoading = state is LocationLoading;
+  //           bool isServiceDisabled = state is LocationServiceDisabled;
+  //           bool isDenied = state is LocationPermissionDenied;
+  //           bool isForeverDenied = state is LocationPermissionDeniedForever;
+  //
+  //           String title;
+  //           String description;
+  //
+  //           if (isServiceDisabled) {
+  //             title = 'Location Services Disabled';
+  //             description =
+  //                 'Please enable location services on your device to see listings near you.';
+  //           } else if (isForeverDenied) {
+  //             title = 'Permission Denied Permanently';
+  //             description =
+  //                 'To show listings near you, please enable location access from device settings.';
+  //           } else if (isDenied) {
+  //             title = 'Location Access Needed';
+  //             description =
+  //                 'IND Classifieds uses your location to show listings near you. You can continue using the app without enabling location, but nearby listings may not be shown.';
+  //           } else {
+  //             title = 'Allow Location Access';
+  //             description =
+  //                 'IND Classifieds uses your location to show listings near you. This helps you discover items, services, and deals in your area for a personalized experience.';
+  //           }
+  //
+  //           return Container(
+  //             padding: const EdgeInsets.all(24),
+  //             decoration: BoxDecoration(
+  //               gradient: LinearGradient(
+  //                 begin: Alignment.topCenter,
+  //                 end: Alignment.bottomCenter,
+  //                 colors: [Colors.white, Colors.grey[50]!],
+  //               ),
+  //               borderRadius: const BorderRadius.vertical(
+  //                 top: Radius.circular(24),
+  //               ),
+  //             ),
+  //             child: Column(
+  //               mainAxisSize: MainAxisSize.min,
+  //               crossAxisAlignment: CrossAxisAlignment.start,
+  //               children: [
+  //                 Center(
+  //                   child: Container(
+  //                     width: 40,
+  //                     height: 4,
+  //                     margin: const EdgeInsets.only(bottom: 16),
+  //                     decoration: BoxDecoration(
+  //                       color: Colors.grey[300],
+  //                       borderRadius: BorderRadius.circular(2),
+  //                     ),
+  //                   ),
+  //                 ),
+  //                 Row(
+  //                   children: [
+  //                     Container(
+  //                       padding: const EdgeInsets.all(8),
+  //                       decoration: BoxDecoration(
+  //                         color: AppColors.primary.withOpacity(0.5),
+  //                         shape: BoxShape.circle,
+  //                       ),
+  //                       child: Icon(
+  //                         Icons.location_on,
+  //                         color: AppColors.primary,
+  //                         size: 24,
+  //                       ),
+  //                     ),
+  //                     const SizedBox(width: 12),
+  //                     Expanded(
+  //                       child: Text(
+  //                         title,
+  //                         style: const TextStyle(
+  //                           fontSize: 18,
+  //                           fontWeight: FontWeight.w600,
+  //                           color: Colors.black87,
+  //                           fontFamily: "lexend",
+  //                         ),
+  //                       ),
+  //                     ),
+  //                   ],
+  //                 ),
+  //                 const SizedBox(height: 16),
+  //                 Text(
+  //                   description,
+  //                   style: TextStyle(
+  //                     fontSize: 14,
+  //                     color: Colors.grey[600],
+  //                     height: 1.5,
+  //                     fontFamily: "lexend",
+  //                   ),
+  //                 ),
+  //                 const SizedBox(height: 24),
+  //                 Row(
+  //                   mainAxisAlignment: MainAxisAlignment.end,
+  //                   children: [
+  //                     if (isForeverDenied)
+  //                       ElevatedButton(
+  //                         onPressed: () async {
+  //                           await OpenAppSettings.openAppSettings(); // Open system settings
+  //                         },
+  //                         style: ElevatedButton.styleFrom(
+  //                           backgroundColor: AppColors.primary,
+  //                           foregroundColor: Colors.white,
+  //                           padding: const EdgeInsets.symmetric(
+  //                             horizontal: 16,
+  //                             vertical: 12,
+  //                           ),
+  //                           shape: RoundedRectangleBorder(
+  //                             borderRadius: BorderRadius.circular(12),
+  //                           ),
+  //                           elevation: 0,
+  //                         ),
+  //                         child: const Text(
+  //                           'Open Settings',
+  //                           style: TextStyle(
+  //                             fontWeight: FontWeight.w600,
+  //                             fontSize: 14,
+  //                             fontFamily: "lexend",
+  //                           ),
+  //                         ),
+  //                       )
+  //                     else
+  //                       ElevatedButton(
+  //                         onPressed: isLoading
+  //                             ? null
+  //                             : () {
+  //                                 context
+  //                                     .read<LocationCubit>()
+  //                                     .requestLocationPermission();
+  //                               },
+  //                         style: ElevatedButton.styleFrom(
+  //                           backgroundColor: AppColors.primary,
+  //                           foregroundColor: Colors.white,
+  //                           padding: const EdgeInsets.symmetric(
+  //                             horizontal: 16,
+  //                             vertical: 12,
+  //                           ),
+  //                           shape: RoundedRectangleBorder(
+  //                             borderRadius: BorderRadius.circular(12),
+  //                           ),
+  //                           elevation: 0,
+  //                         ),
+  //                         child: isLoading
+  //                             ? const SizedBox(
+  //                                 width: 20,
+  //                                 height: 20,
+  //                                 child: CircularProgressIndicator(
+  //                                   strokeWidth: 2,
+  //                                   valueColor: AlwaysStoppedAnimation(
+  //                                     Colors.white,
+  //                                   ),
+  //                                 ),
+  //                               )
+  //                             : const Text(
+  //                                 'Continue',
+  //                                 style: TextStyle(
+  //                                   fontWeight: FontWeight.w600,
+  //                                   fontSize: 14,
+  //                                   fontFamily: "lexend",
+  //                                   color: Colors.white,
+  //                                 ),
+  //                               ),
+  //                       ),
+  //                   ],
+  //                 ),
+  //                 const SizedBox(height: 16),
+  //               ],
+  //             ),
+  //           );
+  //         },
+  //       );
+  //     },
+  //   ).whenComplete(() {
+  //     isLocationSheetShown = false;
+  //   });
+  // }
 }
