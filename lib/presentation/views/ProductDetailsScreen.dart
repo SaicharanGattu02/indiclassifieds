@@ -202,7 +202,69 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     return Scaffold(
       backgroundColor: bgColor,
       appBar: CustomAppBar1(title: 'Details', actions: []),
-      bottomNavigationBar: FutureBuilder(
+      // bottomNavigationBar: FutureBuilder(
+      //   future: Future.wait([AuthService.isGuest, AuthService.getId()]),
+      //   builder: (context, asyncSnapshot) {
+      //     if (asyncSnapshot.connectionState == ConnectionState.waiting) {
+      //       return const Center(child: CircularProgressIndicator());
+      //     }
+      //
+      //     if (asyncSnapshot.hasError) {
+      //       return Center(child: Text('Error: ${asyncSnapshot.error}'));
+      //     }
+      //
+      //     if (!asyncSnapshot.hasData) {
+      //       return const Center(child: Text('No data available'));
+      //     }
+      //
+      //     final results = asyncSnapshot.data!;
+      //     final isGuest = results[0] as bool;
+      //     final userId = results[1] as String;
+      //
+      //     AppLogger.info("receiverId: ${receiverId} and userid:${userId}");
+      //     return (userId == receiverId)
+      //         ? SizedBox.shrink()
+      //         : _BottomCtaBar(
+      //             onContact: isGuest
+      //                 ? () {
+      //                     context.push("/login");
+      //                   }
+      //                 : () async {
+      //                     if (mobile_number != null) {
+      //                       AppLauncher.call(mobile_number ?? "");
+      //                     } else {
+      //                       showDialog(
+      //                         context: context,
+      //                         barrierDismissible: false,
+      //                         builder: (_) => const Center(
+      //                           child: CircularProgressIndicator(),
+      //                         ),
+      //                       );
+      //                       await Future.delayed(const Duration(seconds: 2));
+      //                       if (context.mounted) Navigator.of(context).pop();
+      //                       final updatedMobile = mobile_number;
+      //                       if (updatedMobile != null &&
+      //                           updatedMobile.isNotEmpty) {
+      //                         AppLauncher.call(updatedMobile);
+      //                       } else {
+      //                         CustomSnackBar1.show(
+      //                           context,
+      //                           "Mobile number not available",
+      //                         );
+      //                       }
+      //                     }
+      //                   },
+      //             onChat: isGuest
+      //                 ? () {
+      //                     context.push("/login");
+      //                   }
+      //                 : () {
+      //                     context.push('/chat?receiverId=$receiverId');
+      //                   },
+      //           );
+      //   },
+      // ),
+      bottomNavigationBar: FutureBuilder<List<Object?>>(
         future: Future.wait([AuthService.isGuest, AuthService.getId()]),
         builder: (context, asyncSnapshot) {
           if (asyncSnapshot.connectionState == ConnectionState.waiting) {
@@ -219,49 +281,50 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
           final results = asyncSnapshot.data!;
           final isGuest = results[0] as bool;
-          final userId = results[1] as String;
+          final userId = results[1] as String?; // Allow null
 
-          AppLogger.info("receiverId: ${receiverId} and userid:${userId}");
-          return (userId == receiverId)
-              ? SizedBox.shrink()
-              : _BottomCtaBar(
-                  onContact: isGuest
-                      ? () {
-                          context.push("/login");
-                        }
-                      : () async {
-                          if (mobile_number != null) {
-                            AppLauncher.call(mobile_number ?? "");
-                          } else {
-                            showDialog(
-                              context: context,
-                              barrierDismissible: false,
-                              builder: (_) => const Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                            );
-                            await Future.delayed(const Duration(seconds: 2));
-                            if (context.mounted) Navigator.of(context).pop();
-                            final updatedMobile = mobile_number;
-                            if (updatedMobile != null &&
-                                updatedMobile.isNotEmpty) {
-                              AppLauncher.call(updatedMobile);
-                            } else {
-                              CustomSnackBar1.show(
-                                context,
-                                "Mobile number not available",
-                              );
-                            }
-                          }
-                        },
-                  onChat: isGuest
-                      ? () {
-                          context.push("/login");
-                        }
-                      : () {
-                          context.push('/chat?receiverId=$receiverId');
-                        },
+          // Avoid rendering the bar if userId or receiverId is null/empty
+          if (userId == null || userId.isEmpty || receiverId == null || receiverId!.isEmpty || userId == receiverId) {
+            return const SizedBox.shrink();
+          }
+
+          return _BottomCtaBar(
+            onContact: isGuest
+                ? () {
+              context.push("/login");
+            }
+                : () async {
+              if (mobile_number != null && mobile_number!.isNotEmpty) {
+                AppLauncher.call(mobile_number!);
+              } else {
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (_) => const Center(
+                    child: CircularProgressIndicator(),
+                  ),
                 );
+                await Future.delayed(const Duration(seconds: 2));
+                if (context.mounted) Navigator.of(context).pop();
+                final updatedMobile = mobile_number;
+                if (updatedMobile != null && updatedMobile.isNotEmpty) {
+                  AppLauncher.call(updatedMobile);
+                } else {
+                  CustomSnackBar1.show(
+                    context,
+                    "Mobile number not available",
+                  );
+                }
+              }
+            },
+            onChat: isGuest
+                ? () {
+              context.push("/login");
+            }
+                : () {
+              context.push('/chat?receiverId=$receiverId');
+            },
+          );
         },
       ),
       body: BlocConsumer<ProductDetailsCubit, ProductDetailsStates>(

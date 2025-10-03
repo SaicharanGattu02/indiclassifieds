@@ -422,9 +422,7 @@ class _ProductsListScreenState extends State<ProductsListScreen> {
                                     ? () => context.push("/login")
                                     : () {
                                         if (product.id != null) {
-                                          context
-                                              .read<AddToWishlistCubit>()
-                                              .addToWishlist(product.id!);
+                                          context.read<AddToWishlistCubit>().addToWishlist(product.id!);
                                         }
                                       },
                               ),
