@@ -334,7 +334,6 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           final data = s.productDetailsModel.data!;
           final listing = data.listing!;
 
-          // Set one-time fields without scheduling from build()
           if (!_didInitFromBloc) {
             _didInitFromBloc = true;
 
