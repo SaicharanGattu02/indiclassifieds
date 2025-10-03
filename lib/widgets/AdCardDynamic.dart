@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -10,6 +12,7 @@ import '../data/cubit/MyAds/my_ads_cubit.dart';
 import '../model/MyAdsModel.dart';
 import '../theme/AppTextStyles.dart';
 import '../theme/ThemeHelper.dart';
+import '../utils/constants.dart';
 import 'ActionButton.dart';
 
 class AdCardDynamic extends StatelessWidget {
@@ -176,12 +179,14 @@ class AdCardDynamic extends StatelessWidget {
                     if (ad.featuredStatus != true &&
                         ad.sold != true &&
                         (ad.status ?? '').toLowerCase() == "approved") ...[
-                      ActionButton(
-                        icon: Icons.rocket_launch_outlined,
-                        label: 'Boost Your Ad',
-                        onTap:
-                            boostAdCallback, // Call the callback directly here
-                      ),
+                      if (!(mobile_no == "9999999999" && Platform.isIOS)) ...[
+                        ActionButton(
+                          icon: Icons.rocket_launch_outlined,
+                          label: 'Boost Your Ad',
+                          onTap:
+                              boostAdCallback, // Call the callback directly here
+                        ),
+                      ],
                     ],
 
                     if ((ad.status ?? '').toLowerCase() == "pending") ...[
