@@ -120,6 +120,8 @@ class _DashboardState extends State<Dashboard> {
 
   Future<void> getData() async {
     final isGuest = await AuthService.isGuest;
+    mobile_no = await AuthService.getMobile() ?? "";
+    AppLogger.info("Mobile Number from Dashboard :${mobile_no}");
     if (!isGuest) {
       final plan = await context
           .read<UserActivePlanCubit>()
@@ -164,7 +166,7 @@ class _DashboardState extends State<Dashboard> {
                   // AppLogger.info("called this");
                 }
               },
-              child:BlocListener<LocationCubit, LocationState>(
+              child: BlocListener<LocationCubit, LocationState>(
                 listener: (context, state) {
                   if (state is LocationPermissionDenied ||
                       state is LocationServiceDisabled) {
@@ -301,7 +303,10 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  void showLocationBottomSheet(BuildContext context, {bool userInitiated = false}) {
+  void showLocationBottomSheet(
+    BuildContext context, {
+    bool userInitiated = false,
+  }) {
     if (isLocationSheetShown) return;
 
     isLocationSheetShown = true;
@@ -327,16 +332,20 @@ class _DashboardState extends State<Dashboard> {
 
             if (isServiceDisabled) {
               title = 'Location Services Disabled';
-              description = 'Please enable location services to see nearby listings.';
+              description =
+                  'Please enable location services to see nearby listings.';
             } else if (isForeverDenied && userInitiated) {
               title = 'Permission Denied Permanently';
-              description = 'To show listings near you, please enable location access from your device settings.';
+              description =
+                  'To show listings near you, please enable location access from your device settings.';
             } else if (isDenied) {
               title = 'Location Access Needed';
-              description = 'You can continue without enabling location, but nearby listings may not be shown.';
+              description =
+                  'You can continue without enabling location, but nearby listings may not be shown.';
             } else {
               title = 'Allow Location Access';
-              description = 'IND Classifieds uses your location to show listings near you for a personalized experience.';
+              description =
+                  'IND Classifieds uses your location to show listings near you for a personalized experience.';
             }
 
             return Container(
@@ -347,7 +356,9 @@ class _DashboardState extends State<Dashboard> {
                   end: Alignment.bottomCenter,
                   colors: [Colors.white, Colors.grey[50]!],
                 ),
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(24),
+                ),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -437,8 +448,10 @@ class _DashboardState extends State<Dashboard> {
                           onPressed: isLoading
                               ? null
                               : () {
-                            context.read<LocationCubit>().requestLocationPermission();
-                          },
+                                  context
+                                      .read<LocationCubit>()
+                                      .requestLocationPermission();
+                                },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary,
                             foregroundColor: Colors.white,
@@ -453,22 +466,24 @@ class _DashboardState extends State<Dashboard> {
                           ),
                           child: isLoading
                               ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation(Colors.white),
-                            ),
-                          )
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation(
+                                      Colors.white,
+                                    ),
+                                  ),
+                                )
                               : const Text(
-                            'Continue',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                              fontFamily: "lexend",
-                              color: Colors.white,
-                            ),
-                          ),
+                                  'Continue',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14,
+                                    fontFamily: "lexend",
+                                    color: Colors.white,
+                                  ),
+                                ),
                         ),
                     ],
                   ),
@@ -484,8 +499,7 @@ class _DashboardState extends State<Dashboard> {
     });
   }
 
-
-// void showLocationBottomSheet(BuildContext context) {
+  // void showLocationBottomSheet(BuildContext context) {
   //   if (isLocationSheetShown) return;
   //
   //   isLocationSheetShown = true;
