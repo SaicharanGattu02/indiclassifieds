@@ -382,7 +382,7 @@ Widget _buildPlanCard(
                   ),
                   SizedBox(width: 6),
                   Text(
-                    'Expire Date of Subscription: ${plan.endDate}',
+                    'Expire Date : ${plan.endDate}',
                     style: AppTextStyles.bodySmall(textColor),
                   ),
                 ],

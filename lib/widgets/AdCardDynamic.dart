@@ -63,6 +63,7 @@ class AdCardDynamic extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("mobile number ::${mobile_no}");
     final imageUrl = ad.image ?? '';
     final location = ad.location ?? '';
     return Container(

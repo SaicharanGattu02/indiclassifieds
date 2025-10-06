@@ -73,5 +73,7 @@
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
+	<key>NSAppleMusicUsageDescription</key>
+    <string>This app uses your Apple account to enable secure in-app purchases.</string>
 </dict>
 </plist>

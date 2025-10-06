@@ -248,7 +248,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             isDark,
                             textColor,
                             trailing: Icons.arrow_forward_ios,
-                            onTap: () => context.push("/plans"),
+                            onTap: () => context.push("/subscription_plans"),
                           ),
                           _settingsTile(
                             Icons.subscriptions,

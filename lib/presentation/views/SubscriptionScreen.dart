@@ -1,6 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:indiclassifieds/Components/CutomAppBar.dart';
+
+import '../../theme/AppTextStyles.dart';
+import '../../theme/ThemeHelper.dart';
 
 class SubscriptionScreen extends StatefulWidget {
   @override
@@ -15,9 +19,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   List<PurchaseDetails> _purchases = [];
 
   static const Set<String> _productIds = {
-    'com.yourapp.sub.essential_30d_50ads',
-    'com.yourapp.sub.power_60d_100ads',
-    'com.yourapp.sub.pro_90d_500ads',
+    'com.ind.classifieds.essential_30d_50ads',
   };
 
   @override
@@ -96,29 +98,49 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = ThemeHelper.isDarkMode(context);
+    final Color textColor = ThemeHelper.textColor(context);
+    final Color bgColor = ThemeHelper.backgroundColor(context);
+    final Color cardColor = ThemeHelper.cardColor(context);
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Boost & Promotion Plans'),
+      backgroundColor: bgColor,
+      appBar: CustomAppBar1(
+        title: "Boost & Promotion Plans",
+        actions: [],
       ),
       body: _available
           ? _products.isEmpty
-          ? Center(child: CircularProgressIndicator())
+          ? Center(
+        child: Text(
+          "No Products Found!",
+          style: AppTextStyles.titleMedium(textColor),
+        ),
+      )
           : ListView.builder(
         itemCount: _products.length,
         itemBuilder: (context, index) {
           final product = _products[index];
-          bool purchased = _purchases
-              .any((p) => p.productID == product.id);
+          bool purchased = _purchases.any((p) => p.productID == product.id);
           return Card(
-            margin:
-            EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            color: cardColor,
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: ListTile(
-              title: Text(product.title),
-              subtitle: Text(product.description),
+              title: Text(
+                product.title,
+                style: AppTextStyles.titleLarge(textColor),
+              ),
+              subtitle: Text(
+                product.description,
+                style: AppTextStyles.bodyMedium(textColor.withOpacity(0.8)),
+              ),
               trailing: purchased
                   ? Icon(Icons.check, color: Colors.green)
                   : TextButton(
-                child: Text(product.price),
+                child: Text(
+                  product.price,
+                  style: AppTextStyles.bodyMedium(textColor),
+                ),
                 onPressed: () => _buyProduct(product),
               ),
             ),
@@ -126,8 +148,12 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         },
       )
           : Center(
-        child: Text('In-App Purchases not available on this device'),
+        child: Text(
+          'In-App Purchases not available on this device',
+          style: AppTextStyles.titleMedium(textColor),
+        ),
       ),
     );
   }
+
 }
