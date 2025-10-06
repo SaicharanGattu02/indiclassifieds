@@ -140,7 +140,7 @@ class RemoteDataSourceImpl implements RemoteDataSource {
   Future<ContactInfoModel?> getContactInfo() async {
     try {
       Response response = await ApiClient.get(
-        "${APIEndpointUrls.all_contact_info}"
+        "${APIEndpointUrls.all_contact_info}",
       );
       AppLogger.log('getContactInfo:${response.data}');
       return ContactInfoModel.fromJson(response.data);

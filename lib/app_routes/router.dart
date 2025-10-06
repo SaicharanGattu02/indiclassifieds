@@ -18,6 +18,7 @@ import 'package:indiclassifieds/presentation/views/RecoverAccountScreen.dart';
 import 'package:indiclassifieds/presentation/views/SearchScreen.dart';
 import 'package:indiclassifieds/presentation/views/SplashScreen.dart';
 import 'package:indiclassifieds/presentation/views/SubCategoriesScreen.dart';
+import 'package:indiclassifieds/presentation/views/SubscriptionScreen.dart';
 import 'package:indiclassifieds/presentation/views/SuccessScreen1.dart';
 import 'package:indiclassifieds/utils/constants.dart';
 import '../Components/NoInternet.dart';
@@ -115,6 +116,11 @@ final GoRouter appRouter = GoRouter(
       path: '/plans',
       pageBuilder: (context, state) =>
           buildSlideTransitionPage(PlansScreen(), state),
+    ),
+    GoRoute(
+      path: '/subscription_plans',
+      pageBuilder: (context, state) =>
+          buildSlideTransitionPage(SubscriptionScreen(), state),
     ),
     GoRoute(
       path: '/notifications',

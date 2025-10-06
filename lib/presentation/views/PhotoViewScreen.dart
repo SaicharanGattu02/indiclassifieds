@@ -4,9 +4,6 @@ import 'package:photo_view/photo_view_gallery.dart';
 
 import '../../model/ProductDetailsModel.dart';
 
-import 'package:flutter/material.dart';
-import 'package:photo_view/photo_view.dart';
-import 'package:photo_view/photo_view_gallery.dart';
 
 class PhotoViewScreen extends StatelessWidget {
   final List<Images> images; // List of images passed from the main screen
