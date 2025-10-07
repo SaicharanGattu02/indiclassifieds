@@ -12,8 +12,10 @@ import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 
 class SubscriptionScreen extends StatefulWidget {
+  const SubscriptionScreen({Key? key}) : super(key: key);
+
   @override
-  _SubscriptionScreenState createState() => _SubscriptionScreenState();
+  State<SubscriptionScreen> createState() => _SubscriptionScreenState();
 }
 
 class _SubscriptionScreenState extends State<SubscriptionScreen> {
@@ -23,56 +25,163 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   void initState() {
     super.initState();
     cubit = SubscriptionCubit(SubscriptionRepository());
+
+    // Load your plans here
     cubit.loadPlans([
       PlanModel(
-          productId: 'com.ind.classifieds.essential_30d_50ads',
-          title: '30 Days - 50 Ads',
-          description: 'Boost your posts for 30 days',
-          durationDays: 30,
-          adsCount: 50),
+        productId: 'com.ind.classifieds.essential_30d_50ads',
+        title: '30 Days - 50 Ads',
+        description: 'Boost your posts for 30 days',
+        durationDays: 30,
+        adsCount: 50,
+      ),
+      // Add more plans if needed
     ]);
-    cubit.listenToPurchaseUpdates();
+  }
+
+  @override
+  void dispose() {
+    cubit.close();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<SubscriptionCubit, SubscriptionState>(
-      bloc: cubit,
-      builder: (context, state) {
-        if (state is SubscriptionLoading) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (state is SubscriptionLoaded) {
-          return ListView.builder(
-            itemCount: state.products.length,
-            itemBuilder: (context, index) {
-              final product = state.products[index];
-              bool purchased = cubit.purchases.any((p) => p.productID == product.id);
-              return Card(
-                child: ListTile(
-                  title: Text(product.title),
-                  subtitle: Text(product.description),
-                  trailing: purchased
-                      ? Icon(Icons.check, color: Colors.green)
-                      : TextButton(
-                    child: Text(product.price),
-                    onPressed: () {
-                      final plan = state.plans
-                          .firstWhere((p) => p.productId == product.id);
-                      cubit.buyPlan(plan);
-                    },
+    return Scaffold(
+      backgroundColor: ThemeHelper.backgroundColor(context),
+      appBar: CustomAppBar1(title: "Subscription Plans", actions: []),
+      body: BlocBuilder<SubscriptionCubit, SubscriptionState>(
+        bloc: cubit,
+        builder: (context, state) {
+          if (state is SubscriptionLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is SubscriptionLoaded) {
+            return ListView.builder(
+              padding: const EdgeInsets.all(12),
+              itemCount: state.products.length,
+              itemBuilder: (context, index) {
+                final product = state.products[index];
+                final bool purchased = state.purchases.any((p) => p.productID == product.id);
+
+                return Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  margin: const EdgeInsets.symmetric(vertical: 10),
+                  color: ThemeHelper.cardColor(context),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Title
+                        Text(
+                          product.title,
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: ThemeHelper.textColor(context),
+                          ),
+                        ),
+
+                        const SizedBox(height: 8),
+
+                        // Description
+                        Text(
+                          product.description,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: ThemeHelper.textColor(context).withOpacity(0.7),
+                          ),
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // Price and Action Row
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            // Price tag
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: ThemeHelper.isDarkMode(context)
+                                    ? Colors.blueGrey.shade800
+                                    : Colors.blue.shade50,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                product.price,
+                                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: ThemeHelper.isDarkMode(context)
+                                      ? Colors.white
+                                      : Colors.blueAccent,
+                                ),
+                              ),
+                            ),
+
+                            // Buy or Purchased button
+                            purchased
+                                ? Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: Colors.green.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Text(
+                                "Purchased",
+                                style: TextStyle(
+                                  color: Colors.green,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            )
+                                : ElevatedButton(
+                              onPressed: () {
+                                final plan = state.plans.firstWhere(
+                                      (p) => p.productId == product.id,
+                                );
+                                cubit.buyPlan(plan);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blueAccent,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                              ),
+                              child: const Text(
+                                "Buy Now",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
+                );
+              },
+            );
+          } else if (state is SubscriptionError) {
+            return Center(
+              child: Text(
+                state.message,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Colors.red.shade400,
                 ),
-              );
-            },
-          );
-        } else if (state is SubscriptionError) {
-          return Center(child: Text(state.message));
-        }
-        return const SizedBox();
-      },
+              ),
+            );
+          }
+          return const SizedBox();
+        },
+      ),
     );
   }
 }
+
+
 
 
 // class _SubscriptionScreenState extends State<SubscriptionScreen> {

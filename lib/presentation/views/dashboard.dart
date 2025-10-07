@@ -239,36 +239,15 @@ class _DashboardState extends State<Dashboard> {
               ),
             ),
             bottomNavigationBar: SafeArea(
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                height: 60,
-                decoration: BoxDecoration(
-                  color: cardColor,
-                  // boxShadow: [
-                  //   BoxShadow(
-                  //     // subtle top shadow
-                  //     color: Colors.black.withOpacity(
-                  //       Theme.of(context).brightness == Brightness.dark
-                  //           ? 0.35
-                  //           : 0.08,
-                  //     ),
-                  //     blurRadius: 12,
-                  //     spreadRadius: 0,
-                  //     offset: const Offset(0, -4), // cast UPWARDS
-                  //   ),
-                  // ],
-                ),
-
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildNavItem(Icons.home, "Home", 0),
-                    _buildNavItem(Icons.archive, "My Ads", 1),
-                    const SizedBox(width: 40), // space for FAB
-                    _buildNavItem(Icons.chat, "Chat", 2),
-                    _buildNavItem(Icons.person, "Profile", 3),
-                  ],
-                ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildNavItem(Icons.home, "Home", 0),
+                  _buildNavItem(Icons.archive, "My Ads", 1),
+                  const SizedBox(width: 40), // space for FAB
+                  _buildNavItem(Icons.chat, "Chat", 2),
+                  _buildNavItem(Icons.person, "Profile", 3),
+                ],
               ),
             ),
           ),

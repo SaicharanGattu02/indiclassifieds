@@ -107,21 +107,21 @@ void showPlanBottomSheet({
                           crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            if (!(mobile_no == "9999999999" &&
-                                Platform.isIOS)) ...[
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 16.0),
-                                child: Text(
-                                  "You have 1 Free Ad to post!",
-                                  textAlign: TextAlign.center,
-                                  style: AppTextStyles.headlineSmall(textColor)
-                                      .copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        letterSpacing: 0.5,
-                                      ),
-                                ),
+                            // if (!(mobile_no == "9999999999" &&
+                            //     Platform.isIOS)) ...[
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 16.0),
+                              child: Text(
+                                "You have 1 Free Ad to post!",
+                                textAlign: TextAlign.center,
+                                style: AppTextStyles.headlineSmall(textColor)
+                                    .copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 0.5,
+                                    ),
                               ),
-                            ],
+                            ),
+                            // ],
                             _buildPlanCard(
                               context,
                               Plans(
@@ -136,19 +136,19 @@ void showPlanBottomSheet({
                               onSelectPlan,
                             ),
                             SizedBox(height: 15),
-                            if (!(mobile_no == "9999999999" &&
-                                Platform.isIOS)) ...[
-                              Text(
-                                "Your Free Ad allows you to post only one listing. "
-                                "To continue posting more ads and access extra features, "
-                                "please subscribe to one of our premium options.",
-                                textAlign: TextAlign.center,
-                                style: AppTextStyles.bodyMedium(textColor),
-                              ),
-                              SizedBox(height: 24),
-                              _buildSubscribeButton(context, textColor),
-                            ],
+                            // if (!(mobile_no == "9999999999" &&
+                            //     Platform.isIOS)) ...[
+                            Text(
+                              "Your Free Ad allows you to post only one listing. "
+                              "To continue posting more ads and access extra features, "
+                              "please subscribe to one of our premium options.",
+                              textAlign: TextAlign.center,
+                              style: AppTextStyles.bodyMedium(textColor),
+                            ),
+                            SizedBox(height: 24),
+                            _buildSubscribeButton(context, textColor),
                           ],
+                          // ],
                         ),
                       ),
                     );
@@ -236,17 +236,17 @@ void showPlanBottomSheet({
                               ).copyWith(fontWeight: FontWeight.bold),
                             ),
                             SizedBox(height: 8),
-                            if (!(mobile_no == "9999999999" &&
-                                Platform.isIOS)) ...[
-                              Text(
-                                'Subscribe to a plan to get started and unlock amazing features!',
-                                style: AppTextStyles.bodyMedium(textColor),
-                                textAlign: TextAlign.center,
-                              ),
-                              SizedBox(height: 24),
-                              _buildSubscribeButton(context, textColor),
-                            ],
+                            // if (!(mobile_no == "9999999999" &&
+                            //     Platform.isIOS)) ...[
+                            Text(
+                              'Subscribe to a plan to get started and unlock amazing features!',
+                              style: AppTextStyles.bodyMedium(textColor),
+                              textAlign: TextAlign.center,
+                            ),
+                            SizedBox(height: 24),
+                            _buildSubscribeButton(context, textColor),
                           ],
+                          // ],
                         ),
                       ),
                     );
@@ -409,7 +409,11 @@ Widget _buildSubscribeButton(BuildContext context, Color textColor) {
   return ElevatedButton(
     onPressed: () {
       context.pop();
-      context.push("/plans");
+      if (!(mobile_no == "9999999999" && Platform.isIOS)) {
+        context.push("/plans");
+      } else {
+        context.push("/subscription_plans");
+      }
     },
     style: ElevatedButton.styleFrom(
       foregroundColor: textColor,

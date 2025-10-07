@@ -11,44 +11,73 @@ class SubscriptionCubit extends Cubit<SubscriptionState> {
   final SubscriptionRepository repository;
   final InAppPurchase _iap = InAppPurchase.instance;
 
-  SubscriptionCubit(this.repository) : super(SubscriptionInitial());
-
   List<ProductDetails> _products = [];
-  List<PurchaseDetails> _purchases = [];
+  final List<PurchaseDetails> _purchases = [];
 
-  List<PurchaseDetails> get purchases => _purchases; // ✅ added getter
+  // Expose purchases publicly as unmodifiable list
+  List<PurchaseDetails> get purchases => List.unmodifiable(_purchases);
+
+  SubscriptionCubit(this.repository) : super(SubscriptionInitial()) {
+    listenToPurchaseUpdates();
+  }
 
   Future<void> loadPlans(List<PlanModel> plans) async {
     emit(SubscriptionLoading());
     try {
       final ids = plans.map((p) => p.productId).toSet();
+
+      // Query product details
       final response = await _iap.queryProductDetails(ids);
       _products = response.productDetails;
-      emit(SubscriptionLoaded(plans, _products));
+
+      // Restore purchases before emitting loaded state
+      await _restorePurchases();
+
+      emit(SubscriptionLoaded(plans, _products, List.unmodifiable(_purchases)));
     } catch (e) {
       emit(SubscriptionError(e.toString()));
     }
   }
 
   Future<void> buyPlan(PlanModel plan) async {
-    final product = _products.firstWhere((p) => p.id == plan.productId);
+    final product = _products.firstWhere(
+      (p) => p.id == plan.productId,
+      orElse: () => throw Exception('Product not found'),
+    );
+
     final purchaseParam = PurchaseParam(productDetails: product);
-    _iap.buyNonConsumable(purchaseParam: purchaseParam);
+    await _iap.buyNonConsumable(purchaseParam: purchaseParam);
   }
 
   void listenToPurchaseUpdates() {
     _iap.purchaseStream.listen((purchases) async {
-      for (var purchase in purchases) {
+      for (final purchase in purchases) {
         if (purchase.status == PurchaseStatus.purchased ||
             purchase.status == PurchaseStatus.restored) {
           bool valid = await _verifyPurchase(purchase);
           if (valid) {
-            _purchases.add(purchase);
+            if (!_purchases.any((p) => p.purchaseID == purchase.purchaseID)) {
+              _purchases.add(purchase);
+            }
             await _sendPurchaseToServer(purchase);
+
             if (purchase.pendingCompletePurchase) {
               await _iap.completePurchase(purchase);
             }
-            emit(SubscriptionSuccess());
+
+            // If currently loaded, update state with new purchases
+            if (state is SubscriptionLoaded) {
+              final current = state as SubscriptionLoaded;
+              emit(
+                SubscriptionLoaded(
+                  current.plans,
+                  _products,
+                  List.unmodifiable(_purchases),
+                ),
+              );
+            } else {
+              emit(SubscriptionSuccess());
+            }
           } else {
             emit(SubscriptionError('Purchase verification failed'));
           }
@@ -59,13 +88,25 @@ class SubscriptionCubit extends Cubit<SubscriptionState> {
     });
   }
 
+  Future<void> _restorePurchases() async {
+    try {
+      final isAvailable = await _iap.isAvailable();
+      if (!isAvailable) return;
+
+      await _iap.restorePurchases();
+    } catch (e) {
+      print('Error restoring purchases: $e');
+    }
+  }
+
   Future<bool> _verifyPurchase(PurchaseDetails purchase) async {
-    return true; // For sandbox
+    // Implement your backend verification logic here
+    return true;
   }
 
   Future<void> _sendPurchaseToServer(PurchaseDetails purchase) async {
     final plan = _products.firstWhere((p) => p.id == purchase.productID);
-    final duration = 30;
+    final duration = 30; // Replace with actual logic
     final adsCount = 50;
 
     await repository.sendPurchaseToServer({

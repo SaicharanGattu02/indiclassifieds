@@ -31,4 +31,5 @@ class AppTextStyles {
       TextStyle(fontSize: 12, fontFamily: 'Roboto', color: color);
   static TextStyle labelSmall(Color color) =>
       TextStyle(fontSize: 10, fontFamily: 'Roboto', color: color);
+
 }

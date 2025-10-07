@@ -75,5 +75,7 @@
 	</array>
 	<key>NSAppleMusicUsageDescription</key>
     <string>This app uses your Apple account to enable secure in-app purchases.</string>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
 </dict>
 </plist>

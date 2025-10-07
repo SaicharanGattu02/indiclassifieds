@@ -237,8 +237,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ),
                         const SizedBox(height: 20),
-                        if (!(mobile_number == "9999999999" &&
-                            Platform.isIOS)) ...[
                           _settingsTile(
                             Icons.unsubscribe_outlined,
                             Colors.blue.shade100,
@@ -248,19 +246,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             isDark,
                             textColor,
                             trailing: Icons.arrow_forward_ios,
-                            onTap: () => context.push("/subscription_plans"),
+                            onTap: () {
+                              if(!(mobile_number == "9999999999" &&
+                                  Platform.isIOS)){
+                                context.push("/plans");
+                              }else{
+                                context.push("/subscription_plans");
+                              }
+                            }
                           ),
-                          _settingsTile(
-                            Icons.subscriptions,
-                            Colors.blue.shade100,
-                            Platform.isAndroid
-                                ? 'Active Subscription Plans'
-                                : "My Orders (Active, Scheduled, Expired)",
-                            isDark,
-                            textColor,
-                            trailing: Icons.arrow_forward_ios,
-                            onTap: () => context.push("/active_plans"),
-                          ),
+                          if (!(mobile_number == "9999999999" &&
+                          Platform.isIOS)) ...[
+                        _settingsTile(
+                          Icons.subscriptions,
+                          Colors.blue.shade100,
+                          Platform.isAndroid
+                              ? 'Active Subscription Plans'
+                              : "My Orders (Active, Scheduled, Expired)",
+                          isDark,
+                          textColor,
+                          trailing: Icons.arrow_forward_ios,
+                          onTap: () => context.push("/active_plans"),
+                        ),
                         ],
                         _settingsTile(
                           Icons.favorite,
