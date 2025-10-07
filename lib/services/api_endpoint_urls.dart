@@ -8,7 +8,7 @@ class APIEndpointUrls {
 
   /// Authentiocation Urls
   static const String register = '${apiUrl}Register';
-  static const String refreshtoken = '${apiUrl}refresh-token-for-user';
+  static const String refreshtoken = '${apiUrl}refresh-access-token';
   static const String send_login_otp = '${apiUrl}send-otp';
   static const String resend_login_otp = '${apiUrl}resend-login-otp';
   static const String verify_login_otp = '${apiUrl}verify-otp';
