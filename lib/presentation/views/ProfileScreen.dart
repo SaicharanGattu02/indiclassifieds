@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:indiclassifieds/data/cubit/Profile/profile_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Profile/profile_states.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../Components/CustomAppButton.dart';
 import '../../data/cubit/theme_cubit.dart';
 import '../../services/AuthService.dart';
@@ -237,37 +238,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ),
                         const SizedBox(height: 20),
-                          _settingsTile(
-                            Icons.unsubscribe_outlined,
-                            Colors.blue.shade100,
-                            Platform.isAndroid
-                                ? 'Subscription'
-                                : "Buy Packages",
-                            isDark,
-                            textColor,
-                            trailing: Icons.arrow_forward_ios,
-                            onTap: () {
-                              if(!(mobile_number == "9999999999" &&
-                                  Platform.isIOS)){
-                                context.push("/plans");
-                              }else{
-                                context.push("/subscription_plans");
-                              }
-                            }
-                          ),
-                          if (!(mobile_number == "9999999999" &&
-                          Platform.isIOS)) ...[
                         _settingsTile(
-                          Icons.subscriptions,
+                          Icons.unsubscribe_outlined,
                           Colors.blue.shade100,
-                          Platform.isAndroid
-                              ? 'Active Subscription Plans'
-                              : "My Orders (Active, Scheduled, Expired)",
+                          Platform.isAndroid ? 'Subscription' : "Buy Packages",
                           isDark,
                           textColor,
                           trailing: Icons.arrow_forward_ios,
-                          onTap: () => context.push("/active_plans"),
+                          onTap: () {
+                            if (!(mobile_number == "9999999999" &&
+                                Platform.isIOS)) {
+                              context.push("/plans");
+                            } else {
+                              context.push("/subscription_plans");
+                            }
+                          },
                         ),
+                        if (!(mobile_number == "9999999999" &&
+                            Platform.isIOS)) ...[
+                          _settingsTile(
+                            Icons.subscriptions,
+                            Colors.blue.shade100,
+                            Platform.isAndroid
+                                ? 'Active Subscription Plans'
+                                : "My Orders (Active, Scheduled, Expired)",
+                            isDark,
+                            textColor,
+                            trailing: Icons.arrow_forward_ios,
+                            onTap: () => context.push("/active_plans"),
+                          ),
                         ],
                         _settingsTile(
                           Icons.favorite,
@@ -301,15 +300,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             _openThemePicker(context);
                           },
                         ),
-
-                        // _settingsTile(
-                        //   Icons.share,
-                        //   Colors.orange.shade100,
-                        //   'Share this App',
-                        //   isDark,
-                        //   textColor,
-                        //   trailing: Icons.arrow_forward_ios,
-                        // ),
+                        _settingsTile(
+                          Icons.share,
+                          Colors.orange.shade100,
+                          'Share this App',
+                          isDark,
+                          textColor,
+                          trailing: Icons.arrow_forward_ios,
+                          onTap: () async {
+                            const url =
+                                'https://play.google.com/store/apps/details?id=com.ind.classifieds';
+                            final Uri uri = Uri.parse(url);
+                            if (await canLaunchUrl(uri)) {
+                              await launchUrl(
+                                uri,
+                                mode: LaunchMode.externalApplication,
+                              );
+                            } else {
+                              throw 'Could not launch Play Store';
+                            }
+                          },
+                        ),
                         // _settingsTile(
                         //   Icons.star_rate,
                         //   Colors.yellow.shade100,

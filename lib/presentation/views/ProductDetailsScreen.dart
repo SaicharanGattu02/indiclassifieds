@@ -501,11 +501,12 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         style: AppTextStyles.headlineSmall(textColor),
                       ),
                       const SizedBox(height: 6),
-                      Text(
-                        "₹$priceStr",
-                        style: AppTextStyles.headlineMedium(
-                          textColor,
-                        ).copyWith(fontWeight: FontWeight.w800),
+                      listing.price == "0.0" || listing.price == "0" || listing.price == "0.00"
+                          ? const SizedBox.shrink()
+                          : Text(
+                        "₹${_formatINR(listing.price)}",
+                        style: AppTextStyles.headlineMedium(textColor)
+                            .copyWith(fontWeight: FontWeight.w800),
                       ),
                       const SizedBox(height: 20),
                     ],

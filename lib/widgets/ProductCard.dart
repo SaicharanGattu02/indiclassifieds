@@ -26,7 +26,7 @@ class ProductCard extends StatelessWidget {
     return InkWell(
       onTap: () {
         context.push(
-          "/products_details?listingId=${products.id??""}&subcategory_id=${products.subCategory??""}",
+          "/products_details?listingId=${products.id ?? ""}&subcategory_id=${products.subCategory ?? ""}",
         );
       },
       child: Container(
@@ -100,8 +100,6 @@ class ProductCard extends StatelessWidget {
                         ),
                       ),
                     ),
-
-
                   // Wishlist Icon (Top Right)
                   Positioned(
                     top: 8,
@@ -160,10 +158,14 @@ class ProductCard extends StatelessWidget {
                       ],
                     ),
                     SizedBox(height: 6),
-                    Text(
-                      "₹${products.price ?? ""}",
-                      style: AppTextStyles.titleMedium(Colors.blue),
-                    ),
+                    products.price == "0.0" ||
+                            products.price == "0" ||
+                            products.price == "0.00"
+                        ? SizedBox.shrink()
+                        : Text(
+                            "₹${products.price ?? ""}",
+                            style: AppTextStyles.titleMedium(Colors.blue),
+                          ),
                   ],
                 ),
               ),
