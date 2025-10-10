@@ -55,10 +55,12 @@ class ProductDetailsScreen extends StatefulWidget {
 }
 
 class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
-  final _pgCtrl = PageController();
-  int _page = 0;
+
   bool _didInitFromBloc = false; // prevents repeated side-effects
   String? mobile_number;
+
+  final ValueNotifier<int> _pageNotifier = ValueNotifier<int>(0);
+  final PageController _pgCtrl = PageController();
 
   final Completer<GoogleMapController> _mapCtrl = Completer();
   LatLng? _listingLatLng;
@@ -202,68 +204,6 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     return Scaffold(
       backgroundColor: bgColor,
       appBar: CustomAppBar1(title: 'Details', actions: []),
-      // bottomNavigationBar: FutureBuilder(
-      //   future: Future.wait([AuthService.isGuest, AuthService.getId()]),
-      //   builder: (context, asyncSnapshot) {
-      //     if (asyncSnapshot.connectionState == ConnectionState.waiting) {
-      //       return const Center(child: CircularProgressIndicator());
-      //     }
-      //
-      //     if (asyncSnapshot.hasError) {
-      //       return Center(child: Text('Error: ${asyncSnapshot.error}'));
-      //     }
-      //
-      //     if (!asyncSnapshot.hasData) {
-      //       return const Center(child: Text('No data available'));
-      //     }
-      //
-      //     final results = asyncSnapshot.data!;
-      //     final isGuest = results[0] as bool;
-      //     final userId = results[1] as String;
-      //
-      //     AppLogger.info("receiverId: ${receiverId} and userid:${userId}");
-      //     return (userId == receiverId)
-      //         ? SizedBox.shrink()
-      //         : _BottomCtaBar(
-      //             onContact: isGuest
-      //                 ? () {
-      //                     context.push("/login");
-      //                   }
-      //                 : () async {
-      //                     if (mobile_number != null) {
-      //                       AppLauncher.call(mobile_number ?? "");
-      //                     } else {
-      //                       showDialog(
-      //                         context: context,
-      //                         barrierDismissible: false,
-      //                         builder: (_) => const Center(
-      //                           child: CircularProgressIndicator(),
-      //                         ),
-      //                       );
-      //                       await Future.delayed(const Duration(seconds: 2));
-      //                       if (context.mounted) Navigator.of(context).pop();
-      //                       final updatedMobile = mobile_number;
-      //                       if (updatedMobile != null &&
-      //                           updatedMobile.isNotEmpty) {
-      //                         AppLauncher.call(updatedMobile);
-      //                       } else {
-      //                         CustomSnackBar1.show(
-      //                           context,
-      //                           "Mobile number not available",
-      //                         );
-      //                       }
-      //                     }
-      //                   },
-      //             onChat: isGuest
-      //                 ? () {
-      //                     context.push("/login");
-      //                   }
-      //                 : () {
-      //                     context.push('/chat?receiverId=$receiverId');
-      //                   },
-      //           );
-      //   },
-      // ),
       bottomNavigationBar: FutureBuilder<List<Object?>>(
         future: Future.wait([AuthService.isGuest, AuthService.getId()]),
         builder: (context, asyncSnapshot) {
@@ -385,7 +325,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           // 1) Images
                           PageView.builder(
                             controller: _pgCtrl,
-                            onPageChanged: (i) => setState(() => _page = i),
+                            onPageChanged: (i) => _pageNotifier.value = i,
                             itemCount: images.isEmpty ? 1 : images.length,
                             itemBuilder: (_, i) {
                               final url = images.isNotEmpty
@@ -460,7 +400,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                         MaterialPageRoute(
                                           builder: (context) => PhotoViewScreen(
                                             images: images,
-                                            initialIndex: _page,
+                                            initialIndex: _pageNotifier.value,
                                           ),
                                         ),
                                       );
@@ -477,9 +417,14 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                             right: 0,
                             bottom: 12,
                             child: Center(
-                              child: _Dots(
-                                count: images.isEmpty ? 1 : images.length,
-                                index: _page,
+                              child:ValueListenableBuilder<int>(
+                                valueListenable: _pageNotifier,
+                                builder: (context, page, _) {
+                                  return _Dots(
+                                    count: images.isEmpty ? 1 : images.length,
+                                    index: page,
+                                  );
+                                },
                               ),
                             ),
                           ),

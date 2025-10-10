@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:indiclassifieds/data/cubit/Profile/profile_cubit.dart';
 import 'package:indiclassifieds/data/cubit/Profile/profile_states.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../Components/CustomAppButton.dart';
 import '../../data/cubit/theme_cubit.dart';
@@ -300,6 +301,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             _openThemePicker(context);
                           },
                         ),
+
                         _settingsTile(
                           Icons.share,
                           Colors.orange.shade100,
@@ -308,19 +310,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           textColor,
                           trailing: Icons.arrow_forward_ios,
                           onTap: () async {
-                            const url =
+                            const appUrl =
                                 'https://play.google.com/store/apps/details?id=com.ind.classifieds';
-                            final Uri uri = Uri.parse(url);
-                            if (await canLaunchUrl(uri)) {
-                              await launchUrl(
-                                uri,
-                                mode: LaunchMode.externalApplication,
-                              );
-                            } else {
-                              throw 'Could not launch Play Store';
-                            }
+                            await Share.share(
+                              '🚀 Check out **IND Classifieds** — your one-stop destination to buy, sell, and discover great deals near you! 🛒\n\n'
+                              'It’s fast, easy \n\n'
+                              '👉 Download now on Google Play:\n$appUrl',
+                              subject: 'IND Classifieds – Buy & Sell Locally!',
+                            );
                           },
                         ),
+
                         // _settingsTile(
                         //   Icons.star_rate,
                         //   Colors.yellow.shade100,
