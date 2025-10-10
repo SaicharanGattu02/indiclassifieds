@@ -173,6 +173,7 @@ class _DashboardState extends State<Dashboard> {
                     showLocationBottomSheet(context);
                   } else if (state is LocationLoaded) {
                     address = state.locationName;
+                    latlng = state.latlng;
                     // ✅ Close bottom sheet if showing
                     if (isLocationSheetShown) {
                       Navigator.of(context).pop(); // closes the bottom sheet

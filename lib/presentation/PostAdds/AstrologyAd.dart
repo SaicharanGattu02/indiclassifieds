@@ -768,6 +768,8 @@ class _AstrologyAdState extends State<AstrologyAd> {
                                                 .toList();
                                           }
 
+                                          AppLogger.info("data:${data}");
+
                                           if (widget.editId
                                               .replaceAll('"', '')
                                               .trim()
