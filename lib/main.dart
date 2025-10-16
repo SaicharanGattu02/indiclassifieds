@@ -20,6 +20,8 @@ import 'app_routes/router.dart';
 import 'data/cubit/theme_cubit.dart';
 import 'firebase_options.dart';
 import 'package:indiclassifieds/utils/AppLogger.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:http/http.dart' as http;
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
@@ -185,6 +187,12 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print("  ▶ Title: ${message.notification?.title}");
   print("  ▶ Body: ${message.notification?.body}");
   print("  ▶ Data: ${message.data}");
+  RemoteNotification? notification = message.notification;
+  AndroidNotification? android = message.notification?.android;
+
+  if (notification != null && android != null) {
+    showNotification(notification, android, message.data);
+  }
 }
 
 Future<void> _requestPushPermissions() async {
@@ -205,33 +213,65 @@ Future<void> _requestPushPermissions() async {
   }
 }
 
-// Function to display local notifications
-void showNotification(
-  RemoteNotification notification,
-  AndroidNotification android,
-  Map<String, dynamic> data,
-) async {
-  AndroidNotificationDetails androidPlatformChannelSpecifics =
-      AndroidNotificationDetails(
-        'high_importance_channel',
-        'High Importance Notifications',
-        importance: Importance.max,
-        priority: Priority.high,
-        playSound: true,
-        icon: '@mipmap/ic_launcher',
+Future<void> showNotification(
+    RemoteNotification notification,
+    AndroidNotification android,
+    Map<String, dynamic> data,
+    ) async {
+  // ✅ Prefer notification.imageUrl, else fallback to data['image']
+  String? imageUrl = notification.android?.imageUrl ??
+      notification.apple?.imageUrl ??
+      data['image'] as String?;
+
+  BigPictureStyleInformation? styleInformation;
+
+  // 🖼️ If image exists, download it and prepare BigPicture style
+  if (imageUrl != null && imageUrl.isNotEmpty) {
+    try {
+      final bigPicturePath = await _downloadAndSaveFile(imageUrl, 'bigPicture.jpg');
+      styleInformation = BigPictureStyleInformation(
+        FilePathAndroidBitmap(bigPicturePath),
+        contentTitle: notification.title,
+        summaryText: notification.body,
       );
-  NotificationDetails platformChannelSpecifics = NotificationDetails(
-    android: androidPlatformChannelSpecifics,
+    } catch (e) {
+      debugPrint('❌ Failed to download notification image: $e');
+    }
+  }
+
+  // 📱 Android notification details
+  final androidDetails = AndroidNotificationDetails(
+    channel.id,
+    channel.name,
+    channelDescription: channel.description,
+    importance: Importance.max,
+    priority: Priority.high,
+    playSound: true,
+    icon: '@mipmap/ic_launcher',
+    styleInformation: styleInformation,
   );
 
+  final details = NotificationDetails(android: androidDetails);
+
+  // 🚀 Show notification
   await flutterLocalNotificationsPlugin.show(
     notification.hashCode,
     notification.title,
     notification.body,
-    platformChannelSpecifics,
+    details,
     payload: jsonEncode(data),
   );
 }
+
+Future<String> _downloadAndSaveFile(String url, String fileName) async {
+  final directory = await getApplicationDocumentsDirectory();
+  final filePath = '${directory.path}/$fileName';
+  final response = await http.get(Uri.parse(url));
+  final file = File(filePath);
+  await file.writeAsBytes(response.bodyBytes);
+  return filePath;
+}
+
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
