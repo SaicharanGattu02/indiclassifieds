@@ -47,6 +47,7 @@ class MarkAsListingCubit extends Cubit<MarkAsListingState> {
       emit(MarkAsListingFailure(e.toString()));
     }
   }
+
   Future<void> removeImageOnListingAd(int id) async {
     emit(MarkAsListingLoading());
     try {

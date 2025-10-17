@@ -24,6 +24,7 @@ import '../../utils/media_query_helper.dart';
 import '../../utils/spinkittsLoader.dart';
 import '../../widgets/CommonLoader.dart';
 import '../../widgets/SimilarProductCard.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -35,6 +36,10 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
   int currentIndex = 0;
+
+  late stt.SpeechToText _speech;
+  bool _isListening = false;
+  String _voiceText = '';
 
   @override
   void initState() {
@@ -51,6 +56,41 @@ class _HomeScreenState extends State<HomeScreen> {
         context.read<ProductsCubit>().getMoreProducts();
       }
     });
+    _speech = stt.SpeechToText();
+  }
+
+  Future<void> _startListening() async {
+    bool available = await _speech.initialize(
+      onStatus: (val) => debugPrint('onStatus: $val'),
+      onError: (val) => debugPrint('onError: $val'),
+    );
+
+    if (available) {
+      setState(() => _isListening = true);
+      _speech.listen(
+        onResult: (val) {
+          setState(() {
+            _voiceText = val.recognizedWords;
+          });
+
+          if (val.finalResult) {
+            setState(() => _isListening = false);
+            if (_voiceText.isNotEmpty) {
+              context.push("/search_screen", extra: _voiceText);
+            }
+          }
+        },
+        listenMode: stt.ListenMode.confirmation,
+        localeId: 'en_IN', // You can adjust based on your audience
+      );
+    } else {
+      debugPrint('Speech recognition not available');
+    }
+  }
+
+  void _stopListening() {
+    _speech.stop();
+    setState(() => _isListening = false);
   }
 
   @override
@@ -164,15 +204,41 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // InkWell(
+                        //   onTap: () {
+                        //     context.push("/search_screen");
+                        //   },
+                        //   child: Container(
+                        //     padding: EdgeInsets.symmetric(
+                        //       horizontal: 16,
+                        //       vertical: 12,
+                        //     ),
+                        //     decoration: BoxDecoration(
+                        //       color: cardColor,
+                        //       borderRadius: BorderRadius.circular(8),
+                        //       border: Border.all(color: borderColor),
+                        //     ),
+                        //     child: Row(
+                        //       children: [
+                        //         Icon(
+                        //           Icons.search,
+                        //           color: textColor,
+                        //         ), // Prefix Icon
+                        //         SizedBox(width: 8),
+                        //         Text(
+                        //           'Search products, brands, .....',
+                        //           style: TextStyle(color: textColor),
+                        //         ),
+                        //       ],
+                        //     ),
+                        //   ),
+                        // ),
                         InkWell(
                           onTap: () {
                             context.push("/search_screen");
                           },
                           child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
-                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                             decoration: BoxDecoration(
                               color: cardColor,
                               borderRadius: BorderRadius.circular(8),
@@ -180,14 +246,21 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             child: Row(
                               children: [
-                                Icon(
-                                  Icons.search,
-                                  color: textColor,
-                                ), // Prefix Icon
-                                SizedBox(width: 8),
-                                Text(
-                                  'Search products, brands, .....',
-                                  style: TextStyle(color: textColor),
+                                 Icon(Icons.search, color: textColor),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text('Search products, brands, .....',
+                                    style: TextStyle(color: textColor),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                GestureDetector(
+                                  onTap: _isListening ? _stopListening : _startListening,
+                                  child: Icon(
+                                    _isListening ? Icons.mic : Icons.mic_none,
+                                    color: _isListening ? Colors.red : textColor,
+                                  ),
                                 ),
                               ],
                             ),
