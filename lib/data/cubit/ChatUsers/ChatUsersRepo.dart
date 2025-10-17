@@ -1,8 +1,11 @@
+import 'package:indiclassifieds/model/AdSuccessModel.dart';
+
 import '../../../model/ChatUsersModel.dart';
 import '../../remote_data_source.dart';
 
 abstract class ChatUsersRepo {
   Future<ChatUsersModel?> getChatUsers(String query);
+  Future<AdSuccessModel?> chatUserPin(Map<String, dynamic> data);
 }
 
 class ChatUsersRepoImpl implements ChatUsersRepo {
@@ -17,5 +20,10 @@ class ChatUsersRepoImpl implements ChatUsersRepo {
     } catch (e) {
       throw Exception('Failed to fetch chat users');
     }
+  }
+
+  @override
+  Future<AdSuccessModel?> chatUserPin(Map<String, dynamic> data) async {
+    return await remoteDataSource.chatUserPin(data);
   }
 }

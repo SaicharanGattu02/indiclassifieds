@@ -1,10 +1,14 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
+import 'package:indiclassifieds/Components/CustomSnackBar.dart';
 import 'package:indiclassifieds/services/AuthService.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../data/cubit/Chat/private_chat_cubit.dart';
+import '../../data/cubit/ChatUserPin/ChatUserPinCubit.dart';
+import '../../data/cubit/ChatUserPin/ChatUserPinStates.dart';
 import '../../data/cubit/ChatUsers/ChatUsersCubit.dart';
 import '../../data/cubit/ChatUsers/ChatUsersStates.dart';
 import '../../services/SocketService.dart';
@@ -259,16 +263,65 @@ class _UserListScreenState extends State<UserListScreen>
                               final id = user.userId ?? 0;
                               final name = user.name ?? '';
                               final imageUrl = user.profileImage ?? '';
-                              return _ChatCard(
-                                id: id,
-                                name: name,
-                                imageUrl: imageUrl,
-                                onTap: () {
-                                  context.push('/chat?receiverId=$id');
+                              final isPinned =
+                                  user.pinned ==
+                                  true; // assuming backend returns this flag
+
+                              return BlocListener<
+                                ChatUserPinCubit,
+                                ChatUserPinStates
+                              >(
+                                listener: (context, state) {
+                                  if (state is ChatUserPinLoaded) {
+                                    context
+                                        .read<ChatUsersCubit>()
+                                        .fetchChatUsers("");
+                                  } else if (state is ChatUserPinFailure) {
+                                    CustomSnackBar1.show(context, state.error);
+                                  }
                                 },
-                                card: card,
-                                textColor: textColor,
-                                animationDelay: i * 100,
+                                child: Slidable(
+                                  key: ValueKey(id),
+                                  endActionPane: ActionPane(
+                                    motion: const DrawerMotion(),
+                                    extentRatio: 0.3,
+                                    children: [
+                                      SlidableAction(
+                                        onPressed: (_) {
+                                          final pinData = {
+                                            "pinned_user_id": id,
+                                          };
+                                          context
+                                              .read<ChatUserPinCubit>()
+                                              .chatUserPin(pinData);
+                                        },
+                                        backgroundColor: isPinned
+                                            ? Colors.orangeAccent
+                                            : Colors.teal,
+                                        foregroundColor: Colors.white,
+                                        icon: isPinned
+                                            ? Icons.push_pin_outlined
+                                            : Icons.push_pin,
+                                        label: isPinned ? 'Unpin' : 'Pin',
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ],
+                                  ),
+                                  child: _ChatCard(
+                                    id: id,
+                                    name: name,
+                                    imageUrl: imageUrl,
+                                    onTap: () {
+                                      context.push('/chat?receiverId=$id');
+                                    },
+                                    card: isPinned
+                                        ? Colors.teal.withOpacity(0.1)
+                                        : card,
+                                    textColor: textColor,
+                                    animationDelay: i * 100,
+                                    pinned: isPinned,
+                                  ),
+                                ),
                               );
                             },
                           ),
@@ -340,6 +393,7 @@ class _ChatCard extends StatelessWidget {
     required this.card,
     required this.textColor,
     required this.animationDelay,
+    required this.pinned,
   });
 
   final int id;
@@ -349,6 +403,7 @@ class _ChatCard extends StatelessWidget {
   final Color card;
   final Color textColor;
   final int animationDelay;
+  final bool pinned;
 
   bool get _hasImage =>
       imageUrl.trim().isNotEmpty &&
@@ -447,6 +502,7 @@ class _ChatCard extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 8),
+                          if(pinned)Icon(Icons.push_pin,color: textColor,)
                         ],
                       ),
                       const SizedBox(height: 4),

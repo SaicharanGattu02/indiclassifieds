@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import 'package:indiclassifieds/data/cubit/Dashboard/DashboardState.dart';
 import 'package:indiclassifieds/services/AuthService.dart';
 import 'package:indiclassifieds/theme/app_colors.dart';
 import 'package:intl/intl.dart';
+import 'package:lottie/lottie.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../Components/CustomSnackBar.dart';
 import '../../data/cubit/AddToWishlist/addToWishlistCubit.dart';
@@ -40,6 +42,9 @@ class _HomeScreenState extends State<HomeScreen> {
   late stt.SpeechToText _speech;
   bool _isListening = false;
   String _voiceText = '';
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  bool _showBottomSheet = false;
+  StateSetter? _bottomSheetSetState;
 
   @override
   void initState() {
@@ -57,7 +62,14 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     });
     _speech = stt.SpeechToText();
+    _loadSound();
   }
+
+  Future<void> _loadSound() async {
+    await _audioPlayer.setSource(AssetSource('sounds/google-assistant.mp3'));
+  }
+
+  bool _showListeningAnimation = true; // New variable for animation state
 
   Future<void> _startListening() async {
     bool available = await _speech.initialize(
@@ -66,22 +78,58 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     if (available) {
-      setState(() => _isListening = true);
+      await _audioPlayer.play(AssetSource('sounds/google-assistant.mp3'));
+      setState(() {
+        _isListening = true;
+        _showListeningAnimation = true; // Start with listening animation
+      });
+      _showBottomSheet = true;
+      showModalBottomSheet(
+        context: context,
+        isDismissible: false,
+        builder: (context) => _buildBottomSheet(),
+      );
       _speech.listen(
         onResult: (val) {
-          setState(() {
-            _voiceText = val.recognizedWords;
-          });
+          _voiceText = val.recognizedWords;
+          debugPrint("Recognized: $_voiceText");
+
+          if (_bottomSheetSetState != null) {
+            _bottomSheetSetState!(() {}); // refresh bottom sheet
+          }
 
           if (val.finalResult) {
-            setState(() => _isListening = false);
-            if (_voiceText.isNotEmpty) {
-              context.push("/search_screen", extra: _voiceText);
+            // Switch to success animation briefly before closing
+            if (_bottomSheetSetState != null) {
+              _bottomSheetSetState!(() {
+                _showListeningAnimation = false; // switch animation in sheet
+              });
             }
+            // Small delay to show success animation
+            Future.delayed(Duration(milliseconds: 2000), () {
+              if (mounted) {
+                _stopListening();
+                Navigator.pop(context);
+                if (_voiceText.isNotEmpty) {
+                  context.push("/search_screen", extra: _voiceText).then((_) {
+                    setState(() {
+                      _isListening = false;
+                      _showBottomSheet = false;
+                      _voiceText = '';
+                      _showListeningAnimation = true; // Reset for next time
+                    });
+                  });
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("No text recognized. Try again!")),
+                  );
+                }
+              }
+            });
           }
         },
         listenMode: stt.ListenMode.confirmation,
-        localeId: 'en_IN', // You can adjust based on your audience
+        localeId: 'en_IN',
       );
     } else {
       debugPrint('Speech recognition not available');
@@ -90,7 +138,43 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _stopListening() {
     _speech.stop();
-    setState(() => _isListening = false);
+    setState(() {
+      _isListening = false;
+      _showBottomSheet = false;
+    });
+  }
+
+  Widget _buildBottomSheet() {
+    return StatefulBuilder(
+      builder: (BuildContext context, StateSetter setState) {
+        _bottomSheetSetState = setState; // store reference
+        return Container(
+          padding: const EdgeInsets.all(16.0),
+          width: double.infinity,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(height: 16),
+              Text(
+                _showListeningAnimation
+                    ? 'Hi, I’m listening. Try saying...\n"Cars, Bikes etc"'
+                    : 'Got it. Showing results for\n$_voiceText',
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.black, fontSize: 16),
+              ),
+              Lottie.asset(
+                _showListeningAnimation
+                    ? 'assets/lottie/listening.json'
+                    : 'assets/lottie/successfully.json',
+                height: 200,
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -238,7 +322,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             context.push("/search_screen");
                           },
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
                             decoration: BoxDecoration(
                               color: cardColor,
                               borderRadius: BorderRadius.circular(8),
@@ -246,20 +333,23 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             child: Row(
                               children: [
-                                 Icon(Icons.search, color: textColor),
+                                Icon(Icons.search, color: textColor),
                                 const SizedBox(width: 8),
                                 Expanded(
-                                  child: Text('Search products, brands, .....',
+                                  child: Text(
+                                    'Search products, brands, .....',
                                     style: TextStyle(color: textColor),
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                                 const SizedBox(width: 8),
                                 GestureDetector(
-                                  onTap: _isListening ? _stopListening : _startListening,
+                                  onTap: _isListening
+                                      ? _stopListening
+                                      : _startListening,
                                   child: Icon(
                                     _isListening ? Icons.mic : Icons.mic_none,
-                                    color: _isListening ? Colors.red : textColor,
+                                    color: textColor,
                                   ),
                                 ),
                               ],

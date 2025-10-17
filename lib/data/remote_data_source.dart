@@ -99,6 +99,7 @@ abstract class RemoteDataSource {
   Future<AdSuccessModel?> verifyOTP(Map<String, dynamic> data);
   Future<VerifyOtpModel?> byPassLogin(Map<String, dynamic> data);
   Future<ContactInfoModel?> getContactInfo();
+  Future<AdSuccessModel?> chatUserPin(Map<String, dynamic> data);
 }
 
 class RemoteDataSourceImpl implements RemoteDataSource {
@@ -134,6 +135,21 @@ class RemoteDataSourceImpl implements RemoteDataSource {
       }
     }
     return FormData.fromMap(formMap);
+  }
+
+  @override
+  Future<AdSuccessModel?> chatUserPin(Map<String, dynamic> data) async {
+    try {
+      Response response = await ApiClient.post(
+        "${APIEndpointUrls.toggle_pin_user}",
+        data: data,
+      );
+      AppLogger.log('chatUserPin:${response.data}');
+      return AdSuccessModel.fromJson(response.data);
+    } catch (e) {
+      AppLogger.error('chatUserPin :: $e');
+      return null;
+    }
   }
 
   @override

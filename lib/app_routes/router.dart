@@ -171,7 +171,11 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/search_screen',
       pageBuilder: (context, state) {
-        return buildSlideTransitionPage(SearchScreen(), state);
+        final searchText = state.extra as String? ?? '';
+        return buildSlideTransitionPage(
+          SearchScreen(search_text: searchText),
+          state,
+        );
       },
     ),
     GoRoute(

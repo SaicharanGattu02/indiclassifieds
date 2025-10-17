@@ -36,20 +36,24 @@ class Data {
   String? name;
   String? email;
   String? profileImage;
+  bool? pinned;
   String? lastMessageTime;
 
-  Data(
-      {this.userId,
-        this.name,
-        this.email,
-        this.profileImage,
-        this.lastMessageTime});
+  Data({
+    this.userId,
+    this.name,
+    this.email,
+    this.profileImage,
+    this.pinned,
+    this.lastMessageTime,
+  });
 
   Data.fromJson(Map<String, dynamic> json) {
     userId = json['user_id'];
     name = json['name'];
     email = json['email'];
     profileImage = json['profile_image'];
+    pinned = json['pinned'];
     lastMessageTime = json['last_message_time'];
   }
 
@@ -59,6 +63,7 @@ class Data {
     data['name'] = this.name;
     data['email'] = this.email;
     data['profile_image'] = this.profileImage;
+    data['pinned'] = this.pinned;
     data['last_message_time'] = this.lastMessageTime;
     return data;
   }
@@ -72,13 +77,14 @@ class Settings {
   bool? nextPage;
   bool? prevPage;
 
-  Settings(
-      {this.count,
-        this.page,
-        this.rowsPerPage,
-        this.totalPages,
-        this.nextPage,
-        this.prevPage});
+  Settings({
+    this.count,
+    this.page,
+    this.rowsPerPage,
+    this.totalPages,
+    this.nextPage,
+    this.prevPage,
+  });
 
   Settings.fromJson(Map<String, dynamic> json) {
     count = json['count'];

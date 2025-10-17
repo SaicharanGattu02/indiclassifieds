@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:indiclassifieds/services/AuthService.dart';
+import 'package:lottie/lottie.dart';
 
 import '../../Components/CustomAppButton.dart';
 import '../../Components/CustomSnackBar.dart';
@@ -26,9 +28,11 @@ import '../../theme/ThemeHelper.dart';
 import '../../widgets/CommonLoader.dart';
 import '../../widgets/CommonTextField.dart';
 import '../../widgets/ProductCard.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class SearchScreen extends StatefulWidget {
-  const SearchScreen({super.key});
+  final String search_text;
+  const SearchScreen({super.key, required this.search_text});
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
@@ -60,6 +64,13 @@ class _SearchScreenState extends State<SearchScreen> {
 
   final List<String> _tabs = ["Category", "Price", "Sort By", "States", "City"];
 
+  late stt.SpeechToText _speech;
+  bool _isListening = false;
+  String _voiceText = '';
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  bool _showBottomSheet = false;
+  StateSetter? _bottomSheetSetState;
+
   @override
   void initState() {
     super.initState();
@@ -67,8 +78,8 @@ class _SearchScreenState extends State<SearchScreen> {
     context.read<CategoriesCubit>().getCategories();
     context.read<SelectStatesCubit>().getSelectStates("");
 
-    context.read<ProductsCubit2>().getProducts(search: "");
-
+    context.read<ProductsCubit2>().getProducts(search: widget.search_text);
+    searchController.text = widget.search_text;
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
           _scrollController.position.maxScrollExtent - 200) {
@@ -79,6 +90,125 @@ class _SearchScreenState extends State<SearchScreen> {
     searchController.addListener(() {
       _onSearchChanged(searchController.text);
     });
+    _speech = stt.SpeechToText();
+    _loadSound();
+  }
+
+  Future<void> _loadSound() async {
+    await _audioPlayer.setSource(AssetSource('sounds/google-assistant.mp3'));
+  }
+
+  bool _showListeningAnimation = true; // New variable for animation state
+
+  Future<void> _startListening() async {
+    bool available = await _speech.initialize(
+      onStatus: (val) => debugPrint('onStatus: $val'),
+      onError: (val) => debugPrint('onError: $val'),
+    );
+
+    if (available) {
+      await _audioPlayer.play(AssetSource('sounds/google-assistant.mp3'));
+      setState(() {
+        _isListening = true;
+        _showListeningAnimation = true; // Start with listening animation
+      });
+      _showBottomSheet = true;
+      showModalBottomSheet(
+        context: context,
+        isDismissible: false,
+        builder: (context) => _buildBottomSheet(),
+      );
+      _speech.listen(
+        onResult: (val) {
+          _voiceText = val.recognizedWords;
+          debugPrint("Recognized: $_voiceText");
+
+          if (_bottomSheetSetState != null) {
+            _bottomSheetSetState!(() {}); // refresh bottom sheet
+          }
+
+          if (val.finalResult) {
+            // Switch to success animation briefly before closing
+            if (_bottomSheetSetState != null) {
+              _bottomSheetSetState!(() {
+                _showListeningAnimation = false; // switch animation in sheet
+              });
+            }
+
+            Future.delayed(const Duration(milliseconds: 2000), () {
+              if (mounted) {
+                _stopListening();
+                Navigator.pop(context);
+                if (_voiceText.isNotEmpty) {
+                  context
+                      .read<ProductsCubit2>()
+                      .getProducts(search: _voiceText)
+                      .then((_) {
+                        setState(() {
+                          searchController.text = _voiceText;
+                          _isListening = false;
+                          _showBottomSheet = false;
+                          _voiceText = '';
+                          _showListeningAnimation = true; // Reset for next time
+                        });
+                      });
+                } else {
+                  CustomSnackBar1.show(
+                    context,
+                    "No text recognized. Try again!",
+                  );
+                }
+              }
+            });
+          }
+        },
+        listenMode: stt.ListenMode.confirmation,
+        localeId: 'en_IN',
+      );
+    } else {
+      debugPrint('Speech recognition not available');
+    }
+  }
+
+  void _stopListening() {
+    _speech.stop();
+    setState(() {
+      _isListening = false;
+      _showBottomSheet = false;
+    });
+  }
+
+  Widget _buildBottomSheet() {
+    return StatefulBuilder(
+      builder: (BuildContext context, StateSetter setState) {
+        _bottomSheetSetState = setState; // store reference
+        return Container(
+          padding: const EdgeInsets.all(16.0),
+          width: double.infinity,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(height: 16),
+              Text(
+                _showListeningAnimation
+                    ? 'Hi, I’m listening. Try saying...\n"Cars, Bikes etc"'
+                    : 'Got it. Showing results for\n$_voiceText',
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.black, fontSize: 16),
+              ),
+              Lottie.asset(
+                _showListeningAnimation
+                    ? 'assets/lottie/listening.json'
+                    : 'assets/lottie/successfully.json',
+                height: 200,
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -359,15 +489,32 @@ class _SearchScreenState extends State<SearchScreen> {
                     horizontal: 16.0,
                     vertical: 8,
                   ),
-                  child: TextFormField(
-                    controller: searchController,
-                    style: AppTextStyles.bodyLarge(textColor),
-                    decoration: InputDecoration(
-                      hintText: "Search for products...",
-                      hintStyle: AppTextStyles.bodyLarge(textColor),
-                      prefixIcon: const Icon(Icons.search),
-                      border: const OutlineInputBorder(),
-                    ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: searchController,
+                          style: AppTextStyles.bodyLarge(textColor),
+                          decoration: InputDecoration(
+                            hintText: "Search for products...",
+                            hintStyle: AppTextStyles.bodyLarge(textColor),
+                            prefixIcon: const Icon(Icons.search),
+                            border: const OutlineInputBorder(),
+                          ),
+                        ),
+                      ),
+                      IconButton.outlined(
+                        style: IconButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadiusGeometry.circular(10),
+                          ),
+                        ),
+                        onPressed: _isListening
+                            ? _stopListening
+                            : _startListening,
+                        icon: Icon(Icons.mic),
+                      ),
+                    ],
                   ),
                 ),
                 Expanded(
@@ -611,19 +758,19 @@ class _SearchScreenState extends State<SearchScreen> {
   // }
 
   Widget _buildPriceWidget() {
-    final double priceMin = _minPrice;     // e.g., 100 (must be > 0 for log)
-    final double priceMax = _maxPrice;     // e.g., 10000000
+    final double priceMin = _minPrice; // e.g., 100 (must be > 0 for log)
+    final double priceMax = _maxPrice; // e.g., 10000000
     const double uiMin = 0.0;
-    const double uiMax = 1000.0;           // UI resolution
-    const int uiDivisions = 1000;          // increase for finer control
+    const double uiMax = 1000.0; // UI resolution
+    const int uiDivisions = 1000; // increase for finer control
 
     // map rupee price -> UI position (log scale)
     double _toUi(double price) {
-      final lp  = math.log(price);
+      final lp = math.log(price);
       final lmn = math.log(priceMin);
       final lmx = math.log(priceMax);
-      final t = (lp - lmn) / (lmx - lmn);          // 0..1
-      return uiMin + t * (uiMax - uiMin);          // 0..1000
+      final t = (lp - lmn) / (lmx - lmn); // 0..1
+      return uiMin + t * (uiMax - uiMin); // 0..1000
     }
 
     // map UI position -> rupee price (log scale)
@@ -642,7 +789,10 @@ class _SearchScreenState extends State<SearchScreen> {
       builder: (context, priceRange, _) {
         final textColor = ThemeHelper.textColor(context);
 
-        final uiRange = RangeValues(_toUi(priceRange.start), _toUi(priceRange.end));
+        final uiRange = RangeValues(
+          _toUi(priceRange.start),
+          _toUi(priceRange.end),
+        );
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -651,8 +801,14 @@ class _SearchScreenState extends State<SearchScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(_fmt(priceRange.start), style: AppTextStyles.titleSmall(textColor)),
-                Text(_fmt(priceRange.end),   style: AppTextStyles.titleSmall(textColor)),
+                Text(
+                  _fmt(priceRange.start),
+                  style: AppTextStyles.titleSmall(textColor),
+                ),
+                Text(
+                  _fmt(priceRange.end),
+                  style: AppTextStyles.titleSmall(textColor),
+                ),
               ],
             ),
             const SizedBox(height: 8),
@@ -660,12 +816,10 @@ class _SearchScreenState extends State<SearchScreen> {
             RangeSlider(
               min: uiMin,
               max: uiMax,
-              divisions: uiDivisions, // smooth, precise control across the whole range
+              divisions:
+                  uiDivisions, // smooth, precise control across the whole range
               values: uiRange,
-              labels: RangeLabels(
-                _fmt(priceRange.start),
-                _fmt(priceRange.end),
-              ),
+              labels: RangeLabels(_fmt(priceRange.start), _fmt(priceRange.end)),
               onChanged: (uiVals) {
                 double s = _fromUi(uiVals.start).roundToDouble(); // snap to ₹1
                 double e = _fromUi(uiVals.end).roundToDouble();
@@ -680,7 +834,8 @@ class _SearchScreenState extends State<SearchScreen> {
             Align(
               alignment: Alignment.centerRight,
               child: TextButton(
-                onPressed: () => _selectedRange.value = RangeValues(priceMin, priceMax),
+                onPressed: () =>
+                    _selectedRange.value = RangeValues(priceMin, priceMax),
                 child: const Text("Reset"),
               ),
             ),
@@ -689,7 +844,6 @@ class _SearchScreenState extends State<SearchScreen> {
       },
     );
   }
-
 
   Widget _buildSortByWidget() {
     final sortOptions = [

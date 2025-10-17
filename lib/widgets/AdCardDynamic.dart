@@ -165,8 +165,7 @@ class AdCardDynamic extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    if ((ad.status ?? '').toLowerCase() == "pending" &&
-                        ad.sold != true) ...[
+                    if ((ad.status ?? '').toLowerCase() == "pending" || (ad.status ?? '').toLowerCase() == "approved" && ad.sold != true) ...[
                       ActionButton(
                         icon: Icons.edit_outlined,
                         label: 'Edit',
