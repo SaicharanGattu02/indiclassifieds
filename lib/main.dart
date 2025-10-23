@@ -108,10 +108,14 @@ Future<void> main() async {
 
   // Foreground messages
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    print("📥 Foreground message received:");
-    print("  ▶ Title: ${message.notification?.title}");
-    print("  ▶ Body: ${message.notification?.body}");
-    print("  ▶ Data: ${message.data}");
+    print("📥 🔔 Foreground message received");
+    print("=== 🧩 FULL MESSAGE PAYLOAD START ===");
+    print(message.toMap());
+    print("=== 🧩 FULL MESSAGE PAYLOAD END ===");
+
+    print("▶ Title: ${message.notification?.title}");
+    print("▶ Body: ${message.notification?.body}");
+    print("▶ Data: ${message.data}");
 
     RemoteNotification? notification = message.notification;
     AndroidNotification? android = message.notification?.android;
@@ -123,7 +127,15 @@ Future<void> main() async {
 
   // 1) Background → user tapped push and app was in background
   FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-    print("📲 Notification opened (background): ${message.data}");
+    print("📥 🔔 Foreground message received");
+    print("=== 🧩 FULL MESSAGE PAYLOAD START ===");
+    print(message.toMap());
+    print("=== 🧩 FULL MESSAGE PAYLOAD END ===");
+
+    print("▶ Title: ${message.notification?.title}");
+    print("▶ Body: ${message.notification?.body}");
+    print("▶ Data: ${message.data}");
+
     _navigateFromPushData(message.data);
   });
 
@@ -183,10 +195,14 @@ void _navigateFromPushData(Map<String, dynamic> data) {
 /// Background handler (must be a top-level function or static)
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  print("🌙 Background message received:");
-  print("  ▶ Title: ${message.notification?.title}");
-  print("  ▶ Body: ${message.notification?.body}");
-  print("  ▶ Data: ${message.data}");
+  print("📥 🔔 Background message received");
+  print("=== 🧩 FULL MESSAGE PAYLOAD START ===");
+  print(message.toMap());
+  print("=== 🧩 FULL MESSAGE PAYLOAD END ===");
+
+  print("▶ Title: ${message.notification?.title}");
+  print("▶ Body: ${message.notification?.body}");
+  print("▶ Data: ${message.data}");
   RemoteNotification? notification = message.notification;
   AndroidNotification? android = message.notification?.android;
 
