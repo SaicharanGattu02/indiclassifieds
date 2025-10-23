@@ -214,12 +214,13 @@ Future<void> _requestPushPermissions() async {
 }
 
 Future<void> showNotification(
-    RemoteNotification notification,
-    AndroidNotification android,
-    Map<String, dynamic> data,
-    ) async {
+  RemoteNotification notification,
+  AndroidNotification android,
+  Map<String, dynamic> data,
+) async {
   // ✅ Prefer notification.imageUrl, else fallback to data['image']
-  String? imageUrl = notification.android?.imageUrl ??
+  String? imageUrl =
+      notification.android?.imageUrl ??
       notification.apple?.imageUrl ??
       data['image'] as String?;
 
@@ -228,7 +229,10 @@ Future<void> showNotification(
   // 🖼️ If image exists, download it and prepare BigPicture style
   if (imageUrl != null && imageUrl.isNotEmpty) {
     try {
-      final bigPicturePath = await _downloadAndSaveFile(imageUrl, 'bigPicture.jpg');
+      final bigPicturePath = await _downloadAndSaveFile(
+        imageUrl,
+        'bigPicture.jpg',
+      );
       styleInformation = BigPictureStyleInformation(
         FilePathAndroidBitmap(bigPicturePath),
         contentTitle: notification.title,
@@ -271,7 +275,6 @@ Future<String> _downloadAndSaveFile(String url, String fileName) async {
   await file.writeAsBytes(response.bodyBytes);
   return filePath;
 }
-
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
