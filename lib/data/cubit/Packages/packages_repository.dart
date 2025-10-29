@@ -1,5 +1,5 @@
 
-import 'package:indiclassifieds/model/PackagesModel.dart';
+import 'package:classifieds/model/PackagesModel.dart';
 
 import '../../remote_data_source.dart';
 

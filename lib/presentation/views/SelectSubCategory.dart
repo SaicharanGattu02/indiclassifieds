@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:indiclassifieds/Components/CutomAppBar.dart';
-import 'package:indiclassifieds/data/cubit/subCategory/sub_category_state.dart';
-import 'package:indiclassifieds/services/AuthService.dart';
-import 'package:indiclassifieds/widgets/CommonBackground.dart';
+import 'package:classifieds/Components/CutomAppBar.dart';
+import 'package:classifieds/data/cubit/subCategory/sub_category_state.dart';
+import 'package:classifieds/services/AuthService.dart';
+import 'package:classifieds/widgets/CommonBackground.dart';
 
 import '../../data/cubit/subCategory/sub_category_cubit.dart';
 import '../../theme/AppTextStyles.dart';

@@ -1,4 +1,4 @@
-import 'package:indiclassifieds/model/UserActivePlansModel.dart';
+import 'package:classifieds/model/UserActivePlansModel.dart';
 
 abstract class UserActivePlanStates {}
 

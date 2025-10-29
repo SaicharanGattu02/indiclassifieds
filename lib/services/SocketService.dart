@@ -1,5 +1,5 @@
-import 'package:indiclassifieds/services/api_endpoint_urls.dart';
-import 'package:indiclassifieds/utils/AppLogger.dart';
+import 'package:classifieds/services/api_endpoint_urls.dart';
+import 'package:classifieds/utils/AppLogger.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class SocketService {

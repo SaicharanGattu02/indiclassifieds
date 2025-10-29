@@ -1,5 +1,5 @@
-import 'package:indiclassifieds/model/BannersModel.dart';
-import 'package:indiclassifieds/model/SubcategoryProductsModel.dart';
+import 'package:classifieds/model/BannersModel.dart';
+import 'package:classifieds/model/SubcategoryProductsModel.dart';
 
 import '../../../model/CategoryModel.dart';
 

@@ -1,4 +1,4 @@
-import 'package:indiclassifieds/model/AddToWishlistModel.dart';
+import 'package:classifieds/model/AddToWishlistModel.dart';
 
 abstract class AddToWishlistStates {}
 

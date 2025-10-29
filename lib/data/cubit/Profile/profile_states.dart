@@ -1,4 +1,4 @@
-import 'package:indiclassifieds/model/ProfileModel.dart';
+import 'package:classifieds/model/ProfileModel.dart';
 
 abstract class ProfileStates {}
 

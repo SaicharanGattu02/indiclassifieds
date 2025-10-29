@@ -1,4 +1,4 @@
-import 'package:indiclassifieds/model/PackagesModel.dart';
+import 'package:classifieds/model/PackagesModel.dart';
 
 abstract class PackagesStates {}
 

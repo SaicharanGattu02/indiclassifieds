@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:indiclassifieds/data/cubit/States/states_repository.dart';
-import 'package:indiclassifieds/data/cubit/subCategory/sub_category_repository.dart';
+import 'package:classifieds/data/cubit/States/states_repository.dart';
+import 'package:classifieds/data/cubit/subCategory/sub_category_repository.dart';
 
 import 'states_state.dart';
 

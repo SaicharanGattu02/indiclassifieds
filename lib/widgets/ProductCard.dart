@@ -2,7 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:indiclassifieds/model/WishlistModel.dart';
+import 'package:classifieds/model/WishlistModel.dart';
 
 import '../data/cubit/AddToWishlist/addToWishlistCubit.dart';
 import '../model/SubcategoryProductsModel.dart';

@@ -1,6 +1,6 @@
-import 'package:indiclassifieds/data/remote_data_source.dart';
-import 'package:indiclassifieds/model/AddToWishlistModel.dart';
-import 'package:indiclassifieds/model/SubcategoryProductsModel.dart';
+import 'package:classifieds/data/remote_data_source.dart';
+import 'package:classifieds/model/AddToWishlistModel.dart';
+import 'package:classifieds/model/SubcategoryProductsModel.dart';
 
 import '../../../model/TransectionHistoryModel.dart';
 import '../../../model/WishlistModel.dart';

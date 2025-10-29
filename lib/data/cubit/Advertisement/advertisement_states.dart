@@ -1,4 +1,4 @@
-import 'package:indiclassifieds/model/AdvertisementModel.dart';
+import 'package:classifieds/model/AdvertisementModel.dart';
 
 abstract class AdvertisementStates {}
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:indiclassifieds/Components/CustomSnackBar.dart';
+import 'package:classifieds/Components/CustomSnackBar.dart';
 import '../../data/cubit/RecoverAccount/recover_account_cubit.dart';
 import '../../data/cubit/RecoverAccount/recover_account_states.dart';
 import '../../theme/AppTextStyles.dart';

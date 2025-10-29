@@ -1,5 +1,5 @@
-import 'package:indiclassifieds/data/remote_data_source.dart';
-import 'package:indiclassifieds/model/CategoryModel.dart';
+import 'package:classifieds/data/remote_data_source.dart';
+import 'package:classifieds/model/CategoryModel.dart';
 
 abstract class CategoriesRepo {
   Future<CategoryModel?> getCategories();

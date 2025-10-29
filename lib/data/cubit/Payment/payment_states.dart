@@ -1,4 +1,4 @@
-import 'package:indiclassifieds/model/CreatePaymentModel.dart';
+import 'package:classifieds/model/CreatePaymentModel.dart';
 
 import '../../../model/AdSuccessModel.dart';
 

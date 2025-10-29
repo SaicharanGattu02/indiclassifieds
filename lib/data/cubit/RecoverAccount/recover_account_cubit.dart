@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:indiclassifieds/data/cubit/RecoverAccount/recover_account_repository.dart';
-import 'package:indiclassifieds/data/cubit/RecoverAccount/recover_account_states.dart';
+import 'package:classifieds/data/cubit/RecoverAccount/recover_account_repository.dart';
+import 'package:classifieds/data/cubit/RecoverAccount/recover_account_states.dart';
 
 class RecoverAccountCubit extends Cubit<RecoverAccountStates> {
   RecoverAccountRepo recoverAccountRepo;

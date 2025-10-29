@@ -1,4 +1,4 @@
-import 'package:indiclassifieds/model/BoostAdModel.dart';
+import 'package:classifieds/model/BoostAdModel.dart';
 
 abstract class BoostAdInfoStates {}
 

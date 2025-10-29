@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
-import 'package:indiclassifieds/data/cubit/ChatMessages/ChatMessagesCubit.dart';
+import 'package:classifieds/data/cubit/ChatMessages/ChatMessagesCubit.dart';
 import '../../Components/CustomSnackBar.dart';
 import '../../data/cubit/Chat/private_chat_cubit.dart';
 import '../../data/cubit/ChatMessages/ChatMessagesStates.dart';

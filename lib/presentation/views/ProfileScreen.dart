@@ -5,13 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:indiclassifieds/data/cubit/Profile/profile_cubit.dart';
-import 'package:indiclassifieds/data/cubit/Profile/profile_states.dart';
+import 'package:classifieds/data/cubit/Profile/profile_cubit.dart';
+import 'package:classifieds/data/cubit/Profile/profile_states.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../Components/CustomAppButton.dart';
 import '../../data/cubit/theme_cubit.dart';
 import '../../services/AuthService.dart';
+import '../../services/MetaEventTracker.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../utils/color_constants.dart';
@@ -580,6 +581,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               child: OutlinedButton(
                                 onPressed: () async {
                                   await AuthService.logout();
+                                  await MetaEventTracker.logout();
                                   context.go("/login");
                                 },
                                 style: OutlinedButton.styleFrom(

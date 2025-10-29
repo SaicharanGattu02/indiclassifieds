@@ -1,5 +1,5 @@
-import 'package:indiclassifieds/model/SendOtpModel.dart';
-import 'package:indiclassifieds/model/VerifyOtpModel.dart';
+import 'package:classifieds/model/SendOtpModel.dart';
+import 'package:classifieds/model/VerifyOtpModel.dart';
 
 abstract class LogInWithMobileState {}
 

@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:indiclassifieds/data/cubit/ProductDetails/product_details_repo.dart';
-import 'package:indiclassifieds/data/cubit/ProductDetails/product_details_states.dart';
+import 'package:classifieds/data/cubit/ProductDetails/product_details_repo.dart';
+import 'package:classifieds/data/cubit/ProductDetails/product_details_states.dart';
 
 class ProductDetailsCubit extends Cubit<ProductDetailsStates> {
   ProductDetailsRepo productDetailsRepo;

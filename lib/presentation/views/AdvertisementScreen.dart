@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:indiclassifieds/Components/CutomAppBar.dart';
+import 'package:classifieds/Components/CutomAppBar.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../data/cubit/Advertisement/advertisement_cubit.dart';
 import '../../data/cubit/Advertisement/advertisement_states.dart';

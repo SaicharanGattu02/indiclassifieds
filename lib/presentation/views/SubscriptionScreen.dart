@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
-import 'package:indiclassifieds/Components/CutomAppBar.dart';
+import 'package:classifieds/Components/CutomAppBar.dart';
 
 import '../../data/cubit/Subscription/SubscriptionCubit.dart';
 import '../../data/cubit/Subscription/SubscriptionRepository.dart';

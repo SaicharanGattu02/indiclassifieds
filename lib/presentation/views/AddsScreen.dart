@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:indiclassifieds/services/AuthService.dart';
-import 'package:indiclassifieds/utils/AppLogger.dart';
-import 'package:indiclassifieds/utils/media_query_helper.dart';
+import 'package:classifieds/services/AuthService.dart';
+import 'package:classifieds/utils/AppLogger.dart';
+import 'package:classifieds/utils/media_query_helper.dart';
 import '../../data/cubit/MyAds/my_ads_cubit.dart';
 import '../../data/cubit/MyAds/my_ads_states.dart';
 import '../../theme/AppTextStyles.dart';

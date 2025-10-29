@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
-import 'package:indiclassifieds/utils/AppLogger.dart';
+import 'package:classifieds/utils/AppLogger.dart';
 import '../services/api_endpoint_urls.dart';
 import '../services/ApiClient.dart';
 import '../utils/constants.dart';

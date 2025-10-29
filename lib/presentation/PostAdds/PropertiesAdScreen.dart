@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:indiclassifieds/data/cubit/Ad/PropertyAd/popperty_ad_cubit.dart';
-import 'package:indiclassifieds/data/cubit/Ad/PropertyAd/property_ad_states.dart';
+import 'package:classifieds/data/cubit/Ad/PropertyAd/popperty_ad_cubit.dart';
+import 'package:classifieds/data/cubit/Ad/PropertyAd/property_ad_states.dart';
 import '../../data/cubit/Location/location_cubit.dart';
 import '../../data/cubit/MyAds/GetMarkAsListing/get_listing_ad_cubit.dart';
 import '../../data/cubit/MyAds/MarkAsListing/mark_as_listing_cubit.dart';

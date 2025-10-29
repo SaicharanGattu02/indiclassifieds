@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:indiclassifieds/Components/CutomAppBar.dart';
-import 'package:indiclassifieds/theme/app_colors.dart';
-import 'package:indiclassifieds/widgets/CommonLoader.dart';
+import 'package:classifieds/Components/CutomAppBar.dart';
+import 'package:classifieds/theme/app_colors.dart';
+import 'package:classifieds/widgets/CommonLoader.dart';
 import 'package:lottie/lottie.dart';
 import 'package:url_launcher/url_launcher.dart';
 

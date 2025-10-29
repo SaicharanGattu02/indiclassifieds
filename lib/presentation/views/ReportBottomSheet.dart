@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:indiclassifieds/Components/CustomAppButton.dart';
-import 'package:indiclassifieds/Components/CustomSnackBar.dart';
+import 'package:classifieds/Components/CustomAppButton.dart';
+import 'package:classifieds/Components/CustomSnackBar.dart';
 
 import '../../data/cubit/ReportAd/ReportAdCubit.dart';
 import '../../data/cubit/ReportAd/ReportAdStates.dart';

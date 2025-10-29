@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:indiclassifieds/data/cubit/Profile/profile_repo.dart';
-import 'package:indiclassifieds/data/cubit/UpdateProfile/update_profile_states.dart';
+import 'package:classifieds/data/cubit/Profile/profile_repo.dart';
+import 'package:classifieds/data/cubit/UpdateProfile/update_profile_states.dart';
 
 class UpdateProfileCubit extends Cubit<UpdateProfileStates> {
   ProfileRepo profileRepo;

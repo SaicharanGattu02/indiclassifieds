@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:indiclassifieds/theme/app_colors.dart';
+import 'package:classifieds/theme/app_colors.dart';
 
 import '../theme/AppTextStyles.dart';
 import '../theme/ThemeHelper.dart';

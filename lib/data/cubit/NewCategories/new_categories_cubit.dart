@@ -1,6 +1,6 @@
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:indiclassifieds/data/cubit/NewCategories/new_categories_states.dart';
+import 'package:classifieds/data/cubit/NewCategories/new_categories_states.dart';
 
 import '../Categories/categories_repository.dart';
 

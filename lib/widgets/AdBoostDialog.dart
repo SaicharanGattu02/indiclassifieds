@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:indiclassifieds/Components/CustomAppButton.dart';
-import 'package:indiclassifieds/data/cubit/BoostAd/BoostAdCubit.dart';
-import 'package:indiclassifieds/data/cubit/BoostAd/BoostAdStates.dart';
-import 'package:indiclassifieds/data/cubit/BoostAdInfo/BoostAdInfoCubit.dart';
-import 'package:indiclassifieds/data/cubit/BoostAdInfo/BoostAdInfoStates.dart';
-import 'package:indiclassifieds/widgets/CommonLoader.dart';
+import 'package:classifieds/Components/CustomAppButton.dart';
+import 'package:classifieds/data/cubit/BoostAd/BoostAdCubit.dart';
+import 'package:classifieds/data/cubit/BoostAd/BoostAdStates.dart';
+import 'package:classifieds/data/cubit/BoostAdInfo/BoostAdInfoCubit.dart';
+import 'package:classifieds/data/cubit/BoostAdInfo/BoostAdInfoStates.dart';
+import 'package:classifieds/widgets/CommonLoader.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import '../data/cubit/MyAds/my_ads_cubit.dart';
 import '../services/AuthService.dart';
 import '../theme/AppTextStyles.dart';
 import '../theme/ThemeHelper.dart';
-import 'package:indiclassifieds/utils/AppLogger.dart';
+import 'package:classifieds/utils/AppLogger.dart';
 
 class AdBoostDialog extends StatefulWidget {
   final String listing_id;

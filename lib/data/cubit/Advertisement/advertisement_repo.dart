@@ -1,5 +1,5 @@
-import 'package:indiclassifieds/model/AdvertisementDetailsModel.dart';
-import 'package:indiclassifieds/model/AdvertisementModel.dart';
+import 'package:classifieds/model/AdvertisementDetailsModel.dart';
+import 'package:classifieds/model/AdvertisementModel.dart';
 
 import '../../../model/AdSuccessModel.dart';
 import '../../remote_data_source.dart';

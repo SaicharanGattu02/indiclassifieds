@@ -1,4 +1,4 @@
-import 'package:indiclassifieds/model/ProductDetailsModel.dart';
+import 'package:classifieds/model/ProductDetailsModel.dart';
 
 abstract class ProductDetailsStates {}
 

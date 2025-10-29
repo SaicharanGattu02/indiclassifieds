@@ -1,4 +1,4 @@
-import 'package:indiclassifieds/model/SelectCityModel.dart';
+import 'package:classifieds/model/SelectCityModel.dart';
 import '../../remote_data_source.dart';
 
 abstract class SelectCityRepository {

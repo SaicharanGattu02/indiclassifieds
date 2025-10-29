@@ -1,4 +1,4 @@
-import 'package:indiclassifieds/model/CategoryModel.dart';
+import 'package:classifieds/model/CategoryModel.dart';
 
 abstract class NewCategoryStates {}
 

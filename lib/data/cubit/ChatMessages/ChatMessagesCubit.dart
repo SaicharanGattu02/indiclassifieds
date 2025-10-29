@@ -1,6 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:indiclassifieds/presentation/views/ChatScreen.dart';
+import 'package:classifieds/presentation/views/ChatScreen.dart';
 import '../../../model/ChatMessagesModel.dart';
 import 'ChatMessagesRepository.dart';
 import 'ChatMessagesStates.dart';

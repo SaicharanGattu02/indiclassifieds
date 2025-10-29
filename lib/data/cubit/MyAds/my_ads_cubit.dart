@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:indiclassifieds/data/cubit/MyAds/my_ads_repo.dart';
-import 'package:indiclassifieds/data/cubit/MyAds/my_ads_states.dart';
+import 'package:classifieds/data/cubit/MyAds/my_ads_repo.dart';
+import 'package:classifieds/data/cubit/MyAds/my_ads_states.dart';
 
 import '../../../model/MyAdsModel.dart';
 

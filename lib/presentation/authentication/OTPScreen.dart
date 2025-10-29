@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:indiclassifieds/widgets/CommonBackground.dart';
+import 'package:classifieds/widgets/CommonBackground.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
 import '../../Components/CustomAppButton.dart';
@@ -14,6 +14,7 @@ import '../../Components/CustomSnackBar.dart';
 import '../../data/cubit/LogInWithMobile/login_with_mobile.dart';
 import '../../data/cubit/LogInWithMobile/login_with_mobile_state.dart';
 import '../../services/AuthService.dart';
+import '../../services/MetaEventTracker.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 
@@ -447,6 +448,9 @@ class _OtpscreenState extends State<Otpscreen> {
                                                   '/dashboard',
                                                 );
                                               }
+                                              await MetaEventTracker.login(
+                                                method: "mobile",
+                                              );
                                             } else {
                                               if (data.code ==
                                                   "ACCOUNT_DELETED") {
@@ -491,6 +495,9 @@ class _OtpscreenState extends State<Otpscreen> {
                                                   '/dashboard',
                                                 );
                                               }
+                                              await MetaEventTracker.login(
+                                                method: "email",
+                                              );
                                             } else {
                                               if (data.code ==
                                                   "ACCOUNT_DELETED") {

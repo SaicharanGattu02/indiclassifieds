@@ -1,5 +1,5 @@
-import 'package:indiclassifieds/data/remote_data_source.dart';
-import 'package:indiclassifieds/model/ChatMessagesModel.dart';
+import 'package:classifieds/data/remote_data_source.dart';
+import 'package:classifieds/model/ChatMessagesModel.dart';
 
 abstract class ChatMessagesRepository {
   Future<ChatMessagesModel?> getChatMessages(String user_id,int page);

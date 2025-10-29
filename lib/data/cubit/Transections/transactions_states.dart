@@ -1,4 +1,4 @@
-import 'package:indiclassifieds/model/TransectionHistoryModel.dart';
+import 'package:classifieds/model/TransectionHistoryModel.dart';
 
 abstract class TransactionsStates {}
 

@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:indiclassifieds/data/cubit/Register/register_repo.dart';
-import 'package:indiclassifieds/data/cubit/Register/register_states.dart';
+import 'package:classifieds/data/cubit/Register/register_repo.dart';
+import 'package:classifieds/data/cubit/Register/register_states.dart';
 
 class RegisterCubit extends Cubit<RegisterStates> {
   RegisterRepo registerRepo;

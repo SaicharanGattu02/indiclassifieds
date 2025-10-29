@@ -5,13 +5,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geocoding/geocoding.dart' as geo;
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:indiclassifieds/Components/CustomAppButton.dart';
-import 'package:indiclassifieds/Components/CustomSnackBar.dart';
-import 'package:indiclassifieds/Components/CutomAppBar.dart';
-import 'package:indiclassifieds/data/cubit/Products/products_cubit.dart';
-import 'package:indiclassifieds/model/WishlistModel.dart';
-import 'package:indiclassifieds/services/AuthService.dart';
-import 'package:indiclassifieds/utils/AppLogger.dart';
+import 'package:classifieds/Components/CustomAppButton.dart';
+import 'package:classifieds/Components/CustomSnackBar.dart';
+import 'package:classifieds/Components/CutomAppBar.dart';
+import 'package:classifieds/data/cubit/Products/products_cubit.dart';
+import 'package:classifieds/model/WishlistModel.dart';
+import 'package:classifieds/services/AuthService.dart';
+import 'package:classifieds/utils/AppLogger.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -21,6 +21,7 @@ import '../../data/cubit/ProductDetails/product_details_states.dart';
 import '../../data/cubit/Products/Product_cubit1.dart';
 import '../../data/cubit/ReportAd/ReportAdCubit.dart';
 import '../../model/ProductDetailsModel.dart';
+import '../../services/MetaEventTracker.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../utils/AppLauncher.dart';
@@ -55,7 +56,6 @@ class ProductDetailsScreen extends StatefulWidget {
 }
 
 class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
-
   bool _didInitFromBloc = false; // prevents repeated side-effects
   String? mobile_number;
 
@@ -224,46 +224,49 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           final userId = results[1] as String?; // Allow null
 
           // Avoid rendering the bar if userId or receiverId is null/empty
-          if (userId == null || userId.isEmpty || receiverId == null || receiverId!.isEmpty || userId == receiverId) {
+          if (userId == null ||
+              userId.isEmpty ||
+              receiverId == null ||
+              receiverId!.isEmpty ||
+              userId == receiverId) {
             return const SizedBox.shrink();
           }
 
           return _BottomCtaBar(
             onContact: isGuest
                 ? () {
-              context.push("/login");
-            }
+                    context.push("/login");
+                  }
                 : () async {
-              if (mobile_number != null && mobile_number!.isNotEmpty) {
-                AppLauncher.call(mobile_number!);
-              } else {
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (_) => const Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-                await Future.delayed(const Duration(seconds: 2));
-                if (context.mounted) Navigator.of(context).pop();
-                final updatedMobile = mobile_number;
-                if (updatedMobile != null && updatedMobile.isNotEmpty) {
-                  AppLauncher.call(updatedMobile);
-                } else {
-                  CustomSnackBar1.show(
-                    context,
-                    "Mobile number not available",
-                  );
-                }
-              }
-            },
+                    if (mobile_number != null && mobile_number!.isNotEmpty) {
+                      AppLauncher.call(mobile_number!);
+                    } else {
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (_) =>
+                            const Center(child: CircularProgressIndicator()),
+                      );
+                      await Future.delayed(const Duration(seconds: 2));
+                      if (context.mounted) Navigator.of(context).pop();
+                      final updatedMobile = mobile_number;
+                      if (updatedMobile != null && updatedMobile.isNotEmpty) {
+                        AppLauncher.call(updatedMobile);
+                      } else {
+                        CustomSnackBar1.show(
+                          context,
+                          "Mobile number not available",
+                        );
+                      }
+                    }
+                  },
             onChat: isGuest
                 ? () {
-              context.push("/login");
-            }
+                    context.push("/login");
+                  }
                 : () {
-              context.push('/chat?receiverId=$receiverId');
-            },
+                    context.push('/chat?receiverId=$receiverId');
+                  },
           );
         },
       ),
@@ -284,6 +287,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
             // Initialize map position once
             await _prepareMap(listing);
+            await MetaEventTracker.viewItem(
+              itemId: widget.listingId.toString(),
+              itemName: data.listing?.title ?? "",
+            );
             if (mounted) setState(() {}); // reflect _listingLatLng/_markers
           }
         },
@@ -417,7 +424,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                             right: 0,
                             bottom: 12,
                             child: Center(
-                              child:ValueListenableBuilder<int>(
+                              child: ValueListenableBuilder<int>(
                                 valueListenable: _pageNotifier,
                                 builder: (context, page, _) {
                                   return _Dots(
@@ -446,13 +453,16 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         style: AppTextStyles.headlineSmall(textColor),
                       ),
                       const SizedBox(height: 6),
-                      listing.price == "0.0" || listing.price == "0" || listing.price == "0.00"
+                      listing.price == "0.0" ||
+                              listing.price == "0" ||
+                              listing.price == "0.00"
                           ? const SizedBox.shrink()
                           : Text(
-                        "₹${_formatINR(listing.price)}",
-                        style: AppTextStyles.headlineMedium(textColor)
-                            .copyWith(fontWeight: FontWeight.w800),
-                      ),
+                              "₹${_formatINR(listing.price)}",
+                              style: AppTextStyles.headlineMedium(
+                                textColor,
+                              ).copyWith(fontWeight: FontWeight.w800),
+                            ),
                       const SizedBox(height: 20),
                     ],
                   ),

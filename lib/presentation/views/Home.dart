@@ -4,10 +4,10 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:indiclassifieds/data/cubit/Dashboard/DashboardCubit.dart';
-import 'package:indiclassifieds/data/cubit/Dashboard/DashboardState.dart';
-import 'package:indiclassifieds/services/AuthService.dart';
-import 'package:indiclassifieds/theme/app_colors.dart';
+import 'package:classifieds/data/cubit/Dashboard/DashboardCubit.dart';
+import 'package:classifieds/data/cubit/Dashboard/DashboardState.dart';
+import 'package:classifieds/services/AuthService.dart';
+import 'package:classifieds/theme/app_colors.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -20,6 +20,7 @@ import '../../data/cubit/Products/Product_cubit1.dart';
 import '../../data/cubit/Products/products_cubit.dart';
 import '../../data/cubit/Products/products_state1.dart';
 import '../../data/cubit/Products/products_states.dart';
+import '../../services/MetaEventTracker.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../utils/media_query_helper.dart';
@@ -66,6 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadSound() async {
+    await MetaEventTracker.viewHome();
     await _audioPlayer.setSource(AssetSource('sounds/google-assistant.mp3'));
   }
 

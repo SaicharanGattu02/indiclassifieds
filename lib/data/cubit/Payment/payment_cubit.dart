@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:indiclassifieds/data/cubit/Payment/payment_repository.dart';
-import 'package:indiclassifieds/data/cubit/Payment/payment_states.dart';
+import 'package:classifieds/data/cubit/Payment/payment_repository.dart';
+import 'package:classifieds/data/cubit/Payment/payment_states.dart';
 
 class PaymentCubit extends Cubit<PaymentStates> {
   PaymentRepository paymentRepository;

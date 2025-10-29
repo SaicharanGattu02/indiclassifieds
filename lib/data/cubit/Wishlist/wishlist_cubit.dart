@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:indiclassifieds/data/cubit/Wishlist/wishlist_repository.dart';
-import 'package:indiclassifieds/data/cubit/Wishlist/wishlist_states.dart';
+import 'package:classifieds/data/cubit/Wishlist/wishlist_repository.dart';
+import 'package:classifieds/data/cubit/Wishlist/wishlist_states.dart';
 
 import '../../../model/SubcategoryProductsModel.dart';
 import '../../../model/WishlistModel.dart';

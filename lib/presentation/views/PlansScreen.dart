@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:indiclassifieds/Components/CustomAppButton.dart';
-import 'package:indiclassifieds/data/cubit/Plans/plans_cubit.dart';
-import 'package:indiclassifieds/utils/color_constants.dart';
-import 'package:indiclassifieds/widgets/CommonLoader.dart';
+import 'package:classifieds/Components/CustomAppButton.dart';
+import 'package:classifieds/data/cubit/Plans/plans_cubit.dart';
+import 'package:classifieds/utils/color_constants.dart';
+import 'package:classifieds/widgets/CommonLoader.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../Components/CustomSnackBar.dart';
@@ -16,6 +16,7 @@ import '../../data/cubit/Plans/plans_states.dart';
 import '../../data/cubit/UserActivePlans/user_active_plans_cubit.dart';
 import '../../model/PlansModel.dart';
 import '../../services/AuthService.dart';
+import '../../services/MetaEventTracker.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
@@ -768,6 +769,11 @@ class _BoostYourSalesScreenState extends State<PlansScreen> {
                                             context
                                                 .read<PaymentCubit>()
                                                 .createPayment(data);
+                                            await MetaEventTracker.subscribePremium(
+                                              plan: plan_id.value.toString(),
+                                              price: price.value.toString(),
+                                              currency: "Rupee"
+                                            );
                                           // }
                                         }
                                       },

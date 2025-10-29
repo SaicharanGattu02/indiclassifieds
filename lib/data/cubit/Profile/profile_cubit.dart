@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:indiclassifieds/data/cubit/Profile/profile_repo.dart';
-import 'package:indiclassifieds/data/cubit/Profile/profile_states.dart';
+import 'package:classifieds/data/cubit/Profile/profile_repo.dart';
+import 'package:classifieds/data/cubit/Profile/profile_states.dart';
 
 import '../../../model/ProfileModel.dart';
 

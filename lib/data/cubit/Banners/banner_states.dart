@@ -1,4 +1,4 @@
-import 'package:indiclassifieds/model/BannersModel.dart';
+import 'package:classifieds/model/BannersModel.dart';
 
 abstract class BannerStates {}
 

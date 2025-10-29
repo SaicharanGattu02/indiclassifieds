@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:indiclassifieds/data/cubit/BoostAd/BoostAdRepo.dart';
-import 'package:indiclassifieds/data/cubit/BoostAd/BoostAdStates.dart';
+import 'package:classifieds/data/cubit/BoostAd/BoostAdRepo.dart';
+import 'package:classifieds/data/cubit/BoostAd/BoostAdStates.dart';
 
 class BoostAdCubit extends Cubit<BoostAdStates> {
   BoostAdRepository boostAdRepository;

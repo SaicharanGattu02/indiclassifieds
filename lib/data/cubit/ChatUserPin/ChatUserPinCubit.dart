@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:indiclassifieds/data/cubit/ChatUserPin/ChatUserPinStates.dart';
-import 'package:indiclassifieds/data/cubit/ChatUsers/ChatUsersRepo.dart';
+import 'package:classifieds/data/cubit/ChatUserPin/ChatUserPinStates.dart';
+import 'package:classifieds/data/cubit/ChatUsers/ChatUsersRepo.dart';
 
 class ChatUserPinCubit extends Cubit<ChatUserPinStates> {
   ChatUsersRepo chatUsersRepo;

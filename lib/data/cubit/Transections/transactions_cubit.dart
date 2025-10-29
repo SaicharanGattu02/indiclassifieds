@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:indiclassifieds/data/cubit/Transections/transactions_repository.dart';
-import 'package:indiclassifieds/data/cubit/Transections/transactions_states.dart';
-import 'package:indiclassifieds/model/TransectionHistoryModel.dart';
+import 'package:classifieds/data/cubit/Transections/transactions_repository.dart';
+import 'package:classifieds/data/cubit/Transections/transactions_states.dart';
+import 'package:classifieds/model/TransectionHistoryModel.dart';
 
 
 class TransactionCubit extends Cubit<TransactionsStates> {

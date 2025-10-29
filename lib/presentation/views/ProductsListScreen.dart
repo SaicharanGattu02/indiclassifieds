@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:indiclassifieds/Components/CustomSnackBar.dart';
-import 'package:indiclassifieds/services/AuthService.dart';
+import 'package:classifieds/Components/CustomSnackBar.dart';
+import 'package:classifieds/services/AuthService.dart';
 import '../../Components/CustomAppButton.dart';
 import '../../data/cubit/AddToWishlist/addToWishlistCubit.dart';
 import '../../data/cubit/AddToWishlist/addToWishlistStates.dart';
@@ -18,6 +18,7 @@ import '../../data/cubit/Products/Product_cubit2.dart';
 import '../../data/cubit/Products/products_state2.dart';
 import '../../data/cubit/States/states_cubit.dart';
 import '../../data/cubit/States/states_state.dart';
+import '../../services/MetaEventTracker.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/ThemeHelper.dart';
 import '../../widgets/CommonLoader.dart';
@@ -420,9 +421,12 @@ class _ProductsListScreenState extends State<ProductsListScreen> {
                                 products: product,
                                 onWishlistToggle: isGuest
                                     ? () => context.push("/login")
-                                    : () {
+                                    : () async {
                                         if (product.id != null) {
                                           context.read<AddToWishlistCubit>().addToWishlist(product.id!);
+                                          await MetaEventTracker.addToWishlist(
+                                              product.id.toString()
+                                          );
                                         }
                                       },
                               ),

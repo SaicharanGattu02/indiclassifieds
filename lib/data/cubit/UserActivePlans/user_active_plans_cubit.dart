@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:indiclassifieds/data/cubit/Plans/plans_repository.dart';
-import 'package:indiclassifieds/data/cubit/UserActivePlans/user_active_plans_states.dart';
+import 'package:classifieds/data/cubit/Plans/plans_repository.dart';
+import 'package:classifieds/data/cubit/UserActivePlans/user_active_plans_states.dart';
 
 import '../../../model/UserActivePlansModel.dart';
 

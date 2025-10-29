@@ -1,5 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:indiclassifieds/data/cubit/subCategory/sub_category_repository.dart';
+import 'package:classifieds/data/cubit/subCategory/sub_category_repository.dart';
 
 import 'sub_category_state.dart';
 

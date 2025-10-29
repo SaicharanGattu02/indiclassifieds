@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:indiclassifieds/data/cubit/Plans/plans_repository.dart';
-import 'package:indiclassifieds/data/cubit/Plans/plans_states.dart';
+import 'package:classifieds/data/cubit/Plans/plans_repository.dart';
+import 'package:classifieds/data/cubit/Plans/plans_states.dart';
 
 class PlansCubit extends Cubit<PlansStates> {
   PlansRepository plansRepository;

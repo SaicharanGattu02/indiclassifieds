@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:indiclassifieds/widgets/CommonBackground.dart';
+import 'package:classifieds/widgets/CommonBackground.dart';
 
 import '../../services/AuthService.dart';
 

@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:indiclassifieds/Components/CustomAppButton.dart';
-import 'package:indiclassifieds/utils/constants.dart';
+import 'package:classifieds/Components/CustomAppButton.dart';
+import 'package:classifieds/utils/constants.dart';
 
 import '../data/cubit/UserActivePlans/user_active_plans_cubit.dart';
 import '../data/cubit/UserActivePlans/user_active_plans_states.dart';

@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
-import 'package:indiclassifieds/model/AddToWishlistModel.dart';
-import 'package:indiclassifieds/model/CategoryModel.dart';
-import 'package:indiclassifieds/utils/AppLogger.dart';
+import 'package:classifieds/model/AddToWishlistModel.dart';
+import 'package:classifieds/model/CategoryModel.dart';
+import 'package:classifieds/utils/AppLogger.dart';
 import '../model/AdSuccessModel.dart';
 import '../model/AdvertisementDetailsModel.dart';
 import '../model/AdvertisementModel.dart';

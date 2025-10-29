@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:indiclassifieds/utils/AppLogger.dart';
+import 'package:classifieds/utils/AppLogger.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 import '../../../model/ChatMessagesModel.dart';

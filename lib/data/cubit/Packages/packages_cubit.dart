@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:indiclassifieds/data/cubit/Packages/packages_repository.dart';
-import 'package:indiclassifieds/data/cubit/Packages/packages_states.dart';
+import 'package:classifieds/data/cubit/Packages/packages_repository.dart';
+import 'package:classifieds/data/cubit/Packages/packages_states.dart';
 
 class PackagesCubit extends Cubit<PackagesStates> {
   PackagesRepository packagesRepository;

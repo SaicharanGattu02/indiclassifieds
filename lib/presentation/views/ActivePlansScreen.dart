@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:indiclassifieds/Components/CutomAppBar.dart';
-import 'package:indiclassifieds/theme/app_colors.dart';
+import 'package:classifieds/Components/CutomAppBar.dart';
+import 'package:classifieds/theme/app_colors.dart';
 import 'package:intl/intl.dart';
 
 import '../../data/cubit/UserActivePlans/user_active_plans_cubit.dart';

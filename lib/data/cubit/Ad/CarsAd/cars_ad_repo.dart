@@ -1,4 +1,4 @@
-import 'package:indiclassifieds/model/AdSuccessModel.dart';
+import 'package:classifieds/model/AdSuccessModel.dart';
 
 import '../../../remote_data_source.dart';
 

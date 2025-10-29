@@ -1,6 +1,6 @@
-import 'package:indiclassifieds/data/remote_data_source.dart';
-import 'package:indiclassifieds/model/AdSuccessModel.dart';
-import 'package:indiclassifieds/model/ProfileModel.dart';
+import 'package:classifieds/data/remote_data_source.dart';
+import 'package:classifieds/model/AdSuccessModel.dart';
+import 'package:classifieds/model/ProfileModel.dart';
 
 abstract class ProfileRepo {
   Future<ProfileModel?> getProfileDetails();

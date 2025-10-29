@@ -1,5 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:indiclassifieds/data/cubit/MyAds/MarkAsListing/mark_as_listing_state.dart';
+import 'package:classifieds/data/cubit/MyAds/MarkAsListing/mark_as_listing_state.dart';
 import '../my_ads_repo.dart';
 
 class MarkAsListingCubit extends Cubit<MarkAsListingState> {

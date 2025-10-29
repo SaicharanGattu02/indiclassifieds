@@ -1,6 +1,6 @@
-import 'package:indiclassifieds/data/remote_data_source.dart';
-import 'package:indiclassifieds/model/PlansModel.dart';
-import 'package:indiclassifieds/model/UserActivePlansModel.dart';
+import 'package:classifieds/data/remote_data_source.dart';
+import 'package:classifieds/model/PlansModel.dart';
+import 'package:classifieds/model/UserActivePlansModel.dart';
 
 abstract class PlansRepository {
   Future<PlansModel?> getPlans();

@@ -1,4 +1,4 @@
-import 'package:indiclassifieds/data/remote_data_source.dart';
+import 'package:classifieds/data/remote_data_source.dart';
 
 import '../../../model/SubcategoryProductsModel.dart';
 

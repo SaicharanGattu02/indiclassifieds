@@ -1,5 +1,5 @@
-import 'package:indiclassifieds/data/remote_data_source.dart';
-import 'package:indiclassifieds/model/ProductDetailsModel.dart';
+import 'package:classifieds/data/remote_data_source.dart';
+import 'package:classifieds/model/ProductDetailsModel.dart';
 
 abstract class ProductDetailsRepo {
   Future<ProductDetailsModel?> getProductDetails(int id);

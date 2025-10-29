@@ -1,5 +1,5 @@
 
-import 'package:indiclassifieds/model/AdSuccessModel.dart';
+import 'package:classifieds/model/AdSuccessModel.dart';
 
 abstract class PostAdvertisementStates {}
 

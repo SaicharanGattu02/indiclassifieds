@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:indiclassifieds/services/SecureStorageService.dart';
-import 'package:indiclassifieds/utils/AppLogger.dart';
+import 'package:classifieds/services/SecureStorageService.dart';
+import 'package:classifieds/utils/AppLogger.dart';
 import 'package:permission_handler/permission_handler.dart' as OpenAppSettings;
 
 import 'package:flutter/foundation.dart';

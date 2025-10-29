@@ -9,17 +9,18 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:go_router/go_router.dart';
-import 'package:indiclassifieds/services/ApiClient.dart';
-import 'package:indiclassifieds/services/SecureStorageService.dart';
-import 'package:indiclassifieds/state_injector.dart';
-import 'package:indiclassifieds/theme/AppTheme.dart';
-import 'package:indiclassifieds/utils/DeepLinkMapper.dart';
-import 'package:indiclassifieds/utils/NotificationIntent.dart';
-import 'package:indiclassifieds/utils/constants.dart';
+import 'package:classifieds/services/ApiClient.dart';
+import 'package:classifieds/services/MetaEventTracker.dart';
+import 'package:classifieds/services/SecureStorageService.dart';
+import 'package:classifieds/state_injector.dart';
+import 'package:classifieds/theme/AppTheme.dart';
+import 'package:classifieds/utils/DeepLinkMapper.dart';
+import 'package:classifieds/utils/NotificationIntent.dart';
+import 'package:classifieds/utils/constants.dart';
 import 'app_routes/router.dart';
 import 'data/cubit/theme_cubit.dart';
 import 'firebase_options.dart';
-import 'package:indiclassifieds/utils/AppLogger.dart';
+import 'package:classifieds/utils/AppLogger.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 
@@ -41,7 +42,7 @@ Future<void> main() async {
   final storage = SecureStorageService.instance;
   final themeCubit = ThemeCubit(storage);
   await themeCubit.hydrate();
-
+  await MetaEventTracker.initialize();
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
@@ -305,20 +306,25 @@ class _MyAppState extends State<MyApp> {
   // String? _lastHandled;            // de-dupe
   // bool _routerReady = false;
   //
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   // Mark router ready after first frame (MaterialApp.router is built)
-  //   WidgetsBinding.instance.addPostFrameCallback((_) {
-  //     _routerReady = true;
-  //     if (_queuedLocation != null) {
-  //       appRouter.go(_queuedLocation!);
-  //       _lastHandled = _queuedLocation;
-  //       _queuedLocation = null;
-  //     }
-  //   });
-  //   _initDeepLinks();
-  // }
+  @override
+  void initState() {
+    super.initState();
+    // Mark router ready after first frame (MaterialApp.router is built)
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   _routerReady = true;
+    //   if (_queuedLocation != null) {
+    //     appRouter.go(_queuedLocation!);
+    //     _lastHandled = _queuedLocation;
+    //     _queuedLocation = null;
+    //   }
+    // });
+    // _initDeepLinks();
+
+    Future.delayed(const Duration(seconds: 1), () {
+      MetaEventTracker.appOpen();
+      debugPrint("📊 Meta Event Logged: app_open");
+    });
+  }
   //
   //
   // void _navigateSafely(String location) {

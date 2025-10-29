@@ -1,4 +1,4 @@
-name: indiclassifieds
+name: classifieds
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -72,6 +72,7 @@ dependencies:
   speech_to_text: ^7.3.0
   audioplayers: ^6.5.1
   flutter_slidable: ^4.0.3
+  facebook_app_events: ^0.20.1
 
 
 

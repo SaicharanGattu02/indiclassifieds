@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:indiclassifieds/Components/CustomAppButton.dart';
+import 'package:classifieds/Components/CustomAppButton.dart';
 import 'package:lottie/lottie.dart';
 import '../../theme/ThemeHelper.dart';
 

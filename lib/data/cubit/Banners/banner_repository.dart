@@ -1,5 +1,5 @@
-import 'package:indiclassifieds/data/remote_data_source.dart';
-import 'package:indiclassifieds/model/BannersModel.dart';
+import 'package:classifieds/data/remote_data_source.dart';
+import 'package:classifieds/model/BannersModel.dart';
 
 abstract class BannersRepository {
   Future<BannersModel?> getBanners();

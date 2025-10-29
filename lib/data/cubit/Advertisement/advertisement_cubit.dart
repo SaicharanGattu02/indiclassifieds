@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:indiclassifieds/data/cubit/Advertisement/advertisement_repo.dart';
-import 'package:indiclassifieds/data/cubit/Advertisement/advertisement_states.dart';
-import 'package:indiclassifieds/model/AdvertisementModel.dart';
+import 'package:classifieds/data/cubit/Advertisement/advertisement_repo.dart';
+import 'package:classifieds/data/cubit/Advertisement/advertisement_states.dart';
+import 'package:classifieds/model/AdvertisementModel.dart';
 
 class AdvertisementsCubit extends Cubit<AdvertisementStates> {
   AdvertisementRepo advertisementRepo;

@@ -1,5 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:indiclassifieds/data/cubit/PostAdvertisement/post_advertisement_states.dart';
+import 'package:classifieds/data/cubit/PostAdvertisement/post_advertisement_states.dart';
 
 import '../Advertisement/advertisement_repo.dart';
 
