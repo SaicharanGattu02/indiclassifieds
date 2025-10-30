@@ -179,14 +179,13 @@ class AdCardDynamic extends StatelessWidget {
                     if (ad.featuredStatus != true &&
                         ad.sold != true &&
                         (ad.status ?? '').toLowerCase() == "approved") ...[
-                      if (!(mobile_no == "9999999999" && Platform.isIOS)) ...[
                         ActionButton(
                           icon: Icons.rocket_launch_outlined,
                           label: 'Boost Your Ad',
                           onTap:
                               boostAdCallback, // Call the callback directly here
                         ),
-                      ],
+
                     ],
 
                     if ((ad.status ?? '').toLowerCase() == "pending") ...[

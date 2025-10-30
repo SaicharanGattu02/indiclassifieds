@@ -1,13 +1,17 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:classifieds/services/AuthService.dart';
 import 'package:classifieds/utils/AppLogger.dart';
 import 'package:classifieds/utils/media_query_helper.dart';
+import 'package:go_router/go_router.dart';
 import '../../data/cubit/MyAds/my_ads_cubit.dart';
 import '../../data/cubit/MyAds/my_ads_states.dart';
 import '../../theme/AppTextStyles.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/ThemeHelper.dart';
+import '../../utils/constants.dart';
 import '../../widgets/AdBoostDialog.dart';
 import '../../widgets/AdCardDynamic.dart';
 import '../../widgets/CommonLoader.dart';
@@ -240,12 +244,17 @@ class _AdsScreenState extends State<AdsScreen> {
                               isDark: isDark,
                               textColor: textColor,
                               boostAdCallback: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (context) => AdBoostDialog(
-                                    listing_id: ad.id.toString(),
-                                  ),
-                                );
+                                if ((mobile_no == "9999999999" && Platform.isIOS)) {
+                                  context.push("/subscription_plans");
+                                } else {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => AdBoostDialog(
+                                      listing_id: ad.id.toString(),
+                                    ),
+                                  );
+                                }
+
                               },
                             );
                           },

@@ -29,13 +29,20 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     // Load your plans here
     cubit.loadPlans([
       PlanModel(
-        productId: 'com.ind.classifieds.essential_30d_50ads',
-        title: '30 Days - 50 Ads',
+        productId: 'com.ind.classifieds.essential_30d_30ads',
+        title: '30 Days - 30 Ads',
         description: 'Boost your posts for 30 days',
         durationDays: 30,
+        adsCount: 30,
+      ),
+
+      PlanModel(
+        productId: 'com.ind.classifieds.autoboost_60d_50ads',
+        title: '60 Days - 50 Ads',
+        description: 'Power Seller Plan + Auto Boost for 60 days',
+        durationDays: 60,
         adsCount: 50,
       ),
-      // Add more plans if needed
     ]);
   }
 

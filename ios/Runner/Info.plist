@@ -77,5 +77,41 @@
     <string>This app uses your Apple account to enable secure in-app purchases.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>NSMicrophoneUsageDescription</key>
+    <string>This app requires access to the microphone for voice search.</string>
+
+    <key>NSSpeechRecognitionUsageDescription</key>
+    <string>This app uses speech recognition for voice search.</string>
+
+    <!-- ✅ Meta App Events Setup -->
+    <key>FacebookAppID</key>
+    <string>1143991907864941</string>
+
+    <key>FacebookClientToken</key>
+    <string>84c9ca7a1eb813593b2558bf28599c8e</string>
+
+    <key>FacebookDisplayName</key>
+    <string>IND Classifieds</string>
+
+    <!-- Required for event tracking -->
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+        <string>fbapi</string>
+        <string>fbauth2</string>
+        <string>fbshareextension</string>
+    </array>
+
+    <!-- Facebook URL Scheme -->
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>fb1143991907864941</string>
+            </array>
+        </dict>
+    </array>
+
+
 </dict>
 </plist>

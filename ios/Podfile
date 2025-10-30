@@ -26,10 +26,13 @@ require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelpe
 flutter_ios_podfile_setup
 
 target 'Runner' do
-  use_frameworks! :linkage => :static  # ✅ Use static frameworks to fix the xcframework issue
+  use_frameworks! :linkage => :static
   use_modular_headers!
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+
+  # ✅ Add Meta SDK for App Events
+  pod 'FBSDKCoreKit'
 
   target 'RunnerTests' do
     inherit! :search_paths

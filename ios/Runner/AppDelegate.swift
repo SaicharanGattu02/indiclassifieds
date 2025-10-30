@@ -2,7 +2,8 @@ import UIKit
 import Flutter
 import FirebaseCore
 import UserNotifications
-import GoogleMaps  // 👈 Required import
+import GoogleMaps
+import FBSDKCoreKit  // ✅ Import Facebook SDK
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
@@ -12,13 +13,27 @@ import GoogleMaps  // 👈 Required import
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
 
+    // ✅ Initialize Meta SDK
+    ApplicationDelegate.shared.application(
+      application,
+      didFinishLaunchingWithOptions: launchOptions
+    )
+
+    // ✅ Enable App Event tracking
+    Settings.shared.isAdvertiserTrackingEnabled = true
+    Settings.shared.isAutoLogAppEventsEnabled = true
+    Settings.shared.isCodelessDebugLogEnabled = true
+
+    // ✅ Activate app events (app_activate)
+    AppEvents.shared.activateApp()
+
     // ✅ Provide Google Maps API key
-    GMSServices.provideAPIKey("AIzaSyD0-eauuJ1zBrknaL4uNexkR21cYVOkj7k")  // 🔁 Replace with your real API key
+    GMSServices.provideAPIKey("AIzaSyD0-eauuJ1zBrknaL4uNexkR21cYVOkj7k")
 
     // ✅ Firebase config
     FirebaseApp.configure()
 
-    // ✅ Flutter plugin registration
+    // ✅ Register Flutter plugins
     GeneratedPluginRegistrant.register(with: self)
 
     // ✅ Request push notification permissions
@@ -33,7 +48,14 @@ import GoogleMaps  // 👈 Required import
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
-  // ✅ Universal Link handling for Flutter
+  // ✅ Handle Facebook event routing if needed
+  override func application(_ app: UIApplication, open url: URL,
+                            options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+    ApplicationDelegate.shared.application(app, open: url, options: options)
+    return true
+  }
+
+  // ✅ Keep your universal link handler
   override func application(
     _ application: UIApplication,
     continue userActivity: NSUserActivity,
@@ -41,7 +63,7 @@ import GoogleMaps  // 👈 Required import
   ) -> Bool {
     if userActivity.activityType == NSUserActivityTypeBrowsingWeb,
        let incomingURL = userActivity.webpageURL {
-        // You can add logic to inspect incomingURL if needed
+      // Handle deep links if necessary
     }
 
     return super.application(application, continue: userActivity, restorationHandler: restorationHandler)

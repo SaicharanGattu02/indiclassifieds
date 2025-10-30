@@ -310,16 +310,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           isDark,
                           textColor,
                           trailing: Icons.arrow_forward_ios,
-                          onTap: () async {
-                            const appUrl =
-                                'https://play.google.com/store/apps/details?id=com.ind.classifieds';
-                            await Share.share(
-                              '🚀 Check out **IND Classifieds** — your one-stop destination to buy, sell, and discover great deals near you! 🛒\n\n'
-                              'It’s fast, easy \n\n'
-                              '👉 Download now on Google Play:\n$appUrl',
-                              subject: 'IND Classifieds – Buy & Sell Locally!',
-                            );
-                          },
+                          onTap: Platform.isIOS
+                              ? () async {
+                                  const appUrl =
+                                      'https://apps.apple.com/in/app/ind-classifieds/id6752408949';
+                                  await Share.share(
+                                    '🚀 Check out **IND Classifieds** — your one-stop destination to buy, sell, and discover great deals near you! 🛒\n\n'
+                                    'It’s fast, easy \n\n'
+                                    '👉 Download now on App Store :\n$appUrl',
+                                    subject:
+                                        'IND Classifieds – Buy & Sell Locally!',
+                                  );
+                                }
+                              : () async {
+                                  const appUrl =
+                                      'https://play.google.com/store/apps/details?id=com.ind.classifieds';
+                                  await Share.share(
+                                    '🚀 Check out **IND Classifieds** — your one-stop destination to buy, sell, and discover great deals near you! 🛒\n\n'
+                                    'It’s fast, easy \n\n'
+                                    '👉 Download now on Google Play:\n$appUrl',
+                                    subject:
+                                        'IND Classifieds – Buy & Sell Locally!',
+                                  );
+                                },
                         ),
 
                         // _settingsTile(
