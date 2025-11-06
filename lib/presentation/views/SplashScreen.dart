@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:classifieds/widgets/CommonBackground.dart';
@@ -16,6 +19,21 @@ class _SplashscreenState extends State<Splashscreen> {
   void initState() {
     super.initState();
     _initialize();
+    requestTrackingPermission();
+  }
+
+  Future<void> requestTrackingPermission() async {
+    if (Platform.isIOS) {
+      final status = await AppTrackingTransparency.trackingAuthorizationStatus;
+      if (status == TrackingStatus.notDetermined) {
+        // Show a pre-permission message (optional)
+        await Future.delayed(const Duration(milliseconds: 200));
+        final result = await AppTrackingTransparency.requestTrackingAuthorization();
+        print("ATT Permission result: $result");
+      } else {
+        print("ATT already determined: $status");
+      }
+    }
   }
 
   Future<void> _initialize() async {
