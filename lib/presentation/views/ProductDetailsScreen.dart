@@ -319,6 +319,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           final location =
               "${listing.location},${listing.city_name},${listing.state_name}" ??
               "—";
+
           return CustomScrollView(
             slivers: [
               SliverToBoxAdapter(
