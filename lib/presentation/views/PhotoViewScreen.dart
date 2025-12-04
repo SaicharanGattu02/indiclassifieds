@@ -4,10 +4,9 @@ import 'package:photo_view/photo_view_gallery.dart';
 
 import '../../model/ProductDetailsModel.dart';
 
-
 class PhotoViewScreen extends StatelessWidget {
-  final List<Images> images; // List of images passed from the main screen
-  final int initialIndex; // Index of the tapped image
+  final List<Images> images;
+  final int initialIndex;
 
   PhotoViewScreen({required this.images, required this.initialIndex});
 
@@ -28,10 +27,24 @@ class PhotoViewScreen extends StatelessWidget {
             },
             scrollPhysics: BouncingScrollPhysics(),
             backgroundDecoration: BoxDecoration(color: Colors.black),
-            pageController: PageController(
-              initialPage: initialIndex,
-            ), // Set initial index
+            pageController: PageController(initialPage: initialIndex),
           ),
+
+          // 🔙 Back Button (top-left)
+          Positioned(
+            top: 20,
+            left: 10,
+            child: SafeArea(
+              child: IconButton.filled(
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.white.withOpacity(0.5),
+                ),
+                icon: Icon(Icons.arrow_back, color: Colors.white, size: 28),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
+          ),
+
           // Watermark (bottom-right)
           Positioned(
             right: 20,
@@ -39,8 +52,8 @@ class PhotoViewScreen extends StatelessWidget {
             child: IgnorePointer(
               ignoring: true,
               child: Image.asset(
-                'assets/images/watermark.png', // Same watermark as in the main widget
-                width: 150, // Consistent size with the main widget
+                'assets/images/watermark.png',
+                width: 150,
                 fit: BoxFit.contain,
                 filterQuality: FilterQuality.high,
               ),

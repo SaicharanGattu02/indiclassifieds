@@ -334,6 +334,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   );
                                 },
                         ),
+                        _settingsTile(
+                          Icons.support_agent_outlined,
+                          Colors.blue.shade100,
+                          'Help & Support',
+                          isDark,
+                          textColor,
+                          trailing: Icons.arrow_forward_ios,
+                          onTap: () {
+                            context.push("/contact_support");
+                          },
+                        ),
 
                         // _settingsTile(
                         //   Icons.star_rate,
